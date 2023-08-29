@@ -9,10 +9,6 @@ on:
 env:
   PRIMARY_NODE_VERSION: 20
 
-defaults:
-  run:
-    shell: zsh
-
 jobs:
   lint:
     name: Lint code
