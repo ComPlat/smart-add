@@ -24,6 +24,7 @@
     "typescript": "5.2.2"
   },
   "devDependencies": {
-    "cypress": "12.17.4"
+    "cypress": "12.17.4",
+    "eslint-config-prettier": "9.0.0"
   }
 }
