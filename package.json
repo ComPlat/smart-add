@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "cypress": "cypress open"
+    "cypress": "cypress open",
+    "e2e": "start-server-and-test dev http://localhost:3000 \"cypress open --e2e\"",
+    "e2e:headless": "start-server-and-test dev http://localhost:3000 \"cypress run --e2e\"",
+    "component": "cypress open --component",
+    "component:headless": "cypress run --component"
   },
   "dependencies": {
     "@types/node": "20.5.7",
@@ -26,6 +30,7 @@
   "devDependencies": {
     "cypress": "12.17.4",
     "eslint-config-prettier": "9.0.0",
-    "prettier": "3.0.3"
+    "prettier": "3.0.3",
+    "start-server-and-test": "2.0.0"
   }
 }
