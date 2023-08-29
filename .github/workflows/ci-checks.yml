@@ -1,13 +1,9 @@
 name: 'Run CI checks'
-on:
-  pull_request:
-    branches:
-      - '**'
-  push:
-    branches:
-      - '**'
+
+on: [push]
+
 env:
-  PRIMARY_NODE_VERSION: 20
+  PRIMARY_NODE_VERSION: 18
 
 jobs:
   lint:
