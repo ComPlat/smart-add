@@ -11,7 +11,8 @@ module.exports = {
   plugins: ['prettier', 'promise', 'perfectionist', '@typescript-eslint'],
   root: true,
   rules: {
+    '@typescript-eslint/no-namespace': 'off',
     'prettier/prettier': 'error',
-    'tailwindcss/classnames-order': 'error',
+    'tailwindcss/classnames-order': 'error', // used for Cypress
   },
 }
