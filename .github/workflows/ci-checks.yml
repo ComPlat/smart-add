@@ -31,58 +31,14 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-  e2e-test:
-    name: End-To-End tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'pnpm'
-
-      - name: Install all packages
-        run: pnpm install
-
-      - name: Run tests
+      - name: Run End-To-End tests
         uses: cypress-io/github-action@v5
         with:
           build: pnpm build
           start: pnpm start
           browser: chrome
 
-  component-test:
-    name: Component tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'pnpm'
-
-      - name: Install all packages
-        run: pnpm install
-
-      - name: Run tests
+      - name: Run component tests
         uses: cypress-io/github-action@v5
         with:
           component: true
