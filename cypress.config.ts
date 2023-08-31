@@ -8,7 +8,9 @@ export default defineConfig({
     },
   },
 
-  e2e: {},
+  e2e: {
+    baseUrl: 'http://localhost:3000/',
+  },
 
   screenshotOnRunFailure: true,
   video: false,
