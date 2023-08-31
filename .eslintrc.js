@@ -8,7 +8,7 @@ module.exports = {
     'next/core-web-vitals',
   ],
   parser: '@typescript-eslint/parser',
-  plugins: ['prettier', 'promise', 'perfectionist', '@typescript-eslint'],
+  plugins: ['prettier'],
   root: true,
   rules: {
     'prettier/prettier': 'error',
