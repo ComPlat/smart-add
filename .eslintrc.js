@@ -1,6 +1,6 @@
 module.exports = {
   extends: [
-    // 'prettier',
+    'prettier',
     'plugin:tailwindcss/recommended',
     'plugin:promise/recommended',
     'plugin:perfectionist/recommended-natural',
@@ -11,8 +11,7 @@ module.exports = {
   plugins: ['prettier', 'promise', 'perfectionist', '@typescript-eslint'],
   root: true,
   rules: {
-    '@typescript-eslint/no-namespace': 'off',
     'prettier/prettier': 'error',
-    'tailwindcss/classnames-order': 'error', // used for Cypress
+    'tailwindcss/classnames-order': 'error',
   },
 }
