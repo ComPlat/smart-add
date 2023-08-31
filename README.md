@@ -38,3 +38,21 @@ pnpm component:headless
 ```
 
 for component tests.
+
+## Linting
+
+For linting the codebase, ESLint and strict rulesets for Next.js and TypeScript are used for increasing code quality and consistency.
+
+To run the linting, just run
+
+```bash
+pnpm lint
+```
+
+or
+
+```bash
+pnpm lint --fix
+```
+
+to automatically fix problems.
