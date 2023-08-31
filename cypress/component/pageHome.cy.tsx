@@ -7,6 +7,6 @@ describe('<Home />', () => {
 
   it('has headline', () => {
     cy.mount(<Home />)
-    cy.get('h1').contains('SmartAdd')
+    cy.get('h1').contains('Smart Add')
   })
 })
