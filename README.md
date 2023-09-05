@@ -6,6 +6,9 @@
 
 ## Production
 
+The project is hosted at
+<https://vercel.com/cleaner-code/smart-add>
+
 ## Development
 
 First, run the development server:
