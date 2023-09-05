@@ -4,7 +4,9 @@
 
 - Install Node.js, version 18.17.1 (LTS)
 
-## Getting Started
+## Production
+
+## Development
 
 First, run the development server:
 
@@ -13,10 +15,6 @@ pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-## Production
-
-## Development
 
 ## Testing
 
