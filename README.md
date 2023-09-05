@@ -2,7 +2,15 @@
 
 ## Setup
 
-- Install Node.js, version 18.17.1 (LTS)
+1. Install asdf
+2. `asdf plugin add nodejs`
+3. `asdf plugin add pnpm`
+4. Install packages with the right version using `asdf install`
+
+### Used dependencies
+
+- Node.js, version 18.17.1 (LTS)
+- pnpm, version 8.7.3
 
 ## Production
 
