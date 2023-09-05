@@ -1,4 +1,4 @@
-# Smart Add
+# SmartAdd
 
 ## Setup
 
