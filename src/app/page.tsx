@@ -1,7 +1,7 @@
 export default function Home() {
   return (
-    <main className="text-3xl">
-      <h1>SmartAdd</h1>
+    <main className="p-8">
+      <h1 className="text-3xl">SmartAdd</h1>
     </main>
   )
 }
