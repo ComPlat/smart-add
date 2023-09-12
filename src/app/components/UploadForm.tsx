@@ -5,39 +5,31 @@ import type { UploadProps } from 'antd'
 import { InboxOutlined } from '@ant-design/icons'
 import { Upload, message } from 'antd'
 import localforage from 'localforage'
-import React, { useState } from 'react'
+import React, { useEffect } from 'react'
 
 const { Dragger } = Upload
 
 const UploadForm: React.FC = () => {
-  const [fileName, setFileName] = useState([] as string[])
+  useEffect(() => {
+    const fetchKeys = async () => {
+      try {
+        const keys = await localforage.keys()
+        const fileNames = []
+        for (const key of keys) {
+          const file = await localforage.getItem(key)
+          if (!(file instanceof File)) {
+            console.error(file)
+            continue
+          }
+          fileNames.push(file.name)
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }
 
-  localforage
-    .keys()
-    .then((keys) =>
-      keys.forEach((key) => {
-        localforage
-          .getItem(key)
-          .then((file) => {
-            if (!(file instanceof File)) {
-              return console.error(file)
-            }
-            return setFileName([...fileName, ...[file.name]])
-          })
-          .catch((err) => console.error(err))
-      }),
-    )
-    .catch((err) => console.error(err))
-
-  // ((keys) => {
-  //   keys.forEach((key) => {
-  //     localforage.getItem(key).then((file) => {
-  //       setFileName([...fileName, ...[file.name]])
-  //     })
-  //   })
-  // })
-  // .then((file) => setFileName([file.name]))
-  // .catch((err) => console.log(err))
+    fetchKeys()
+  }, [])
 
   const props: UploadProps = {
     customRequest: ({ file, onProgress, onSuccess }) => {
@@ -47,17 +39,14 @@ const UploadForm: React.FC = () => {
       }
       localforage
         .setItem(file.name, file)
-        .then(async function () {
-          console.log('File saved to localForage')
+        .then(async () => {
           onProgress?.({ percent: 100 })
           onSuccess?.(file)
 
-          // const myFile = await myFilePromiseFactory()
-          // setFileName(myFile.name)
           return true
         })
-        .catch(function (error) {
-          console.error('Failed to save file:', error)
+        .catch((err) => {
+          console.error('Failed to save file:', err)
         })
 
       return true
@@ -67,17 +56,11 @@ const UploadForm: React.FC = () => {
     name: 'file',
     onChange(info) {
       const { status } = info.file
-      if (status !== 'uploading') {
-        console.log(info.file, info.fileList)
-      }
       if (status === 'done') {
         message.success(`${info.file.name} file uploaded successfully.`)
       } else if (status === 'error') {
         message.error(`${info.file.name} file upload failed.`)
       }
-    },
-    onDrop(e) {
-      console.log('Dropped files', e.dataTransfer.files)
     },
   }
 
@@ -95,7 +78,6 @@ const UploadForm: React.FC = () => {
           uploading company data or other banned files.
         </p>
       </Dragger>
-      <div>File name: {fileName}</div>
     </div>
   )
 }
