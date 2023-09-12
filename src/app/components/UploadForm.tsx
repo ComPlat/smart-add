@@ -33,7 +33,6 @@ const UploadForm: React.FC = () => {
 
   const props: UploadProps = {
     customRequest: ({ file, onProgress, onSuccess }) => {
-      console.log(file)
       if (typeof file === 'string') {
         return console.error(file)
       }
