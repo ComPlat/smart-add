@@ -5,7 +5,7 @@ import type { UploadProps } from 'antd'
 import { InboxOutlined } from '@ant-design/icons'
 import { Upload, message } from 'antd'
 import localforage from 'localforage'
-import React, { useEffect } from 'react'
+import React, { Fragment, useEffect } from 'react'
 
 const { Dragger } = Upload
 
@@ -31,7 +31,7 @@ const UploadForm: React.FC = () => {
     fetchKeys()
   }, [])
 
-  const props: UploadProps = {
+  const uploadProps: UploadProps = {
     customRequest: ({ file, onProgress, onSuccess }) => {
       if (typeof file === 'string') {
         return console.error(file)
@@ -50,6 +50,7 @@ const UploadForm: React.FC = () => {
 
       return true
     },
+    directory: true,
     listType: 'picture',
     multiple: true,
     name: 'file',
@@ -64,20 +65,18 @@ const UploadForm: React.FC = () => {
   }
 
   return (
-    <div>
-      <Dragger {...props}>
-        <p className="ant-upload-drag-icon">
+    <Fragment>
+      <Dragger {...uploadProps}>
+        <p className="text-6xl text-blue-500">
           <InboxOutlined />
         </p>
-        <p className="ant-upload-text">
-          Click or drag file to this area to upload
-        </p>
-        <p className="ant-upload-hint">
+        <p className="text-lg">Click or drag file to this area to upload</p>
+        <p className="mt-2 text-sm text-neutral-400">
           Support for a single or bulk upload. Strictly prohibited from
           uploading company data or other banned files.
         </p>
       </Dragger>
-    </div>
+    </Fragment>
   )
 }
 
