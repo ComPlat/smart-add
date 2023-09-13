@@ -5,30 +5,37 @@ import type { UploadProps } from 'antd'
 import { InboxOutlined } from '@ant-design/icons'
 import { Upload, message } from 'antd'
 import localforage from 'localforage'
-import React, { Fragment, useEffect } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 
 const { Dragger } = Upload
 
 const UploadForm: React.FC = () => {
+  //  Try to move this to dexie.js: https://dexie.org/docs/Tutorial/React
+  const [fileNames, setFileNames] = useState([] as string[])
+
   useEffect(() => {
     const fetchKeys = async () => {
       try {
         const keys = await localforage.keys()
-        keys.map(async (key) => {
+        const fileNamesFromLocalForage = keys.map(async (key) => {
           const file = await localforage.getItem(key)
           if (!(file instanceof File)) {
-            console.error(file)
-            return null
+            throw new Error(
+              `only files allowed, but a none-file is here: ${String(file)}`,
+            )
           }
+
           return file.name
         })
+
+        setFileNames(await Promise.all(fileNamesFromLocalForage))
       } catch (err) {
         console.error(err)
       }
     }
 
     fetchKeys()
-  }, [])
+  }, [fileNames])
 
   const uploadProps: UploadProps = {
     customRequest: ({ file, onProgress, onSuccess }) => {
@@ -41,6 +48,7 @@ const UploadForm: React.FC = () => {
           onProgress?.({ percent: 100 })
           onSuccess?.(file)
 
+          setFileNames([...fileNames, ...[file.name]])
           return true
         })
         .catch((err) => {
@@ -74,6 +82,7 @@ const UploadForm: React.FC = () => {
           Support for a single or bulk upload. Strictly prohibited from
           uploading company data or other banned files.
         </p>
+        {fileNames.join(', ')}
       </Dragger>
     </Fragment>
   )
