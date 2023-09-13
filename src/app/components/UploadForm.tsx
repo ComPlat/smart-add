@@ -2,53 +2,45 @@
 
 import type { UploadProps } from 'antd'
 
+import { db } from '@/database/db'
 import { InboxOutlined } from '@ant-design/icons'
 import { Upload, message } from 'antd'
-import localforage from 'localforage'
+import { RcFile } from 'antd/es/upload'
 import React, { Fragment, useEffect, useState } from 'react'
 
 const { Dragger } = Upload
 
 const UploadForm: React.FC = () => {
-  // TODO: Try to move this to dexie.js: https://dexie.org/docs/Tutorial/React
-  const [fileNames, setFileNames] = useState([] as string[])
+  const [files, setFiles] = useState([] as (Blob | RcFile)[])
 
   useEffect(() => {
-    const fetchKeys = async () => {
-      try {
-        const keys = await localforage.keys()
-        const fileNamesFromLocalForage = keys.map(async (key) => {
-          const file = await localforage.getItem(key)
-          if (!(file instanceof File)) {
-            throw new Error(
-              `only files allowed, but a none-file is here: ${String(file)}`,
-            )
-          }
-
-          return file.name
-        })
-
-        setFileNames(await Promise.all(fileNamesFromLocalForage))
-      } catch (err) {
-        console.error(err)
-      }
+    const fetchFilesFromDb = async () => {
+      setFiles(await db.files.toArray())
     }
 
-    fetchKeys()
-  }, [fileNames])
+    fetchFilesFromDb()
+  }, [files])
 
   const uploadProps: UploadProps = {
     customRequest: ({ file, onProgress, onSuccess }) => {
       if (typeof file === 'string') {
         return console.error(file)
       }
-      localforage
-        .setItem(file.name, file)
+
+      async function addFile(file: Blob | RcFile) {
+        try {
+          return db.files.add(file)
+        } catch (err) {
+          console.log(err)
+        }
+      }
+
+      addFile(file)
         .then(async () => {
           onProgress?.({ percent: 100 })
           onSuccess?.(file)
 
-          setFileNames([...fileNames, ...[file.name]])
+          setFiles([...files, ...[file]])
           return true
         })
         .catch((err) => {
@@ -82,8 +74,12 @@ const UploadForm: React.FC = () => {
           Support for a single or bulk upload. Strictly prohibited from
           uploading company data or other banned files.
         </p>
-        {fileNames.join(', ')}
       </Dragger>
+      <div>
+        {files.map((file) => (
+          <p key={file.name}>{file.name}</p>
+        ))}
+      </div>
     </Fragment>
   )
 }
