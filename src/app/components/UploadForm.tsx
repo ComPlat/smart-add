@@ -10,7 +10,7 @@ import React, { Fragment, useEffect, useState } from 'react'
 const { Dragger } = Upload
 
 const UploadForm: React.FC = () => {
-  //  Try to move this to dexie.js: https://dexie.org/docs/Tutorial/React
+  // TODO: Try to move this to dexie.js: https://dexie.org/docs/Tutorial/React
   const [fileNames, setFileNames] = useState([] as string[])
 
   useEffect(() => {
