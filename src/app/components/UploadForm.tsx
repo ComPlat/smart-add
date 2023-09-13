@@ -14,15 +14,14 @@ const UploadForm: React.FC = () => {
     const fetchKeys = async () => {
       try {
         const keys = await localforage.keys()
-        const fileNames = []
-        for (const key of keys) {
+        keys.map(async (key) => {
           const file = await localforage.getItem(key)
           if (!(file instanceof File)) {
             console.error(file)
-            continue
+            return null
           }
-          fileNames.push(file.name)
-        }
+          return file.name
+        })
       } catch (err) {
         console.error(err)
       }
