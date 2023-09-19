@@ -14,9 +14,19 @@ const UploadForm: React.FC = () => {
   const uploadProps: UploadProps = {
     customRequest: ({ file, onProgress, onSuccess }) => {
       if (typeof file === 'string')
-        throw new Error('Uploaded file is a string!')
+        throw new TypeError('Uploaded file is a String!')
 
-      console.log('file: ', file)
+      if (file instanceof Blob && !(file instanceof File)) {
+        throw new TypeError('Uploaded file is a Blob, not a File!')
+      }
+
+      if (!('uid' in file)) {
+        throw new TypeError('Uploaded file is a File, not an RcFile!')
+      }
+
+      if (!(typeof file.uid === 'string')) {
+        throw new TypeError('Uploaded file has an uid that is not a string!')
+      }
 
       filesDB.files
         .add({
@@ -43,7 +53,6 @@ const UploadForm: React.FC = () => {
     multiple: true,
     name: 'file',
     onChange(info) {
-      console.log(info)
       const { status } = info.file
       if (status === 'done') {
         message.success(`${info.file.name} file uploaded successfully.`)
@@ -52,6 +61,16 @@ const UploadForm: React.FC = () => {
       }
     },
     onRemove(file) {
+      if (!('id' in file)) {
+        throw new TypeError('Can not delete because the file is missing an id!')
+      }
+
+      if (!(typeof file.id === 'number')) {
+        throw new TypeError(
+          'Can not delete because the id of file is not a number!',
+        )
+      }
+
       filesDB.files.delete(file.id)
     },
   }
