@@ -3,7 +3,6 @@
 import { filesDB } from '@/database/db'
 import { InboxOutlined } from '@ant-design/icons'
 import { Upload, UploadProps, message } from 'antd'
-// import { Upload, message } from 'antd'
 import { useLiveQuery } from 'dexie-react-hooks'
 import React, { Fragment } from 'react'
 
