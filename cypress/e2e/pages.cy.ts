@@ -1,9 +1,6 @@
-import localforage from 'localforage'
-
 describe('Pages', () => {
   beforeEach(() => {
     cy.visit('/')
-    localforage.clear()
   })
 
   it('uploads file per drag and drop successfully', () => {

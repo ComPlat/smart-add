@@ -8,7 +8,6 @@ export type ExtendedFile = {
   path: string
   uid: string
 }
-export type ExtendedFileFromDB = RcFile & { id: number }
 
 export class FilesDBCreator extends Dexie {
   files!: Table<ExtendedFile, number>
