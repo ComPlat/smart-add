@@ -1,17 +1,22 @@
 import { RcFile } from 'antd/es/upload'
 import Dexie, { Table } from 'dexie'
 
-export class IndexedDbCreator extends Dexie {
-  // 'file' is added by dexie when declaring the stores()
-  // We just tell the typing system this is the case
-  files!: Table<Blob | RcFile>
+export type ExtendedFile = {
+  file: Blob | RcFile
+  id?: number
+  name: string
+  path: string
+  uid: string
+}
+export type ExtendedFileFromDB = RcFile & { id: number }
+
+export class FilesDBCreator extends Dexie {
+  files!: Table<ExtendedFile, number>
 
   constructor() {
-    super('myDatabase')
-    this.version(1).stores({
-      files: '++id, file', // Primary key and indexed props
-    })
+    super('filesDatabase')
+    this.version(1).stores({ files: '++id, file, path' })
   }
 }
 
-export const db = new IndexedDbCreator()
+export const filesDB = new FilesDBCreator()

@@ -2,55 +2,47 @@
 
 import type { UploadProps } from 'antd'
 
-import { db } from '@/database/db'
+import { filesDB } from '@/database/db'
 import { InboxOutlined } from '@ant-design/icons'
 import { Upload, message } from 'antd'
-import { RcFile } from 'antd/es/upload'
-import React, { Fragment, useEffect, useState } from 'react'
+import { useLiveQuery } from 'dexie-react-hooks'
+import React, { Fragment } from 'react'
 
 const { Dragger } = Upload
 
 const UploadForm: React.FC = () => {
-  const [files, setFiles] = useState([] as (Blob | RcFile)[])
-
-  useEffect(() => {
-    const fetchFilesFromDb = async () => {
-      setFiles(await db.files.toArray())
-    }
-
-    fetchFilesFromDb()
-  }, [files])
+  const files = useLiveQuery(() => filesDB.files.toArray()) || []
 
   const uploadProps: UploadProps = {
     customRequest: ({ file, onProgress, onSuccess }) => {
-      if (typeof file === 'string') {
-        return console.error(file)
-      }
+      if (typeof file === 'string')
+        throw new Error('Uploaded file is a string!')
 
-      async function addFile(file: Blob | RcFile) {
-        try {
-          return db.files.add(file)
-        } catch (err) {
-          console.log(err)
-        }
-      }
+      console.log('file: ', file)
 
-      addFile(file)
-        .then(async () => {
-          onProgress?.({ percent: 100 })
-          onSuccess?.(file)
+      if ('webkitRelativePath' in file && 'uid' in file)
+        filesDB.files
+          .add({
+            file,
+            name: file.name,
+            path: file.webkitRelativePath,
+            uid: file.uid,
+          })
+          .then(async () => {
+            onProgress?.({ percent: 100 })
+            onSuccess?.(file)
 
-          setFiles([...files, ...[file]])
-          return true
-        })
-        .catch((err) => {
-          console.error('Failed to save file:', err)
-        })
+            return true
+          })
+          .catch((err) => {
+            console.error('Failed to save file:', err)
+          })
 
       return true
     },
     directory: true,
-    listType: 'picture',
+    fileList: files,
+    listType: 'text',
     multiple: true,
     name: 'file',
     onChange(info) {
@@ -75,11 +67,6 @@ const UploadForm: React.FC = () => {
           uploading company data or other banned files.
         </p>
       </Dragger>
-      <div>
-        {files.map((file) => (
-          <p key={file.name}>{file.name}</p>
-        ))}
-      </div>
     </Fragment>
   )
 }
