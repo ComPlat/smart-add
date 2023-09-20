@@ -1,12 +1,43 @@
 'use client'
 
-import { filesDB } from '@/database/db'
+import { ExtendedFile, filesDB } from '@/database/db'
 import { InboxOutlined } from '@ant-design/icons'
 import { Upload, UploadProps, message } from 'antd'
 import { useLiveQuery } from 'dexie-react-hooks'
 import React, { Fragment } from 'react'
 
 const { Dragger } = Upload
+
+const FileList = ({ files }: { files: ExtendedFile[] }) => (
+  <div className="flex flex-col">
+    {files.map((file) => (
+      <div className="flex justify-between text-sm " key={file.id}>
+        <p className="leading-loose text-neutral-900 ">{file.name}</p>
+        <button
+          onClick={(event) => {
+            event.preventDefault()
+
+            if (!('id' in file)) {
+              throw new TypeError(
+                'Can not delete because the file is missing an id!',
+              )
+            }
+
+            if (!(typeof file.id === 'number')) {
+              throw new TypeError(
+                'Can not delete because the id of file is not a number!',
+              )
+            }
+
+            filesDB.files.delete(file.id)
+          }}
+        >
+          Delete
+        </button>
+      </div>
+    ))}
+  </div>
+)
 
 const UploadForm: React.FC = () => {
   const files = useLiveQuery(() => filesDB.files.toArray()) || []
@@ -48,7 +79,6 @@ const UploadForm: React.FC = () => {
       return true
     },
     directory: true,
-    fileList: files,
     listType: 'text',
     multiple: true,
     name: 'file',
@@ -60,19 +90,7 @@ const UploadForm: React.FC = () => {
         message.error(`${info.file.name} file upload failed.`)
       }
     },
-    onRemove(file) {
-      if (!('id' in file)) {
-        throw new TypeError('Can not delete because the file is missing an id!')
-      }
-
-      if (!(typeof file.id === 'number')) {
-        throw new TypeError(
-          'Can not delete because the id of file is not a number!',
-        )
-      }
-
-      filesDB.files.delete(file.id)
-    },
+    showUploadList: false,
   }
 
   return (
@@ -87,6 +105,7 @@ const UploadForm: React.FC = () => {
           uploading company data or other banned files.
         </p>
       </Dragger>
+      <FileList files={files} />
     </Fragment>
   )
 }
