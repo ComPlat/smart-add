@@ -1,7 +1,11 @@
 'use client'
 
 import { ExtendedFile, filesDB } from '@/database/db'
-import { InboxOutlined } from '@ant-design/icons'
+import {
+  DeleteOutlined,
+  InboxOutlined,
+  PaperClipOutlined,
+} from '@ant-design/icons'
 import { Upload, UploadProps, message } from 'antd'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Fragment } from 'react'
@@ -25,16 +29,23 @@ const DeleteFileButton = ({ file }: { file: ExtendedFile }) => (
 
       filesDB.files.delete(file.id)
     }}
+    className="rounded-sm px-0.5 text-neutral-400 transition-all hover:border-neutral-200 hover:bg-neutral-200 hover:text-neutral-900"
   >
-    Delete
+    <DeleteOutlined />
   </button>
 )
 
 const FileList = ({ files }: { files: ExtendedFile[] }) => (
-  <div className="flex flex-col">
+  <div className="flex flex-col gap-2">
     {files.map((file) => (
-      <div className="flex justify-between text-sm " key={file.id}>
-        <p className="leading-loose text-neutral-900 ">{file.name}</p>
+      <div
+        className="flex justify-between text-sm transition-all hover:bg-neutral-100"
+        key={file.id}
+      >
+        <div className="flex gap-2">
+          <PaperClipOutlined className="text-neutral-400" />
+          <p className=" mr-3 line-clamp-1 text-neutral-900">{file.path}</p>
+        </div>
         <DeleteFileButton file={file} />
       </div>
     ))}
@@ -98,9 +109,7 @@ const UploadForm: React.FC = () => {
   return (
     <Fragment>
       <Dragger {...uploadProps}>
-        <p className="text-6xl text-blue-500">
-          <InboxOutlined />
-        </p>
+        <InboxOutlined className="text-6xl text-blue-500" />
         <p className="text-lg">Click or drag file to this area to upload</p>
         <p className="mt-2 text-sm text-neutral-400">
           Support for a single or bulk upload. Strictly prohibited from
