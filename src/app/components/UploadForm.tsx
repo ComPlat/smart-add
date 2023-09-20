@@ -4,36 +4,38 @@ import { ExtendedFile, filesDB } from '@/database/db'
 import { InboxOutlined } from '@ant-design/icons'
 import { Upload, UploadProps, message } from 'antd'
 import { useLiveQuery } from 'dexie-react-hooks'
-import React, { Fragment } from 'react'
+import { Fragment } from 'react'
 
 const { Dragger } = Upload
+
+const DeleteFileButton = ({ file }: { file: ExtendedFile }) => (
+  <button
+    onClick={(event) => {
+      event.preventDefault()
+
+      if (!('id' in file)) {
+        throw new TypeError('Can not delete because the file is missing an id!')
+      }
+
+      if (!(typeof file.id === 'number')) {
+        throw new TypeError(
+          'Can not delete because the id of file is not a number!',
+        )
+      }
+
+      filesDB.files.delete(file.id)
+    }}
+  >
+    Delete
+  </button>
+)
 
 const FileList = ({ files }: { files: ExtendedFile[] }) => (
   <div className="flex flex-col">
     {files.map((file) => (
       <div className="flex justify-between text-sm " key={file.id}>
         <p className="leading-loose text-neutral-900 ">{file.name}</p>
-        <button
-          onClick={(event) => {
-            event.preventDefault()
-
-            if (!('id' in file)) {
-              throw new TypeError(
-                'Can not delete because the file is missing an id!',
-              )
-            }
-
-            if (!(typeof file.id === 'number')) {
-              throw new TypeError(
-                'Can not delete because the id of file is not a number!',
-              )
-            }
-
-            filesDB.files.delete(file.id)
-          }}
-        >
-          Delete
-        </button>
+        <DeleteFileButton file={file} />
       </div>
     ))}
   </div>
