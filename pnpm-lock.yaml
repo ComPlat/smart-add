@@ -28,6 +28,9 @@ dependencies:
     version: 5.2.2
 
 devDependencies:
+  '@this-dot/cypress-indexeddb':
+    specifier: 2.0.1
+    version: 2.0.1(cypress@12.17.4)
   '@types/node':
     specifier: 20.5.7
     version: 20.5.7
@@ -543,6 +546,15 @@ packages:
     dependencies:
       tslib: 2.6.2
     dev: false
+
+  /@this-dot/cypress-indexeddb@2.0.1(cypress@12.17.4):
+    resolution: {integrity: sha512-0U0ONB24RFGS1XgOqrahNAGPTRQjBBLv19I2/JcDHky61i7rotxnK9rwBoWfcRspg3APfiT3V5qxEvv4P0WGVg==}
+    peerDependencies:
+      cypress: '> 12.6.0'
+    dependencies:
+      cypress: 12.17.4
+      rxjs: 7.5.7
+    dev: true
 
   /@types/json-schema@7.0.12:
     resolution: {integrity: sha512-Hr5Jfhc9eYOQNPYO5WLDq/n4jqijdHNlDXjuAQkkt+mWdQR+XJToOHrsD4cPaMXpn6KO7y2+wM8AZEs8VpBLVA==}
@@ -4166,6 +4178,12 @@ packages:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
     dependencies:
       queue-microtask: 1.2.3
+
+  /rxjs@7.5.7:
+    resolution: {integrity: sha512-z9MzKh/UcOqB3i20H6rtrlaE/CgjLOvheWK/9ILrbhROGTweAi1BaFsTT9FbwZi5Trr1qNRs+MXkhmR06awzQA==}
+    dependencies:
+      tslib: 2.6.2
+    dev: true
 
   /rxjs@7.8.1:
     resolution: {integrity: sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==}

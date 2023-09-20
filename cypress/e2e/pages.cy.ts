@@ -1,8 +1,8 @@
-import Dexie from 'dexie'
+import '@this-dot/cypress-indexeddb'
 
 describe('Pages', () => {
   beforeEach(() => {
-    Dexie.delete('filesDatabase')
+    cy.clearIndexedDb('filesDatabase')
     cy.visit('/')
   })
 
@@ -20,5 +20,14 @@ describe('Pages', () => {
       'contain',
       `${fileName} uploaded successfully`,
     )
+
+    cy.openIndexedDb('filesDatabase')
+      .as('testFilesDatabase')
+      .getIndexedDb('@testFilesDatabase')
+      .createObjectStore('files')
+      .as('files')
+      .getStore('@files')
+      .keys()
+      .should('not.be.empty')
   })
 })
