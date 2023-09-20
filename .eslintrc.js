@@ -11,7 +11,7 @@ module.exports = {
   plugins: ['prettier'],
   root: true,
   rules: {
-    'prettier/prettier': 'error',
+    'prettier/prettier': ['error', { endOfLine: 'auto' }],
     'tailwindcss/classnames-order': 'error',
   },
 }
