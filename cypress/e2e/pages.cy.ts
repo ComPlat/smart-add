@@ -1,5 +1,8 @@
+import Dexie from 'dexie'
+
 describe('Pages', () => {
   beforeEach(() => {
+    Dexie.delete('filesDatabase')
     cy.visit('/')
   })
 
@@ -11,10 +14,11 @@ describe('Pages', () => {
       action: 'drag-drop',
     })
 
-    cy.get('.ant-upload-list-item-name').should('contain', fileName)
+    cy.get('p').contains(`${fileName}`)
+
     cy.get('.ant-message-success').should(
       'contain',
-      `${fileName} file uploaded successfully`,
+      `${fileName} uploaded successfully`,
     )
   })
 })

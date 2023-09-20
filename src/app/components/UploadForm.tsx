@@ -44,7 +44,9 @@ const FileList = ({ files }: { files: ExtendedFile[] }) => (
       >
         <div className="flex gap-2">
           <PaperClipOutlined className="text-neutral-400" />
-          <p className=" mr-3 line-clamp-1 text-neutral-900">{file.path}</p>
+          <p className="data-file-path: mr-3 line-clamp-1 text-neutral-900">
+            {file.name}
+          </p>
         </div>
         <DeleteFileButton file={file} />
       </div>
@@ -98,9 +100,9 @@ const UploadForm: React.FC = () => {
     onChange(info) {
       const { status } = info.file
       if (status === 'done') {
-        message.success(`${info.file.name} file uploaded successfully.`)
+        message.success(`${info.file.name} uploaded successfully.`)
       } else if (status === 'error') {
-        message.error(`${info.file.name} file upload failed.`)
+        message.error(`Upload of file ${info.file.name} failed.`)
       }
     },
     showUploadList: false,
