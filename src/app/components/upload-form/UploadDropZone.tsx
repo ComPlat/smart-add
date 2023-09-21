@@ -3,43 +3,58 @@
 import { filesDB } from '@/database/db'
 import { InboxOutlined } from '@ant-design/icons'
 import { Upload, UploadProps, message } from 'antd'
+import { RcFile } from 'antd/es/upload'
+
+interface UploadProgressEvent extends Partial<ProgressEvent> {
+  percent?: number
+}
+
+const handleCustomRequest = ({
+  file,
+  onProgress,
+  onSuccess,
+}: {
+  file: Blob | RcFile | string
+  onProgress?: (event: UploadProgressEvent) => void
+  onSuccess?: (body: File, xhr?: XMLHttpRequest) => void
+}) => {
+  if (typeof file === 'string')
+    throw new TypeError('Uploaded file is a String!')
+
+  if (file instanceof Blob && !(file instanceof File)) {
+    throw new TypeError('Uploaded file is a Blob, not a File!')
+  }
+
+  if (!('uid' in file)) {
+    throw new TypeError('Uploaded file is a File, not an RcFile!')
+  }
+
+  if (!(typeof file.uid === 'string')) {
+    throw new TypeError('Uploaded file has an uid that is not a string!')
+  }
+
+  filesDB.files
+    .add({
+      file,
+      name: file.name,
+      path: file.webkitRelativePath,
+      uid: file.uid,
+    })
+    .then(async () => {
+      onProgress?.({ percent: 100 })
+      onSuccess?.(file)
+
+      return true
+    })
+    .catch((err) => {
+      console.error('Failed to save file:', err)
+    })
+
+  return true
+}
 
 const uploadProps: UploadProps = {
-  customRequest: ({ file, onProgress, onSuccess }) => {
-    if (typeof file === 'string')
-      throw new TypeError('Uploaded file is a String!')
-
-    if (file instanceof Blob && !(file instanceof File)) {
-      throw new TypeError('Uploaded file is a Blob, not a File!')
-    }
-
-    if (!('uid' in file)) {
-      throw new TypeError('Uploaded file is a File, not an RcFile!')
-    }
-
-    if (!(typeof file.uid === 'string')) {
-      throw new TypeError('Uploaded file has an uid that is not a string!')
-    }
-
-    filesDB.files
-      .add({
-        file,
-        name: file.name,
-        path: file.webkitRelativePath,
-        uid: file.uid,
-      })
-      .then(async () => {
-        onProgress?.({ percent: 100 })
-        onSuccess?.(file)
-
-        return true
-      })
-      .catch((err) => {
-        console.error('Failed to save file:', err)
-      })
-
-    return true
-  },
+  customRequest: handleCustomRequest,
   directory: true,
   listType: 'text',
   multiple: true,
@@ -69,4 +84,4 @@ const UploadDropZone = () => (
   </Upload.Dragger>
 )
 
-export { UploadDropZone }
+export { UploadDropZone, handleCustomRequest }
