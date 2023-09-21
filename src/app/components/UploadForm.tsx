@@ -98,11 +98,14 @@ const UploadForm: React.FC = () => {
     multiple: true,
     name: 'file',
     onChange(info) {
-      const { status } = info.file
+      const {
+        file: { name, status },
+      } = info
+
       if (status === 'done') {
-        message.success(`${info.file.name} uploaded successfully.`)
+        message.success(`${name} uploaded successfully.`)
       } else if (status === 'error') {
-        message.error(`Upload of file ${info.file.name} failed.`)
+        message.error(`Upload of file ${name} failed.`)
       }
     },
     showUploadList: false,
