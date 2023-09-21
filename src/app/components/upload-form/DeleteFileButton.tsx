@@ -1,10 +1,7 @@
 import { ExtendedFile, filesDB } from '@/database/db'
 import { DeleteOutlined } from '@ant-design/icons'
 
-const handleDelete = (
-  file: ExtendedFile,
-  event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-) => {
+const handleDelete = (file: ExtendedFile, event: React.MouseEvent) => {
   event.preventDefault()
 
   if (!('id' in file)) {
