@@ -1,7 +1,7 @@
 import { Fragment } from 'react'
 
-import { UploadDropZone } from './upload-form/Dragger'
 import { FileList } from './upload-form/FileList'
+import { UploadDropZone } from './upload-form/UploadDropZone'
 
 const UploadForm: React.FC = () => {
   return (
