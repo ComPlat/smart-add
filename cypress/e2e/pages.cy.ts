@@ -6,28 +6,37 @@ describe('Pages', () => {
     cy.visit('/')
   })
 
-  it('uploads file per drag and drop successfully', () => {
-    const path = 'cypress/fixtures'
+  describe('UploadForm', () => {
     const fileName = 'file.json'
 
-    cy.get('span[role=button]').selectFile(`${path}/${fileName}`, {
-      action: 'drag-drop',
+    beforeEach(() => {
+      cy.fixture(fileName).as('testFile')
     })
 
-    cy.get('p').contains(`${fileName}`)
+    context('when uploading per drag and drop', () => {
+      beforeEach(() => {
+        cy.get('span[role=button]').selectFile('@testFile', {
+          action: 'drag-drop',
+        })
+      })
 
-    cy.get('.ant-message-success').should(
-      'contain',
-      `${fileName} uploaded successfully`,
-    )
+      it('shows message that upload was successful', () => {
+        cy.get('p').contains(`${fileName}`)
 
-    cy.openIndexedDb('filesDatabase')
-      .as('testFilesDatabase')
-      .getIndexedDb('@testFilesDatabase')
-      .createObjectStore('files')
-      .as('files')
-      .getStore('@files')
-      .keys()
-      .should('not.be.empty')
+        cy.get('.ant-message-success').should(
+          'contain',
+          `${fileName} uploaded successfully`,
+        )
+      })
+
+      it('fills IndexedDB database', () => {
+        cy.openIndexedDb('filesDatabase').as('testFilesDatabase')
+        cy.getIndexedDb('@testFilesDatabase')
+          .createObjectStore('files')
+          .as('files')
+
+        cy.getStore('@files').keys().should('not.be.empty')
+      })
+    })
   })
 })
