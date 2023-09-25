@@ -4,12 +4,13 @@ import { filesDB } from '@/database/db'
 import { InboxOutlined } from '@ant-design/icons'
 import { Upload, UploadProps, message } from 'antd'
 import { RcFile } from 'antd/es/upload'
+import JSZip from 'jszip'
 
 interface UploadProgressEvent extends Partial<ProgressEvent> {
   percent?: number
 }
 
-const handleCustomRequest = ({
+const handleCustomRequest = async ({
   file,
   onProgress,
   onSuccess,
@@ -33,22 +34,65 @@ const handleCustomRequest = ({
     throw new TypeError('Uploaded file has an uid that is not a string!')
   }
 
-  filesDB.files
-    .add({
-      file,
-      name: file.name,
-      path: file.webkitRelativePath,
-      uid: file.uid,
-    })
-    .then(async () => {
+  if (file.type === 'application/zip') {
+    try {
+      const zip = new JSZip()
+      const zipData = await zip.loadAsync(file)
+
+      const extractedFiles: {
+        data: Promise<File>
+        name: string
+        path: string
+        type: string
+      }[] = []
+      zipData.forEach((relativePath, zipObject) => {
+        if (!zipObject.dir) {
+          const fileName = zipObject.name.split('/').pop() || 'unknown.txt'
+          const fileType = zipObject.name.split('.').pop() || 'unknown'
+
+          extractedFiles.push({
+            data: zipObject
+              .async('blob')
+              .then((blob) => new File([blob], fileName, { type: fileType })),
+            name: fileName,
+            path: relativePath,
+            type: fileType,
+          })
+        }
+      })
+
+      for (const extractedFile of extractedFiles) {
+        const { data, name, path } = extractedFile
+        await filesDB.files.add({
+          file: await data,
+          name,
+          path,
+          uid: file.uid,
+        })
+      }
+
       onProgress?.({ percent: 100 })
       onSuccess?.(file)
-
-      return true
-    })
-    .catch((err) => {
-      console.error('Failed to save file:', err)
-    })
+    } catch (err) {
+      console.error('Failed to extract and upload ZIP file:', err)
+    }
+  } else {
+    filesDB.files
+      .add({
+        file,
+        name: file.name,
+        path: file.webkitRelativePath,
+        uid: file.uid,
+      })
+      .then(async () => {
+        onProgress?.({ percent: 100 })
+        onSuccess?.(file)
+        return true
+      })
+      .catch((err) => {
+        console.error('Failed to save file:', err)
+      })
+  }
 
   return true
 }
