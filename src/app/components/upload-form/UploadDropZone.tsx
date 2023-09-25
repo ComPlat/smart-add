@@ -49,9 +49,7 @@ const handleCustomRequest = async ({
       zipData.forEach((relativePath, zipObject) => {
         if (!zipObject.dir) {
           const fileName = zipObject.name.split('/').pop() || 'unknown.txt'
-          const fileType = mime.lookup(
-            zipObject.name.split('.').pop() || 'unknown',
-          )
+          const fileType = mime.lookup(zipObject.name.split('.')[-1]) || ''
 
           extractedFiles.push({
             data: zipObject
@@ -59,7 +57,7 @@ const handleCustomRequest = async ({
               .then((blob) => new File([blob], fileName, { type: fileType })),
             name: fileName,
             path: relativePath,
-            type: fileType || '',
+            type: fileType,
           })
         }
       })
