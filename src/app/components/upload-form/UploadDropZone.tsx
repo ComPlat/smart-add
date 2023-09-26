@@ -5,6 +5,7 @@ import { InboxOutlined } from '@ant-design/icons'
 import { Upload, UploadProps, message } from 'antd'
 import { RcFile } from 'antd/es/upload'
 
+import styles from './UploadDropZone.module.css'
 interface UploadProgressEvent extends Partial<ProgressEvent> {
   percent?: number
 }
@@ -74,14 +75,16 @@ const uploadProps: UploadProps = {
 }
 
 const UploadDropZone = () => (
-  <Upload.Dragger {...uploadProps}>
-    <InboxOutlined className="text-6xl text-blue-500" />
-    <p className="text-lg">Click or drag file to this area to upload</p>
-    <p className="mt-2 text-sm text-neutral-400">
-      Support for a single or bulk upload. Strictly prohibited from uploading
-      company data or other banned files.
-    </p>
-  </Upload.Dragger>
+  <div className={styles['upload-wrapper']}>
+    <Upload.Dragger {...uploadProps} openFileDialogOnClick={false}>
+      <InboxOutlined className="text-6xl text-blue-500" />
+      <p className="text-lg">Drag file to this area to upload</p>
+      <p className="mt-2 text-sm text-neutral-400">
+        Support for a single or bulk upload. Strictly prohibited from uploading
+        company data or other banned files.
+      </p>
+    </Upload.Dragger>
+  </div>
 )
 
 export { UploadDropZone, handleCustomRequest }
