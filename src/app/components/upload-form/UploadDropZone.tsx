@@ -11,6 +11,57 @@ interface UploadProgressEvent extends Partial<ProgressEvent> {
   percent?: number
 }
 
+const extractFilesFromZip = async (file: RcFile) => {
+  const zip = new JSZip()
+  const zipData = await zip.loadAsync(file)
+
+  const extractedFiles: {
+    data: Promise<File>
+    name: string
+    path: string
+    type: string
+  }[] = []
+
+  zipData.forEach((relativePath, zipObject) => {
+    if (!zipObject.dir && !relativePath.startsWith('__')) {
+      const fileName = zipObject.name.split('/').pop() || 'unknown.txt'
+      const extension = zipObject.name.split('.').pop()
+      const fileType = mime.lookup(extension ?? '') || ''
+
+      extractedFiles.push({
+        data: zipObject
+          .async('blob')
+          .then((blob) => new File([blob], fileName, { type: fileType })),
+        name: fileName,
+        path: relativePath,
+        type: fileType,
+      })
+    }
+  })
+
+  return extractedFiles
+}
+
+const uploadExtractedFiles = async (
+  extractedFiles: {
+    data: Promise<File>
+    name: string
+    path: string
+    type: string
+  }[],
+  file: RcFile,
+) => {
+  for (const extractedFile of extractedFiles) {
+    const { data, name, path } = extractedFile
+    await filesDB.files.add({
+      file: await data,
+      name,
+      path,
+      uid: file.uid + '_' + name,
+    })
+  }
+}
+
 const handleCustomRequest = async ({
   file,
   onProgress,
@@ -37,42 +88,8 @@ const handleCustomRequest = async ({
 
   if (file.type === 'application/zip') {
     try {
-      const zip = new JSZip()
-      const zipData = await zip.loadAsync(file)
-
-      const extractedFiles: {
-        data: Promise<File>
-        name: string
-        path: string
-        type: string
-      }[] = []
-      zipData.forEach((relativePath, zipObject) => {
-        if (!zipObject.dir) {
-          const fileName = zipObject.name.split('/').pop() || 'unknown.txt'
-          const extension = zipObject.name.split('.').pop()
-          const fileType = mime.lookup(extension ?? '') || ''
-
-          extractedFiles.push({
-            data: zipObject
-              .async('blob')
-              .then((blob) => new File([blob], fileName, { type: fileType })),
-            name: fileName,
-            path: relativePath,
-            type: fileType,
-          })
-        }
-      })
-
-      for (const extractedFile of extractedFiles) {
-        const { data, name, path } = extractedFile
-        await filesDB.files.add({
-          file: await data,
-          name,
-          path,
-          uid: file.uid,
-        })
-      }
-
+      const extractedFiles = await extractFilesFromZip(file as RcFile)
+      await uploadExtractedFiles(extractedFiles, file as RcFile)
       onProgress?.({ percent: 100 })
       onSuccess?.(file)
     } catch (err) {
