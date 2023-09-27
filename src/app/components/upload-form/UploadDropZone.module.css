@@ -1,6 +1,3 @@
 .upload-wrapper :global(.ant-upload-btn) {
   cursor: default !important;
 }
-/* .upload-wrapper .ant-upload-drag:hover {
-    border-color: inherit !important;
-} */
