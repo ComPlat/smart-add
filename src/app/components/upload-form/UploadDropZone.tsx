@@ -6,6 +6,7 @@ import { Upload, UploadProps, message } from 'antd'
 import { RcFile } from 'antd/es/upload'
 import JSZip from 'jszip'
 import mime from 'mime-types'
+import { v4 } from 'uuid'
 
 interface UploadProgressEvent extends Partial<ProgressEvent> {
   percent?: number
@@ -49,7 +50,6 @@ const uploadExtractedFiles = async (
     path: string
     type: string
   }[],
-  file: RcFile,
 ) => {
   for (const extractedFile of extractedFiles) {
     const { data, name, path } = extractedFile
@@ -57,7 +57,7 @@ const uploadExtractedFiles = async (
       file: await data,
       name,
       path,
-      uid: file.uid + '_' + name,
+      uid: v4(),
     })
   }
 }
@@ -89,7 +89,7 @@ const handleCustomRequest = async ({
   if (file.type === 'application/zip') {
     try {
       const extractedFiles = await extractFilesFromZip(file as RcFile)
-      await uploadExtractedFiles(extractedFiles, file as RcFile)
+      await uploadExtractedFiles(extractedFiles)
       onProgress?.({ percent: 100 })
       onSuccess?.(file)
     } catch (err) {
@@ -101,7 +101,7 @@ const handleCustomRequest = async ({
         file,
         name: file.name,
         path: file.webkitRelativePath,
-        uid: file.uid,
+        uid: v4(),
       })
       .then(async () => {
         onProgress?.({ percent: 100 })
