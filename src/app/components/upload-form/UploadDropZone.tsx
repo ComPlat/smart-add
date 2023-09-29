@@ -12,6 +12,19 @@ interface UploadProgressEvent extends Partial<ProgressEvent> {
   percent?: number
 }
 
+const getFilenameAndExtension = (zipObject: {
+  name: string
+}): [extension: string, fileName: string] => {
+  const components = zipObject.name.split(/[\/.]/)
+  const fileName =
+    components[components.length - 2] + '.' + components[components.length - 1]
+  const extension = components[components.length - 1]
+
+  return !fileName.startsWith('.') && !zipObject.name.startsWith('__')
+    ? [extension, fileName]
+    : ['', '']
+}
+
 const extractFilesFromZip = async (file: RcFile) => {
   const zip = new JSZip()
   const zipData = await zip.loadAsync(file)
@@ -24,9 +37,8 @@ const extractFilesFromZip = async (file: RcFile) => {
   }[] = []
 
   zipData.forEach((relativePath, zipObject) => {
-    if (!zipObject.dir && !relativePath.startsWith('__')) {
-      const fileName = zipObject.name.split('/').pop() || 'unknown.txt'
-      const extension = zipObject.name.split('.').pop()
+    if (!zipObject.dir) {
+      const [extension, fileName] = getFilenameAndExtension(zipObject)
       const fileType = mime.lookup(extension ?? '') || ''
 
       extractedFiles.push({
@@ -50,14 +62,17 @@ const uploadExtractedFiles = async (
     path: string
     type: string
   }[],
+  file: RcFile,
 ) => {
   for (const extractedFile of extractedFiles) {
     const { data, name, path } = extractedFile
+    const fileData = await data
+    if (name === '' || fileData.type === '') continue
     await filesDB.files.add({
-      file: await data,
+      file: fileData,
       name,
       path,
-      uid: v4(),
+      uid: file.uid + '_' + v4(),
     })
   }
 }
@@ -89,7 +104,7 @@ const handleCustomRequest = async ({
   if (file.type === 'application/zip') {
     try {
       const extractedFiles = await extractFilesFromZip(file as RcFile)
-      await uploadExtractedFiles(extractedFiles)
+      await uploadExtractedFiles(extractedFiles, file as RcFile)
       onProgress?.({ percent: 100 })
       onSuccess?.(file)
     } catch (err) {
