@@ -1,0 +1,3 @@
+.upload-wrapper :global(.ant-upload-btn) {
+  cursor: default;
+}
