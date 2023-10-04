@@ -67,7 +67,7 @@ const uploadExtractedFiles = async (
   for (const extractedFile of extractedFiles) {
     const { data, name, path } = extractedFile
     const fileData = await data
-    if (name === '' || fileData.type === '') continue
+    if (name === '') continue
     await filesDB.files.add({
       file: fileData,
       name,
