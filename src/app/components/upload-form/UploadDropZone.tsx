@@ -80,8 +80,7 @@ const UploadDropZone = () => (
       <InboxOutlined className="text-6xl text-blue-500" />
       <p className="text-lg">Drag file to this area to upload</p>
       <p className="mt-2 text-sm text-neutral-400">
-        Support for a single or bulk upload. Strictly prohibited from uploading
-        company data or other banned files.
+        Support for single, bulk or zip archive upload.
       </p>
     </Upload.Dragger>
   </div>
