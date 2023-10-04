@@ -39,7 +39,8 @@ const extractFilesFromZip = async (file: RcFile) => {
   zipData.forEach((relativePath, zipObject) => {
     if (!zipObject.dir) {
       const [extension, fileName] = getFilenameAndExtension(zipObject)
-      const fileType = mime.lookup(extension ?? '') || ''
+      const fileType =
+        mime.lookup(extension ?? '') || 'application/octet-stream'
 
       extractedFiles.push({
         data: zipObject
