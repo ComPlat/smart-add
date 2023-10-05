@@ -16,9 +16,8 @@ const getFilenameAndExtension = (zipObject: {
   name: string
 }): [extension: string, fileName: string] => {
   const components = zipObject.name.split(/[\/.]/)
-  const fileName =
-    components[components.length - 2] + '.' + components[components.length - 1]
-  const extension = components[components.length - 1]
+  const [fileNameWithoutExtension, extension] = components.slice(-2)
+  const fileName = `${fileNameWithoutExtension}.${extension}`
 
   return !fileName.startsWith('.') && !zipObject.name.startsWith('__')
     ? [extension, fileName]
@@ -37,20 +36,19 @@ const extractFilesFromZip = async (file: RcFile) => {
   }[] = []
 
   zipData.forEach((relativePath, zipObject) => {
-    if (!zipObject.dir) {
-      const [extension, fileName] = getFilenameAndExtension(zipObject)
-      const fileType =
-        mime.lookup(extension ?? '') || 'application/octet-stream'
+    if (zipObject.dir) return
 
-      extractedFiles.push({
-        data: zipObject
-          .async('blob')
-          .then((blob) => new File([blob], fileName, { type: fileType })),
-        name: fileName,
-        path: relativePath,
-        type: fileType,
-      })
-    }
+    const [extension, fileName] = getFilenameAndExtension(zipObject)
+    const fileType = mime.lookup(extension ?? '') || 'application/octet-stream'
+
+    extractedFiles.push({
+      data: zipObject
+        .async('blob')
+        .then((blob) => new File([blob], fileName, { type: fileType })),
+      name: fileName,
+      path: relativePath,
+      type: fileType,
+    })
   })
 
   return extractedFiles
@@ -67,8 +65,9 @@ const uploadExtractedFiles = async (
 ) => {
   for (const extractedFile of extractedFiles) {
     const { data, name, path } = extractedFile
-    const fileData = await data
     if (name === '') continue
+
+    const fileData = await data
     await filesDB.files.add({
       file: fileData,
       name,
