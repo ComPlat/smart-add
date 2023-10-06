@@ -1,5 +1,8 @@
 # SmartAdd
 
+## Wireframe
+https://www.figma.com/file/mpZ5QeOaOpkj3AaPeoKaus/Wireframes?type=design&node-id=109-13398&mode=design&t=2xpSfEaSiHmBlR47-0
+
 ## Setup
 
 1. Install asdf
