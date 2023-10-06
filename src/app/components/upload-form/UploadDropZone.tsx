@@ -86,24 +86,31 @@ const handleCustomRequest = async ({
   onProgress?: (event: UploadProgressEvent) => void
   onSuccess?: (body: File, xhr?: XMLHttpRequest) => void
 }) => {
+  // FIXME: More sensible percentages needed, also we need to show progress on UI.
+  //        Otherwise some things feel buggy, for example adding "large" zip file causes FileList
+  //        to show nothing until it is processed completely.
+  onProgress?.({ percent: 1 })
   if (typeof file === 'string')
     throw new TypeError('Uploaded file is a String!')
-
+  onProgress?.({ percent: 2 })
   if (file instanceof Blob && !(file instanceof File)) {
     throw new TypeError('Uploaded file is a Blob, not a File!')
   }
-
+  onProgress?.({ percent: 3 })
   if (!('uid' in file)) {
     throw new TypeError('Uploaded file is a File, not an RcFile!')
   }
-
+  onProgress?.({ percent: 4 })
   if (!(typeof file.uid === 'string')) {
     throw new TypeError('Uploaded file has an uid that is not a string!')
   }
+  onProgress?.({ percent: 5 })
 
   if (file.type === 'application/zip') {
+    onProgress?.({ percent: 6 })
     try {
       const extractedFiles = await extractFilesFromZip(file as RcFile)
+      onProgress?.({ percent: 50 })
       await uploadExtractedFiles(extractedFiles, file as RcFile)
       onProgress?.({ percent: 100 })
       onSuccess?.(file)
@@ -111,6 +118,7 @@ const handleCustomRequest = async ({
       console.error('Failed to extract and upload ZIP file:', err)
     }
   } else {
+    onProgress?.({ percent: 50 })
     filesDB.files
       .add({
         file,
