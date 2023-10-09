@@ -46,9 +46,6 @@ const ParseXlsx = () => {
         <div>
           <h2>Output</h2>
           <JSONTree data={output} />
-          {/* <pre className="overflow-x-auto rounded-md border border-gray-300 p-4">
-            {output}
-          </pre> */}
         </div>
       )}
       {!output && <p>No output to display!</p>}
