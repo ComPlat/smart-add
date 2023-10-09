@@ -43,6 +43,7 @@
     "eslint-plugin-tailwindcss": "3.13.0",
     "postcss": "8.4.31",
     "prettier": "3.0.3",
+    "react-json-tree": "0.18.0",
     "start-server-and-test": "2.0.0"
   }
 }

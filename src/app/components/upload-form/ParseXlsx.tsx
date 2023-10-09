@@ -2,11 +2,12 @@
 
 import { ExtendedFile, filesDB } from '@/database/db'
 import { useState } from 'react'
+import { JSONTree } from 'react-json-tree'
 import * as XLSX from 'xlsx'
 
 const ParseXlsx = () => {
   const [path, setPath] = useState('')
-  const [output, setOutput] = useState('')
+  const [output, setOutput] = useState(null as XLSX.WorkBook | null)
 
   const handleFileChange = async () => {
     const file: ExtendedFile | undefined = await filesDB.files.get({ path })
@@ -17,14 +18,10 @@ const ParseXlsx = () => {
     })
 
     const reader = new FileReader()
-
-    reader.onload = (e) => {
-      const arrayBuffer = e.target?.result
+    reader.onload = (event) => {
+      const arrayBuffer = event.target?.result
       const workbook = XLSX.read(arrayBuffer, { type: 'binary' })
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]]
-      const jsonData = XLSX.utils.sheet_to_json(worksheet)
-
-      setOutput(JSON.stringify(jsonData, null, 4))
+      setOutput(workbook)
     }
 
     reader.readAsArrayBuffer(fileAsFile)
@@ -48,9 +45,10 @@ const ParseXlsx = () => {
       {output && (
         <div>
           <h2>Output</h2>
-          <pre className="overflow-x-auto rounded-md border border-gray-300 p-4">
+          <JSONTree data={output} />
+          {/* <pre className="overflow-x-auto rounded-md border border-gray-300 p-4">
             {output}
-          </pre>
+          </pre> */}
         </div>
       )}
       {!output && <p>No output to display!</p>}
