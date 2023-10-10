@@ -5,7 +5,7 @@ describe('XLSX', () => {
     cy.visit('/')
   })
   afterEach(() => {
-    cy.clearIndexedDb('filesDatabse')
+    cy.clearIndexedDb('filesDatabase')
   })
 
   describe('xlsx upload prep', () => {
