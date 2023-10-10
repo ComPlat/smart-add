@@ -11,7 +11,7 @@ describe('ZIP Upload', () => {
   })
 
   describe('uploading zip file', () => {
-    const zipFileName = 'example.zip'
+    const zipFileName = 'test-zip.zip'
     const zipFile = `cypress/fixtures/${zipFileName}`
 
     it('xlsx file upload', () => {
@@ -19,9 +19,7 @@ describe('ZIP Upload', () => {
         action: 'drag-drop',
       })
       cy.wait(5_000)
-      cy.get('p').should('contain', 'jszip.js')
-      cy.get('p').should('contain', 'pygments.css')
-      cy.get('p').should('contain', 'Franz Kafka - The Metamorphosis.epub')
+      cy.get('p').should('contain', '2023_SmartAdd.mol')
     })
   })
 })
