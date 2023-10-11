@@ -14,7 +14,7 @@ export class FilesDBCreator extends Dexie {
 
   constructor() {
     super('filesDatabase')
-    this.version(1).stores({ files: '++id, file, path' })
+    this.version(1).stores({ files: '++id, path, name, uid' })
   }
 }
 
