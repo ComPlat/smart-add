@@ -1,30 +1,36 @@
 import '@this-dot/cypress-indexeddb'
 
-describe('XLSX', () => {
+describe('XLSX Parsing', () => {
   beforeEach(() => {
     cy.visit('/')
   })
+
   afterEach(() => {
     cy.clearIndexedDb('filesDatabase')
   })
 
-  describe('xlsx upload prep', () => {
-    const xlsxFileName = 'file_example_XLSX_50.xlsx'
+  it('should upload an XLSX file', () => {
+    const xlsxFile = `cypress/fixtures/file_example_XLSX_50.xlsx`
+
+    cy.get('input[type="file"].border').selectFile(xlsxFile)
+  })
+
+  context('when the XLSX file is uploaded', () => {
+    const xlsxFile = `cypress/fixtures/file_example_XLSX_50.xlsx`
 
     beforeEach(() => {
-      cy.fixture(xlsxFileName).as('testFile')
+      cy.get('input[type="file"].border').selectFile(xlsxFile)
     })
 
-    it('xlsx file upload', () => {
-      cy.get('span[role=button]').selectFile('@testFile', {
-        action: 'drag-drop',
-      })
-      cy.wait(10_000)
-      cy.get('p').contains(xlsxFileName)
+    it('should generate output', () => {
+      cy.get('ul')
+    })
 
-      cy.get('input.w-full').type(xlsxFileName)
-      cy.get('button.rounded-md').click({ force: true }) // click doesn't work
-      cy.wait(1_000)
+    it('validate the parsing result', () => {
+      cy.get('ul').should('contain', 'root')
+      cy.get('ul').should('contain', 'Directory')
+      cy.get('ul').should('contain', 'Workbook')
+      cy.get('ul').should('contain', 'Props')
     })
   })
 })
