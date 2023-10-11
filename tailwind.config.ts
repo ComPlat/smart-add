@@ -4,7 +4,13 @@ const config: Config = {
   content: ['./src/**/*.{html,js,ts,tsx}'],
   plugins: [],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        kit: {
+          primary: '#32A189',
+        },
+      },
+    },
   },
 }
 export default config
