@@ -3,7 +3,6 @@ import '@this-dot/cypress-indexeddb'
 describe('ZIP Upload', () => {
   beforeEach(() => {
     cy.visit('/')
-    cy.wait(5_000)
   })
 
   afterEach(() => {
@@ -18,7 +17,6 @@ describe('ZIP Upload', () => {
       cy.get('span[role=button]').selectFile(zipFile, {
         action: 'drag-drop',
       })
-      cy.wait(5_000)
       cy.get('p').should('contain', '2023_SmartAdd.mol')
     })
   })
