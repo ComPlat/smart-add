@@ -70,6 +70,9 @@ devDependencies:
   cypress:
     specifier: 13.3.0
     version: 13.3.0
+  cypress-file-upload:
+    specifier: ^5.0.8
+    version: 5.0.8(cypress@13.3.0)
   dexie:
     specifier: 3.2.4
     version: 3.2.4
@@ -1444,6 +1447,15 @@ packages:
 
   /csstype@3.1.2:
     resolution: {integrity: sha512-I7K1Uu0MBPzaFKg4nI5Q7Vs2t+3gWWW648spaF+Rg7pI9ds18Ugn+lvg4SHczUdKlHI5LWBXyqfS8+DufyBsgQ==}
+
+  /cypress-file-upload@5.0.8(cypress@13.3.0):
+    resolution: {integrity: sha512-+8VzNabRk3zG6x8f8BWArF/xA/W0VK4IZNx3MV0jFWrJS/qKn8eHfa5nU73P9fOQAgwHFJx7zjg4lwOnljMO8g==}
+    engines: {node: '>=8.2.1'}
+    peerDependencies:
+      cypress: '>3.0.0'
+    dependencies:
+      cypress: 13.3.0
+    dev: true
 
   /cypress@13.3.0:
     resolution: {integrity: sha512-mpI8qcTwLGiA4zEQvTC/U1xGUezVV4V8HQCOYjlEOrVmU1etVvxOjkCXHGwrlYdZU/EPmUiWfsO3yt1o+Q2bgw==}

@@ -63,12 +63,12 @@ const ParseXlsx = () => {
         >
           Parse XLSX
         </button>
-        <input
+        {/* <input
           accept={EXCEL_FILE}
           className="flex-1 rounded-md border border-black p-4 text-gray-700"
           onChange={handleFileUpload}
           type="file"
-        />
+        /> */}
       </div>
       {output && (
         <div>

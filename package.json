@@ -37,6 +37,7 @@
     "@typescript-eslint/parser": "6.5.0",
     "autoprefixer": "10.4.15",
     "cypress": "13.3.0",
+    "cypress-file-upload": "^5.0.8",
     "dexie": "3.2.4",
     "dexie-react-hooks": "1.1.6",
     "eslint": "8.48.0",
