@@ -120,6 +120,7 @@ const handleCustomRequest = async ({
     }
   } else {
     onProgress?.({ percent: 50 })
+    console.log(file)
     filesDB.files
       .add({
         file,
