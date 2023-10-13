@@ -31,6 +31,7 @@ describe('XLSX Upload and Parsing', () => {
           value: `./${filePath}`,
         })
 
+        // FIXME: file now has the webkitRelativePath here, but not in production code if we run this.
         cy.get('input[type="file"]').attachFile({
           // encoding: 'utf-8',
           file,
