@@ -71,7 +71,7 @@ devDependencies:
     specifier: 13.3.0
     version: 13.3.0
   cypress-file-upload:
-    specifier: ^5.0.8
+    specifier: 5.0.8
     version: 5.0.8(cypress@13.3.0)
   dexie:
     specifier: 3.2.4
