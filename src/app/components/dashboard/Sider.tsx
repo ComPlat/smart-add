@@ -12,7 +12,7 @@ const Sider = () => {
   const [collapsed, setCollapsed] = useState(false)
 
   return (
-    <aside className={`${collapsed ? 'w-20' : 'w-64'} bg-white py-4 shadow-xl`}>
+    <aside className={`${collapsed ? 'w-20' : 'w-64'} bg-white drop-shadow-md`}>
       <MenuItem
         collapsed={collapsed}
         icon={<HomeFilled className="pl-8 text-kit-primary" />}
