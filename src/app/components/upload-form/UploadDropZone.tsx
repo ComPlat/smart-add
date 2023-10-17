@@ -2,13 +2,15 @@
 
 import { filesDB } from '@/database/db'
 import { InboxOutlined } from '@ant-design/icons'
-import { Upload, UploadProps, message } from 'antd'
+import { Progress, Upload, UploadProps, message } from 'antd'
 import { RcFile } from 'antd/es/upload'
 import JSZip from 'jszip'
 import mime from 'mime-types'
+import { useState } from 'react'
 import { v4 } from 'uuid'
 
 import styles from './UploadDropZone.module.css'
+
 interface UploadProgressEvent extends Partial<ProgressEvent> {
   percent?: number
 }
@@ -63,10 +65,18 @@ const uploadExtractedFiles = async (
     type: string
   }[],
   file: RcFile,
+  setProgress: (progress: number) => void,
+  // onProgress: ((event: UploadProgressEvent) => void) | undefined,
 ) => {
+  const totalFiles = extractedFiles.length
+  let uploadedFiles = 0
+
   for (const extractedFile of extractedFiles) {
     const { data, name, path } = extractedFile
-    if (name === '') continue
+    if (name === '') {
+      uploadedFiles++
+      continue
+    }
 
     const fileData = await data
     await filesDB.files.add({
@@ -75,6 +85,11 @@ const uploadExtractedFiles = async (
       path,
       uid: file.uid + '_' + v4(),
     })
+
+    uploadedFiles++
+    const percentageProgress = Math.round((uploadedFiles / totalFiles) * 100)
+    setProgress(percentageProgress)
+    // onProgress?.({ percent: percentageProgress })
   }
 }
 
@@ -82,44 +97,50 @@ const handleCustomRequest = async ({
   file,
   onProgress,
   onSuccess,
+  setProgress,
 }: {
   file: Blob | RcFile | string
   onProgress?: (event: UploadProgressEvent) => void
   onSuccess?: (body: File, xhr?: XMLHttpRequest) => void
+  setProgress: (progress: number) => void
 }) => {
-  // FIXME: More sensible percentages needed, also we need to show progress on UI.
-  //        Otherwise some things feel buggy, for example adding "large" zip file causes FileList
-  //        to show nothing until it is processed completely.
-  onProgress?.({ percent: 1 })
+  // onProgress?.({ percent: 1 })
   if (typeof file === 'string')
     throw new TypeError('Uploaded file is a String!')
-  onProgress?.({ percent: 2 })
+  // onProgress?.({ percent: 2 })
   if (file instanceof Blob && !(file instanceof File)) {
     throw new TypeError('Uploaded file is a Blob, not a File!')
   }
-  onProgress?.({ percent: 3 })
+  // onProgress?.({ percent: 3 })
   if (!('uid' in file)) {
     throw new TypeError('Uploaded file is a File, not an RcFile!')
   }
-  onProgress?.({ percent: 4 })
+  // onProgress?.({ percent: 4 })
   if (!(typeof file.uid === 'string')) {
     throw new TypeError('Uploaded file has an uid that is not a string!')
   }
-  onProgress?.({ percent: 5 })
+  // onProgress?.({ percent: 5 })
 
   if (file.type === 'application/zip') {
-    onProgress?.({ percent: 6 })
+    // onProgress?.({ percent: 6 })
     try {
       const extractedFiles = await extractFilesFromZip(file as RcFile)
-      onProgress?.({ percent: 50 })
-      await uploadExtractedFiles(extractedFiles, file as RcFile)
-      onProgress?.({ percent: 100 })
+      // onProgress?.({ percent: 50 })
+      await uploadExtractedFiles(
+        extractedFiles,
+        file as RcFile,
+        setProgress,
+        // onProgress,
+      )
+      // onProgress?.({ percent: 100 })
+      setProgress(100)
       onSuccess?.(file)
     } catch (err) {
       console.error('Failed to extract and upload ZIP file:', err)
     }
   } else {
-    onProgress?.({ percent: 50 })
+    // onProgress?.({ percent: 50 })
+    setProgress(50)
     console.log(file)
     filesDB.files
       .add({
@@ -129,7 +150,8 @@ const handleCustomRequest = async ({
         uid: v4(),
       })
       .then(async () => {
-        onProgress?.({ percent: 100 })
+        // onProgress?.({ percent: 100 })
+        setProgress(100)
         onSuccess?.(file)
         return true
       })
@@ -141,36 +163,42 @@ const handleCustomRequest = async ({
   return true
 }
 
-const uploadProps: UploadProps = {
-  customRequest: handleCustomRequest,
-  directory: true,
-  listType: 'text',
-  multiple: true,
-  name: 'file',
-  onChange(info) {
-    const {
-      file: { name, status },
-    } = info
+const UploadDropZone = () => {
+  const [progress, setProgress] = useState<number>(0)
 
-    if (status === 'done') {
-      message.success(`${name} uploaded successfully.`)
-    } else if (status === 'error') {
-      message.error(`Upload of file ${name} failed.`)
-    }
-  },
-  showUploadList: false,
+  const uploadProps: UploadProps = {
+    customRequest: (options) =>
+      handleCustomRequest({ ...options, setProgress }),
+    directory: true,
+    listType: 'text',
+    multiple: true,
+    name: 'file',
+    onChange(info) {
+      const {
+        file: { name, status },
+      } = info
+
+      if (status === 'done') {
+        message.success(`${name} uploaded successfully.`)
+      } else if (status === 'error') {
+        message.error(`Upload of file ${name} failed.`)
+      }
+      setProgress
+    },
+    showUploadList: false,
+  }
+
+  return (
+    <div className={styles['upload-wrapper']}>
+      <Upload.Dragger {...uploadProps} openFileDialogOnClick={false}>
+        <InboxOutlined className="text-6xl text-blue-500" />
+        <p className="text-lg">Drag file to this area to upload</p>
+        <p className="mt-2 text-sm text-neutral-400">
+          Support for single, bulk or zip archive upload.
+        </p>
+      </Upload.Dragger>
+      <Progress percent={progress} />
+    </div>
+  )
 }
-
-const UploadDropZone = () => (
-  <div className={styles['upload-wrapper']}>
-    <Upload.Dragger {...uploadProps} openFileDialogOnClick={false}>
-      <InboxOutlined className="text-6xl text-blue-500" />
-      <p className="text-lg">Drag file to this area to upload</p>
-      <p className="mt-2 text-sm text-neutral-400">
-        Support for single, bulk or zip archive upload.
-      </p>
-    </Upload.Dragger>
-  </div>
-)
-
 export { UploadDropZone, handleCustomRequest }
