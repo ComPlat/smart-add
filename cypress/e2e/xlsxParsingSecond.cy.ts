@@ -13,34 +13,17 @@ describe('XLSX Upload and Parsing', () => {
   it('should upload xlsx file', () => {
     const filePath = 'file_example_XLSX_50.xlsx'
 
-    cy.fixture(filePath, 'binary')
-      .then(Cypress.Blob.binaryStringToBlob)
-      // .then((blob) => {
-      //   const file = new File([blob], 'testPicture.png', { type: 'image/png' })
-      //   Object.defineProperty(file, 'webkitRelativePath', {
-      //     value: 'images/2017/01/testPicture.png',
-      //   })
-      // })
-      .then((fileContent) => {
-        // const blob = Cypress.Blob.base64StringToBlob(fileContent)
-        const file = new File([fileContent], filePath, {
-          type: 'image/png',
-        })
-        Object.defineProperty(file, 'webkitRelativePath', {
-          value: `./${filePath}`,
-        })
-
-        // FIXME: file now has the webkitRelativePath here, but not in production code if we run this.
-        cy.get('input[type="file"]').attachFile({
-          // encoding: 'utf-8',
-          file,
-          filePath, // FIXME: Only fills attribute name of File object, not webkitRelativePath (which remains empty string)
-          lastModified: new Date().getTime(),
-        })
-      })
-
-    // HINT: Component and upload are mounting db, so this will not work before.
-    cy.openIndexedDb('filesDatabase')
+    cy.get('span[role="button"]')
+      .selectFile(
+        {
+          contents: `cypress/fixtures/${filePath}`,
+        },
+        {
+          action: 'drag-drop',
+          force: true,
+        },
+      )
+      .openIndexedDb('filesDatabase')
       .createObjectStore('files')
       .entries()
       .should(($files) => {
@@ -50,13 +33,24 @@ describe('XLSX Upload and Parsing', () => {
         expect($files[0]).haveOwnProperty('path')
       })
       .should(($files) => {
-        expect($files[0].path).to.eq(filePath)
+        // HINT: This is not intended, but neither Cypress
+        //       nor we are able to mock webkitRelativePath correctly.
+        expect($files[0].path).eq('')
       })
-
-    // cy.get('input[type="text"]').type('file_example_XLSX_50.xlsx')
-    // cy.get('button.rounded-md').click()
-
-    // cy.get('ul')
+      .then(($files) => {
+        // HINT: So we just mock / fix it in IndexedDB.
+        // Wasted hours: 40
+        const file = $files[0]
+        file.path = filePath
+        cy.openIndexedDb('filesDatabase')
+          .createObjectStore('files')
+          .updateItem(file)
+      })
+      .get('input[type="text"]')
+      .type(filePath)
+      .get('button.rounded-md')
+      .click()
+      .get('ul')
   })
 
   // it('should upload xlsx file', () => {
