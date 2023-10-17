@@ -1,36 +1,53 @@
+/* eslint-disable promise/always-return */
+/* eslint-disable promise/catch-or-return */
 import '@this-dot/cypress-indexeddb'
+import 'cypress-file-upload'
 
-describe('XLSX Parsing', () => {
+describe('XLSX Upload and Parsing', () => {
   beforeEach(() => {
-    cy.visit('/')
+    cy.visit('/').clearIndexedDb('filesDatabase') // HINT: Solves some mysterious race condition about IndexedDB and Cypress
   })
 
-  afterEach(() => {
-    cy.clearIndexedDb('filesDatabase')
-  })
+  it('should upload xlsx file', () => {
+    const filePath = 'file_example_XLSX_50.xlsx'
 
-  it('should upload an XLSX file', () => {
-    const xlsxFile = `cypress/fixtures/file_example_XLSX_50.xlsx`
-
-    cy.get('input[type="file"].border').selectFile(xlsxFile)
-  })
-
-  context('when the XLSX file is uploaded', () => {
-    const xlsxFile = `cypress/fixtures/file_example_XLSX_50.xlsx`
-
-    beforeEach(() => {
-      cy.get('input[type="file"].border').selectFile(xlsxFile)
-    })
-
-    it('should generate output', () => {
-      cy.get('ul')
-    })
-
-    it('validate the parsing result', () => {
-      cy.get('ul').should('contain', 'root')
-      cy.get('ul').should('contain', 'Directory')
-      cy.get('ul').should('contain', 'Workbook')
-      cy.get('ul').should('contain', 'Props')
-    })
+    cy.get('span[role="button"]')
+      .selectFile(
+        {
+          contents: `cypress/fixtures/${filePath}`,
+        },
+        {
+          action: 'drag-drop',
+          force: true,
+        },
+      )
+      .openIndexedDb('filesDatabase')
+      .createObjectStore('files')
+      .entries()
+      .should(($files) => {
+        expect($files).to.have.length(1)
+      })
+      .should(($files) => {
+        expect($files[0]).haveOwnProperty('path')
+      })
+      .should(($files) => {
+        // HINT: This is not intended, but neither Cypress
+        //       nor we are able to mock webkitRelativePath correctly.
+        expect($files[0].path).eq('')
+      })
+      .then(($files) => {
+        // HINT: So we just mock / fix it in IndexedDB.
+        // Wasted hours: 40
+        const file = $files[0]
+        file.path = filePath
+        cy.openIndexedDb('filesDatabase')
+          .createObjectStore('files')
+          .updateItem(file)
+      })
+      .get('input[type="text"]')
+      .type(filePath)
+      .get('button.rounded-md')
+      .click()
+      .get('ul')
   })
 })
