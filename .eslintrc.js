@@ -14,4 +14,19 @@ module.exports = {
     'prettier/prettier': ['error', { endOfLine: 'auto' }],
     'tailwindcss/classnames-order': 'error',
   },
+  // HINT: Disabled the following rules as they can't be caught or returned in Cypress
+  //       environment and cause false positives
+  overrides: [
+    {
+      extends: ['plugin:cypress/recommended'],
+      files: ['cypress.config.ts', 'cypress/**/*.ts', 'cypress/**/*.js'],
+      parserOptions: {
+        project: ['cypress/tsconfig.json'],
+      },
+      rules: {
+        'promise/always-return': 'off',
+        'promise/catch-or-return': 'off',
+      },
+    },
+  ],
 }

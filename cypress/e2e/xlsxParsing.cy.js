@@ -1,5 +1,3 @@
-/* eslint-disable promise/always-return */
-/* eslint-disable promise/catch-or-return */
 import '@this-dot/cypress-indexeddb'
 import 'cypress-file-upload'
 
