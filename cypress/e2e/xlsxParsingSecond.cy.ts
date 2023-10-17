@@ -5,7 +5,6 @@ import 'cypress-file-upload'
 
 describe('XLSX Upload and Parsing', () => {
   beforeEach(() => {
-    // HINT: Solves some mysterious race condition about IndexedDB and Cypress
     cy.visit('/').clearIndexedDb('filesDatabase') // HINT: Solves some mysterious race condition about IndexedDB and Cypress
 
     // cy.wait(5_000)
