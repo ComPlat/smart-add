@@ -11,10 +11,6 @@ import { v4 } from 'uuid'
 
 import styles from './UploadDropZone.module.css'
 
-interface UploadProgressEvent extends Partial<ProgressEvent> {
-  percent?: number
-}
-
 const getFilenameAndExtension = (zipObject: {
   name: string
 }): [extension: string, fileName: string] => {
@@ -66,7 +62,6 @@ const uploadExtractedFiles = async (
   }[],
   file: RcFile,
   setProgress: (progress: number) => void,
-  // onProgress: ((event: UploadProgressEvent) => void) | undefined,
 ) => {
   const totalFiles = extractedFiles.length
   let uploadedFiles = 0
@@ -89,57 +84,40 @@ const uploadExtractedFiles = async (
     uploadedFiles++
     const percentageProgress = Math.round((uploadedFiles / totalFiles) * 100)
     setProgress(percentageProgress)
-    // onProgress?.({ percent: percentageProgress })
   }
 }
 
 const handleCustomRequest = async ({
   file,
-  onProgress,
   onSuccess,
   setProgress,
 }: {
   file: Blob | RcFile | string
-  onProgress?: (event: UploadProgressEvent) => void
   onSuccess?: (body: File, xhr?: XMLHttpRequest) => void
   setProgress: (progress: number) => void
 }) => {
-  // onProgress?.({ percent: 1 })
   if (typeof file === 'string')
     throw new TypeError('Uploaded file is a String!')
-  // onProgress?.({ percent: 2 })
   if (file instanceof Blob && !(file instanceof File)) {
     throw new TypeError('Uploaded file is a Blob, not a File!')
   }
-  // onProgress?.({ percent: 3 })
   if (!('uid' in file)) {
     throw new TypeError('Uploaded file is a File, not an RcFile!')
   }
-  // onProgress?.({ percent: 4 })
   if (!(typeof file.uid === 'string')) {
     throw new TypeError('Uploaded file has an uid that is not a string!')
   }
-  // onProgress?.({ percent: 5 })
 
   if (file.type === 'application/zip') {
-    // onProgress?.({ percent: 6 })
     try {
       const extractedFiles = await extractFilesFromZip(file as RcFile)
-      // onProgress?.({ percent: 50 })
-      await uploadExtractedFiles(
-        extractedFiles,
-        file as RcFile,
-        setProgress,
-        // onProgress,
-      )
-      // onProgress?.({ percent: 100 })
+      await uploadExtractedFiles(extractedFiles, file as RcFile, setProgress)
       setProgress(100)
       onSuccess?.(file)
     } catch (err) {
       console.error('Failed to extract and upload ZIP file:', err)
     }
   } else {
-    // onProgress?.({ percent: 50 })
     setProgress(50)
     filesDB.files
       .add({
@@ -149,7 +127,6 @@ const handleCustomRequest = async ({
         uid: v4(),
       })
       .then(async () => {
-        // onProgress?.({ percent: 100 })
         setProgress(100)
         onSuccess?.(file)
         return true
