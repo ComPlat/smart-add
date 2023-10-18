@@ -35,7 +35,7 @@ describe('XLSX Upload and Parsing', () => {
       })
       .then(($files) => {
         // HINT: So we just mock / fix it in IndexedDB.
-        // Wasted hours: 40
+        //       Wasted hours: 40
         const file = $files[0]
         file.path = filePath
         cy.openIndexedDb('filesDatabase')
@@ -46,6 +46,17 @@ describe('XLSX Upload and Parsing', () => {
       .type(filePath)
       .get('button.rounded-md')
       .click()
-      .get('ul')
+      .get('ul > li')
+      .find('li:first > label > span')
+      .should('contain', 'Directory')
+      .get('ul > li')
+      .find('li:first > span > span')
+      .should('contain', '25 keys')
+      .get('ul > li')
+      .find('li:last')
+      .should('contain', 'bookType')
+      .get('ul > li')
+      .find('li:last > span')
+      .should('contain', '"xlsx"')
   })
 })
