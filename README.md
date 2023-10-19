@@ -13,7 +13,7 @@ https://www.figma.com/file/mpZ5QeOaOpkj3AaPeoKaus/Wireframes?type=design&node-id
 ### Used dependencies
 
 - Node.js, version 18.17.1 (LTS)
-- pnpm, version 8.7.3
+- pnpm, version 8.8.0
 
 ## Production
 
