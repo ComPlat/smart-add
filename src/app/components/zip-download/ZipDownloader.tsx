@@ -1,26 +1,24 @@
 'use client'
 
 import { ExtendedFile, filesDB } from '@/database/db'
-import { Button } from 'antd'
+import { Button, message } from 'antd'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { saveAs } from 'file-saver'
 import JSZip from 'jszip'
 
-interface TreeStructure {
-  [key: string]: TreeStructure | string
+interface FileTree {
+  [key: string]: Blob | FileTree
 }
 
 const FileDownloader = () => {
   const files = useLiveQuery(() => filesDB.files.toArray()) || []
 
-  // TODO: Tree structure needs to include file objects.
-  //       Extracted files cannot be opened as of now.
-  const constructTree = (files: ExtendedFile[]): TreeStructure => {
-    const fileTree: TreeStructure = {}
+  const constructTree = (files: ExtendedFile[]) => {
+    const fileTree: FileTree = {}
 
     files.forEach((file) => {
       const pathComponents: string[] = file.path.split('/')
-      let currentLevel: TreeStructure = fileTree
+      let currentLevel = fileTree
 
       pathComponents.forEach((component, index) => {
         if (!currentLevel[component]) {
@@ -28,43 +26,72 @@ const FileDownloader = () => {
         }
 
         if (index === pathComponents.length - 1) {
-          currentLevel[component] = file.name
+          currentLevel[component] = file.file
         } else {
-          currentLevel = currentLevel[component] as TreeStructure
+          currentLevel = currentLevel[component] as FileTree
         }
       })
     })
 
-    console.log(fileTree)
     return fileTree
   }
 
   const handleClick = async () => {
-    const zip = new JSZip()
-    const fileTree = constructTree(files)
-
-    async function addFilesToZip(tree: TreeStructure, path: string) {
-      for (const [key, value] of Object.entries(tree)) {
-        if (typeof value === 'string') {
-          const fileContent = JSON.stringify(value)
-          const blob = new Blob([fileContent], { type: 'text/plain' })
-          const file = new File([blob], `${path}/${key}`)
-          zip.file(`${path}/${key}`, file)
-        } else {
-          await addFilesToZip(value, `${path}/${key}`)
-        }
-      }
+    if (files.length === 0) {
+      message.error('No files to download!')
+      return
     }
 
-    await addFilesToZip(fileTree, '')
+    try {
+      const zip = new JSZip()
+      const fileTree = constructTree(files)
 
-    const topmostFolder = Object.keys(fileTree)[0]
-    const blob = await zip.generateAsync({ type: 'blob' })
+      const addFilesToZip = async (tree: FileTree, path: string) => {
+        for (const [key, value] of Object.entries(tree)) {
+          if (value instanceof Blob) {
+            zip.file(`${path}/${key}`, value)
+          } else {
+            await addFilesToZip(value, `${path}/${key}`)
+          }
+        }
+      }
 
-    saveAs(blob, `${topmostFolder}.zip`)
+      await addFilesToZip(fileTree, '')
+
+      const topmostFolder = Object.keys(fileTree)[0]
+      const blob = await zip.generateAsync({ type: 'blob' })
+
+      saveAs(blob, `${topmostFolder}.zip`)
+      message.success(`${topmostFolder}.zip downloaded successfully`)
+    } catch (error) {
+      console.error(error)
+    }
   }
 
-  return <Button onClick={handleClick}>Download as Zip</Button>
+  const handleClear = () => {
+    filesDB.files.clear()
+    window.location.reload()
+  }
+
+  return (
+    <div className="flex">
+      <Button
+        className="mx-2 w-1/2"
+        disabled={files.length === 0 ? true : false}
+        onClick={handleClick}
+      >
+        Download as Zip
+      </Button>
+      <Button
+        className="mx-2 w-1/2"
+        danger
+        disabled={files.length === 0 ? true : false}
+        onClick={handleClear}
+      >
+        Clear DB
+      </Button>
+    </div>
+  )
 }
 
 export { FileDownloader }
