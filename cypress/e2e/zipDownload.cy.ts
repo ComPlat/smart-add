@@ -8,6 +8,11 @@ describe('ZIP download', () => {
   describe('uploading ZIP file', () => {
     const zipFileName = 'test-zip.zip'
     const zipFile = `cypress/fixtures/${zipFileName}`
+
+    after(() => {
+      cy.exec(`rm -f cypress/downloads/${zipFileName}`)
+    })
+
     it('uploads and downloads a ZIP file', () => {
       cy.get('span[role=button]')
         .selectFile(zipFile, {
@@ -24,7 +29,6 @@ describe('ZIP download', () => {
         .then((fileContent) => {
           expect(fileContent).to.exist
         })
-      cy.exec(`rm -f cypress/downloads/${zipFileName}`)
     })
   })
 })

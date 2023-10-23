@@ -13,28 +13,24 @@ interface FileTree {
 const FileDownloader = () => {
   const files = useLiveQuery(() => filesDB.files.toArray()) || []
 
-  const constructTree = (files: ExtendedFile[]) => {
-    const fileTree: FileTree = {}
-
-    files.forEach((file) => {
+  const constructTree = (files: ExtendedFile[]): FileTree =>
+    files.reduce((fileTree, file) => {
       const pathComponents: string[] = file.path.split('/')
-      let currentLevel = fileTree
+      pathComponents.reduce(
+        (level: FileTree, component: string, index: number) => {
+          if (!level[component]) {
+            level[component] = {}
+          }
+          if (index === pathComponents.length - 1) {
+            level[component] = file.file
+          }
+          return level[component] as FileTree
+        },
+        fileTree,
+      )
 
-      pathComponents.forEach((component, index) => {
-        if (!currentLevel[component]) {
-          currentLevel[component] = {}
-        }
-
-        if (index === pathComponents.length - 1) {
-          currentLevel[component] = file.file
-        } else {
-          currentLevel = currentLevel[component] as FileTree
-        }
-      })
-    })
-
-    return fileTree
-  }
+      return fileTree
+    }, {} as FileTree)
 
   const handleClick = async () => {
     if (files.length === 0) {
@@ -46,14 +42,21 @@ const FileDownloader = () => {
       const zip = new JSZip()
       const fileTree = constructTree(files)
 
-      const addFilesToZip = async (tree: FileTree, path: string) => {
-        for (const [key, value] of Object.entries(tree)) {
+      const addFilesToZip = async (
+        tree: FileTree,
+        path: string,
+      ): Promise<void> => {
+        const promises: Promise<void>[] = Object.keys(tree).map(async (key) => {
+          const value = tree[key]
+
           if (value instanceof Blob) {
             zip.file(`${path}/${key}`, value)
           } else {
             await addFilesToZip(value, `${path}/${key}`)
           }
-        }
+        })
+
+        await Promise.all(promises)
       }
 
       await addFilesToZip(fileTree, '')
