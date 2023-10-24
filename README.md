@@ -78,7 +78,7 @@ to automatically fix problems.
 
 Accepted spreadsheet file extensions: <https://docs.sheetjs.com/docs/miscellany/formats>
 
-Elements can be nested, e.g. 2 samples with 3 analyses in 1 reaction.
+Elements can be nested, e.g. 2 samples with 3 analyses in 1 reaction. For each element an own sheet should exist.
 
 ### Reaction
 
