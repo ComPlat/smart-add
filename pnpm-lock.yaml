@@ -11,6 +11,9 @@ dependencies:
   antd:
     specifier: 5.8.6
     version: 5.8.6(react-dom@18.2.0)(react@18.2.0)
+  file-saver:
+    specifier: 2.0.5
+    version: 2.0.5
   jszip:
     specifier: 3.10.1
     version: 3.10.1
@@ -43,6 +46,9 @@ devDependencies:
   '@this-dot/cypress-indexeddb':
     specifier: 2.0.1
     version: 2.0.1(cypress@13.3.0)
+  '@types/file-saver':
+    specifier: 2.0.6
+    version: 2.0.6
   '@types/mime-types':
     specifier: 2.1.1
     version: 2.1.1
@@ -582,6 +588,10 @@ packages:
 
   /@types/base16@1.0.3:
     resolution: {integrity: sha512-rjrIWFr73ylMjEQuU1OQjkoIDcLR2/dIwiopZe2S5ASo5eoSYBxaAnGtwTUhWc5oWefQXxHRFmGDelYR5yMcgA==}
+    dev: true
+
+  /@types/file-saver@2.0.6:
+    resolution: {integrity: sha512-Mw671DVqoMHbjw0w4v2iiOro01dlT/WhWp5uwecBa0Wg8c+bcZOjgF1ndBnlaxhtvFCgTRBtsGivSVhrK/vnag==}
     dev: true
 
   /@types/json-schema@7.0.12:
@@ -2283,6 +2293,10 @@ packages:
     dependencies:
       flat-cache: 3.1.0
     dev: true
+
+  /file-saver@2.0.5:
+    resolution: {integrity: sha512-P9bmyZ3h/PRG+Nzga+rbdI4OEpNDzAVyy74uVO9ATgzLK6VtAsYybF/+TOCvrc0MO793d6+42lLyZTw7/ArVzA==}
+    dev: false
 
   /fill-range@7.0.1:
     resolution: {integrity: sha512-qOo9F+dMUmC2Lcb4BbVvnKJxTPjCm+RRpe4gDuGrzkL7mEVl/djYSu2OdQ2Pa302N4oqkSg9ir6jaLWJ2USVpQ==}

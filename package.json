@@ -16,6 +16,7 @@
   "dependencies": {
     "@ant-design/icons": "5.2.6",
     "antd": "5.8.6",
+    "file-saver": "2.0.5",
     "jszip": "3.10.1",
     "mime-types": "2.1.35",
     "next": "13.5.4",
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "@this-dot/cypress-indexeddb": "2.0.1",
+    "@types/file-saver": "2.0.6",
     "@types/mime-types": "2.1.1",
     "@types/node": "20.5.7",
     "@types/react": "18.2.21",
