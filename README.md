@@ -77,6 +77,7 @@ to automatically fix problems.
 ## Parsing spreadsheets
 
 Accepted spreadsheet file extensions: <https://docs.sheetjs.com/docs/miscellany/formats>
+
 Elements can be nested, e.g. 2 samples with 3 analyses in 1 reaction.
 
 ### Reaction
