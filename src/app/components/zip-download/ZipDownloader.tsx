@@ -45,18 +45,20 @@ const FileDownloader = () => {
       const addFilesToZip = async (
         tree: FileTree,
         path: string,
-      ): Promise<void> => {
-        const promises: Promise<void>[] = Object.keys(tree).map(async (key) => {
-          const value = tree[key]
+      ): Promise<JSZip[]> => {
+        const promises: Promise<JSZip[]>[] = Object.keys(tree).map(
+          async (key) => {
+            const value = tree[key]
 
-          if (value instanceof Blob) {
-            zip.file(`${path}/${key}`, value)
-          } else {
-            await addFilesToZip(value, `${path}/${key}`)
-          }
-        })
+            return value instanceof Blob
+              ? [zip.file(`${path}/${key}`, value)]
+              : await addFilesToZip(value, `${path}/${key}`)
+          },
+        )
 
-        await Promise.all(promises)
+        const results = await Promise.all(promises)
+
+        return results.flat()
       }
 
       await addFilesToZip(fileTree, '')
