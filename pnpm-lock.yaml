@@ -26,6 +26,9 @@ dependencies:
   react:
     specifier: 18.2.0
     version: 18.2.0
+  react-complex-tree:
+    specifier: 2.2.3
+    version: 2.2.3(react@18.2.0)
   react-dom:
     specifier: 18.2.0
     version: 18.2.0(react@18.2.0)
@@ -4178,6 +4181,14 @@ packages:
       csstype: 3.1.2
       lodash.curry: 4.1.1
     dev: true
+
+  /react-complex-tree@2.2.3(react@18.2.0):
+    resolution: {integrity: sha512-hb4haCvf+Z9YyGibRHPoiw8IJ7QQMZDjQlEIJQRPGcF4tNzN39IrwTTOdysvh4mPw/xqyu5lt9VkleV+5Oc4sg==}
+    peerDependencies:
+      react: '>=16.0.0'
+    dependencies:
+      react: 18.2.0
+    dev: false
 
   /react-dom@18.2.0(react@18.2.0):
     resolution: {integrity: sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g==}
