@@ -79,9 +79,9 @@ const constructTree = (files: ExtendedFile[]): Record<string, any> => {
     return fileTree
   }
 
-  const exampleOutput = convertToTree(files)
+  const outputTree = convertToTree(files)
 
-  return exampleOutput
+  return outputTree
 }
 
 const TreeView = () => {
@@ -94,25 +94,23 @@ const TreeView = () => {
   const fileTree = constructTree(files)
 
   return (
-    <>
-      <p>Tree View:</p>
-      <UncontrolledTreeEnvironment
-        dataProvider={
-          new StaticTreeDataProvider(fileTree, (item, data) => ({
-            ...item,
-            data,
-          }))
-        }
-        canDragAndDrop
-        canDropOnFolder
-        canDropOnNonFolder
-        canReorderItems
-        getItemTitle={(item) => item.data}
-        viewState={{}}
-      >
-        <Tree rootItem="root" treeId="tree-1" treeLabel="Tree Example" />
-      </UncontrolledTreeEnvironment>
-    </>
+    <UncontrolledTreeEnvironment
+      dataProvider={
+        new StaticTreeDataProvider(fileTree, (item, data) => ({
+          ...item,
+          data,
+        }))
+      }
+      canDragAndDrop
+      canDropOnFolder
+      canDropOnNonFolder
+      canReorderItems
+      getItemTitle={(item) => item.data}
+      key={files.length}
+      viewState={{}}
+    >
+      <Tree rootItem="root" treeId="tree-1" treeLabel="Tree Example" />
+    </UncontrolledTreeEnvironment>
   )
 }
 

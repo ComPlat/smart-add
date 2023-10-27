@@ -75,28 +75,30 @@ const uploadExtractedFiles = async (
   const totalFiles = extractedFiles.length
   let uploadedFiles = 0
 
-  for (const extractedFile of extractedFiles) {
-    const { data, name, path } = extractedFile
-    if (name === '') {
+  await Promise.all(
+    extractedFiles.map(async (extractedFile) => {
+      const { data, name, path } = extractedFile
+      if (name === '') {
+        uploadedFiles++
+        return
+      }
+
+      const fileData = await data
+      await filesDB.files.add({
+        extension: name.split('.').slice(0, -1)[0],
+        file: fileData,
+        fullPath: path.join('/') + '/' + name,
+        name,
+        parentUid: file.uid.split('.')[0],
+        path,
+        uid: file.uid + '_' + v4(),
+      })
+
       uploadedFiles++
-      continue
-    }
-
-    const fileData = await data
-    await filesDB.files.add({
-      extension: name.split('.').slice(0, -1)[0],
-      file: fileData,
-      fullPath: path.join('/') + '/' + name,
-      name,
-      parentUid: file.uid.split('.')[0],
-      path,
-      uid: file.uid + '_' + v4(),
-    })
-
-    uploadedFiles++
-    const percentageProgress = Math.round((uploadedFiles / totalFiles) * 100)
-    setProgress(percentageProgress)
-  }
+      const percentageProgress = Math.round((uploadedFiles / totalFiles) * 100)
+      setProgress(percentageProgress)
+    }),
+  )
 }
 
 const handleCustomRequest = async ({
@@ -122,6 +124,7 @@ const handleCustomRequest = async ({
 
   if (file.type === 'application/zip') {
     try {
+      setProgress(0)
       const extractedFiles = await extractFilesFromZip(file as RcFile)
       await uploadExtractedFiles(extractedFiles, file as RcFile, setProgress)
       setProgress(100)
