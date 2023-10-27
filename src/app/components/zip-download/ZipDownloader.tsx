@@ -15,7 +15,7 @@ const FileDownloader = () => {
 
   const constructTree = (files: ExtendedFile[]): FileTree =>
     files.reduce((fileTree, file) => {
-      const pathComponents: string[] = file.path.split('/')
+      const pathComponents: string[] = file.fullPath.split('/')
       pathComponents.reduce(
         (level: FileTree, component: string, index: number) => {
           if (!level[component]) {

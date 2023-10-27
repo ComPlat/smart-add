@@ -29,8 +29,11 @@ const extractFilesFromZip = async (file: RcFile) => {
 
   const extractedFiles: {
     data: Promise<File>
+    extension: string
+    fullPath: string
     name: string
-    path: string
+    parentUid: string
+    path: string[]
     type: string
   }[] = []
 
@@ -39,13 +42,17 @@ const extractFilesFromZip = async (file: RcFile) => {
 
     const [extension, fileName] = getFilenameAndExtension(zipObject)
     const fileType = mime.lookup(extension ?? '') || 'application/octet-stream'
+    const path = relativePath.split('/').slice(0, -1)
 
     extractedFiles.push({
       data: zipObject
         .async('blob')
         .then((blob) => new File([blob], fileName, { type: fileType })),
+      extension,
+      fullPath: path.join('/') + '/' + fileName,
       name: fileName,
-      path: relativePath,
+      parentUid: file.uid,
+      path,
       type: fileType,
     })
   })
@@ -56,8 +63,10 @@ const extractFilesFromZip = async (file: RcFile) => {
 const uploadExtractedFiles = async (
   extractedFiles: {
     data: Promise<File>
+    extension: string
     name: string
-    path: string
+    parentUid: string
+    path: string[]
     type: string
   }[],
   file: RcFile,
@@ -75,8 +84,11 @@ const uploadExtractedFiles = async (
 
     const fileData = await data
     await filesDB.files.add({
+      extension: name.split('.').slice(0, -1)[0],
       file: fileData,
+      fullPath: path.join('/') + '/' + name,
       name,
+      parentUid: file.uid.split('.')[0],
       path,
       uid: file.uid + '_' + v4(),
     })
@@ -118,12 +130,17 @@ const handleCustomRequest = async ({
       console.error('Failed to extract and upload ZIP file:', err)
     }
   } else {
+    const path = file.webkitRelativePath.split('/').slice(0, -1)
+
     setProgress(50)
     filesDB.files
       .add({
+        extension: file.webkitRelativePath.split('.').slice(-1)[0],
         file,
+        fullPath: file.webkitRelativePath,
         name: file.name,
-        path: file.webkitRelativePath,
+        parentUid: file.uid.split('_')[0],
+        path,
         uid: v4(),
       })
       .then(async () => {

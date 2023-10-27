@@ -10,34 +10,78 @@ import {
 } from 'react-complex-tree'
 import 'react-complex-tree/lib/style-modern.css'
 
-// TODO: TreeView needs to be able to group files in correct folders
 const constructTree = (files: ExtendedFile[]): Record<string, any> => {
-  const fileTree: Record<string, any> = {}
-
-  files.forEach((file, index) => {
-    const dataIndex = `child${index + 1}`
-    fileTree[dataIndex] = {
-      children: [],
-      data: file.name,
-      fileData: file,
-      index: dataIndex,
-    }
-  })
-
-  fileTree.root = {
-    children: Object.keys(fileTree).filter((key) => key !== 'root'),
-    data: 'Root item',
-    index: 'root',
-    isFolder: true,
+  interface FileNode {
+    canMove: boolean
+    children?: string[]
+    data?: string
+    index: string
+    isFolder: boolean
   }
 
-  return fileTree
+  const convertToTree = (
+    inputFiles: ExtendedFile[],
+  ): Record<string, FileNode> => {
+    const fileTree: Record<string, FileNode> = {
+      // HINT: Root is ALWAYS needed.
+      root: {
+        canMove: false,
+        children: [],
+        data: 'Root item',
+        index: 'root',
+        isFolder: true,
+      },
+    }
+
+    const addFoldersToTree = (path: string[], node: FileNode) => {
+      let currentPath = ''
+      path.forEach((folder) => {
+        const previousPath = currentPath
+        currentPath += `${folder}/`
+        // HINT: Go deeper into folder structure every iteration.
+
+        if (!fileTree[currentPath]) {
+          // HINT: Create create folders for file when they don't exist already
+          fileTree[currentPath] = {
+            canMove: false,
+            children: [],
+            data: folder,
+            index: currentPath,
+            isFolder: true,
+          }
+          // HINT: make folder for file child of parent folder
+          fileTree[previousPath ? previousPath : 'root'].children?.push(
+            currentPath,
+          )
+        }
+      })
+
+      // HINT: make file child of folder for file
+      fileTree[currentPath].children?.push(node.index)
+    }
+
+    inputFiles.forEach((inputFile) => {
+      const { fullPath, name, path } = inputFile
+      const node: FileNode = {
+        canMove: false,
+        data: name,
+        index: fullPath,
+        isFolder: false,
+      }
+      addFoldersToTree(path, node)
+      fileTree[node.index] = node
+    })
+
+    return fileTree
+  }
+
+  const exampleOutput = convertToTree(files)
+
+  return exampleOutput
 }
 
 const TreeView = () => {
-  const files: ExtendedFile[] | undefined = useLiveQuery(() =>
-    filesDB.files.toArray(),
-  )
+  const files = useLiveQuery(() => filesDB.files.toArray(), [])
 
   if (!files) {
     return <div>Loading...</div>
@@ -55,6 +99,10 @@ const TreeView = () => {
             data,
           }))
         }
+        canDragAndDrop
+        canDropOnFolder
+        canDropOnNonFolder
+        canReorderItems
         getItemTitle={(item) => item.data}
         viewState={{}}
       >
