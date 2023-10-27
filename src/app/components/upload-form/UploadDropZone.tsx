@@ -1,105 +1,15 @@
 'use client'
 
 import { filesDB } from '@/database/db'
+import { extractFilesFromZip } from '@/helper/extractFilesFromZip'
+import { uploadExtractedFiles } from '@/helper/uploadExtractedFiles'
 import { InboxOutlined } from '@ant-design/icons'
 import { Progress, Upload, UploadProps, message } from 'antd'
 import { RcFile } from 'antd/es/upload'
-import JSZip from 'jszip'
-import mime from 'mime-types'
 import { useState } from 'react'
 import { v4 } from 'uuid'
 
 import styles from './UploadDropZone.module.css'
-
-const getFilenameAndExtension = (zipObject: {
-  name: string
-}): [extension: string, fileName: string] => {
-  const components = zipObject.name.split(/[\/.]/)
-  const [fileNameWithoutExtension, extension] = components.slice(-2)
-  const fileName = `${fileNameWithoutExtension}.${extension}`
-
-  return !fileName.startsWith('.') && !zipObject.name.startsWith('__')
-    ? [extension, fileName]
-    : ['', '']
-}
-
-const extractFilesFromZip = async (file: RcFile) => {
-  const zip = new JSZip()
-  const zipData = await zip.loadAsync(file)
-
-  const extractedFiles: {
-    data: Promise<File>
-    extension: string
-    fullPath: string
-    name: string
-    parentUid: string
-    path: string[]
-    type: string
-  }[] = []
-
-  zipData.forEach((relativePath, zipObject) => {
-    if (zipObject.dir) return
-
-    const [extension, fileName] = getFilenameAndExtension(zipObject)
-    const fileType = mime.lookup(extension ?? '') || 'application/octet-stream'
-    const path = relativePath.split('/').slice(0, -1)
-
-    extractedFiles.push({
-      data: zipObject
-        .async('blob')
-        .then((blob) => new File([blob], fileName, { type: fileType })),
-      extension,
-      fullPath: path.join('/') + '/' + fileName,
-      name: fileName,
-      parentUid: file.uid,
-      path,
-      type: fileType,
-    })
-  })
-
-  return extractedFiles
-}
-
-const uploadExtractedFiles = async (
-  extractedFiles: {
-    data: Promise<File>
-    extension: string
-    name: string
-    parentUid: string
-    path: string[]
-    type: string
-  }[],
-  file: RcFile,
-  setProgress: (progress: number) => void,
-) => {
-  const totalFiles = extractedFiles.length
-  let uploadedFiles = 0
-
-  await Promise.all(
-    extractedFiles.map(async (extractedFile) => {
-      const { data, name, path } = extractedFile
-      if (name === '') {
-        uploadedFiles++
-        return
-      }
-
-      const fileData = await data
-      await filesDB.files.add({
-        extension: name.split('.').slice(0, -1)[0],
-        file: fileData,
-        fullPath: path.join('/') + '/' + name,
-        name,
-        parentUid: file.uid.split('.')[0],
-        path,
-        uid: file.uid + '_' + v4(),
-      })
-
-      uploadedFiles++
-      const percentageProgress = Math.round((uploadedFiles / totalFiles) * 100)
-      setProgress(percentageProgress)
-    }),
-  )
-}
 
 const handleCustomRequest = async ({
   file,
