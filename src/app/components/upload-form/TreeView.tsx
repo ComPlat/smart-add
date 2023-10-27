@@ -34,30 +34,34 @@ const constructTree = (files: ExtendedFile[]): Record<string, any> => {
     }
 
     const addFoldersToTree = (path: string[], node: FileNode) => {
-      let currentPath = ''
-      path.forEach((folder) => {
-        const previousPath = currentPath
-        currentPath += `${folder}/`
-        // HINT: Go deeper into folder structure every iteration.
+      if (path.length === 0) {
+        fileTree['root'].children?.push(node.index)
+      } else {
+        let currentPath = ''
+        path.forEach((folder) => {
+          const previousPath = currentPath
+          currentPath += `${folder}/`
+          // HINT: Go deeper into folder structure every iteration.
 
-        if (!fileTree[currentPath]) {
-          // HINT: Create create folders for file when they don't exist already
-          fileTree[currentPath] = {
-            canMove: false,
-            children: [],
-            data: folder,
-            index: currentPath,
-            isFolder: true,
+          if (!fileTree[currentPath]) {
+            // HINT: Create create folders for file when they don't exist already
+            fileTree[currentPath] = {
+              canMove: false,
+              children: [],
+              data: folder,
+              index: currentPath,
+              isFolder: true,
+            }
+            // HINT: make folder for file child of parent folder
+            fileTree[previousPath ? previousPath : 'root'].children?.push(
+              currentPath,
+            )
           }
-          // HINT: make folder for file child of parent folder
-          fileTree[previousPath ? previousPath : 'root'].children?.push(
-            currentPath,
-          )
-        }
-      })
+        })
 
-      // HINT: make file child of folder for file
-      fileTree[currentPath].children?.push(node.index)
+        // HINT: make file child of folder for file
+        fileTree[currentPath].children?.push(node.index)
+      }
     }
 
     inputFiles.forEach((inputFile) => {

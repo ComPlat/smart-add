@@ -26,18 +26,18 @@ describe('XLSX Upload and Parsing', () => {
         expect($files).to.have.length(1)
       })
       .should(($files) => {
-        expect($files[0]).haveOwnProperty('path')
+        expect($files[0]).haveOwnProperty('fullPath')
       })
       .should(($files) => {
         // HINT: This is not intended, but neither Cypress
         //       nor we are able to mock webkitRelativePath correctly.
-        expect($files[0].path).eq('')
+        expect($files[0].fullPath).eq('')
       })
       .then(($files) => {
         // HINT: So we just mock / fix it in IndexedDB.
         //       Wasted hours: 40
         const file = $files[0]
-        file.path = filePath
+        file.fullPath = filePath
         cy.openIndexedDb('filesDatabase')
           .createObjectStore('files')
           .updateItem(file)

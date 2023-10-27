@@ -6,11 +6,11 @@ import { JSONTree } from 'react-json-tree'
 import * as XLSX from 'xlsx'
 
 const ParseXlsx = () => {
-  const [path, setPath] = useState('')
+  const [fullPath, setFullPath] = useState('')
   const [output, setOutput] = useState(null as XLSX.WorkBook | null)
 
   const handleFileChange = async () => {
-    const file: ExtendedFile | undefined = await filesDB.files.get({ path })
+    const file: ExtendedFile | undefined = await filesDB.files.get({ fullPath })
     if (!file) return
 
     const fileAsFile = new File([file.file], file.name, {
@@ -31,10 +31,10 @@ const ParseXlsx = () => {
     <div className="flex flex-col gap-4">
       <input
         className="w-full rounded-md border border-gray-300 p-4"
-        onChange={(e) => setPath(e.target.value)}
+        onChange={(e) => setFullPath(e.target.value)}
         placeholder="Enter file path"
         type="text"
-        value={path}
+        value={fullPath}
       />
       <div className="flex flex-row gap-4">
         <button
