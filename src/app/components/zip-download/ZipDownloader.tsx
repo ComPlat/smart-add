@@ -66,8 +66,8 @@ const FileDownloader = () => {
       const topmostFolder = Object.keys(fileTree)[0]
       const blob = await zip.generateAsync({ type: 'blob' })
 
-      saveAs(blob, `${topmostFolder}.zip`)
-      message.success(`${topmostFolder}.zip downloaded successfully`)
+      saveAs(blob, `${topmostFolder}`)
+      message.success(`${topmostFolder} downloaded successfully`)
     } catch (error) {
       console.error(error)
     }
