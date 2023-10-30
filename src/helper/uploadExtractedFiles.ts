@@ -17,6 +17,16 @@ const uploadExtractedFiles = async (
   const totalFiles = extractedFiles.length
   let uploadedFiles = 0
 
+  await filesDB.files.add({
+    extension: file.name.split('.').slice(0, -1)[0],
+    file,
+    fullPath: file.webkitRelativePath,
+    name: file.name,
+    parentUid: '',
+    path: [],
+    uid: file.uid,
+  })
+
   await Promise.all(
     extractedFiles.map(async (extractedFile) => {
       const { data, name, path } = extractedFile
