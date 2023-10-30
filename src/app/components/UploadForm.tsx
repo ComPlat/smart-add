@@ -1,8 +1,8 @@
 import { Fragment } from 'react'
 
+import { TreeView } from './tree-view/TreeView'
 import { FileList } from './upload-form/FileList'
 import ParseXlsx from './upload-form/ParseXlsx'
-import { TreeView } from './upload-form/TreeView'
 import { UploadDropZone } from './upload-form/UploadDropZone'
 import { FileDownloader } from './zip-download/ZipDownloader'
 
