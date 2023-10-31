@@ -18,7 +18,7 @@ const uploadExtractedFiles = async (
   let uploadedFiles = 0
 
   await filesDB.files.add({
-    extension: file.name.split('.').slice(0, -1)[0],
+    extension: file.name.split('.').slice(-1)[0],
     file,
     fullPath: file.webkitRelativePath,
     name: file.name,
@@ -37,7 +37,7 @@ const uploadExtractedFiles = async (
 
       const fileData = await data
       await filesDB.files.add({
-        extension: name.split('.').slice(0, -1)[0],
+        extension: name.split('.').slice(-1)[0],
         file: fileData,
         fullPath: path.join('/') + '/' + name,
         name,
