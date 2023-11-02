@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { ReactElement, ReactNode } from 'react'
 import { TreeItem, TreeItemRenderContext } from 'react-complex-tree'
 
 import { ICONS } from './fileIcons'
@@ -11,6 +11,17 @@ interface RenderItemParams {
   title: ReactNode
 }
 
+const Icon = (
+  item: TreeItem<string>,
+  context: TreeItemRenderContext,
+  title: ReactNode,
+): ReactElement => {
+  if (item.isFolder) return context.isExpanded ? ICONS.folderOpen : ICONS.folder
+
+  const key = typeof title === 'string' ? title.split('.').pop() : ''
+  return ICONS[key as keyof typeof ICONS] || ICONS.txt
+}
+
 const renderItem = ({
   children,
   context,
@@ -18,20 +29,6 @@ const renderItem = ({
   item,
   title,
 }: RenderItemParams) => {
-  let icon
-  if (item.isFolder) {
-    icon = context.isExpanded ? ICONS.folderOpen : ICONS.folder
-  } else {
-    if (typeof title === 'string') {
-      const fileExtension = title.split('.').pop()
-      if (fileExtension) {
-        icon = ICONS[fileExtension as keyof typeof ICONS] || ICONS.txt
-      } else {
-        icon = ICONS.txt
-      }
-    }
-  }
-
   return (
     <li {...context.itemContainerWithChildrenProps}>
       <button
@@ -45,7 +42,9 @@ const renderItem = ({
         className="items-center"
         type="button"
       >
-        <span style={{ marginRight: '10px' }}>{icon}</span>
+        <span style={{ marginRight: '10px' }}>
+          {Icon(item, context, title)}
+        </span>
         <span>{title}</span>
       </button>
       {children}
