@@ -35,6 +35,7 @@ const TreeView = () => {
       canReorderItems
       canSearch={false}
       getItemTitle={(item) => item.data}
+      // HINT: Rerender when number of files changes
       key={files.length}
       viewState={{}}
     >
