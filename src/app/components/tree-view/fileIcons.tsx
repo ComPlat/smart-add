@@ -1,3 +1,4 @@
+import { ReactElement } from 'react'
 import {
   FaFolder,
   FaRegFileAlt,
@@ -9,7 +10,7 @@ import {
 } from 'react-icons/fa'
 import { GrDocumentZip } from 'react-icons/gr'
 
-const ICONS = {
+const ICONS: Readonly<Record<string, ReactElement>> = {
   docx: <FaRegFileWord />,
   folder: <FaFolder />,
   folderOpen: <FaRegFolderOpen />,
