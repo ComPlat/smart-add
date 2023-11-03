@@ -6,11 +6,12 @@ describe('ZIP download', () => {
   })
 
   describe('uploading ZIP file', () => {
+    const ouputZipName = 'exportZip'
     const zipFileName = 'test-zip.zip'
     const zipFile = `cypress/fixtures/${zipFileName}`
 
     after(() => {
-      cy.exec(`rm -f cypress/downloads/${zipFileName}`)
+      cy.exec(`rm -f cypress/downloads/${ouputZipName}.zip`)
     })
 
     it('uploads and downloads a ZIP file', () => {
@@ -24,8 +25,8 @@ describe('ZIP download', () => {
         .get('.ant-message-success')
         .should('contain', `${zipFileName} uploaded successfully`)
         .get('.ant-message-success')
-        .should('contain', `${zipFileName} downloaded successfully`)
-        .readFile(`cypress/downloads/${zipFileName}`)
+        .should('contain', `${ouputZipName}.zip downloaded successfully`)
+        .readFile(`cypress/downloads/${ouputZipName}.zip`)
         .then((fileContent) => {
           expect(fileContent).to.exist
         })

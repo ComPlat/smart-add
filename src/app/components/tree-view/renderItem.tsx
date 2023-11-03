@@ -16,10 +16,15 @@ const Icon = (
   context: TreeItemRenderContext,
   title: ReactNode,
 ): ReactElement => {
-  if (item.isFolder) return context.isExpanded ? ICONS.folderOpen : ICONS.folder
+  if (item.isFolder) {
+    if (item.data.endsWith('.zip')) {
+      return context.isExpanded ? ICONS.zipOpen : ICONS.zip
+    }
+    return context.isExpanded ? ICONS.folderOpen : ICONS.folder
+  }
 
   const key = typeof title === 'string' ? title.split('.').pop() : ''
-  return ICONS[key as keyof typeof ICONS] || ICONS.txt
+  return ICONS[key as keyof typeof ICONS] || ICONS.file
 }
 
 const renderItem = ({
@@ -36,7 +41,7 @@ const renderItem = ({
         {...context.interactiveElementProps}
         style={{
           display: 'flex',
-          margin: '5px',
+          maxWidth: '45%',
           paddingLeft: `${depth * 25}px`,
         }}
         className="items-center"
@@ -45,7 +50,7 @@ const renderItem = ({
         <span style={{ marginRight: '10px' }}>
           {Icon(item, context, title)}
         </span>
-        <span>{title}</span>
+        <span className="truncate">{title}</span>
       </button>
       {children}
     </li>
