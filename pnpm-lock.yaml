@@ -26,9 +26,15 @@ dependencies:
   react:
     specifier: 18.2.0
     version: 18.2.0
+  react-complex-tree:
+    specifier: 2.2.3
+    version: 2.2.3(react@18.2.0)
   react-dom:
     specifier: 18.2.0
     version: 18.2.0(react@18.2.0)
+  react-icons:
+    specifier: 4.11.0
+    version: 4.11.0(react@18.2.0)
   tailwindcss:
     specifier: 3.3.3
     version: 3.3.3
@@ -4179,6 +4185,14 @@ packages:
       lodash.curry: 4.1.1
     dev: true
 
+  /react-complex-tree@2.2.3(react@18.2.0):
+    resolution: {integrity: sha512-hb4haCvf+Z9YyGibRHPoiw8IJ7QQMZDjQlEIJQRPGcF4tNzN39IrwTTOdysvh4mPw/xqyu5lt9VkleV+5Oc4sg==}
+    peerDependencies:
+      react: '>=16.0.0'
+    dependencies:
+      react: 18.2.0
+    dev: false
+
   /react-dom@18.2.0(react@18.2.0):
     resolution: {integrity: sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g==}
     peerDependencies:
@@ -4187,6 +4201,14 @@ packages:
       loose-envify: 1.4.0
       react: 18.2.0
       scheduler: 0.23.0
+    dev: false
+
+  /react-icons@4.11.0(react@18.2.0):
+    resolution: {integrity: sha512-V+4khzYcE5EBk/BvcuYRq6V/osf11ODUM2J8hg2FDSswRrGvqiYUYPRy4OdrWaQOBj4NcpJfmHZLNaD+VH0TyA==}
+    peerDependencies:
+      react: '*'
+    dependencies:
+      react: 18.2.0
     dev: false
 
   /react-is@16.13.1:

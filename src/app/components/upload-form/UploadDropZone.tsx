@@ -1,91 +1,15 @@
 'use client'
 
 import { filesDB } from '@/database/db'
+import { extractFilesFromZip } from '@/helper/extractFilesFromZip'
+import { uploadExtractedFiles } from '@/helper/uploadExtractedFiles'
 import { InboxOutlined } from '@ant-design/icons'
 import { Progress, Upload, UploadProps, message } from 'antd'
 import { RcFile } from 'antd/es/upload'
-import JSZip from 'jszip'
-import mime from 'mime-types'
 import { useState } from 'react'
 import { v4 } from 'uuid'
 
 import styles from './UploadDropZone.module.css'
-
-const getFilenameAndExtension = (zipObject: {
-  name: string
-}): [extension: string, fileName: string] => {
-  const components = zipObject.name.split(/[\/.]/)
-  const [fileNameWithoutExtension, extension] = components.slice(-2)
-  const fileName = `${fileNameWithoutExtension}.${extension}`
-
-  return !fileName.startsWith('.') && !zipObject.name.startsWith('__')
-    ? [extension, fileName]
-    : ['', '']
-}
-
-const extractFilesFromZip = async (file: RcFile) => {
-  const zip = new JSZip()
-  const zipData = await zip.loadAsync(file)
-
-  const extractedFiles: {
-    data: Promise<File>
-    name: string
-    path: string
-    type: string
-  }[] = []
-
-  zipData.forEach((relativePath, zipObject) => {
-    if (zipObject.dir) return
-
-    const [extension, fileName] = getFilenameAndExtension(zipObject)
-    const fileType = mime.lookup(extension ?? '') || 'application/octet-stream'
-
-    extractedFiles.push({
-      data: zipObject
-        .async('blob')
-        .then((blob) => new File([blob], fileName, { type: fileType })),
-      name: fileName,
-      path: relativePath,
-      type: fileType,
-    })
-  })
-
-  return extractedFiles
-}
-
-const uploadExtractedFiles = async (
-  extractedFiles: {
-    data: Promise<File>
-    name: string
-    path: string
-    type: string
-  }[],
-  file: RcFile,
-  setProgress: (progress: number) => void,
-) => {
-  const totalFiles = extractedFiles.length
-  let uploadedFiles = 0
-
-  for (const extractedFile of extractedFiles) {
-    const { data, name, path } = extractedFile
-    if (name === '') {
-      uploadedFiles++
-      continue
-    }
-
-    const fileData = await data
-    await filesDB.files.add({
-      file: fileData,
-      name,
-      path,
-      uid: file.uid + '_' + v4(),
-    })
-
-    uploadedFiles++
-    const percentageProgress = Math.round((uploadedFiles / totalFiles) * 100)
-    setProgress(percentageProgress)
-  }
-}
 
 const handleCustomRequest = async ({
   file,
@@ -110,6 +34,7 @@ const handleCustomRequest = async ({
 
   if (file.type === 'application/zip') {
     try {
+      setProgress(0)
       const extractedFiles = await extractFilesFromZip(file as RcFile)
       await uploadExtractedFiles(extractedFiles, file as RcFile, setProgress)
       setProgress(100)
@@ -118,12 +43,17 @@ const handleCustomRequest = async ({
       console.error('Failed to extract and upload ZIP file:', err)
     }
   } else {
+    const path = file.webkitRelativePath.split('/').slice(0, -1)
+
     setProgress(50)
     filesDB.files
       .add({
+        extension: file.webkitRelativePath.split('.').slice(-1)[0],
         file,
+        fullPath: file.webkitRelativePath,
         name: file.name,
-        path: file.webkitRelativePath,
+        parentUid: file.uid.split('_')[0],
+        path,
         uid: v4(),
       })
       .then(async () => {

@@ -15,7 +15,7 @@ const FileDownloader = () => {
 
   const constructTree = (files: ExtendedFile[]): FileTree =>
     files.reduce((fileTree, file) => {
-      const pathComponents: string[] = file.path.split('/')
+      const pathComponents: string[] = [...file.path, file.name]
       pathComponents.reduce(
         (level: FileTree, component: string, index: number) => {
           if (!level[component]) {
@@ -66,8 +66,8 @@ const FileDownloader = () => {
       const topmostFolder = Object.keys(fileTree)[0]
       const blob = await zip.generateAsync({ type: 'blob' })
 
-      saveAs(blob, `${topmostFolder}.zip`)
-      message.success(`${topmostFolder}.zip downloaded successfully`)
+      saveAs(blob, `${topmostFolder}`)
+      message.success(`${topmostFolder} downloaded successfully`)
     } catch (error) {
       console.error(error)
     }
