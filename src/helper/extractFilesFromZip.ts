@@ -5,7 +5,7 @@ import mime from 'mime-types'
 const getFilenameAndExtension = (zipObject: {
   name: string
 }): [extension: string, fileName: string] => {
-  const components = zipObject.name.split(/[\/.]/)
+  const components = zipObject.name.split(/\/|\.(?=[^.]*$)/)
   const [fileNameWithoutExtension, extension] = components.slice(-2)
   const fileName = `${fileNameWithoutExtension}.${extension}`
 
