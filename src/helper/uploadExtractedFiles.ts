@@ -39,7 +39,7 @@ const uploadExtractedFiles = async (
       await filesDB.files.add({
         extension: name.split('.').slice(-1)[0],
         file: fileData,
-        fullPath: file.name + '/' + path.join('/') + '/' + name,
+        fullPath: path.join('/') + '/' + name,
         name,
         parentUid: file.uid.split('.')[0],
         path: [file.name, ...path],

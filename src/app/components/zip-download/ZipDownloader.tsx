@@ -15,7 +15,7 @@ const FileDownloader = () => {
 
   const constructTree = (files: ExtendedFile[]): FileTree =>
     files.reduce((fileTree, file) => {
-      const pathComponents: string[] = [...file.path, file.name]
+      const pathComponents: string[] = file.fullPath.split('/')
       pathComponents.reduce(
         (level: FileTree, component: string, index: number) => {
           if (!level[component]) {
@@ -49,10 +49,11 @@ const FileDownloader = () => {
         const promises: Promise<JSZip[]>[] = Object.keys(tree).map(
           async (key) => {
             const value = tree[key]
+            const newPath = path ? `${path}/${key}` : key
 
             return value instanceof Blob
-              ? [zip.file(`${path}/${key}`, value)]
-              : await addFilesToZip(value, `${path}/${key}`)
+              ? [zip.file(newPath, value)]
+              : await addFilesToZip(value, newPath)
           },
         )
 
