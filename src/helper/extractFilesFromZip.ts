@@ -33,7 +33,10 @@ const extractFilesFromZip = async (file: RcFile) => {
 
     const [extension, fileName] = getFilenameAndExtension(zipObject)
     const fileType = mime.lookup(extension ?? '') || 'application/octet-stream'
-    const path = relativePath.split('/').slice(0, -1)
+    const path = relativePath
+      .split('/')
+      .slice(0, -1)
+      .filter((str) => str !== '')
 
     extractedFiles.push({
       data: zipObject
