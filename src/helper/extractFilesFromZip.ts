@@ -5,7 +5,7 @@ import mime from 'mime-types'
 const getFilenameAndExtension = (zipObject: {
   name: string
 }): [extension: string, fileName: string] => {
-  const components = zipObject.name.split(/[\/.]/)
+  const components = zipObject.name.split(/\/|\.(?=[^.]*$)/)
   const [fileNameWithoutExtension, extension] = components.slice(-2)
   const fileName = `${fileNameWithoutExtension}.${extension}`
 
@@ -33,7 +33,10 @@ const extractFilesFromZip = async (file: RcFile) => {
 
     const [extension, fileName] = getFilenameAndExtension(zipObject)
     const fileType = mime.lookup(extension ?? '') || 'application/octet-stream'
-    const path = relativePath.split('/').slice(0, -1)
+    const path = relativePath
+      .split('/')
+      .slice(0, -1)
+      .filter((str) => str !== '')
 
     extractedFiles.push({
       data: zipObject

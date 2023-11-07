@@ -15,7 +15,7 @@ const FileDownloader = () => {
 
   const constructTree = (files: ExtendedFile[]): FileTree =>
     files.reduce((fileTree, file) => {
-      const pathComponents: string[] = [...file.path, file.name]
+      const pathComponents: string[] = file.fullPath.split('/')
       pathComponents.reduce(
         (level: FileTree, component: string, index: number) => {
           if (!level[component]) {
@@ -49,10 +49,11 @@ const FileDownloader = () => {
         const promises: Promise<JSZip[]>[] = Object.keys(tree).map(
           async (key) => {
             const value = tree[key]
+            const newPath = path ? `${path}/${key}` : key
 
             return value instanceof Blob
-              ? [zip.file(`${path}/${key}`, value)]
-              : await addFilesToZip(value, `${path}/${key}`)
+              ? [zip.file(newPath, value)]
+              : await addFilesToZip(value, newPath)
           },
         )
 
@@ -63,11 +64,10 @@ const FileDownloader = () => {
 
       await addFilesToZip(fileTree, '')
 
-      const topmostFolder = Object.keys(fileTree)[0]
       const blob = await zip.generateAsync({ type: 'blob' })
 
-      saveAs(blob, `${topmostFolder}`)
-      message.success(`${topmostFolder} downloaded successfully`)
+      saveAs(blob, 'exportZip')
+      message.success('exportZip.zip downloaded successfully')
     } catch (error) {
       console.error(error)
     }

@@ -1,27 +1,34 @@
 import { ReactElement } from 'react'
 import {
-  FaFolder,
-  FaRegFileAlt,
+  FaFileZipper,
+  FaRegFile,
+  FaRegFileCode,
   FaRegFileExcel,
   FaRegFileImage,
+  FaRegFileLines,
   FaRegFilePdf,
   FaRegFileWord,
-  FaRegFolderOpen,
-} from 'react-icons/fa'
-import { GrDocumentZip } from 'react-icons/gr'
+  FaRegFileZipper,
+} from 'react-icons/fa6'
+import { MdFolder, MdFolderOpen } from 'react-icons/md'
+import { PiFileSvgBold } from 'react-icons/pi'
 
 const ICONS: Readonly<Record<string, ReactElement>> = {
   docx: <FaRegFileWord />,
-  folder: <FaFolder />,
-  folderOpen: <FaRegFolderOpen />,
+  file: <FaRegFile />,
+  folder: <MdFolder />,
+  folderOpen: <MdFolderOpen />,
   jpeg: <FaRegFileImage />,
   jpg: <FaRegFileImage />,
+  json: <FaRegFileCode />,
   pdf: <FaRegFilePdf />,
   png: <FaRegFileImage />,
-  txt: <FaRegFileAlt />,
+  svg: <PiFileSvgBold />,
+  txt: <FaRegFileLines />,
   xlsx: <FaRegFileExcel />,
   xlx: <FaRegFileExcel />,
-  zip: <GrDocumentZip />,
+  zip: <FaFileZipper />,
+  zipOpen: <FaRegFileZipper />,
 }
 
 export { ICONS }

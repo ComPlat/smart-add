@@ -12,14 +12,23 @@ interface RenderItemParams {
 }
 
 const Icon = (
-  item: TreeItem<string>,
+  fileItem: TreeItem<string>,
   context: TreeItemRenderContext,
   title: ReactNode,
 ): ReactElement => {
-  if (item.isFolder) return context.isExpanded ? ICONS.folderOpen : ICONS.folder
+  if (!fileItem.isFolder) {
+    const key = typeof title === 'string' ? title.split('.').pop() : ''
+    return ICONS[key as keyof typeof ICONS] || ICONS.file
+  }
 
-  const key = typeof title === 'string' ? title.split('.').pop() : ''
-  return ICONS[key as keyof typeof ICONS] || ICONS.txt
+  const isZip = fileItem.data.endsWith('.zip')
+  return context.isExpanded
+    ? isZip
+      ? ICONS.zipOpen
+      : ICONS.folderOpen
+    : isZip
+    ? ICONS.zip
+    : ICONS.folder
 }
 
 const renderItem = ({
@@ -36,7 +45,7 @@ const renderItem = ({
         {...context.interactiveElementProps}
         style={{
           display: 'flex',
-          margin: '5px',
+          maxWidth: '45%',
           paddingLeft: `${depth * 25}px`,
         }}
         className="items-center"
@@ -45,7 +54,7 @@ const renderItem = ({
         <span style={{ marginRight: '10px' }}>
           {Icon(item, context, title)}
         </span>
-        <span>{title}</span>
+        <span className="truncate">{title}</span>
       </button>
       {children}
     </li>

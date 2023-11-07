@@ -13,16 +13,11 @@ const addFoldersToTree = (
   path: string[],
   node: FileNode,
 ): void => {
-  if (path.length === 0) {
-    fileTree['root'].children.push(node.index)
-    return
-  }
-
   let currentPath = 'root'
-  path.forEach((folder) => {
-    const previousPath = currentPath
-    // HINT: Go deeper into folder structure every iteration.
-    currentPath += `${folder}/`
+  let currentFolder = fileTree[currentPath]
+
+  for (const folder of path) {
+    currentPath = currentPath === 'root' ? folder : `${currentPath}/${folder}`
 
     if (!fileTree[currentPath]) {
       // HINT: Create create folders for file when they don't exist already
@@ -33,13 +28,13 @@ const addFoldersToTree = (
         index: currentPath,
         isFolder: true,
       }
-      // HINT: make folder for file child of parent folder
-      fileTree[previousPath].children.push(currentPath)
+      currentFolder.children.push(currentPath)
     }
-  })
+    currentFolder = fileTree[currentPath]
+  }
 
-  // HINT: make file child of folder for file
-  fileTree[currentPath].children.push(node.index)
+  currentFolder.children.push(node.index)
+  fileTree[node.index] = node
 }
 
 const constructTree = (files: ExtendedFile[]): Record<string, FileNode> => {
@@ -61,12 +56,13 @@ const constructTree = (files: ExtendedFile[]): Record<string, FileNode> => {
       const { fullPath, name, path } = inputFile
       const node: FileNode = {
         canMove: false,
+        children: [],
         data: name,
         index: fullPath,
-        isFolder: false,
-      } as FileNode
+        isFolder: name.endsWith('.zip'),
+      }
+
       addFoldersToTree(fileTree, path, node)
-      fileTree[node.index] = node
     })
 
     return fileTree
