@@ -12,19 +12,23 @@ interface RenderItemParams {
 }
 
 const Icon = (
-  item: TreeItem<string>,
+  fileItem: TreeItem<string>,
   context: TreeItemRenderContext,
   title: ReactNode,
 ): ReactElement => {
-  if (item.isFolder) {
-    if (item.data.endsWith('.zip')) {
-      return context.isExpanded ? ICONS.zipOpen : ICONS.zip
-    }
-    return context.isExpanded ? ICONS.folderOpen : ICONS.folder
+  if (!fileItem.isFolder) {
+    const key = typeof title === 'string' ? title.split('.').pop() : ''
+    return ICONS[key as keyof typeof ICONS] || ICONS.file
   }
 
-  const key = typeof title === 'string' ? title.split('.').pop() : ''
-  return ICONS[key as keyof typeof ICONS] || ICONS.file
+  const isZip = fileItem.data.endsWith('.zip')
+  return context.isExpanded
+    ? isZip
+      ? ICONS.zipOpen
+      : ICONS.folderOpen
+    : isZip
+    ? ICONS.zip
+    : ICONS.folder
 }
 
 const renderItem = ({
