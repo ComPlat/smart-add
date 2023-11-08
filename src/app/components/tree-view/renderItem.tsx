@@ -31,7 +31,7 @@ const Icon = (
     : ICONS.folder
 }
 
-const RenderItem = ({
+const renderItem = ({
   children,
   context,
   depth,
@@ -42,7 +42,6 @@ const RenderItem = ({
   const isDraggedOver = context.isDraggingOver
 
   const selectedClassesSelected = isSelected && 'text-blue-600'
-  // TODO: Improve styling
   const selectedClassesDragged = isDraggedOver && 'text-green-500'
 
   return (
@@ -71,4 +70,4 @@ const RenderItem = ({
   )
 }
 
-export { RenderItem }
+export { renderItem }

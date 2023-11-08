@@ -10,7 +10,7 @@ import {
 } from 'react-complex-tree'
 import 'react-complex-tree/lib/style-modern.css'
 
-import { RenderItem } from './RenderItem'
+import { renderItem } from './renderItem'
 
 const TreeView = () => {
   const files = useLiveQuery(() => filesDB.files.toArray(), [])
@@ -56,7 +56,7 @@ const TreeView = () => {
               renderTreeContainer={({ children, containerProps }) => (
                 <div {...containerProps}>{children}</div>
               )}
-              renderItem={RenderItem}
+              renderItem={renderItem}
               rootItem="root"
               treeId="tree-1"
               treeLabel="Input Tree"
@@ -70,7 +70,7 @@ const TreeView = () => {
               renderTreeContainer={({ children, containerProps }) => (
                 <div {...containerProps}>{children}</div>
               )}
-              renderItem={RenderItem}
+              renderItem={renderItem}
               rootItem="root2"
               treeId="tree-2"
               treeLabel="Assignment Tree"
