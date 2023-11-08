@@ -53,12 +53,12 @@ const constructTree = (files: ExtendedFile[]): Record<string, FileNode> => {
     }
 
     inputFiles.forEach((inputFile) => {
-      const { name, path } = inputFile
+      const { fullPath, name, path } = inputFile
       const node: FileNode = {
         canMove: false,
         children: [],
         data: name,
-        index: path.join('/'),
+        index: fullPath,
         isFolder: name.endsWith('.zip'),
       }
 

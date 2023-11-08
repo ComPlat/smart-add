@@ -5,9 +5,9 @@ import mime from 'mime-types'
 const getFilenameAndExtension = (zipObject: {
   name: string
 }): [extension: string, fileName: string] => {
-  const components = zipObject.name.split(/\/|\.(?=[^.]*$)/)
-  const [fileNameWithoutExtension, extension] = components.slice(-2)
-  const fileName = `${fileNameWithoutExtension}.${extension}`
+  const components = zipObject.name.split('/')
+  const [fileNameWithoutExtension, extension] = components.slice(-1)
+  const fileName = fileNameWithoutExtension || ''
 
   return !fileName.startsWith('.') && !zipObject.name.startsWith('__')
     ? [extension, fileName]
@@ -39,9 +39,8 @@ const extractFilesFromZip = async (file: RcFile) => {
     const fileType = mime.lookup(extension ?? '') || 'application/octet-stream'
     const path = relativePath.split('/').filter((str) => str !== '')
 
-    const fullPath = [...currentPath, ...path].join('/')
+    const fullPath = [file.name, ...currentPath, ...path].join('/')
 
-    // Check if the file is not inside a folder with the same name as itself
     extractedFiles.push({
       data: zipObject
         .async('blob')
