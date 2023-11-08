@@ -31,13 +31,20 @@ const Icon = (
     : ICONS.folder
 }
 
-const renderItem = ({
+const RenderItem = ({
   children,
   context,
   depth,
   item,
   title,
 }: RenderItemParams) => {
+  const isSelected = context.isSelected
+  const isDraggedOver = context.isDraggingOver
+
+  const selectedClassesSelected = isSelected && 'text-blue-600'
+  // TODO: Improve styling
+  const selectedClassesDragged = isDraggedOver && 'text-green-500'
+
   return (
     <li {...context.itemContainerWithChildrenProps}>
       <button
@@ -45,13 +52,16 @@ const renderItem = ({
         {...context.interactiveElementProps}
         style={{
           display: 'flex',
-          maxWidth: '45%',
+          maxWidth: '95%',
           paddingLeft: `${depth * 25}px`,
         }}
-        className="items-center"
+        className={`items-center ${selectedClassesSelected}`}
         type="button"
       >
-        <span style={{ marginRight: '10px' }}>
+        <span
+          className={`${selectedClassesDragged}`}
+          style={{ marginRight: '10px' }}
+        >
           {Icon(item, context, title)}
         </span>
         <span className="truncate">{title}</span>
@@ -61,4 +71,4 @@ const renderItem = ({
   )
 }
 
-export { renderItem }
+export { RenderItem }
