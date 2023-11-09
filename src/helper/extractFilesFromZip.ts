@@ -59,7 +59,7 @@ const extractFilesFromZip = async (file: RcFile) => {
       await Promise.all(
         Object.keys(nestedZipData.files).map(async (nestedRelativePath) => {
           const nestedZipObject = nestedZipData.files[nestedRelativePath]
-          await extractFilesRecursively(
+          return extractFilesRecursively(
             nestedRelativePath,
             nestedZipObject,
             nestedCurrentPath,
@@ -72,7 +72,7 @@ const extractFilesFromZip = async (file: RcFile) => {
   await Promise.all(
     Object.keys(zipData.files).map(async (relativePath) => {
       const zipObject = zipData.files[relativePath]
-      await extractFilesRecursively(relativePath, zipObject)
+      return extractFilesRecursively(relativePath, zipObject)
     }),
   )
 
