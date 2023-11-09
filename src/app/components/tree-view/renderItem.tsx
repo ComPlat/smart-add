@@ -37,37 +37,24 @@ const renderItem = ({
   depth,
   item,
   title,
-}: RenderItemParams) => {
-  const isSelected = context.isSelected
-  const isDraggedOver = context.isDraggingOver
-
-  const selectedClassesSelected = isSelected && 'text-blue-600'
-  const selectedClassesDragged = isDraggedOver && 'text-green-500'
-
-  return (
-    <li {...context.itemContainerWithChildrenProps}>
-      <button
-        {...context.itemContainerWithoutChildrenProps}
-        {...context.interactiveElementProps}
-        style={{
-          display: 'flex',
-          maxWidth: '95%',
-          paddingLeft: `${depth * 25}px`,
-        }}
-        className={`items-center ${selectedClassesSelected}`}
-        type="button"
-      >
-        <span
-          className={`${selectedClassesDragged}`}
-          style={{ marginRight: '10px' }}
-        >
-          {Icon(item, context, title)}
-        </span>
-        <span className="truncate">{title}</span>
-      </button>
-      {children}
-    </li>
-  )
-}
+}: RenderItemParams) => (
+  <li title={String(title)} {...context.itemContainerWithChildrenProps}>
+    <button
+      {...context.itemContainerWithoutChildrenProps}
+      {...context.interactiveElementProps}
+      style={{
+        display: 'flex',
+        maxWidth: '95%',
+        paddingLeft: `${depth * 25}px`,
+      }}
+      className="items-center"
+      type="button"
+    >
+      <span style={{ marginRight: '10px' }}>{Icon(item, context, title)}</span>
+      <span className="truncate">{title}</span>
+    </button>
+    {children}
+  </li>
+)
 
 export { renderItem }
