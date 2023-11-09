@@ -13,6 +13,7 @@ const uploadExtractedFiles = async (
     type: string
   }[],
   file: RcFile,
+  parentPath: string[],
   setProgress: (progress: number) => void,
 ) => {
   const totalFiles = extractedFiles.length
@@ -30,10 +31,10 @@ const uploadExtractedFiles = async (
       await filesDB.files.add({
         extension: name.split('.').slice(-1)[0],
         file: fileData,
-        fullPath,
+        fullPath: [...parentPath, fullPath].join('/'),
         name,
         parentUid: file.uid.split('.')[0],
-        path: [file.name, ...path],
+        path,
         uid: file.uid + '_' + v4(),
       })
 
