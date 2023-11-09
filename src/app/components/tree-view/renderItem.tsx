@@ -37,28 +37,24 @@ const renderItem = ({
   depth,
   item,
   title,
-}: RenderItemParams) => {
-  return (
-    <li {...context.itemContainerWithChildrenProps}>
-      <button
-        {...context.itemContainerWithoutChildrenProps}
-        {...context.interactiveElementProps}
-        style={{
-          display: 'flex',
-          maxWidth: '45%',
-          paddingLeft: `${depth * 25}px`,
-        }}
-        className="items-center"
-        type="button"
-      >
-        <span style={{ marginRight: '10px' }}>
-          {Icon(item, context, title)}
-        </span>
-        <span className="truncate">{title}</span>
-      </button>
-      {children}
-    </li>
-  )
-}
+}: RenderItemParams) => (
+  <li title={String(title)} {...context.itemContainerWithChildrenProps}>
+    <button
+      {...context.itemContainerWithoutChildrenProps}
+      {...context.interactiveElementProps}
+      style={{
+        display: 'flex',
+        maxWidth: '45%',
+        paddingLeft: `${depth * 25}px`,
+      }}
+      className="items-center"
+      type="button"
+    >
+      <span style={{ marginRight: '10px' }}>{Icon(item, context, title)}</span>
+      <span className="truncate">{title}</span>
+    </button>
+    {children}
+  </li>
+)
 
 export { renderItem }

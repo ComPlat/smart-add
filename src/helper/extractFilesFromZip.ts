@@ -5,9 +5,9 @@ import mime from 'mime-types'
 const getFilenameAndExtension = (zipObject: {
   name: string
 }): [extension: string, fileName: string] => {
-  const components = zipObject.name.split(/\/|\.(?=[^.]*$)/)
-  const [fileNameWithoutExtension, extension] = components.slice(-2)
-  const fileName = `${fileNameWithoutExtension}.${extension}`
+  const components = zipObject.name.split('/')
+  const [fileNameWithoutExtension, extension] = components.slice(-1)
+  const fileName = fileNameWithoutExtension || ''
 
   return !fileName.startsWith('.') && !zipObject.name.startsWith('__')
     ? [extension, fileName]
@@ -28,28 +28,53 @@ const extractFilesFromZip = async (file: RcFile) => {
     type: string
   }[] = []
 
-  zipData.forEach((relativePath, zipObject) => {
+  const extractFilesRecursively = async (
+    relativePath: string,
+    zipObject: JSZip.JSZipObject,
+    currentPath: string[] = [],
+  ) => {
     if (zipObject.dir) return
 
     const [extension, fileName] = getFilenameAndExtension(zipObject)
     const fileType = mime.lookup(extension ?? '') || 'application/octet-stream'
-    const path = relativePath
-      .split('/')
-      .slice(0, -1)
-      .filter((str) => str !== '')
+    const path = relativePath.split('/').filter((str) => str !== '')
+
+    const fullPath = [file.name, ...currentPath, ...path].join('/')
 
     extractedFiles.push({
       data: zipObject
         .async('blob')
         .then((blob) => new File([blob], fileName, { type: fileType })),
       extension,
-      fullPath: path.join('/') + '/' + fileName,
+      fullPath,
       name: fileName,
       parentUid: file.uid,
-      path,
+      path: [...currentPath, ...path],
       type: fileType,
     })
-  })
+
+    if (fileName.endsWith('.zip')) {
+      const nestedZipData = await JSZip.loadAsync(await zipObject.async('blob'))
+      const nestedCurrentPath = [...currentPath, ...path]
+      await Promise.all(
+        Object.keys(nestedZipData.files).map(async (nestedRelativePath) => {
+          const nestedZipObject = nestedZipData.files[nestedRelativePath]
+          return extractFilesRecursively(
+            nestedRelativePath,
+            nestedZipObject,
+            nestedCurrentPath,
+          )
+        }),
+      )
+    }
+  }
+
+  await Promise.all(
+    Object.keys(zipData.files).map(async (relativePath) => {
+      const zipObject = zipData.files[relativePath]
+      return extractFilesRecursively(relativePath, zipObject)
+    }),
+  )
 
   return extractedFiles
 }

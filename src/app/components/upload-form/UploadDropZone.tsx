@@ -32,19 +32,24 @@ const handleCustomRequest = async ({
     throw new TypeError('Uploaded file has an uid that is not a string!')
   }
 
+  const path = file.webkitRelativePath.split('/').slice(0, -1)
+
   if (file.type === 'application/zip') {
     try {
       setProgress(0)
       const extractedFiles = await extractFilesFromZip(file as RcFile)
-      await uploadExtractedFiles(extractedFiles, file as RcFile, setProgress)
+      await uploadExtractedFiles(
+        extractedFiles,
+        file as RcFile,
+        path,
+        setProgress,
+      )
       setProgress(100)
       onSuccess?.(file)
     } catch (err) {
       console.error('Failed to extract and upload ZIP file:', err)
     }
   } else {
-    const path = file.webkitRelativePath.split('/').slice(0, -1)
-
     setProgress(50)
     filesDB.files
       .add({
