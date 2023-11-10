@@ -10,6 +10,7 @@ import {
 } from 'react-complex-tree'
 import 'react-complex-tree/lib/style-modern.css'
 
+import styles from './TreeView.module.css'
 import { renderItem } from './renderItem'
 
 const TreeView = () => {
@@ -39,7 +40,7 @@ const TreeView = () => {
       viewState={{}}
     >
       <div className="flex flex-row justify-between">
-        <div style={{ width: '50%' }}>
+        <div className={styles['tree']}>
           <Tree
             renderItemsContainer={({ children, containerProps }) => (
               <ul {...containerProps}>{children}</ul>
@@ -53,7 +54,7 @@ const TreeView = () => {
             treeLabel="Input Tree"
           />
         </div>
-        <div style={{ width: '50%' }}>
+        <div className={`${styles['assignment-tree']} ${styles['tree']}`}>
           <Tree
             renderItemsContainer={({ children, containerProps }) => (
               <ul {...containerProps}>{children}</ul>
