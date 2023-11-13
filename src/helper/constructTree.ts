@@ -42,31 +42,17 @@ const constructTree = (files: ExtendedFile[]): Record<string, FileNode> => {
     inputFiles: ExtendedFile[],
   ): Record<string, FileNode> => {
     const fileTree: Record<string, FileNode> = {
-      assignmentRoot: {
-        canMove: false,
-        children: [],
-        data: 'Assignment Tree.root',
-        index: 'assignmentRoot',
-        isFolder: false,
-      },
-      inputRoot: {
-        canMove: false,
-        children: [],
-        data: 'Input Tree.root',
-        index: 'inputRoot',
-        isFolder: false,
-      },
       // HINT: Root is ALWAYS needed.
       root: {
         canMove: false,
-        children: ['inputRoot'],
+        children: [],
         data: 'Root item',
         index: 'root',
         isFolder: true,
       },
       root2: {
         canMove: false,
-        children: ['assignmentRoot'],
+        children: [],
         data: 'Root item 2',
         index: 'root2',
         isFolder: true,
