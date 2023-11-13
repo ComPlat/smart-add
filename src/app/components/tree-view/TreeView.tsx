@@ -54,7 +54,7 @@ const TreeView = () => {
             treeLabel="Input Tree"
           />
         </div>
-        <div className={`${styles['assignment-tree']} ${styles['tree']}`}>
+        <div className={styles['tree']}>
           <Tree
             renderItemsContainer={({ children, containerProps }) => (
               <ul {...containerProps}>{children}</ul>
