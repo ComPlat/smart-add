@@ -1,7 +1,12 @@
 # SmartAdd
 
 ## Wireframe
-https://www.figma.com/file/mpZ5QeOaOpkj3AaPeoKaus/Wireframes?type=design&node-id=109-13398&mode=design&t=2xpSfEaSiHmBlR47-0
+
+<https://www.figma.com/file/mpZ5QeOaOpkj3AaPeoKaus/Wireframes?type=design&node-id=109-13398&mode=design&t=2xpSfEaSiHmBlR47-0>
+
+## Mockups
+
+<https://www.figma.com/file/Iczx5uvb1oGyjQ0FQVv3ob/Mockups?type=design&node-id=351-23224&mode=design&t=C9tyBdwB37KDZwh5-0>
 
 ## Setup
 
@@ -13,7 +18,7 @@ https://www.figma.com/file/mpZ5QeOaOpkj3AaPeoKaus/Wireframes?type=design&node-id
 ### Used dependencies
 
 - Node.js, version 18.17.1 (LTS)
-- pnpm, version 8.7.3
+- pnpm, version 8.8.0
 
 ## Production
 
@@ -68,3 +73,73 @@ pnpm lint --fix
 ```
 
 to automatically fix problems.
+
+## Parsing spreadsheets
+
+Accepted spreadsheet file extensions: <https://docs.sheetjs.com/docs/miscellany/formats>
+
+Elements can be nested, e.g. 2 samples with 3 analyses in 1 reaction. For each element an own sheet should exist.
+
+### Reaction
+
+- r short label
+- description
+- temperature
+- duration
+
+### Sample
+
+- residue_type
+- decoupled
+- molecular mass (decoupled)
+- sum formula (decoupled)
+- stereo_abs
+- stereo_rel
+- cas|image
+- sample name
+- molecule name
+- sample external label
+- short label
+- description
+- real amount
+- real unit
+- target amount
+- target unit
+- molarity_value
+- density
+- molfile
+- solvent
+- location
+- secret
+- sample readout
+- melting pt
+- boiling pt
+- created_at
+- updated_at
+- user_labels
+- literatures
+- canonical smiles
+
+### Analysis
+
+- sample name
+- sample external label
+- short label
+- name
+- description
+- uuid
+- kind
+- status
+- content
+- dataset name
+- instrument
+- dataset description
+- filename
+- checksum
+
+### Error handling
+
+An item will not be displayed or thrown an error message when one of the following conditions will be fulfilled:
+
+- when one header items differs from the default
+- when content of a cell is of a different type

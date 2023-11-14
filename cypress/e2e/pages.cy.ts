@@ -2,11 +2,7 @@ import '@this-dot/cypress-indexeddb'
 
 describe('Pages', () => {
   beforeEach(() => {
-    cy.visit('/')
-  })
-
-  afterEach(() => {
-    cy.clearIndexedDb('filesDatabase')
+    cy.visit('/').clearIndexedDb('filesDatabase')
   })
 
   describe('UploadForm', () => {
@@ -33,8 +29,8 @@ describe('Pages', () => {
       })
 
       it('fills IndexedDB database', () => {
-        cy.openIndexedDb('filesDatabase').as('testFilesDatabase')
-        cy.getIndexedDb('@testFilesDatabase')
+        cy.openIndexedDb('filesDatabase')
+          .openIndexedDb('filesDatabase')
           .createObjectStore('files')
           .as('files')
 
