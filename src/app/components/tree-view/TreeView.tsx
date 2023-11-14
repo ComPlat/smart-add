@@ -10,6 +10,7 @@ import {
 } from 'react-complex-tree'
 import 'react-complex-tree/lib/style-modern.css'
 
+import styles from './TreeView.module.css'
 import { renderItem } from './renderItem'
 
 const TreeView = () => {
@@ -31,7 +32,6 @@ const TreeView = () => {
       }
       canDragAndDrop
       canDropOnFolder
-      canDropOnNonFolder
       canReorderItems
       canSearch={false}
       getItemTitle={(item) => item.data}
@@ -39,18 +39,36 @@ const TreeView = () => {
       key={files.length}
       viewState={{}}
     >
-      <Tree
-        renderItemsContainer={({ children, containerProps }) => (
-          <ul {...containerProps}>{children}</ul>
-        )}
-        renderTreeContainer={({ children, containerProps }) => (
-          <div {...containerProps}>{children}</div>
-        )}
-        renderItem={renderItem}
-        rootItem="root"
-        treeId="tree-1"
-        treeLabel="Tree Example"
-      />
+      <div className="flex flex-row justify-between">
+        <div className={styles['tree']}>
+          <Tree
+            renderItemsContainer={({ children, containerProps }) => (
+              <ul {...containerProps}>{children}</ul>
+            )}
+            renderTreeContainer={({ children, containerProps }) => (
+              <div {...containerProps}>{children}</div>
+            )}
+            renderItem={renderItem}
+            rootItem="inputTreeRoot"
+            treeId="tree-1"
+            treeLabel="Input Tree"
+          />
+        </div>
+        <div className={styles['tree']}>
+          <Tree
+            renderItemsContainer={({ children, containerProps }) => (
+              <ul {...containerProps}>{children}</ul>
+            )}
+            renderTreeContainer={({ children, containerProps }) => (
+              <div {...containerProps}>{children}</div>
+            )}
+            renderItem={renderItem}
+            rootItem="assignmentTreeRoot"
+            treeId="tree-2"
+            treeLabel="Assignment Tree"
+          />
+        </div>
+      </div>
     </UncontrolledTreeEnvironment>
   )
 }

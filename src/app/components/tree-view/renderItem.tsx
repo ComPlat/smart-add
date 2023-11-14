@@ -37,24 +37,36 @@ const renderItem = ({
   depth,
   item,
   title,
-}: RenderItemParams) => (
-  <li title={String(title)} {...context.itemContainerWithChildrenProps}>
-    <button
-      {...context.itemContainerWithoutChildrenProps}
-      {...context.interactiveElementProps}
-      style={{
-        display: 'flex',
-        maxWidth: '45%',
-        paddingLeft: `${depth * 25}px`,
-      }}
-      className="items-center"
-      type="button"
-    >
-      <span style={{ marginRight: '10px' }}>{Icon(item, context, title)}</span>
-      <span className="truncate">{title}</span>
-    </button>
-    {children}
-  </li>
-)
+}: RenderItemParams) => {
+  const isDraggingOver = context.isDraggingOver
+  const shouldHideTitle = typeof title === 'string' && title.endsWith('.root')
+
+  return (
+    <li title={String(title)} {...context.itemContainerWithChildrenProps}>
+      <button
+        {...context.itemContainerWithoutChildrenProps}
+        {...context.interactiveElementProps}
+        className={`flex items-center focus:outline-none
+          ${context.isSelected ? 'text-blue-600' : ''}
+          ${isDraggingOver ? 'rounded-md bg-blue-200' : ''}`}
+        style={{
+          marginLeft: `${depth * 25}px`,
+          maxWidth: '95%',
+        }}
+        type="button"
+      >
+        <span className="mr-2">{Icon(item, context, title)}</span>
+        <span className={`truncate ${shouldHideTitle ? 'invisible' : ''}`}>
+          {shouldHideTitle ? (
+            <span className="invisible">{'\u200B'}</span>
+          ) : (
+            title
+          )}
+        </span>
+      </button>
+      {children}
+    </li>
+  )
+}
 
 export { renderItem }

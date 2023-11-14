@@ -12,6 +12,7 @@ import {
 } from 'react-icons/fa6'
 import { MdFolder, MdFolderOpen } from 'react-icons/md'
 import { PiFileSvgBold } from 'react-icons/pi'
+import { VscListTree } from 'react-icons/vsc'
 
 const ICONS: Readonly<Record<string, ReactElement>> = {
   docx: <FaRegFileWord />,
@@ -23,6 +24,7 @@ const ICONS: Readonly<Record<string, ReactElement>> = {
   json: <FaRegFileCode />,
   pdf: <FaRegFilePdf />,
   png: <FaRegFileImage />,
+  root: <VscListTree />,
   svg: <PiFileSvgBold />,
   txt: <FaRegFileLines />,
   xlsx: <FaRegFileExcel />,

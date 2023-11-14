@@ -13,16 +13,17 @@ const addFoldersToTree = (
   path: string[],
   node: FileNode,
 ): void => {
-  let currentPath = 'root'
+  let currentPath = 'inputTreeRoot'
   let currentFolder = fileTree[currentPath]
 
   for (const folder of path) {
-    currentPath = currentPath === 'root' ? folder : `${currentPath}/${folder}`
+    currentPath =
+      currentPath === 'inputTreeRoot' ? folder : `${currentPath}/${folder}`
 
     if (!fileTree[currentPath]) {
       // HINT: Create create folders for file when they don't exist already
       fileTree[currentPath] = {
-        canMove: false,
+        canMove: true,
         children: [],
         data: folder,
         index: currentPath,
@@ -42,12 +43,19 @@ const constructTree = (files: ExtendedFile[]): Record<string, FileNode> => {
     inputFiles: ExtendedFile[],
   ): Record<string, FileNode> => {
     const fileTree: Record<string, FileNode> = {
+      assignmentTreeRoot: {
+        canMove: false,
+        children: [],
+        data: 'Root item 2',
+        index: 'assignmentTreeRoot',
+        isFolder: true,
+      },
       // HINT: Root is ALWAYS needed.
-      root: {
+      inputTreeRoot: {
         canMove: false,
         children: [],
         data: 'Root item',
-        index: 'root',
+        index: 'inputTreeRoot',
         isFolder: true,
       },
     }
@@ -55,7 +63,7 @@ const constructTree = (files: ExtendedFile[]): Record<string, FileNode> => {
     inputFiles.forEach((inputFile) => {
       const { fullPath, name } = inputFile
       const node: FileNode = {
-        canMove: false,
+        canMove: true,
         children: [],
         data: name,
         index: fullPath,
