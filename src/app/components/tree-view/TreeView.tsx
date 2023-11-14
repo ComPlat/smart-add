@@ -49,7 +49,7 @@ const TreeView = () => {
               <div {...containerProps}>{children}</div>
             )}
             renderItem={renderItem}
-            rootItem="root"
+            rootItem="inputTreeRoot"
             treeId="tree-1"
             treeLabel="Input Tree"
           />
@@ -63,7 +63,7 @@ const TreeView = () => {
               <div {...containerProps}>{children}</div>
             )}
             renderItem={renderItem}
-            rootItem="root2"
+            rootItem="assignmentTreeRoot"
             treeId="tree-2"
             treeLabel="Assignment Tree"
           />
