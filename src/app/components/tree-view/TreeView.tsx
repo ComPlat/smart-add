@@ -31,6 +31,7 @@ const TreeView = () => {
         }))
       }
       canDragAndDrop
+      canDropAt={(_items, target) => target.treeId !== 'tree-1'}
       canDropOnFolder
       canReorderItems
       canSearch={false}
