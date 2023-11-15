@@ -19,6 +19,9 @@ const handleFileMove = async (
       const file = await filesDB.files.get({
         uid: String(fileTree[item].uid),
       })
+      const assigned = await assignmentsDB.assignedFiles.get({
+        uid: String(fileTree[item].uid),
+      })
       if (file) {
         file.fullPath =
           filePaths.find((path) => path.name === fileTree[item].data)?.path ||
@@ -27,6 +30,17 @@ const handleFileMove = async (
 
         await filesDB.files.where({ uid: file.uid }).delete()
 
+        fileCount++
+      }
+      if (assigned) {
+        const newPath =
+          filePaths.find((path) => path.name === fileTree[item].data)?.path ||
+          ''
+        const updatedFile = {
+          ...assigned,
+          fullPath: newPath,
+        }
+        await assignmentsDB.assignedFiles.put(updatedFile)
         fileCount++
       }
     } catch (error) {
