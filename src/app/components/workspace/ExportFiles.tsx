@@ -1,6 +1,8 @@
 import { ButtonGroup } from './ButtonGroup'
 
 const ExportFiles = () => {
+  // TODO: Replace image placeholder with real components
+  // TODO: Adjust css correctly
   return (
     <div className="ml-5 flex w-[41%] flex-col items-stretch max-md:ml-0 max-md:w-full">
       <div className="flex grow flex-col items-stretch self-stretch max-md:mt-4 max-md:max-w-full">

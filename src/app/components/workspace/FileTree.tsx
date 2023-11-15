@@ -1,4 +1,5 @@
 const FileTree = () => {
+  // TODO: Create component for each file type (archive, spreadsheet, file, etc.)
   return (
     <div className="mb-0 mt-6 flex flex-col rounded-lg py-1 pr-20">
       <div className="flex w-auto items-stretch gap-2">
