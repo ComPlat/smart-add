@@ -6,14 +6,15 @@ type Message = {
 }
 
 const Message = ({ percent, sumSize, title, uploadedSize }: Message) => {
+  // TODO: Implement circular bar for running upload progress
   return (
-    <div className="flex gap-4 rounded-[100px] border border-solid border-black border-opacity-0 bg-white p-4 shadow-sm max-md:justify-center">
+    <div className="flex gap-4 rounded-full border border-black/0  bg-white p-4 shadow-lg">
       <img
         className="aspect-square w-10 max-w-full shrink-0 overflow-hidden object-contain object-center"
         loading="lazy"
         src="https://cdn.builder.io/api/v1/image/assets/TEMP/12312231-6ea7-48a5-9cee-d899b2fb9ed2?"
       />
-      <div className="flex grow basis-[0%] flex-col items-stretch justify-center self-stretch">
+      <div className="flex flex-col justify-center">
         <div className="whitespace-nowrap text-sm font-medium leading-5 text-gray-900">
           {title}
         </div>

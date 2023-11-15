@@ -4,10 +4,10 @@ import { Message } from './Message'
 
 const Sidebar = () => {
   return (
-    <aside className="flex w-[18%] flex-col items-stretch max-md:ml-0 max-md:w-full">
-      <div className="mx-auto flex w-full flex-col items-center justify-between self-stretch rounded-3xl bg-white px-2 py-6 shadow-sm max-md:mt-4">
+    <aside className="flex w-auto flex-col">
+      <div className="mx-auto flex h-screen w-full flex-col items-center justify-between rounded-3xl bg-white px-2 py-6 shadow-sm">
         <MenuItem label="Workspace" />
-        <div className="mt-[712px] flex flex-col items-stretch justify-end self-stretch max-md:mt-10">
+        <div className="mt-4 flex flex-col">
           <Message
             percent={75.0}
             sumSize={400}

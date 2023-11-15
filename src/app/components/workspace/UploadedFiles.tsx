@@ -1,6 +1,5 @@
 import { UploadDropZone } from '../upload-form/UploadDropZone'
 import { FileTree } from './FileTree'
-import { UploadDropZoneNew } from './UploadDropZoneNew'
 
 const UploadedFiles = () => {
   return (
@@ -10,7 +9,6 @@ const UploadedFiles = () => {
           Uploaded files
         </h3>
         <div className="mt-4 flex flex-col items-stretch rounded-3xl border-2 border-dashed border-[color:var(--gray-300,#D1D5DB)] bg-white px-2 pb-[463px] shadow-sm max-md:max-w-full max-md:pb-24">
-          <UploadDropZoneNew />
           <UploadDropZone />
           <FileTree />
         </div>
