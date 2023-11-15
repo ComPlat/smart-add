@@ -23,4 +23,16 @@ export class FilesDBCreator extends Dexie {
   }
 }
 
+export class AssignmentsDBCreator extends Dexie {
+  assignedFiles!: Table<ExtendedFile, number>
+
+  constructor() {
+    super('assignmentsDatabase')
+    this.version(1).stores({
+      assignedFiles: '++id, fullPath, name, uid, extension, parentUid',
+    })
+  }
+}
+
 export const filesDB = new FilesDBCreator()
+export const assignmentsDB = new AssignmentsDBCreator()

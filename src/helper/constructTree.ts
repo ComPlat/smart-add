@@ -1,82 +1,82 @@
 import { ExtendedFile } from '@/database/db'
-
-interface FileNode {
-  canMove: boolean
-  children: string[]
-  data: string
-  index: string
-  isFolder: boolean
-}
+import { FileNode } from '@/helper/types'
 
 const addFoldersToTree = (
   fileTree: Record<string, FileNode>,
   path: string[],
   node: FileNode,
+  root: string,
 ): void => {
-  let currentPath = 'inputTreeRoot'
+  let currentPath = root
   let currentFolder = fileTree[currentPath]
 
   for (const folder of path) {
-    currentPath =
-      currentPath === 'inputTreeRoot' ? folder : `${currentPath}/${folder}`
+    currentPath = currentPath === root ? folder : `${currentPath}/${folder}`
 
     if (!fileTree[currentPath]) {
-      // HINT: Create create folders for file when they don't exist already
       fileTree[currentPath] = {
         canMove: true,
         children: [],
         data: folder,
         index: currentPath,
         isFolder: true,
+        uid: null,
       }
       currentFolder.children.push(currentPath)
+      currentFolder = fileTree[currentPath]
+    } else {
+      currentFolder = fileTree[currentPath]
     }
-    currentFolder = fileTree[currentPath]
   }
 
   currentFolder.children.push(node.index)
   fileTree[node.index] = node
 }
 
-const constructTree = (files: ExtendedFile[]): Record<string, FileNode> => {
+const constructTree = (
+  inputFiles: ExtendedFile[],
+  assignmentFiles: ExtendedFile[] | undefined,
+  inputRoot: string,
+  assignmentRoot: string,
+): Record<string, FileNode> => {
   const convertToTree = (
-    inputFiles: ExtendedFile[],
+    files: ExtendedFile[],
+    root: string,
   ): Record<string, FileNode> => {
     const fileTree: Record<string, FileNode> = {
-      assignmentTreeRoot: {
-        canMove: false,
-        children: [],
-        data: 'Root item 2',
-        index: 'assignmentTreeRoot',
-        isFolder: true,
-      },
-      // HINT: Root is ALWAYS needed.
-      inputTreeRoot: {
+      [root]: {
         canMove: false,
         children: [],
         data: 'Root item',
-        index: 'inputTreeRoot',
+        index: root,
         isFolder: true,
+        uid: 'root',
       },
     }
 
-    inputFiles.forEach((inputFile) => {
-      const { fullPath, name } = inputFile
-      const node: FileNode = {
-        canMove: true,
-        children: [],
-        data: name,
-        index: fullPath,
-        isFolder: name.endsWith('.zip'),
-      }
+    if (files && Array.isArray(files)) {
+      files.forEach((inputFile) => {
+        const { fullPath, name, uid } = inputFile
+        const node: FileNode = {
+          canMove: true,
+          children: [],
+          data: name,
+          index: fullPath,
+          isFolder: name.endsWith('.zip'),
+          uid,
+        }
 
-      addFoldersToTree(fileTree, fullPath.split('/'), node)
-    })
+        addFoldersToTree(fileTree, fullPath.split('/'), node, root)
+      })
+    }
 
     return fileTree
   }
 
-  return convertToTree(files)
+  const inputTree = convertToTree(inputFiles, inputRoot)
+  const assignmentTree = convertToTree(assignmentFiles || [], assignmentRoot)
+
+  return { ...inputTree, ...assignmentTree }
 }
 
 export { constructTree }

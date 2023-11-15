@@ -42,7 +42,11 @@ const renderItem = ({
   const shouldHideTitle = typeof title === 'string' && title.endsWith('.root')
 
   return (
-    <li title={String(title)} {...context.itemContainerWithChildrenProps}>
+    <li
+      className="flex-col"
+      title={String(title)}
+      {...context.itemContainerWithChildrenProps}
+    >
       <button
         {...context.itemContainerWithoutChildrenProps}
         {...context.interactiveElementProps}
@@ -51,7 +55,7 @@ const renderItem = ({
           ${isDraggingOver ? 'rounded-md bg-blue-200' : ''}`}
         style={{
           marginLeft: `${depth * 25}px`,
-          maxWidth: '95%',
+          maxWidth: `calc(100% - ${depth * 25}px)`,
         }}
         type="button"
       >
