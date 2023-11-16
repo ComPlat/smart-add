@@ -28,7 +28,6 @@ const createFilePaths = (
     traverseTree(rootFolder, '', true)
   }
 
-  console.log(filePaths)
   return filePaths
 }
 
