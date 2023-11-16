@@ -3,8 +3,8 @@ import { FileNode } from './types'
 const createFilePaths = (
   fileTree: Record<string, FileNode>,
   root: string,
-): { name: string; path: string }[] => {
-  const filePaths: { name: string; path: string }[] = []
+): { name: string; path: string; uid: string }[] => {
+  const filePaths: { name: string; path: string; uid: string }[] = []
 
   const traverseTree = (
     node: FileNode,
@@ -14,7 +14,7 @@ const createFilePaths = (
     const fullPath = isRoot
       ? ''
       : `${currentPath}${currentPath ? '/' : ''}${node.data}`
-    filePaths.push({ name: node.data, path: fullPath })
+    filePaths.push({ name: node.data, path: fullPath, uid: String(node.uid) })
 
     if (node.children) {
       for (const child of node.children) {
@@ -28,6 +28,7 @@ const createFilePaths = (
     traverseTree(rootFolder, '', true)
   }
 
+  console.log(filePaths)
   return filePaths
 }
 

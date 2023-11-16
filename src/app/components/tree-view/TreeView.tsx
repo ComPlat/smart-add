@@ -3,7 +3,7 @@
 import { assignmentsDB, filesDB } from '@/database/db'
 import { constructTree } from '@/helper/constructTree'
 import { handleFileMove } from '@/helper/handleFileMove'
-import { Button, Spin } from 'antd'
+import { Button, Spin, message } from 'antd'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useMemo, useState } from 'react'
 import {
@@ -43,6 +43,15 @@ const TreeView = () => {
 
   return (
     <UncontrolledTreeEnvironment
+      canDropAt={(items, target) =>
+        items.every((item) => {
+          if (target.targetType !== 'between-items') {
+            message.warning(`"${item.data}" already exists at location!`)
+            return !treeData[target.targetItem].children.includes(item.data)
+          }
+          return false
+        })
+      }
       dataProvider={
         new StaticTreeDataProvider(treeData, (item, data) => ({
           ...item,
@@ -54,7 +63,7 @@ const TreeView = () => {
       canReorderItems
       canSearch={false}
       getItemTitle={(item) => item.data}
-      key={uploading ? 0 : files?.length}
+      key={uploading ? 0 : files?.length || assignedFiles?.length}
       onDrop={() => handleFileMove(treeData, setUploading)}
       viewState={{}}
     >

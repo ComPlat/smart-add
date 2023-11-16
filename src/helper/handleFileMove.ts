@@ -1,5 +1,5 @@
 import { assignmentsDB, filesDB } from '@/database/db'
-import { createFilePaths } from '@/helper/constructPaths'
+import { createFilePaths } from '@/helper/createFilePaths'
 import { FileNode } from '@/helper/types'
 import { message } from 'antd'
 import { Dispatch, SetStateAction } from 'react'
@@ -11,6 +11,7 @@ const handleFileMove = async (
   setUploading(true)
 
   let fileCount = 0
+  let updateCount = 0
 
   const filePaths = createFilePaths(fileTree, 'assignmentTreeRoot')
 
@@ -22,26 +23,37 @@ const handleFileMove = async (
       const assigned = await assignmentsDB.assignedFiles.get({
         uid: String(fileTree[item].uid),
       })
+
       if (file) {
         file.fullPath =
-          filePaths.find((path) => path.name === fileTree[item].data)?.path ||
-          ''
+          filePaths.find((path) => path.uid === fileTree[item].uid)?.path || ''
         await assignmentsDB.assignedFiles.add(file)
-
         await filesDB.files.where({ uid: file.uid }).delete()
 
         fileCount++
       }
+
       if (assigned) {
-        const newPath =
-          filePaths.find((path) => path.name === fileTree[item].data)?.path ||
-          ''
-        const updatedFile = {
-          ...assigned,
-          fullPath: newPath,
+        const newFullPath =
+          filePaths.find((path) => path.uid === fileTree[item].uid)?.path || ''
+        if (newFullPath !== assigned.fullPath) {
+          const existingFile = await assignmentsDB.assignedFiles.get({
+            fullPath: newFullPath,
+          })
+
+          if (existingFile) {
+            message.warning(`File already exists at path: ${newFullPath}`)
+            return
+          }
+
+          const updatedFile = {
+            ...assigned,
+            fullPath: newFullPath,
+          }
+          await assignmentsDB.assignedFiles.put(updatedFile)
+
+          updateCount++
         }
-        await assignmentsDB.assignedFiles.put(updatedFile)
-        fileCount++
       }
     } catch (error) {
       console.error(`Error processing file for item: ${fileTree[item].data}`)
@@ -64,9 +76,12 @@ const handleFileMove = async (
   }
 
   if (fileCount > 0) {
-    message.success(
+    message.info(
       `Moved ${fileCount} file${fileCount > 1 ? 's' : ''} to assignmentDB`,
     )
+  }
+  if (updateCount > 0) {
+    message.info(`${updateCount} entr${updateCount > 1 ? 'ies' : 'y'} updated`)
   }
 
   setUploading(false)
