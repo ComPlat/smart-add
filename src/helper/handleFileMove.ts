@@ -23,32 +23,25 @@ const handleFileMove = async (
         uid: String(fileTree[item].uid),
       })
       if (file) {
-        const oldPath = file.fullPath
-        const newPath =
+        file.fullPath =
           filePaths.find((path) => path.name === fileTree[item].data)?.path ||
           ''
-        if (oldPath !== newPath) {
-          file.fullPath = newPath
-          await assignmentsDB.assignedFiles.add(file)
+        await assignmentsDB.assignedFiles.add(file)
 
-          await filesDB.files.where({ uid: file.uid }).delete()
+        await filesDB.files.where({ uid: file.uid }).delete()
 
-          fileCount++
-        }
+        fileCount++
       }
       if (assigned) {
-        const oldPath = assigned.fullPath
         const newPath =
           filePaths.find((path) => path.name === fileTree[item].data)?.path ||
           ''
-        if (oldPath !== newPath) {
-          const updatedFile = {
-            ...assigned,
-            fullPath: newPath,
-          }
-          await assignmentsDB.assignedFiles.put(updatedFile)
-          fileCount++
+        const updatedFile = {
+          ...assigned,
+          fullPath: newPath,
         }
+        await assignmentsDB.assignedFiles.put(updatedFile)
+        fileCount++
       }
     } catch (error) {
       console.error(`Error processing file for item: ${fileTree[item].data}`)
