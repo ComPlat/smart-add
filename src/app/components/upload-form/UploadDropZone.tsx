@@ -111,9 +111,9 @@ const UploadDropZone = () => {
         }}
         openFileDialogOnClick={false}
       >
-        <div className="flex flex-col items-center justify-center rounded-2xl bg-white px-20 py-8 max-md:max-w-full max-md:px-5">
+        <div className="flex flex-col items-center justify-center rounded-2xl bg-white">
           <UploadOutlined className="text-5xl text-gray-300" />
-          <div className="mt-4 flex flex-col items-stretch self-stretch">
+          <div className="mt-4 flex flex-col">
             <div className="text-center text-base font-medium leading-6 text-black text-opacity-80">
               Drag your files or folders to this area to upload
             </div>
