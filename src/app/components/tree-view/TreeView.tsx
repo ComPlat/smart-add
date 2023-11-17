@@ -3,7 +3,6 @@
 import { assignmentsDB, filesDB } from '@/database/db'
 import { constructTree } from '@/helper/constructTree'
 import { handleFileMove } from '@/helper/handleFileMove'
-import { Button, Spin } from 'antd'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useMemo, useState } from 'react'
 import {
@@ -13,7 +12,9 @@ import {
 } from 'react-complex-tree'
 import 'react-complex-tree/lib/style-modern.css'
 
+import ClearButtonGroup from './ClearButtonGroup'
 import styles from './TreeView.module.css'
+import { UploadSpinner } from './UploadSpinner'
 import { renderItem } from './renderItem'
 
 const TreeView = () => {
@@ -75,13 +76,7 @@ const TreeView = () => {
           />
         </div>
 
-        <>
-          {uploading && (
-            <div className="absolute left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2">
-              <Spin size="large" />
-            </div>
-          )}
-        </>
+        <UploadSpinner isUploading={uploading} />
 
         <div className={styles['tree']}>
           <Tree
@@ -99,30 +94,10 @@ const TreeView = () => {
         </div>
       </div>
 
-      <div className="flex">
-        <Button
-          onClick={() => {
-            filesDB.files.clear()
-            window.location.reload()
-          }}
-          className="mr-2 w-1/2"
-          danger
-          disabled={files?.length === 0}
-        >
-          Clear Files DB
-        </Button>
-        <Button
-          onClick={() => {
-            assignmentsDB.assignedFiles.clear()
-            window.location.reload()
-          }}
-          className=" mr-2 w-1/2"
-          danger
-          disabled={assignedFiles?.length === 0}
-        >
-          Clear Assignment DB
-        </Button>
-      </div>
+      <ClearButtonGroup
+        assignedFilesLength={assignedFiles?.length || 0}
+        filesLength={files?.length || 0}
+      />
     </UncontrolledTreeEnvironment>
   )
 }
