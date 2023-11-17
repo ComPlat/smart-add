@@ -9,7 +9,7 @@ const Workspace = () => {
   return (
     <div className="flex h-screen w-screen flex-col bg-gray-100 p-4">
       <Header />
-      <div className="mt-4">
+      <div className="mt-4 h-screen">
         <div className="flex h-full">
           <Sidebar />
           <UploadedFiles />
