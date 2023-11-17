@@ -1,3 +1,5 @@
+import { CloseIcon } from './icons/CloseIcon'
+
 type Message = {
   percent: number
   sumSize: number
@@ -27,11 +29,16 @@ const Message = ({ percent, sumSize, title, uploadedSize }: Message) => {
           </div>
         </div>
       </div>
-      <img
-        className="my-auto aspect-square w-5 max-w-full shrink-0 self-center overflow-hidden object-contain object-center"
-        loading="lazy"
-        src="https://cdn.builder.io/api/v1/image/assets/TEMP/54a467d4-c460-43fb-ba3a-07d0371fb6ef?"
-      />
+      <button
+        onClick={() => {
+          {
+            /* TODO: Dismiss and hide me! */
+          }
+        }}
+        className="my-auto h-8 w-8 text-lg text-gray-800 duration-150 hover:text-kit-primary-full"
+      >
+        <CloseIcon />
+      </button>
     </div>
   )
 }
