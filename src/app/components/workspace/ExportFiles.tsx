@@ -4,12 +4,12 @@ const ExportFiles = () => {
   // TODO: Replace image placeholder with real components
   // TODO: Adjust css correctly
   return (
-    <div className="ml-5 flex w-[41%] flex-col items-stretch max-md:ml-0 max-md:w-full">
-      <div className="flex grow flex-col items-stretch self-stretch max-md:mt-4 max-md:max-w-full">
-        <h3 className="justify-center text-base font-bold leading-6 text-gray-900 max-md:max-w-full">
+    <div className="ml-5 flex w-[41%] flex-col">
+      <div className="flex grow flex-col">
+        <h3 className="justify-center text-base font-bold leading-6 text-gray-900">
           Export
         </h3>
-        <div className="mt-4 flex flex-col rounded-3xl bg-white pb-[498px] pt-8 shadow-sm max-md:max-w-full max-md:pb-24">
+        <div className="mt-4 flex w-[400px] flex-col rounded-3xl bg-white pt-8 shadow-sm">
           <ButtonGroup />
           <div className="mb-0 mt-8 flex flex-col items-stretch self-stretch rounded-[30px] px-4 pt-2 max-md:mb-2.5 max-md:max-w-full">
             <div className="flex flex-col items-stretch rounded-lg max-md:max-w-full">
