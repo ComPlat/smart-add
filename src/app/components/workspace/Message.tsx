@@ -1,21 +1,17 @@
+import { ProgressBar } from './ProgressBar'
 import { CloseIcon } from './icons/CloseIcon'
 
-type Message = {
+type MessageProps = {
   percent: number
   sumSize: number
   title: string
   uploadedSize: number
 }
 
-const Message = ({ percent, sumSize, title, uploadedSize }: Message) => {
-  // TODO: Implement circular bar for running upload progress
+const Message = ({ percent, sumSize, title, uploadedSize }: MessageProps) => {
   return (
-    <div className="flex gap-4 rounded-full border border-black/0  bg-white p-4 shadow-lg">
-      <img
-        className="aspect-square w-10 max-w-full shrink-0 overflow-hidden object-contain object-center"
-        loading="lazy"
-        src="https://cdn.builder.io/api/v1/image/assets/TEMP/12312231-6ea7-48a5-9cee-d899b2fb9ed2?"
-      />
+    <div className="flex gap-4 rounded-full border border-black/0 bg-white p-4 shadow-lg">
+      <ProgressBar progress={percent} />
       <div className="flex flex-col justify-center">
         <div className="whitespace-nowrap text-sm font-medium leading-5 text-gray-900">
           {title}
@@ -37,6 +33,7 @@ const Message = ({ percent, sumSize, title, uploadedSize }: Message) => {
         }}
         className="my-auto h-8 w-8 text-lg text-gray-800 duration-150 hover:text-kit-primary-full"
       >
+        {/* TODO: Put me into center of the div. */}
         <CloseIcon />
       </button>
     </div>

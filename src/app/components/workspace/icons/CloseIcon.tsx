@@ -3,7 +3,7 @@ import { IconProps } from '@/types/IconProps'
 const CloseIcon = ({
   className,
   hidden = true,
-  viewBox = '0 0 20 20',
+  viewBox = '0 0 40 40',
 }: IconProps) => {
   return (
     <svg
