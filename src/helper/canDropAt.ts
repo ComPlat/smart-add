@@ -9,18 +9,19 @@ const canDropAt = (
 ) => {
   if (target.treeId === 'inputTree') return false
 
-  const draggedName = treeData[items[0].index].data
+  const isDroppable = (parent: FileNode) =>
+    !parent.children.some(
+      (child) => treeData[child].data === treeData[items[0].index].data,
+    )
 
-  if (target.targetType === 'item' || target.targetType === 'between-items') {
-    const parentItem =
-      target.targetType === 'item' ? target.targetItem : target.parentItem
-
-    for (const child of treeData[parentItem].children) {
-      if (treeData[child].data === draggedName) return false
-    }
+  switch (target.targetType) {
+    case 'item':
+      return isDroppable(treeData[target.targetItem])
+    case 'between-items':
+      return isDroppable(treeData[target.parentItem])
+    default:
+      return true
   }
-
-  return true
 }
 
 export { canDropAt }

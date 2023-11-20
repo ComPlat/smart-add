@@ -20,22 +20,16 @@ export class EventEmitter<EventPayload> {
 
   public delete(handlerId: number) {
     this.options?.logger?.('off')
-    this.handlers[handlerId] = null
+    delete this.handlers[handlerId]
   }
 
   public async emit(payload: EventPayload): Promise<void> {
-    const promises: Array<Promise<void>> = []
-
     this.options?.logger?.('emit', payload)
 
-    for (const handler of this.handlers) {
-      if (handler) {
-        const res = handler(payload) as Promise<void>
-        if (typeof res?.then === 'function') {
-          promises.push(res)
-        }
-      }
-    }
+    const promises = this.handlers
+      .filter((handler) => handler)
+      .map((handler) => handler?.(payload))
+      .filter((res) => typeof res?.then === 'function')
 
     await Promise.all(promises)
   }

@@ -7,29 +7,28 @@ const addFoldersToTree = (
   node: FileNode,
   root: string,
 ): void => {
-  let currentPath = root
-  let currentFolder = fileTree[currentPath]
+  const currentPath = path.reduce((accumulatedPath, currentFolder) => {
+    const newPath =
+      accumulatedPath === root
+        ? currentFolder
+        : `${accumulatedPath}/${currentFolder}`
 
-  for (const folder of path) {
-    currentPath = currentPath === root ? folder : `${currentPath}/${folder}`
-
-    if (!fileTree[currentPath]) {
-      fileTree[currentPath] = {
+    if (!fileTree[newPath]) {
+      fileTree[newPath] = {
         canMove: true,
         children: [],
-        data: folder,
-        index: currentPath,
+        data: currentFolder,
+        index: newPath,
         isFolder: true,
         uid: null,
       }
-      currentFolder.children.push(currentPath)
-      currentFolder = fileTree[currentPath]
-    } else {
-      currentFolder = fileTree[currentPath]
+      fileTree[accumulatedPath].children.push(newPath)
     }
-  }
 
-  currentFolder.children.push(node.index)
+    return newPath
+  }, root)
+
+  fileTree[currentPath].children.push(node.index)
   fileTree[node.index] = node
 }
 
