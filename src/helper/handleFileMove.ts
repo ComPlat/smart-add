@@ -41,18 +41,17 @@ const handleFileMove = async (
             fullPath: newFullPath,
           })
 
-          if (existingFile) {
-            message.warning(`File already exists at path: ${newFullPath}`)
-            return
-          }
+          if (existingFile) return
 
           const updatedFile = {
             ...assigned,
             fullPath: newFullPath,
           }
-          await assignmentsDB.assignedFiles.put(updatedFile)
 
-          updateCount++
+          if (newFullPath !== assigned.fullPath) {
+            await assignmentsDB.assignedFiles.put(updatedFile)
+            updateCount++
+          }
         }
       }
     } catch (error) {

@@ -1,63 +1,61 @@
 'use client'
 
 import { assignmentsDB, filesDB } from '@/database/db'
-import { constructTree } from '@/helper/constructTree'
+import { canDropAt } from '@/helper/canDropAt'
 import { handleFileMove } from '@/helper/handleFileMove'
+import { retrieveTree } from '@/helper/retrieveTree'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useMemo, useState } from 'react'
-import {
-  StaticTreeDataProvider,
-  Tree,
-  UncontrolledTreeEnvironment,
-} from 'react-complex-tree'
+import { useState } from 'react'
+import { Tree, UncontrolledTreeEnvironment } from 'react-complex-tree'
 import 'react-complex-tree/lib/style-modern.css'
 
+import { CustomTreeDataProvider } from '../custom/CustomTreeDataProvider'
 import ClearButtonGroup from './ClearButtonGroup'
 import styles from './TreeView.module.css'
 import { UploadSpinner } from './UploadSpinner'
 import { renderItem } from './renderItem'
 
 const TreeView = () => {
-  const files = useLiveQuery(() => filesDB.files.toArray(), [])
+  const files = useLiveQuery(() => filesDB.files.toArray() || [])
   const assignedFiles = useLiveQuery(
-    () => assignmentsDB.assignedFiles.toArray(),
-    [],
+    () => assignmentsDB.assignedFiles.toArray() || [],
   )
 
   const [uploading, setUploading] = useState(false)
 
-  const treeData = useMemo(() => {
-    if (files && assignedFiles) {
-      return constructTree(
-        files,
-        assignedFiles,
-        'inputTreeRoot',
-        'assignmentTreeRoot',
-      )
-    }
-    return null
-  }, [files, assignedFiles])
+  const treeData = retrieveTree(
+    files ?? [],
+    assignedFiles ?? [],
+    'inputTreeRoot',
+    'assignmentTreeRoot',
+  )
 
   if (!treeData) {
     return <div>Loading...</div>
   }
 
+  const treeDataProvider = new CustomTreeDataProvider(
+    treeData,
+    (item, data) => ({
+      ...item,
+      data,
+    }),
+  )
+
+  treeDataProvider.onDidChangeTreeData(() =>
+    handleFileMove(treeData, setUploading),
+  )
+
   return (
     <UncontrolledTreeEnvironment
-      dataProvider={
-        new StaticTreeDataProvider(treeData, (item, data) => ({
-          ...item,
-          data,
-        }))
-      }
       canDragAndDrop
-      canDropAt={(_items, target) => target.treeId === 'assignmentTree'}
+      canDropAt={(items, target) => canDropAt(items, target, treeData)}
       canDropOnFolder
       canReorderItems
       canSearch={false}
+      dataProvider={treeDataProvider}
       getItemTitle={(item) => item.data}
       key={uploading ? 0 : files?.length || assignedFiles?.length}
-      onDrop={() => handleFileMove(treeData, setUploading)}
       viewState={{}}
     >
       <div className="flex flex-row justify-between">
