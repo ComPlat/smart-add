@@ -16,54 +16,39 @@ import { UploadSpinner } from './UploadSpinner'
 import { renderItem } from './renderItem'
 
 const TreeView = () => {
-  const files = useLiveQuery(() => filesDB.files.toArray() || [])
-  const assignedFiles = useLiveQuery(
-    () => assignmentsDB.assignedFiles.toArray() || [],
-  )
-
-  const [uploading, setUploading] = useState(false)
-  const [treeDataVersion, setTreeDataVersion] = useState(0)
-
-  const treeData = retrieveTree(
-    files ?? [],
-    assignedFiles ?? [],
-    'inputTreeRoot',
-    'assignmentTreeRoot',
-  )
-
-  if (!treeData) {
-    return <div>Loading...</div>
-  }
-
-  const treeDataProvider = new CustomTreeDataProvider(
-    treeData,
-    (item, data) => ({
+  const db = useLiveQuery(async () => {
+    const files = await filesDB.files.toArray()
+    const assignedFiles = await assignmentsDB.assignedFiles.toArray()
+    const tree = retrieveTree(
+      files,
+      assignedFiles,
+      'inputTreeRoot',
+      'assignmentTreeRoot',
+    )
+    const treeDataProvider = new CustomTreeDataProvider(tree, (item, data) => ({
       ...item,
       data,
-    }),
-  )
+    }))
+    const key = Date.now()
 
-  treeDataProvider.onDidChangeTreeData(() => {
-    setTreeDataVersion((prevVersion) => prevVersion + 1)
+    return { assignedFiles, files, key, tree, treeDataProvider }
   })
 
-  const generateKey = () => {
-    return uploading
-      ? 0
-      : files?.length || assignedFiles?.length || treeDataVersion
-  }
+  const [uploading, setUploading] = useState(false)
+
+  if (!db) return <div>Loading...</div>
 
   return (
     <UncontrolledTreeEnvironment
       canDragAndDrop
-      canDropAt={(items, target) => canDropAt(items, target, treeData)}
+      canDropAt={(items, target) => canDropAt(items, target, db.tree)}
       canDropOnFolder
       canReorderItems
       canSearch={false}
-      dataProvider={treeDataProvider}
+      dataProvider={db.treeDataProvider}
       getItemTitle={(item) => item.data}
-      key={generateKey()}
-      onDrop={() => handleFileMove(treeData, setUploading)}
+      key={uploading ? 0 : db.key}
+      onDrop={() => handleFileMove(db.tree, setUploading)}
       viewState={{}}
     >
       <div className="flex flex-row justify-between">
@@ -101,8 +86,8 @@ const TreeView = () => {
       </div>
 
       <ClearButtonGroup
-        assignedFilesLength={assignedFiles?.length || 0}
-        filesLength={files?.length || 0}
+        assignedFilesLength={db.assignedFiles.length}
+        filesLength={db.files.length}
       />
     </UncontrolledTreeEnvironment>
   )
