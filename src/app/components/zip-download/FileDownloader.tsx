@@ -1,10 +1,13 @@
 'use client'
 
 import { ExtendedFile, filesDB } from '@/database/db'
-import { Button, message } from 'antd'
+import { message } from 'antd'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { saveAs } from 'file-saver'
 import JSZip from 'jszip'
+
+import { Button } from '../workspace/Button'
+import { ArchiveDownloadIcon } from '../workspace/icons/ArchiveDownloadIcon'
 
 interface FileTree {
   [key: string]: Blob | FileTree
@@ -79,22 +82,22 @@ const FileDownloader = () => {
   }
 
   return (
-    <div className="flex">
+    <div className="mt-4 flex flex-col">
       <Button
-        className="mx-2 w-1/2"
+        icon={
+          <ArchiveDownloadIcon className="h-4 w-4 self-center text-white" />
+        }
         disabled={files.length === 0 ? true : false}
+        label="Export as ZIP"
         onClick={handleClick}
-      >
-        Download as Zip
-      </Button>
+      />
+
       <Button
-        className="mx-2 w-1/2"
-        danger
         disabled={files.length === 0 ? true : false}
+        label="Clear DB"
         onClick={handleClear}
-      >
-        Clear DB
-      </Button>
+        variant="danger"
+      ></Button>
     </div>
   )
 }

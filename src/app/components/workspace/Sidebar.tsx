@@ -1,7 +1,6 @@
-import { Button } from './Button'
+import { FileDownloader } from '../zip-download/FileDownloader'
 import { MenuItem } from './MenuItem'
 import { Message } from './Message'
-import { ArchiveDownloadIcon } from './icons/ArchiveDownloadIcon'
 
 const Sidebar = () => {
   return (
@@ -15,12 +14,8 @@ const Sidebar = () => {
             title="4 files uploading"
             uploadedSize={300}
           />
-          <Button
-            icon={
-              <ArchiveDownloadIcon className="h-4 w-4 self-center text-white" />
-            }
-            label="Export as ZIP"
-          />
+
+          <FileDownloader />
         </div>
       </div>
     </aside>
