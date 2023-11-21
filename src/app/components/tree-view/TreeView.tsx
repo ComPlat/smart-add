@@ -31,6 +31,7 @@ const TreeView = () => {
         }))
       }
       canDragAndDrop
+      canDropAt={(_items, target) => target.treeId === 'assignmentTree'}
       canDropOnFolder
       canReorderItems
       canSearch={false}
@@ -50,7 +51,7 @@ const TreeView = () => {
             )}
             renderItem={renderItem}
             rootItem="inputTreeRoot"
-            treeId="tree-1"
+            treeId="inputTree"
             treeLabel="Input Tree"
           />
         </div>
@@ -64,7 +65,7 @@ const TreeView = () => {
             )}
             renderItem={renderItem}
             rootItem="assignmentTreeRoot"
-            treeId="tree-2"
+            treeId="assignmentTree"
             treeLabel="Assignment Tree"
           />
         </div>
