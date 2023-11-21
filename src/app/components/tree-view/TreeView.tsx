@@ -6,7 +6,11 @@ import { handleFileMove } from '@/helper/handleFileMove'
 import { retrieveTree } from '@/helper/retrieveTree'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
-import { Tree, UncontrolledTreeEnvironment } from 'react-complex-tree'
+import {
+  Tree,
+  TreeItemIndex,
+  UncontrolledTreeEnvironment,
+} from 'react-complex-tree'
 import 'react-complex-tree/lib/style-modern.css'
 
 import { CustomTreeDataProvider } from '../custom/CustomTreeDataProvider'
@@ -35,11 +39,32 @@ const TreeView = () => {
   })
 
   const [uploading, setUploading] = useState(false)
+  const [focusedItem, setFocusedItem] = useState<
+    TreeItemIndex & (TreeItemIndex | TreeItemIndex[])
+  >()
+  const [expandedItems, setExpandedItems] = useState<TreeItemIndex[]>([])
 
   if (!db) return <div>Loading...</div>
 
   return (
     <UncontrolledTreeEnvironment
+      onCollapseItem={(item) =>
+        setExpandedItems(
+          expandedItems.filter(
+            (expandedItemIndex) => expandedItemIndex !== item.index,
+          ),
+        )
+      }
+      viewState={{
+        ['assignmentTree']: {
+          expandedItems,
+          focusedItem,
+        },
+        ['inputTree']: {
+          expandedItems,
+          focusedItem,
+        },
+      }}
       canDragAndDrop
       canDropAt={(items, target) => canDropAt(items, target, db.tree)}
       canDropOnFolder
@@ -49,7 +74,8 @@ const TreeView = () => {
       getItemTitle={(item) => item.data}
       key={uploading ? 0 : db.key}
       onDrop={() => handleFileMove(db.tree, setUploading)}
-      viewState={{}}
+      onExpandItem={(item) => setExpandedItems([...expandedItems, item.index])}
+      onFocusItem={(item) => setFocusedItem(item.index)}
     >
       <div className="flex flex-row justify-between">
         <div className={styles['tree']}>
