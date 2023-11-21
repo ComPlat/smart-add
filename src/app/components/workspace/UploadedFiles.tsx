@@ -1,5 +1,7 @@
+import ParseXlsx from '../upload-form/ParseXlsx'
 import { UploadDropZone } from '../upload-form/UploadDropZone'
 import { FileTree } from './FileTree'
+import { TreeView } from './TreeView'
 
 const UploadedFiles = () => {
   return (
@@ -11,6 +13,8 @@ const UploadedFiles = () => {
         <div className="mt-4 flex h-full flex-col rounded-3xl border-2 border-dashed border-gray-300 bg-white px-2 shadow-sm">
           <UploadDropZone />
           <FileTree />
+          <TreeView />
+          <ParseXlsx />
         </div>
       </div>
     </div>
