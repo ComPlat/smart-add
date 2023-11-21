@@ -22,6 +22,7 @@ const TreeView = () => {
   )
 
   const [uploading, setUploading] = useState(false)
+  const [treeDataVersion, setTreeDataVersion] = useState(0)
 
   const treeData = retrieveTree(
     files ?? [],
@@ -42,9 +43,15 @@ const TreeView = () => {
     }),
   )
 
-  treeDataProvider.onDidChangeTreeData(() =>
-    handleFileMove(treeData, setUploading),
-  )
+  treeDataProvider.onDidChangeTreeData(() => {
+    setTreeDataVersion((prevVersion) => prevVersion + 1)
+  })
+
+  const generateKey = () => {
+    return uploading
+      ? 0
+      : files?.length || assignedFiles?.length || treeDataVersion
+  }
 
   return (
     <UncontrolledTreeEnvironment
@@ -55,7 +62,8 @@ const TreeView = () => {
       canSearch={false}
       dataProvider={treeDataProvider}
       getItemTitle={(item) => item.data}
-      key={uploading ? 0 : files?.length || assignedFiles?.length}
+      key={generateKey()}
+      onDrop={() => handleFileMove(treeData, setUploading)}
       viewState={{}}
     >
       <div className="flex flex-row justify-between">
