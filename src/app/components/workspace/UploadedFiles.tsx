@@ -3,7 +3,7 @@ import { FileTree } from './FileTree'
 
 const UploadedFiles = () => {
   return (
-    <div className="ml-5 flex w-[41%] flex-col">
+    <div className="ml-5 flex w-full flex-col">
       <div className="flex grow flex-col">
         <h3 className="justify-center whitespace-nowrap text-base font-bold leading-6 text-gray-900">
           Uploaded files
