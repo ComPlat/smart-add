@@ -5,9 +5,11 @@ import { canDropAt } from '@/helper/canDropAt'
 import { handleFileMove } from '@/helper/handleFileMove'
 import { retrieveTree } from '@/helper/retrieveTree'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
+  DraggingPosition,
   Tree,
+  TreeItem,
   TreeItemIndex,
   UncontrolledTreeEnvironment,
 } from 'react-complex-tree'
@@ -44,38 +46,56 @@ const TreeView = () => {
   >()
   const [expandedItems, setExpandedItems] = useState<TreeItemIndex[]>([])
 
+  const memoizedKey = useMemo(
+    () => (db ? (uploading ? 0 : db.key) : null),
+    [uploading, db],
+  )
+
   if (!db) return <div>Loading...</div>
+
+  const viewState = {
+    ['assignmentTree']: {
+      expandedItems,
+      focusedItem,
+    },
+    ['inputTree']: {
+      expandedItems,
+      focusedItem,
+    },
+  }
+
+  const handleOnCollapseItem = (item: TreeItem) =>
+    setExpandedItems(
+      expandedItems.filter(
+        (expandedItemIndex) => expandedItemIndex !== item.index,
+      ),
+    )
+
+  const handleOnExpandItem = (item: TreeItem) =>
+    setExpandedItems([...expandedItems, item.index])
+
+  const handleOnFocusItem = (item: TreeItem) => setFocusedItem(item.index)
+
+  const handleOnDrop = () => handleFileMove(db.tree, setUploading)
+
+  const handleCanDropAt = (items: TreeItem[], target: DraggingPosition) =>
+    canDropAt(items, target, db.tree)
 
   return (
     <UncontrolledTreeEnvironment
-      onCollapseItem={(item) =>
-        setExpandedItems(
-          expandedItems.filter(
-            (expandedItemIndex) => expandedItemIndex !== item.index,
-          ),
-        )
-      }
-      viewState={{
-        ['assignmentTree']: {
-          expandedItems,
-          focusedItem,
-        },
-        ['inputTree']: {
-          expandedItems,
-          focusedItem,
-        },
-      }}
       canDragAndDrop
-      canDropAt={(items, target) => canDropAt(items, target, db.tree)}
+      canDropAt={handleCanDropAt}
       canDropOnFolder
       canReorderItems
       canSearch={false}
       dataProvider={db.treeDataProvider}
-      getItemTitle={(item) => item.data}
-      key={uploading ? 0 : db.key}
-      onDrop={() => handleFileMove(db.tree, setUploading)}
-      onExpandItem={(item) => setExpandedItems([...expandedItems, item.index])}
-      onFocusItem={(item) => setFocusedItem(item.index)}
+      getItemTitle={(item: TreeItem) => item.data}
+      key={memoizedKey}
+      onCollapseItem={handleOnCollapseItem}
+      onDrop={handleOnDrop}
+      onExpandItem={handleOnExpandItem}
+      onFocusItem={handleOnFocusItem}
+      viewState={viewState}
     >
       <div className="flex flex-row justify-between">
         <div className={styles['tree']}>
