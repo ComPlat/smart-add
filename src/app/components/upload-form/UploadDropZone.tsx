@@ -38,6 +38,17 @@ const handleCustomRequest = async ({
     try {
       setProgress(0)
       const extractedFiles = await extractFilesFromZip(file as RcFile)
+
+      await filesDB.files.add({
+        extension: file.webkitRelativePath.split('.').slice(-1)[0],
+        file,
+        fullPath: file.webkitRelativePath,
+        isFolder: true,
+        name: file.name,
+        parentUid: file.uid.split('_')[0],
+        path,
+        uid: v4(),
+      })
       await uploadExtractedFiles(
         extractedFiles,
         file as RcFile,
@@ -56,6 +67,7 @@ const handleCustomRequest = async ({
         extension: file.webkitRelativePath.split('.').slice(-1)[0],
         file,
         fullPath: file.webkitRelativePath,
+        isFolder: false,
         name: file.name,
         parentUid: file.uid.split('_')[0],
         path,

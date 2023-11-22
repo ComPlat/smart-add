@@ -6,6 +6,7 @@ export type ExtendedFile = {
   file: Blob | RcFile
   fullPath: string
   id?: number
+  isFolder: boolean
   name: string
   parentUid: string
   path: string[]

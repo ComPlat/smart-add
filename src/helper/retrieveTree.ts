@@ -55,13 +55,13 @@ const retrieveTree = (
 
     if (files) {
       files.forEach((inputFile) => {
-        const { fullPath, name, uid } = inputFile
+        const { fullPath, isFolder, name, uid } = inputFile
         const node: FileNode = {
           canMove: true,
           children: [],
           data: name,
           index: fullPath,
-          isFolder: name.endsWith('.zip'),
+          isFolder,
           uid,
         }
 

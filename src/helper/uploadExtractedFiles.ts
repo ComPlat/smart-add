@@ -32,6 +32,7 @@ const uploadExtractedFiles = async (
         extension: name.split('.').slice(-1)[0],
         file: fileData,
         fullPath: [...parentPath, fullPath].join('/'),
+        isFolder: false,
         name,
         parentUid: file.uid.split('.')[0],
         path,
