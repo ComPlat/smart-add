@@ -39,16 +39,24 @@ const handleCustomRequest = async ({
       setProgress(0)
       const extractedFiles = await extractFilesFromZip(file as RcFile)
 
-      await filesDB.files.add({
-        extension: file.webkitRelativePath.split('.').slice(-1)[0],
-        file,
-        fullPath: file.webkitRelativePath,
-        isFolder: true,
-        name: file.name,
-        parentUid: file.uid.split('_')[0],
-        path,
-        uid: v4(),
-      })
+      const folderPaths = new Set(
+        extractedFiles.map((file) =>
+          file.fullPath.split('/').slice(0, -1).join('/'),
+        ),
+      )
+
+      for (const folderPath of folderPaths) {
+        if (folderPath.includes('__MACOSX')) continue
+        if (folderPath === file.name) continue
+        await filesDB.folders.add({
+          fullPath: folderPath,
+          isFolder: true,
+          name: folderPath.split('/').slice(-1)[0],
+          parentUid: file.uid.split('_')[0],
+          uid: v4(),
+        })
+      }
+
       await uploadExtractedFiles(
         extractedFiles,
         file as RcFile,
@@ -62,6 +70,27 @@ const handleCustomRequest = async ({
     }
   } else {
     setProgress(50)
+
+    // const folderPaths = new Set(file.webkitRelativePath.split('/').slice(0, -1))
+    // for (const folderPath of folderPaths) {
+    //   await filesDB.folders.add({
+    //     fullPath: folderPath,
+    //     isFolder: true,
+    //     name: folderPath.split('/').slice(-1)[0],
+    //     parentUid: file.uid.split('_')[0],
+    //     uid: v4(),
+    //   })
+    // }
+
+    // const folderPath = file.webkitRelativePath.split('/').slice(0, -1).join('/')
+    // await filesDB.folders.add({
+    //   fullPath: folderPath,
+    //   isFolder: true,
+    //   name: folderPath,
+    //   parentUid: file.uid.split('_')[0],
+    //   uid: v4(),
+    // })
+
     filesDB.files
       .add({
         extension: file.webkitRelativePath.split('.').slice(-1)[0],

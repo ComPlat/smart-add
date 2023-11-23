@@ -1,4 +1,4 @@
-import { ExtendedFile } from '@/database/db'
+import { ExtendedFile, ExtendedFolder } from '@/database/db'
 import { FileNode } from '@/helper/types'
 
 const addFoldersToTree = (
@@ -34,12 +34,15 @@ const addFoldersToTree = (
 
 const retrieveTree = (
   inputFiles: ExtendedFile[],
+  inputFolders: ExtendedFolder[],
   assignmentFiles: ExtendedFile[],
+  assignmentFolders: ExtendedFolder[],
   inputRoot: string,
   assignmentRoot: string,
 ): Record<string, FileNode> => {
   const convertToTree = (
     files: ExtendedFile[],
+    folders: ExtendedFolder[],
     root: string,
   ): Record<string, FileNode> => {
     const fileTree: Record<string, FileNode> = {
@@ -53,28 +56,45 @@ const retrieveTree = (
       },
     }
 
-    if (files) {
-      files.forEach((inputFile) => {
-        const { fullPath, isFolder, name, uid } = inputFile
-        const node: FileNode = {
-          canMove: true,
-          children: [],
-          data: name,
-          index: fullPath,
-          isFolder,
-          uid,
-        }
+    folders.forEach((folder) => {
+      const { fullPath, name, uid } = folder
+      const node: FileNode = {
+        canMove: true,
+        children: [],
+        data: name,
+        index: fullPath,
+        isFolder: true,
+        uid,
+      }
 
-        addFoldersToTree(fileTree, fullPath.split('/'), node, root)
-      })
-    }
+      addFoldersToTree(fileTree, fullPath.split('/'), node, root)
+    })
+
+    files.forEach((inputFile) => {
+      const { fullPath, isFolder, name, uid } = inputFile
+      const node: FileNode = {
+        canMove: true,
+        children: [],
+        data: name,
+        index: fullPath,
+        isFolder,
+        uid,
+      }
+
+      addFoldersToTree(fileTree, fullPath.split('/'), node, root)
+    })
 
     return fileTree
   }
 
-  const inputTree = convertToTree(inputFiles, inputRoot)
-  const assignmentTree = convertToTree(assignmentFiles, assignmentRoot)
+  const inputTree = convertToTree(inputFiles, inputFolders, inputRoot)
+  const assignmentTree = convertToTree(
+    assignmentFiles,
+    assignmentFolders,
+    assignmentRoot,
+  )
 
+  console.log(inputTree)
   return { ...inputTree, ...assignmentTree }
 }
 

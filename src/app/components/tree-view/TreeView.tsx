@@ -25,10 +25,14 @@ import { renderItem } from './renderItem'
 const TreeView = () => {
   const db = useLiveQuery(async () => {
     const files = await filesDB.files.toArray()
+    const folders = await filesDB.folders.toArray()
     const assignedFiles = await assignmentsDB.assignedFiles.toArray()
+    const assignedFolders = await assignmentsDB.assignedFolders.toArray()
     const tree = retrieveTree(
       files,
+      folders,
       assignedFiles,
+      assignedFolders,
       'inputTreeRoot',
       'assignmentTreeRoot',
     )
@@ -38,7 +42,15 @@ const TreeView = () => {
     }))
     const key = Date.now()
 
-    return { assignedFiles, files, key, tree, treeDataProvider }
+    return {
+      assignedFiles,
+      assignedFolders,
+      files,
+      folders,
+      key,
+      tree,
+      treeDataProvider,
+    }
   })
 
   const [uploading, setUploading] = useState(false)
@@ -135,8 +147,8 @@ const TreeView = () => {
       <AddFoldersButton tree={db.tree} />
 
       <ClearButtonGroup
-        assignedFilesLength={db.assignedFiles.length}
-        filesLength={db.files.length}
+        assignmentDBLength={db.assignedFiles.length + db.assignedFolders.length}
+        inputDBLength={db.files.length + db.folders.length}
       />
     </UncontrolledTreeEnvironment>
   )

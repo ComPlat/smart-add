@@ -2,27 +2,36 @@ import { assignmentsDB, filesDB } from '@/database/db'
 import { Button } from 'antd'
 import React from 'react'
 
+const inputDbClearHandler = () => {
+  filesDB.files.clear()
+  filesDB.folders.clear()
+}
+const assignmentsDBClearHandler = () => {
+  assignmentsDB.assignedFiles.clear()
+  assignmentsDB.assignedFolders.clear()
+}
+
 const ClearButtonGroup = ({
-  assignedFilesLength,
-  filesLength,
+  assignmentDBLength,
+  inputDBLength,
 }: {
-  assignedFilesLength: number
-  filesLength: number
+  assignmentDBLength: number
+  inputDBLength: number
 }) => (
   <div className="flex">
     <Button
       className="mr-2 w-1/2"
       danger
-      disabled={filesLength === 0}
-      onClick={() => filesDB.files.clear()}
+      disabled={inputDBLength === 0}
+      onClick={inputDbClearHandler}
     >
       Clear Files DB
     </Button>
     <Button
       className="mr-2 w-1/2"
       danger
-      disabled={assignedFilesLength === 0}
-      onClick={() => assignmentsDB.assignedFiles.clear()}
+      disabled={assignmentDBLength === 0}
+      onClick={assignmentsDBClearHandler}
     >
       Clear Assignment DB
     </Button>

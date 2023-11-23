@@ -12,6 +12,8 @@ const handleFileMove = async (
 
   let fileCount = 0
   let updateCount = 0
+  let folderCount = 0
+  let folderUpdateCount = 0
 
   const filePaths = createFilePaths(fileTree, 'assignmentTreeRoot')
 
@@ -21,6 +23,12 @@ const handleFileMove = async (
         uid: String(fileTree[item].uid),
       })
       const assigned = await assignmentsDB.assignedFiles.get({
+        uid: String(fileTree[item].uid),
+      })
+      const folder = await filesDB.folders.get({
+        uid: String(fileTree[item].uid),
+      })
+      const assignedFolder = await assignmentsDB.assignedFolders.get({
         uid: String(fileTree[item].uid),
       })
 
@@ -54,6 +62,36 @@ const handleFileMove = async (
           }
         }
       }
+      if (folder) {
+        folder.fullPath =
+          filePaths.find((path) => path.uid === fileTree[item].uid)?.path || ''
+        await assignmentsDB.assignedFolders.add(folder)
+        await filesDB.folders.where({ uid: folder.uid }).delete()
+
+        folderCount++
+      }
+
+      if (assignedFolder) {
+        const newFullPath =
+          filePaths.find((path) => path.uid === fileTree[item].uid)?.path || ''
+        if (newFullPath !== assignedFolder.fullPath) {
+          const existingFolder = await assignmentsDB.assignedFolders.get({
+            fullPath: newFullPath,
+          })
+
+          if (existingFolder) return
+
+          const updatedFolder = {
+            ...assignedFolder,
+            fullPath: newFullPath,
+          }
+
+          if (newFullPath !== assignedFolder.fullPath) {
+            await assignmentsDB.assignedFolders.put(updatedFolder)
+            folderUpdateCount++
+          }
+        }
+      }
     } catch (error) {
       console.error(`Error processing file for item: ${fileTree[item].data}`)
       console.error(error)
@@ -81,6 +119,20 @@ const handleFileMove = async (
   }
   if (updateCount > 0) {
     message.info(`${updateCount} entr${updateCount > 1 ? 'ies' : 'y'} updated`)
+  }
+  if (folderCount > 0) {
+    message.info(
+      `Moved ${folderCount} folder${
+        folderCount > 1 ? 's' : ''
+      } to assignmentDB`,
+    )
+  }
+  if (folderUpdateCount > 0) {
+    message.info(
+      `${folderUpdateCount} folder${
+        folderUpdateCount > 1 ? 's' : ''
+      } updated in assignmentDB`,
+    )
   }
 
   setUploading(false)
