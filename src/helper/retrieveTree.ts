@@ -94,7 +94,6 @@ const retrieveTree = (
     assignmentRoot,
   )
 
-  console.log(inputTree)
   return { ...inputTree, ...assignmentTree }
 }
 
