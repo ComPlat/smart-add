@@ -71,25 +71,29 @@ const handleCustomRequest = async ({
   } else {
     setProgress(50)
 
-    // const folderPaths = new Set(file.webkitRelativePath.split('/').slice(0, -1))
-    // for (const folderPath of folderPaths) {
-    //   await filesDB.folders.add({
-    //     fullPath: folderPath,
-    //     isFolder: true,
-    //     name: folderPath.split('/').slice(-1)[0],
-    //     parentUid: file.uid.split('_')[0],
-    //     uid: v4(),
-    //   })
-    // }
+    const storedFolders: string[] = []
+    const parts = file.webkitRelativePath.split('/')
+    let fullPath = ''
+    const folderPaths = []
 
-    // const folderPath = file.webkitRelativePath.split('/').slice(0, -1).join('/')
-    // await filesDB.folders.add({
-    //   fullPath: folderPath,
-    //   isFolder: true,
-    //   name: folderPath,
-    //   parentUid: file.uid.split('_')[0],
-    //   uid: v4(),
-    // })
+    for (let i = 0; i < parts.length - 1; i++) {
+      fullPath += parts[i] + '/'
+      folderPaths.push(fullPath.slice(0, -1))
+    }
+
+    for (const path of folderPaths) {
+      if (!storedFolders.includes(path)) {
+        storedFolders.push(path)
+        const folderName = path.split('/').pop()
+        await filesDB.folders.add({
+          fullPath: path,
+          isFolder: true,
+          name: folderName || '',
+          parentUid: file.uid.split('_')[0],
+          uid: v4(),
+        })
+      }
+    }
 
     filesDB.files
       .add({
