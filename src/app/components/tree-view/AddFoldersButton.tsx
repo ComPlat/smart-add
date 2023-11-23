@@ -62,39 +62,41 @@ const AddFoldersButton = ({ tree }: { tree: Record<string, FileNode> }) => (
         uid: v4(),
       }
 
-      await assignmentsDB.assignedFiles.add({
-        extension: 'folder',
-        file: new File([''], newFolderNode1.data),
-        fullPath: newFolderNode1.index,
-        isFolder: true,
-        name: newFolderNode1.data,
-        parentUid: v4(),
-        path: [],
-        uid: newFolderNode1.uid,
-      })
-      await assignmentsDB.assignedFiles.add({
-        extension: 'folder',
-        file: new File([''], newFolderNode2.data),
-        fullPath: newFolderNode2.index,
-        isFolder: true,
-        name: newFolderNode2.data,
-        parentUid: v4(),
-        path: [],
-        uid: newFolderNode2.uid,
-      })
-      await assignmentsDB.assignedFiles.add({
-        extension: 'folder',
-        file: new File([''], newFolderNode3.data),
-        fullPath: newFolderNode3.index,
-        isFolder: true,
-        name: newFolderNode3.data,
-        parentUid: v4(),
-        path: [],
-        uid: newFolderNode3.uid,
-      })
+      await Promise.all([
+        assignmentsDB.assignedFiles.add({
+          extension: 'folder',
+          file: new File([''], newFolderNode1.data),
+          fullPath: newFolderNode1.index,
+          isFolder: true,
+          name: newFolderNode1.data,
+          parentUid: v4(),
+          path: [],
+          uid: newFolderNode1.uid,
+        }),
+        assignmentsDB.assignedFiles.add({
+          extension: 'folder',
+          file: new File([''], newFolderNode2.data),
+          fullPath: newFolderNode2.index,
+          isFolder: true,
+          name: newFolderNode2.data,
+          parentUid: v4(),
+          path: [],
+          uid: newFolderNode2.uid,
+        }),
+        assignmentsDB.assignedFiles.add({
+          extension: 'folder',
+          file: new File([''], newFolderNode3.data),
+          fullPath: newFolderNode3.index,
+          isFolder: true,
+          name: newFolderNode3.data,
+          parentUid: v4(),
+          path: [],
+          uid: newFolderNode3.uid,
+        }),
+      ])
     }}
   >
-    New Folder
+    Add Folders
   </Button>
 )
 
