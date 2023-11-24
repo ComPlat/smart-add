@@ -38,6 +38,18 @@ const handleCustomRequest = async ({
 
   const path = file.webkitRelativePath.split('/').slice(0, -1)
 
+  const addFolderToDB = async (folderPath: string, file: RcFile) => {
+    if (folderPath.includes('__MACOSX') || folderPath === file.name) return
+
+    return await filesDB.folders.add({
+      fullPath: folderPath,
+      isFolder: true,
+      name: folderPath.split('/').slice(-1)[0],
+      parentUid: file.uid.split('_')[0],
+      uid: v4(),
+    })
+  }
+
   if (file.type === 'application/zip') {
     try {
       setProgress(0)
@@ -49,17 +61,8 @@ const handleCustomRequest = async ({
         ),
       )
 
-      for (const folderPath of folderPaths) {
-        if (folderPath.includes('__MACOSX')) continue
-        if (folderPath === file.name) continue
-        await filesDB.folders.add({
-          fullPath: folderPath,
-          isFolder: true,
-          name: folderPath.split('/').slice(-1)[0],
-          parentUid: file.uid.split('_')[0],
-          uid: v4(),
-        })
-      }
+      for (const folderPath of folderPaths)
+        await addFolderToDB(folderPath, file as RcFile)
 
       await uploadExtractedFiles(
         extractedFiles,
@@ -82,13 +85,7 @@ const handleCustomRequest = async ({
       return [...new Set(newFolderPaths)]
     })
 
-    await filesDB.folders.add({
-      fullPath: folderPath,
-      isFolder: true,
-      name: folderPath.split('/').pop() || folderPath,
-      parentUid: file.uid.split('_')[0],
-      uid: v4(),
-    })
+    await addFolderToDB(folderPath, file as RcFile)
 
     // TODO: Implement better handling after folder upload works correctly
     if (file.name.startsWith('.')) return
