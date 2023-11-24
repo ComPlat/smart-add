@@ -6,7 +6,7 @@ import { uploadExtractedFiles } from '@/helper/uploadExtractedFiles'
 import { InboxOutlined } from '@ant-design/icons'
 import { Progress, Upload, UploadProps, message } from 'antd'
 import { RcFile } from 'antd/es/upload'
-import { useState } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
 import { v4 } from 'uuid'
 
 import styles from './UploadDropZone.module.css'
@@ -15,10 +15,14 @@ const handleCustomRequest = async ({
   file,
   onSuccess,
   setProgress,
+  setUploadedFolders,
+  uploadedFolders,
 }: {
   file: Blob | RcFile | string
   onSuccess?: (body: File, xhr?: XMLHttpRequest) => void
   setProgress: (progress: number) => void
+  setUploadedFolders: Dispatch<SetStateAction<string[]>>
+  uploadedFolders: string[]
 }) => {
   if (typeof file === 'string')
     throw new TypeError('Uploaded file is a String!')
@@ -71,30 +75,23 @@ const handleCustomRequest = async ({
   } else {
     setProgress(50)
 
-    const storedFolders: string[] = []
-    const parts = file.webkitRelativePath.split('/')
-    let fullPath = ''
-    const folderPaths = []
+    const folderPath = file.webkitRelativePath.split('/').slice(0, -1).join('/')
+    if ((uploadedFolders ? uploadedFolders : []).includes(folderPath)) return
+    setUploadedFolders((prev) => {
+      const newFolderPaths = prev ? [...prev, folderPath] : [folderPath]
+      return [...new Set(newFolderPaths)]
+    })
 
-    for (let i = 0; i < parts.length - 1; i++) {
-      fullPath += parts[i] + '/'
-      folderPaths.push(fullPath.slice(0, -1))
-    }
+    await filesDB.folders.add({
+      fullPath: folderPath,
+      isFolder: true,
+      name: folderPath.split('/').pop() || folderPath,
+      parentUid: file.uid.split('_')[0],
+      uid: v4(),
+    })
 
-    for (const path of folderPaths) {
-      if (!storedFolders.includes(path)) {
-        storedFolders.push(path)
-        const folderName = path.split('/').pop()
-        await filesDB.folders.add({
-          fullPath: path,
-          isFolder: true,
-          name: folderName || '',
-          parentUid: file.uid.split('_')[0],
-          uid: v4(),
-        })
-      }
-    }
-
+    // TODO: Implement better handling after folder upload works correctly
+    if (file.name.startsWith('.')) return
     filesDB.files
       .add({
         extension: file.webkitRelativePath.split('.').slice(-1)[0],
@@ -121,10 +118,16 @@ const handleCustomRequest = async ({
 
 const UploadDropZone = () => {
   const [progress, setProgress] = useState<number>(0)
+  const [uploadedFolders, setUploadedFolders] = useState<string[]>([])
 
   const uploadProps: UploadProps = {
     customRequest: (options) =>
-      handleCustomRequest({ ...options, setProgress }),
+      handleCustomRequest({
+        ...options,
+        setProgress,
+        setUploadedFolders,
+        uploadedFolders,
+      }),
     directory: true,
     listType: 'text',
     multiple: true,
