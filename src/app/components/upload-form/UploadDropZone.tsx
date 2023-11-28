@@ -20,8 +20,9 @@ const handleCustomRequest = async ({
   onSuccess?: (body: File, xhr?: XMLHttpRequest) => void
   setProgress: (progress: number) => void
 }) => {
-  if (typeof file === 'string')
+  if (typeof file === 'string') {
     throw new TypeError('Uploaded file is a String!')
+  }
   if (file instanceof Blob && !(file instanceof File)) {
     throw new TypeError('Uploaded file is a Blob, not a File!')
   }

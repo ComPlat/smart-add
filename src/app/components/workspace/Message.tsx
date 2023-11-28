@@ -15,7 +15,7 @@ const Message = ({ percent, sumSize, title, uploadedSize }: MessageProps) => (
       <div className="whitespace-nowrap text-sm font-medium leading-5 text-gray-900">
         {title}
       </div>
-      <div className="mt-1 flex items-stretch justify-between gap-1">
+      <div className="mt-1 flex justify-between gap-1">
         <div className="text-xs font-medium leading-5 text-gray-600">
           {percent.toFixed(1)}%
         </div>
