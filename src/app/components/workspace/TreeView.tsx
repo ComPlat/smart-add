@@ -10,7 +10,6 @@ import {
 } from 'react-complex-tree'
 import 'react-complex-tree/lib/style-modern.css'
 
-import styles from '../tree-view/TreeView.module.css'
 import { renderItem } from '../tree-view/renderItem'
 
 type FileTreeProps = {
@@ -21,7 +20,7 @@ type FileTreeProps = {
 
 const FileTree = ({ rootItem, treeId, treeLabel }: FileTreeProps) => {
   return (
-    <div className={styles['tree']}>
+    <div className="m-0.5 flex min-h-[150px] w-1/2 flex-col rounded-md border border-gray-300 bg-gray-50 p-1 shadow-md last:grow">
       <Tree
         renderItemsContainer={({ children, containerProps }) => (
           <ul {...containerProps}>{children}</ul>
