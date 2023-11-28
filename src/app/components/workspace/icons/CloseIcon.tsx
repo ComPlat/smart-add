@@ -4,18 +4,16 @@ const CloseIcon = ({
   className,
   hidden = true,
   viewBox = '0 0 40 40',
-}: IconProps) => {
-  return (
-    <svg
-      aria-hidden={hidden}
-      className={className}
-      fill="currentColor"
-      viewBox={viewBox}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z" />
-    </svg>
-  )
-}
+}: IconProps) => (
+  <svg
+    aria-hidden={hidden}
+    className={className}
+    fill="currentColor"
+    viewBox={viewBox}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z" />
+  </svg>
+)
 
 export { CloseIcon }
