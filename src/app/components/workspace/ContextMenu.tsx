@@ -1,4 +1,4 @@
-const Contextmenu = () => {
+const ContextMenu = () => {
   return (
     <div className="flex grow basis-[0%] flex-col items-stretch self-start bg-white shadow-sm">
       <div className="flex flex-col items-stretch">
@@ -18,4 +18,4 @@ const Contextmenu = () => {
   )
 }
 
-export { Contextmenu }
+export { ContextMenu }
