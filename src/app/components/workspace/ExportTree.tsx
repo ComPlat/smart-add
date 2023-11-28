@@ -25,13 +25,13 @@ const Folder = ({ empty, label, level = 1, selected }: FolderProps) => {
         <ChevronDownIcon
           className={`h-2 w-2 self-center ${
             empty ? 'text-gray-400' : 'text-gray-900'
-          } dark:text-white`}
+          }`}
         />
       ) : (
         <ChevronRightIcon
           className={`h-2 w-2 self-center ${
             empty ? 'text-gray-400' : 'text-gray-900'
-          } dark:text-white`}
+          }`}
         />
       )}
       <p
