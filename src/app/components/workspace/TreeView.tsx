@@ -11,6 +11,8 @@ import {
 import 'react-complex-tree/lib/style-modern.css'
 
 import { renderItem } from '../tree-view/renderItem'
+import { ExportFiles } from './ExportFiles'
+import { UploadedFiles } from './UploadedFiles'
 
 type FileTreeProps = {
   rootItem: string
@@ -20,7 +22,7 @@ type FileTreeProps = {
 
 const FileTree = ({ rootItem, treeId, treeLabel }: FileTreeProps) => {
   return (
-    <div className="m-0.5 flex min-h-[150px] w-1/2 flex-col rounded-md border border-gray-300 bg-gray-50 p-1 shadow-md last:grow">
+    <div className="my-4 flex min-h-[150px] flex-col rounded-md bg-gray-100 px-2 [&>*]:min-h-full">
       <Tree
         renderItemsContainer={({ children, containerProps }) => (
           <ul {...containerProps}>{children}</ul>
@@ -64,18 +66,21 @@ const TreeView = () => {
       key={files.length}
       viewState={{}}
     >
-      <div className="flex flex-row justify-between">
-        <FileTree
-          rootItem="inputTreeRoot"
-          treeId="inputTree"
-          treeLabel="Input Tree"
-        />
-
-        <FileTree
-          rootItem="assignmentTreeRoot"
-          treeId="assignmentTree"
-          treeLabel="Assignment Tree"
-        />
+      <div className="ml-4 flex w-full flex-row justify-between gap-4">
+        <UploadedFiles>
+          <FileTree
+            rootItem="inputTreeRoot"
+            treeId="inputTree"
+            treeLabel="Input Tree"
+          />
+        </UploadedFiles>
+        <ExportFiles>
+          <FileTree
+            rootItem="assignmentTreeRoot"
+            treeId="assignmentTree"
+            treeLabel="Assignment Tree"
+          />
+        </ExportFiles>
       </div>
     </UncontrolledTreeEnvironment>
   )

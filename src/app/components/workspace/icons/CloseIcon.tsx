@@ -3,7 +3,7 @@ import { IconProps } from '@/types/IconProps'
 const CloseIcon = ({
   className,
   hidden = true,
-  viewBox = '0 0 40 40',
+  viewBox = '0 0 20 20',
 }: IconProps) => (
   <svg
     aria-hidden={hidden}

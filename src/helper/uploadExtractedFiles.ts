@@ -39,7 +39,9 @@ const uploadExtractedFiles = async (
       })
 
       uploadedFiles++
-      const percentageProgress = Math.round((uploadedFiles / totalFiles) * 100)
+      const percentageProgress = Number(
+        ((uploadedFiles / totalFiles) * 100).toPrecision(3),
+      )
       setProgress(percentageProgress)
     }),
   )

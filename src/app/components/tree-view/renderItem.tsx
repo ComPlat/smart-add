@@ -38,11 +38,15 @@ const renderItem = ({
   item,
   title,
 }: RenderItemParams) => {
-  const isDraggingOver = context.isDraggingOver
+  const { isDraggingOver } = context
   const shouldHideTitle = typeof title === 'string' && title.endsWith('.root')
 
   return (
-    <li title={String(title)} {...context.itemContainerWithChildrenProps}>
+    <li
+      title={String(title)}
+      {...context.itemContainerWithChildrenProps}
+      className="grid grid-cols-1"
+    >
       <button
         {...context.itemContainerWithoutChildrenProps}
         {...context.interactiveElementProps}
@@ -51,7 +55,6 @@ const renderItem = ({
           ${isDraggingOver ? 'rounded-md bg-blue-200' : ''}`}
         style={{
           marginLeft: `${depth * 25}px`,
-          maxWidth: '95%',
         }}
         type="button"
       >

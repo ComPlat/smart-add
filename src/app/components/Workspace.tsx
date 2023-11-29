@@ -1,18 +1,16 @@
 'use client'
 
-import { ExportFiles } from './workspace/ExportFiles'
+import { TreeView } from '../components/workspace/TreeView'
 import Header from './workspace/Header'
 import Sidebar from './workspace/Sidebar'
-import { UploadedFiles } from './workspace/UploadedFiles'
 
 const Workspace = () => (
   <div className="flex h-screen w-screen flex-col bg-gray-100 p-4">
     <Header />
     <div className="mt-4 h-screen">
-      <div className="flex h-full">
+      <div className="flex h-full overflow-hidden border border-green-500">
         <Sidebar />
-        <UploadedFiles />
-        <ExportFiles />
+        <TreeView />
       </div>
     </div>
   </div>

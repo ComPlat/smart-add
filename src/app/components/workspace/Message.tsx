@@ -30,9 +30,8 @@ const Message = ({ percent, sumSize, title, uploadedSize }: MessageProps) => (
           /* TODO: Dismiss and hide me! */
         }
       }}
-      className="my-auto h-8 w-8 text-lg text-gray-800 duration-150 hover:text-kit-primary-full"
+      className="my-auto h-4 w-4 text-lg text-gray-800 duration-150 hover:text-kit-primary-full"
     >
-      {/* TODO: Put me into center of the div. */}
       <CloseIcon />
     </button>
   </div>
