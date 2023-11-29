@@ -1,43 +1,65 @@
 import { ExtendedFile, ExtendedFolder } from '@/database/db'
 import { FileNode } from '@/helper/types'
 
-const addFoldersToTree = (
+const convertToFileTree = (
   fileTree: Record<string, FileNode>,
-  path: string[],
-  node: FileNode,
-  root: string,
+  folderMap: { [key: string]: TempFileNode },
+  folderDepthMap: { [key: number]: string[] },
+  noFolderFiles: ExtendedFile[],
 ): void => {
-  const currentPath = path.reduce((accumulatedPath, currentFolder) => {
-    const newPath =
-      accumulatedPath === root
-        ? currentFolder
-        : `${accumulatedPath}/${currentFolder}`
-
-    if (!fileTree[newPath]) {
-      fileTree[newPath] = {
-        canMove: true,
-        children: [],
-        data: currentFolder,
-        index: newPath,
-        isFolder: true,
-        uid: null,
-      }
-      fileTree[accumulatedPath].children.push(newPath)
+  noFolderFiles.forEach((file) => {
+    fileTree[file.fullPath] = {
+      canMove: true,
+      children: [],
+      data: file.name,
+      index: file.fullPath,
+      isFolder: false,
+      uid: file.uid,
     }
+  })
 
-    return newPath
-  }, root)
+  for (let i = 0; i < Object.keys(folderDepthMap).length; i++) {
+    if (!folderDepthMap[i]) continue
 
-  fileTree[currentPath].children.push(node.index)
-  fileTree[node.index] = node
+    folderDepthMap[i].forEach((folder) => {
+      const currentFolder = folderMap[folder]
+
+      fileTree[currentFolder.folderObj.fullPath] = {
+        canMove: true,
+        children: Object.keys(currentFolder.children),
+        data: currentFolder.folderObj.name,
+        index: currentFolder.folderObj.fullPath,
+        isFolder: true,
+        uid: currentFolder.folderObj.uid,
+      }
+
+      Object.values(currentFolder.children).forEach((child) => {
+        if ('extension' in child) {
+          fileTree[child.fullPath] = {
+            canMove: true,
+            children: [],
+            data: child.name,
+            index: child.fullPath,
+            isFolder: false,
+            uid: child.uid,
+          }
+        }
+      })
+    })
+  }
+}
+
+interface TempFileNode {
+  children: { [key: string]: ExtendedFile | ExtendedFolder | TempFileNode }
+  folderObj: ExtendedFolder
 }
 
 const retrieveTree = (
   inputFiles: ExtendedFile[],
   inputFolders: ExtendedFolder[],
+  inputRoot: string,
   assignmentFiles: ExtendedFile[],
   assignmentFolders: ExtendedFolder[],
-  inputRoot: string,
   assignmentRoot: string,
 ): Record<string, FileNode> => {
   const convertToTree = (
@@ -45,10 +67,54 @@ const retrieveTree = (
     folders: ExtendedFolder[],
     root: string,
   ): Record<string, FileNode> => {
+    const folderMap: { [key: string]: TempFileNode } = {}
+    const noFolderFiles: ExtendedFile[] = []
+
+    folders.forEach((folder) => {
+      folderMap[folder.fullPath] = {
+        children: {},
+        folderObj: folder,
+      }
+    })
+
+    const folderDepthMap: { [key: number]: string[] } = {}
+    Object.keys(folderMap).forEach((key) => {
+      const depth = key.split('/').length - 1
+      folderDepthMap[depth] = folderDepthMap[depth]
+        ? [...folderDepthMap[depth], key]
+        : [key]
+    })
+
+    files.forEach((file) => {
+      const folderPath = file.fullPath.split('/').slice(0, -1).join('/')
+      if (!folderMap[folderPath]) {
+        noFolderFiles.push(file)
+      } else {
+        folderMap[folderPath].children[file.fullPath] = file
+      }
+    })
+
+    const maxDepth = Object.keys(folderDepthMap).length
+    const rootItems = folderDepthMap[0] || []
+
+    for (let i = 0; i < maxDepth - 1; i++) {
+      if (!folderDepthMap[i]) break
+      for (const folder of folderDepthMap[i]) {
+        if (folderDepthMap[i + 1]) {
+          const children = folderDepthMap[i + 1].filter((child) =>
+            child.startsWith(folder),
+          )
+          children.forEach((child) => {
+            folderMap[folder].children[child] = folderMap[child]
+          })
+        }
+      }
+    }
+
     const fileTree: Record<string, FileNode> = {
       [root]: {
         canMove: false,
-        children: [],
+        children: [...rootItems, ...noFolderFiles.map((file) => file.fullPath)],
         data: 'Root item',
         index: root,
         isFolder: true,
@@ -56,33 +122,7 @@ const retrieveTree = (
       },
     }
 
-    folders.forEach((folder) => {
-      const { fullPath, name, uid } = folder
-      const node: FileNode = {
-        canMove: true,
-        children: [],
-        data: name,
-        index: fullPath,
-        isFolder: true,
-        uid,
-      }
-
-      addFoldersToTree(fileTree, fullPath.split('/'), node, root)
-    })
-
-    files.forEach((inputFile) => {
-      const { fullPath, isFolder, name, uid } = inputFile
-      const node: FileNode = {
-        canMove: true,
-        children: [],
-        data: name,
-        index: fullPath,
-        isFolder,
-        uid,
-      }
-
-      addFoldersToTree(fileTree, fullPath.split('/'), node, root)
-    })
+    convertToFileTree(fileTree, folderMap, folderDepthMap, noFolderFiles)
 
     return fileTree
   }

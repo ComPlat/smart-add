@@ -31,9 +31,9 @@ const TreeView = () => {
     const tree = retrieveTree(
       files,
       folders,
+      'inputTreeRoot',
       assignedFiles,
       assignedFolders,
-      'inputTreeRoot',
       'assignmentTreeRoot',
     )
     const treeDataProvider = new CustomTreeDataProvider(tree, (item, data) => ({

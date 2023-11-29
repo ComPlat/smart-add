@@ -5,24 +5,38 @@ import { extractFilesFromZip } from '@/helper/extractFilesFromZip'
 import { uploadExtractedFiles } from '@/helper/uploadExtractedFiles'
 import { InboxOutlined } from '@ant-design/icons'
 import { Progress, Upload, UploadProps, message } from 'antd'
-import { RcFile } from 'antd/es/upload'
+import { RcFile, UploadFile } from 'antd/es/upload'
 import { Dispatch, SetStateAction, useState } from 'react'
 import { v4 } from 'uuid'
 
 import styles from './UploadDropZone.module.css'
 
+// HINT: Necessary because of the way the Ant Design Upload Component
+//       handles dropped folders. Need to store already uploaded folders
+//       so that no duplicates get uploaded
+// TODO: May cause issues when uploading folders with the same name as variable
+//       is never cleared
+const uploadedFolders: string[] = []
+
 const handleCustomRequest = async ({
   file,
+  filePaths,
   onSuccess,
+  setFilePaths,
+  setFolderPaths,
   setProgress,
-  setUploadedFolders,
-  uploadedFolders,
+  uploadFileList,
 }: {
   file: Blob | RcFile | string
+  filePaths: { [key: string]: UploadFile } | undefined
+  folderPaths: string[]
   onSuccess?: (body: File, xhr?: XMLHttpRequest) => void
+  setFilePaths: Dispatch<
+    SetStateAction<{ [key: string]: UploadFile } | undefined>
+  >
+  setFolderPaths: Dispatch<SetStateAction<string[]>>
   setProgress: (progress: number) => void
-  setUploadedFolders: Dispatch<SetStateAction<string[]>>
-  uploadedFolders: string[]
+  uploadFileList: UploadFile[] | undefined
 }) => {
   if (typeof file === 'string')
     throw new TypeError('Uploaded file is a String!')
@@ -36,21 +50,16 @@ const handleCustomRequest = async ({
     throw new TypeError('Uploaded file has an uid that is not a string!')
   }
 
-  const path = file.webkitRelativePath.split('/').slice(0, -1)
+  const parentPath = file.webkitRelativePath.split('/').slice(0, -1)
 
-  const addFolderToDB = async (folderPath: string, file: RcFile) => {
-    if (folderPath.includes('__MACOSX') || folderPath === file.name) return
+  const zipTypes = [
+    'multipart/x-zip',
+    'application/zip',
+    'application/zip-compressed',
+    'application/x-zip-compressed',
+  ]
 
-    return await filesDB.folders.add({
-      fullPath: folderPath,
-      isFolder: true,
-      name: folderPath.split('/').slice(-1)[0],
-      parentUid: file.uid.split('_')[0],
-      uid: v4(),
-    })
-  }
-
-  if (file.type === 'application/zip') {
+  if (zipTypes.includes(file.type)) {
     try {
       setProgress(0)
       const extractedFiles = await extractFilesFromZip(file as RcFile)
@@ -61,13 +70,35 @@ const handleCustomRequest = async ({
         ),
       )
 
-      for (const folderPath of folderPaths)
-        await addFolderToDB(folderPath, file as RcFile)
+      for (const path of folderPaths) {
+        if (path.includes('__MACOSX')) continue
+
+        const folders = path.split('/')
+
+        let currentPath = parentPath.join('/')
+        for (const folder of folders) {
+          currentPath = currentPath ? `${currentPath}/${folder}` : folder
+          const existingFolder = await filesDB.folders
+            .where('fullPath')
+            .equals(currentPath)
+            .first()
+
+          if (!existingFolder) {
+            await filesDB.folders.add({
+              fullPath: currentPath,
+              isFolder: true,
+              name: folder,
+              parentUid: '',
+              uid: v4(),
+            })
+          }
+        }
+      }
 
       await uploadExtractedFiles(
         extractedFiles,
         file as RcFile,
-        path,
+        parentPath,
         setProgress,
       )
       setProgress(100)
@@ -78,17 +109,33 @@ const handleCustomRequest = async ({
   } else {
     setProgress(50)
 
-    const folderPath = file.webkitRelativePath.split('/').slice(0, -1).join('/')
-    if ((uploadedFolders ? uploadedFolders : []).includes(folderPath)) return
-    setUploadedFolders((prev) => {
-      const newFolderPaths = prev ? [...prev, folderPath] : [folderPath]
-      return [...new Set(newFolderPaths)]
+    if (!uploadFileList) return
+
+    uploadFileList.forEach(async (fileObj) => {
+      const path = fileObj.originFileObj?.webkitRelativePath
+      if (path && !(path in (filePaths ? filePaths : []))) {
+        setFilePaths({ ...filePaths, [path]: fileObj })
+        let temp = path
+        while (temp.indexOf('/') !== -1) {
+          const currentFolder = temp.substring(0, temp.lastIndexOf('/'))
+          if (!uploadedFolders.includes(currentFolder)) {
+            uploadedFolders.push(currentFolder)
+            const folderName = currentFolder.split('/').slice(-1)[0]
+            await filesDB.folders.add({
+              fullPath: currentFolder,
+              isFolder: true,
+              name: folderName,
+              parentUid: '',
+              uid: v4(),
+            })
+          }
+          temp = currentFolder
+        }
+      }
     })
 
-    await addFolderToDB(folderPath, file as RcFile)
+    setFolderPaths(uploadedFolders)
 
-    // TODO: Implement better handling after folder upload works correctly
-    if (file.name.startsWith('.')) return
     filesDB.files
       .add({
         extension: file.webkitRelativePath.split('.').slice(-1)[0],
@@ -97,7 +144,7 @@ const handleCustomRequest = async ({
         isFolder: false,
         name: file.name,
         parentUid: file.uid.split('_')[0],
-        path,
+        path: parentPath,
         uid: v4(),
       })
       .then(async () => {
@@ -115,15 +162,20 @@ const handleCustomRequest = async ({
 
 const UploadDropZone = () => {
   const [progress, setProgress] = useState<number>(0)
-  const [uploadedFolders, setUploadedFolders] = useState<string[]>([])
+  const [uploadFileList, setUploadFileList] = useState<UploadFile[]>()
+  const [filePaths, setFilePaths] = useState<{ [key: string]: UploadFile }>()
+  const [folderPaths, setFolderPaths] = useState<string[]>([])
 
   const uploadProps: UploadProps = {
     customRequest: (options) =>
       handleCustomRequest({
         ...options,
+        filePaths,
+        folderPaths,
+        setFilePaths,
+        setFolderPaths,
         setProgress,
-        setUploadedFolders,
-        uploadedFolders,
+        uploadFileList,
       }),
     directory: true,
     listType: 'text',
@@ -133,6 +185,8 @@ const UploadDropZone = () => {
       const {
         file: { name, status },
       } = info
+
+      setUploadFileList(info.fileList)
 
       if (status === 'done') {
         message.success(`${name} uploaded successfully.`)

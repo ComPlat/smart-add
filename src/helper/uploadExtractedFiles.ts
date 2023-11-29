@@ -22,10 +22,7 @@ const uploadExtractedFiles = async (
   await Promise.all(
     extractedFiles.map(async (extractedFile) => {
       const { data, fullPath, name, path } = extractedFile
-      if (name === '') {
-        uploadedFiles++
-        return
-      }
+      if (name === '' || name.endsWith('.zip')) return
 
       const fileData = await data
       await filesDB.files.add({
