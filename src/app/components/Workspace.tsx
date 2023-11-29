@@ -8,7 +8,7 @@ const Workspace = () => (
   <div className="flex h-screen w-screen flex-col bg-gray-100 p-4">
     <Header />
     <div className="mt-4 h-screen">
-      <div className="flex h-full overflow-hidden border border-green-500">
+      <div className="flex h-full overflow-hidden">
         <Sidebar />
         <TreeView />
       </div>
