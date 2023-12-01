@@ -16,67 +16,29 @@ const generateUniqueFolderName = (
     : folderName
 }
 
-const clickHandler = async (tree: Record<string, FileNode>) => {
-  const uniqueFolderName1 = generateUniqueFolderName('Samples', tree)
+const folderNames = ['Samples', 'Reactions', 'Analyses']
 
-  const newFolderNode1 = {
-    canMove: true,
-    canRename: true,
-    children: [],
-    data: uniqueFolderName1,
-    index: uniqueFolderName1,
+const createFolderNode = async (
+  baseFolderName: string,
+  tree: Record<string, FileNode>,
+): Promise<number> => {
+  const uniqueFolderName = generateUniqueFolderName(baseFolderName, tree)
+
+  return await assignmentsDB.assignedFolders.add({
+    fullPath: uniqueFolderName,
     isFolder: true,
+    name: uniqueFolderName,
+    parentUid: v4(),
     uid: v4(),
-  }
-
-  const uniqueFolderName2 = generateUniqueFolderName('Reactions', tree)
-
-  const newFolderNode2 = {
-    canMove: true,
-    canRename: true,
-    children: [],
-    data: uniqueFolderName2,
-    index: uniqueFolderName2,
-    isFolder: true,
-    uid: v4(),
-  }
-
-  const uniqueFolderName3 = generateUniqueFolderName('Analyses', tree)
-
-  const newFolderNode3 = {
-    canMove: true,
-    canRename: true,
-    children: [],
-    data: uniqueFolderName3,
-    index: uniqueFolderName3,
-    isFolder: true,
-    uid: v4(),
-  }
-
-  await Promise.all([
-    assignmentsDB.assignedFolders.add({
-      fullPath: newFolderNode1.index,
-      isFolder: true,
-      name: newFolderNode1.data,
-      parentUid: v4(),
-      uid: newFolderNode1.uid,
-    }),
-    assignmentsDB.assignedFolders.add({
-      fullPath: newFolderNode2.index,
-      isFolder: true,
-      name: newFolderNode2.data,
-      parentUid: v4(),
-      uid: newFolderNode2.uid,
-    }),
-    assignmentsDB.assignedFolders.add({
-      fullPath: newFolderNode3.index,
-      isFolder: true,
-      name: newFolderNode3.data,
-      parentUid: v4(),
-      uid: newFolderNode3.uid,
-    }),
-  ])
+  })
 }
+
+const clickHandler = async (
+  tree: Record<string, FileNode>,
+): Promise<number[]> =>
+  await Promise.all(
+    folderNames.map((folderName) => createFolderNode(folderName, tree)),
+  )
 
 const AddFoldersButton = ({ tree }: { tree: Record<string, FileNode> }) => (
   <Button onClick={() => clickHandler(tree)}>Add Folders</Button>

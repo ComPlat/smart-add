@@ -1,8 +1,76 @@
-import { assignmentsDB, filesDB } from '@/database/db'
+import {
+  ExtendedFile,
+  ExtendedFolder,
+  assignmentsDB,
+  filesDB,
+} from '@/database/db'
 import { createFilePaths } from '@/helper/createFilePaths'
 import { FileNode } from '@/helper/types'
 import { message } from 'antd'
 import { Dispatch, SetStateAction } from 'react'
+
+const uploadFile = async (
+  file: ExtendedFile,
+  filePaths: {
+    name: string
+    path: string
+    uid: string
+  }[],
+) => {
+  file.fullPath = filePaths.find((path) => path.uid === file.uid)?.path || ''
+  await assignmentsDB.assignedFiles.add(file)
+  await filesDB.files.where({ uid: file.uid }).delete()
+}
+
+const updateAssignedFile = async (
+  assigned: ExtendedFile,
+  newFullPath: string,
+  updateCount: number,
+) => {
+  const existingFile = await assignmentsDB.assignedFiles.get({
+    fullPath: newFullPath,
+  })
+
+  if (!existingFile) {
+    const updatedFile = { ...assigned, fullPath: newFullPath }
+    await assignmentsDB.assignedFiles.put(updatedFile)
+    updateCount++
+  }
+
+  return updateCount
+}
+
+const uploadFolder = async (
+  folder: ExtendedFolder,
+  filePaths: {
+    name: string
+    path: string
+    uid: string
+  }[],
+) => {
+  folder.fullPath =
+    filePaths.find((path) => path.uid === folder.uid)?.path || ''
+  await assignmentsDB.assignedFolders.add(folder)
+  await filesDB.folders.where({ uid: folder.uid }).delete()
+}
+
+const updateAssignedFolder = async (
+  assignedFolder: ExtendedFolder,
+  newFullPath: string,
+  folderUpdateCount: number,
+) => {
+  const existingFolder = await assignmentsDB.assignedFolders.get({
+    fullPath: newFullPath,
+  })
+
+  if (!existingFolder) {
+    const updatedFolder = { ...assignedFolder, fullPath: newFullPath }
+    await assignmentsDB.assignedFolders.put(updatedFolder)
+    folderUpdateCount++
+  }
+
+  return folderUpdateCount
+}
 
 const handleFileMove = async (
   fileTree: Record<string, FileNode>,
@@ -19,9 +87,7 @@ const handleFileMove = async (
 
   const uploadFileTree = async (item: string) => {
     try {
-      const file = await filesDB.files.get({
-        uid: String(fileTree[item].uid),
-      })
+      const file = await filesDB.files.get({ uid: String(fileTree[item].uid) })
       const assigned = await assignmentsDB.assignedFiles.get({
         uid: String(fileTree[item].uid),
       })
@@ -33,11 +99,7 @@ const handleFileMove = async (
       })
 
       if (file) {
-        file.fullPath =
-          filePaths.find((path) => path.uid === fileTree[item].uid)?.path || ''
-        await assignmentsDB.assignedFiles.add(file)
-        await filesDB.files.where({ uid: file.uid }).delete()
-
+        await uploadFile(file, filePaths)
         fileCount++
       }
 
@@ -45,29 +107,16 @@ const handleFileMove = async (
         const newFullPath =
           filePaths.find((path) => path.uid === fileTree[item].uid)?.path || ''
         if (newFullPath !== assigned.fullPath) {
-          const existingFile = await assignmentsDB.assignedFiles.get({
-            fullPath: newFullPath,
-          })
-
-          if (existingFile) return
-
-          const updatedFile = {
-            ...assigned,
-            fullPath: newFullPath,
-          }
-
-          if (newFullPath !== assigned.fullPath) {
-            await assignmentsDB.assignedFiles.put(updatedFile)
-            updateCount++
-          }
+          updateCount = await updateAssignedFile(
+            assigned,
+            newFullPath,
+            updateCount,
+          )
         }
       }
-      if (folder) {
-        folder.fullPath =
-          filePaths.find((path) => path.uid === fileTree[item].uid)?.path || ''
-        await assignmentsDB.assignedFolders.add(folder)
-        await filesDB.folders.where({ uid: folder.uid }).delete()
 
+      if (folder) {
+        await uploadFolder(folder, filePaths)
         folderCount++
       }
 
@@ -75,21 +124,11 @@ const handleFileMove = async (
         const newFullPath =
           filePaths.find((path) => path.uid === fileTree[item].uid)?.path || ''
         if (newFullPath !== assignedFolder.fullPath) {
-          const existingFolder = await assignmentsDB.assignedFolders.get({
-            fullPath: newFullPath,
-          })
-
-          if (existingFolder) return
-
-          const updatedFolder = {
-            ...assignedFolder,
-            fullPath: newFullPath,
-          }
-
-          if (newFullPath !== assignedFolder.fullPath) {
-            await assignmentsDB.assignedFolders.put(updatedFolder)
-            folderUpdateCount++
-          }
+          folderUpdateCount = await updateAssignedFolder(
+            assignedFolder,
+            newFullPath,
+            folderUpdateCount,
+          )
         }
       }
     } catch (error) {

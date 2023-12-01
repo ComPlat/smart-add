@@ -64,18 +64,14 @@ const handleCustomRequest = async ({
       setProgress(0)
       const extractedFiles = await extractFilesFromZip(file as RcFile)
 
-      const folderPaths = new Set(
-        extractedFiles.map((file) =>
-          file.fullPath.split('/').slice(0, -1).join('/'),
-        ),
+      const folderPaths = extractedFiles.map((file) =>
+        file.fullPath.split('/').slice(0, -1).join('/'),
       )
 
-      for (const path of folderPaths) {
-        if (path.includes('__MACOSX')) continue
-
+      const createFolders = async (path: string, parentPath: string[]) => {
         const folders = path.split('/')
-
         let currentPath = parentPath.join('/')
+
         for (const folder of folders) {
           currentPath = currentPath ? `${currentPath}/${folder}` : folder
           const existingFolder = await filesDB.folders
@@ -93,6 +89,13 @@ const handleCustomRequest = async ({
             })
           }
         }
+      }
+
+      // HINT: Exlude Mac OS specific folder
+      const paths = folderPaths.filter((path) => !path.includes('__MACOSX'))
+
+      for (const path of paths) {
+        await createFolders(path, parentPath)
       }
 
       await uploadExtractedFiles(
@@ -113,11 +116,11 @@ const handleCustomRequest = async ({
 
     uploadFileList.forEach(async (fileObj) => {
       const path = fileObj.originFileObj?.webkitRelativePath
-      if (path && !(path in (filePaths ? filePaths : []))) {
+      if (path && !(path in (filePaths ? filePaths : {}))) {
         setFilePaths({ ...filePaths, [path]: fileObj })
-        let temp = path
-        while (temp.indexOf('/') !== -1) {
-          const currentFolder = temp.substring(0, temp.lastIndexOf('/'))
+        const pathParts = path.split('/')
+        pathParts.slice(0, -1).forEach(async (part, i) => {
+          const currentFolder = pathParts.slice(0, i + 1).join('/')
           if (!uploadedFolders.includes(currentFolder)) {
             uploadedFolders.push(currentFolder)
             const folderName = currentFolder.split('/').slice(-1)[0]
@@ -129,8 +132,7 @@ const handleCustomRequest = async ({
               uid: v4(),
             })
           }
-          temp = currentFolder
-        }
+        })
       }
     })
 

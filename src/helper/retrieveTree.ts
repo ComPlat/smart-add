@@ -18,10 +18,10 @@ const convertToFileTree = (
     }
   })
 
-  for (let i = 0; i < Object.keys(folderDepthMap).length; i++) {
-    if (!folderDepthMap[i]) continue
+  Object.keys(folderDepthMap).forEach((key) => {
+    if (!folderDepthMap[Number(key)]) return
 
-    folderDepthMap[i].forEach((folder) => {
+    folderDepthMap[Number(key)].forEach((folder: string) => {
       const currentFolder = folderMap[folder]
 
       fileTree[currentFolder.folderObj.fullPath] = {
@@ -46,7 +46,7 @@ const convertToFileTree = (
         }
       })
     })
-  }
+  })
 }
 
 interface TempFileNode {
