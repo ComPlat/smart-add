@@ -137,19 +137,17 @@ const handleFileMove = async (
       message.error(`Error processing file for item: ${fileTree[item].data}`)
     }
 
-    if (fileTree[item].children) {
-      for (const child of fileTree[item].children) {
-        await uploadFileTree(child)
-      }
-    }
+    const uploadPromises = fileTree[item].children.map((child) =>
+      uploadFileTree(child),
+    )
+    await Promise.all(uploadPromises)
   }
 
   const rootFolder = fileTree['assignmentTreeRoot']
-  if (rootFolder) {
-    for (const itemName of rootFolder.children) {
-      await uploadFileTree(itemName)
-    }
-  }
+  const uploadPromises = rootFolder
+    ? rootFolder.children.map((child) => uploadFileTree(child))
+    : []
+  await Promise.all(uploadPromises)
 
   if (fileCount > 0) {
     message.info(
