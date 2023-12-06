@@ -2,14 +2,14 @@ import { assignmentsDB, filesDB } from '@/database/db'
 import { Button } from 'antd'
 import React from 'react'
 
-const inputDbClearHandler = () => {
-  filesDB.files.clear()
-  filesDB.folders.clear()
-}
-const assignmentsDBClearHandler = () => {
-  assignmentsDB.assignedFiles.clear()
-  assignmentsDB.assignedFolders.clear()
-}
+const inputDbClearHandler = async () =>
+  Promise.all([filesDB.files.clear(), filesDB.folders.clear()])
+
+const assignmentsDBClearHandler = async () =>
+  Promise.all([
+    assignmentsDB.assignedFiles.clear(),
+    assignmentsDB.assignedFolders.clear(),
+  ])
 
 const ClearButtonGroup = ({
   assignmentDBLength,

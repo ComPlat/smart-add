@@ -34,11 +34,6 @@ const FileDownloader = () => {
     }, {} as FileTree)
 
   const handleClick = async () => {
-    if (assignedFiles.length === 0) {
-      message.error('No files to download!')
-      return
-    }
-
     try {
       const zip = new JSZip()
       const fileTree = constructTree(assignedFiles)

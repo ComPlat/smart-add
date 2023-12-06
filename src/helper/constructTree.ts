@@ -23,10 +23,8 @@ const addFoldersToTree = (
         uid: null,
       }
       currentFolder.children.push(currentPath)
-      currentFolder = fileTree[currentPath]
-    } else {
-      currentFolder = fileTree[currentPath]
     }
+    currentFolder = fileTree[currentPath]
   }
 
   currentFolder.children.push(node.index)
@@ -54,21 +52,19 @@ const constructTree = (
       },
     }
 
-    if (files && Array.isArray(files)) {
-      files.forEach((inputFile) => {
-        const { fullPath, name, uid } = inputFile
-        const node: FileNode = {
-          canMove: true,
-          children: [],
-          data: name,
-          index: fullPath,
-          isFolder: name.endsWith('.zip'),
-          uid,
-        }
+    files.forEach((inputFile) => {
+      const { fullPath, name, uid } = inputFile
+      const node: FileNode = {
+        canMove: true,
+        children: [],
+        data: name,
+        index: fullPath,
+        isFolder: name.endsWith('.zip'),
+        uid,
+      }
 
-        addFoldersToTree(fileTree, fullPath.split('/'), node, root)
-      })
-    }
+      addFoldersToTree(fileTree, fullPath.split('/'), node, root)
+    })
 
     return fileTree
   }

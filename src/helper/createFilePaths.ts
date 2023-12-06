@@ -17,7 +17,7 @@ const createFilePaths = (
     filePaths.push({ name: node.data, path: fullPath, uid: String(node.uid) })
 
     if (node.children) {
-      for (const child of node.children) {
+      for (const child of node.children || []) {
         traverseTree(fileTree[child], fullPath, false)
       }
     }

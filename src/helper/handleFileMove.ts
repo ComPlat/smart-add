@@ -85,56 +85,76 @@ const handleFileMove = async (
 
   const filePaths = createFilePaths(fileTree, 'assignmentTreeRoot')
 
-  const uploadFileTree = async (item: string) => {
+  const uploadFileTree = async (item: string): Promise<void> => {
     try {
-      const file = await filesDB.files.get({ uid: String(fileTree[item].uid) })
-      const assigned = await assignmentsDB.assignedFiles.get({
-        uid: String(fileTree[item].uid),
-      })
-      const folder = await filesDB.folders.get({
-        uid: String(fileTree[item].uid),
-      })
-      const assignedFolder = await assignmentsDB.assignedFolders.get({
-        uid: String(fileTree[item].uid),
-      })
+      const uid = String(fileTree[item].uid)
 
-      if (file) {
-        await uploadFile(file, filePaths)
-        fileCount++
-      }
+      const filePromise = filesDB.files
+        .get({ uid })
+        .then((result) => (result ? { id: 'file', result } : Promise.reject()))
+      const assignedPromise = assignmentsDB.assignedFiles
+        .get({ uid })
+        .then((result) =>
+          result ? { id: 'assigned', result } : Promise.reject(),
+        )
+      const folderPromise = filesDB.folders
+        .get({ uid })
+        .then((result) =>
+          result ? { id: 'folder', result } : Promise.reject(),
+        )
+      const assignedFolderPromise = assignmentsDB.assignedFolders
+        .get({ uid })
+        .then((result) =>
+          result ? { id: 'assignedFolder', result } : Promise.reject(),
+        )
 
-      if (assigned) {
-        const newFullPath =
-          filePaths.find((path) => path.uid === fileTree[item].uid)?.path || ''
-        if (newFullPath !== assigned.fullPath) {
-          updateCount = await updateAssignedFile(
-            assigned,
-            newFullPath,
-            updateCount,
-          )
-        }
-      }
+      const promises = [
+        filePromise,
+        assignedPromise,
+        folderPromise,
+        assignedFolderPromise,
+      ]
 
-      if (folder) {
-        await uploadFolder(folder, filePaths)
-        folderCount++
-      }
+      const result = await Promise.any(promises)
 
-      if (assignedFolder) {
-        const newFullPath =
-          filePaths.find((path) => path.uid === fileTree[item].uid)?.path || ''
-        if (newFullPath !== assignedFolder.fullPath) {
-          folderUpdateCount = await updateAssignedFolder(
-            assignedFolder,
-            newFullPath,
-            folderUpdateCount,
-          )
-        }
+      switch (result.id) {
+        case 'file':
+          fileCount++
+          await uploadFile(result.result as ExtendedFile, filePaths)
+          break
+        case 'assigned':
+          const assigned = result.result as ExtendedFile
+          const newFullPathFile =
+            filePaths.find((path) => path.uid === fileTree[item].uid)?.path ||
+            ''
+          if (newFullPathFile !== assigned.fullPath) {
+            updateCount = await updateAssignedFile(
+              assigned,
+              newFullPathFile,
+              updateCount,
+            )
+          }
+          break
+        case 'folder':
+          folderCount++
+          await uploadFolder(result.result, filePaths)
+          break
+        case 'assignedFolder':
+          const assignedFolder = result.result as ExtendedFolder
+          const newFullPathFolder =
+            filePaths.find((path) => path.uid === fileTree[item].uid)?.path ||
+            ''
+          if (newFullPathFolder !== assignedFolder.fullPath) {
+            folderUpdateCount = await updateAssignedFolder(
+              assignedFolder,
+              newFullPathFolder,
+              folderUpdateCount,
+            )
+          }
+          break
       }
     } catch (error) {
-      console.error(`Error processing file for item: ${fileTree[item].data}`)
-      console.error(error)
-      message.error(`Error processing file for item: ${fileTree[item].data}`)
+      console.error('All promises were rejected', error)
     }
 
     const uploadPromises = fileTree[item].children.map((child) =>

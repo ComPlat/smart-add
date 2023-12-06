@@ -28,15 +28,13 @@ const handleCustomRequest = async ({
   uploadFileList,
 }: {
   file: Blob | RcFile | string
-  filePaths: { [key: string]: UploadFile } | undefined
+  filePaths: { [key: string]: UploadFile }
   folderPaths: string[]
   onSuccess?: (body: File, xhr?: XMLHttpRequest) => void
-  setFilePaths: Dispatch<
-    SetStateAction<{ [key: string]: UploadFile } | undefined>
-  >
+  setFilePaths: Dispatch<SetStateAction<{ [key: string]: UploadFile }>>
   setFolderPaths: Dispatch<SetStateAction<string[]>>
   setProgress: (progress: number) => void
-  uploadFileList: UploadFile[] | undefined
+  uploadFileList: UploadFile[]
 }) => {
   if (typeof file === 'string')
     throw new TypeError('Uploaded file is a String!')
@@ -94,9 +92,7 @@ const handleCustomRequest = async ({
       // HINT: Exlude Mac OS specific folder
       const paths = folderPaths.filter((path) => !path.includes('__MACOSX'))
 
-      for (const path of paths) {
-        await createFolders(path, parentPath)
-      }
+      for (const path of paths) await createFolders(path, parentPath)
 
       await uploadExtractedFiles(
         extractedFiles,
@@ -114,27 +110,37 @@ const handleCustomRequest = async ({
 
     if (!uploadFileList) return
 
-    uploadFileList.forEach(async (fileObj) => {
-      const path = fileObj.originFileObj?.webkitRelativePath
-      if (path && !(path in (filePaths ? filePaths : {}))) {
+    const promises: Promise<Promise<number | void>[]>[] =
+      uploadFileList.flatMap(async (fileObj) => {
+        if (!fileObj.originFileObj) return [Promise.resolve()]
+
+        const path = fileObj.originFileObj.webkitRelativePath
+        const safeFilePaths = filePaths ? filePaths : {}
+
+        if (path in safeFilePaths) return [Promise.resolve()]
+
         setFilePaths({ ...filePaths, [path]: fileObj })
+
         const pathParts = path.split('/')
-        pathParts.slice(0, -1).forEach(async (part, i) => {
+        return pathParts.slice(0, -1).flatMap(async (_part, i) => {
           const currentFolder = pathParts.slice(0, i + 1).join('/')
-          if (!uploadedFolders.includes(currentFolder)) {
-            uploadedFolders.push(currentFolder)
-            const folderName = currentFolder.split('/').slice(-1)[0]
-            await filesDB.folders.add({
-              fullPath: currentFolder,
-              isFolder: true,
-              name: folderName,
-              parentUid: '',
-              uid: v4(),
-            })
-          }
+
+          if (uploadedFolders.includes(currentFolder)) return Promise.resolve()
+
+          uploadedFolders.push(currentFolder)
+
+          const folderName = currentFolder.split('/').slice(-1)[0]
+          return await filesDB.folders.add({
+            fullPath: currentFolder,
+            isFolder: true,
+            name: folderName,
+            parentUid: '',
+            uid: v4(),
+          })
         })
-      }
-    })
+      })
+
+    await Promise.all(promises)
 
     setFolderPaths(uploadedFolders)
 
@@ -164,8 +170,8 @@ const handleCustomRequest = async ({
 
 const UploadDropZone = () => {
   const [progress, setProgress] = useState<number>(0)
-  const [uploadFileList, setUploadFileList] = useState<UploadFile[]>()
-  const [filePaths, setFilePaths] = useState<{ [key: string]: UploadFile }>()
+  const [uploadFileList, setUploadFileList] = useState<UploadFile[]>([])
+  const [filePaths, setFilePaths] = useState<{ [key: string]: UploadFile }>({})
   const [folderPaths, setFolderPaths] = useState<string[]>([])
 
   const uploadProps: UploadProps = {
