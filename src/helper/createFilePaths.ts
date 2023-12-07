@@ -6,19 +6,23 @@ const createFilePaths = (
 ): { name: string; path: string; uid: string }[] => {
   const filePaths: { name: string; path: string; uid: string }[] = []
 
+  const getFullPath = (
+    currentPath: string,
+    nodeData: string,
+    isRoot: boolean,
+  ) => (isRoot ? '' : `${currentPath}${currentPath ? '/' : ''}${nodeData}`)
+
   const traverseTree = (
     node: FileNode,
     currentPath: string,
     isRoot: boolean,
-  ) => {
-    const fullPath = isRoot
-      ? ''
-      : `${currentPath}${currentPath ? '/' : ''}${node.data}`
-    filePaths.push({ name: node.data, path: fullPath, uid: String(node.uid) })
+  ): Promise<void>[] => {
+    const fullPath = getFullPath(currentPath, node.data, isRoot)
+    filePaths.push({ name: node.data, path: fullPath, uid: node.uid! })
 
-    for (const child of node.children || []) {
-      traverseTree(fileTree[child], fullPath, false)
-    }
+    return (node.children?.map((child: string) =>
+      traverseTree(fileTree[child], fullPath, false),
+    )).flat()
   }
 
   const rootFolder = fileTree[root]

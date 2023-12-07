@@ -70,10 +70,7 @@ const FileDownloader = () => {
   }
 
   return (
-    <Button
-      disabled={assignedFiles.length === 0 ? true : false}
-      onClick={handleClick}
-    >
+    <Button disabled={assignedFiles.length === 0} onClick={handleClick}>
       Download as Zip
     </Button>
   )
