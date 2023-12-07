@@ -7,6 +7,7 @@ import {
 import { createFilePaths } from '@/helper/createFilePaths'
 import { FileNode } from '@/helper/types'
 import { message } from 'antd'
+import { Table } from 'dexie'
 import { Dispatch, SetStateAction } from 'react'
 
 const uploadFile = async (
@@ -16,17 +17,19 @@ const uploadFile = async (
     path: string
     uid: string
   }[],
-) => {
+): Promise<[number, number]> => {
   file.fullPath = filePaths.find((path) => path.uid === file.uid)?.path || ''
-  await assignmentsDB.assignedFiles.add(file)
-  await filesDB.files.where({ uid: file.uid }).delete()
+  return Promise.all([
+    assignmentsDB.assignedFiles.add(file),
+    filesDB.files.where({ uid: file.uid }).delete(),
+  ])
 }
 
 const updateAssignedFile = async (
   assigned: ExtendedFile,
   newFullPath: string,
   updateCount: number,
-) => {
+): Promise<number> => {
   const existingFile = await assignmentsDB.assignedFiles.get({
     fullPath: newFullPath,
   })
@@ -47,18 +50,20 @@ const uploadFolder = async (
     path: string
     uid: string
   }[],
-) => {
+): Promise<[number, number]> => {
   folder.fullPath =
     filePaths.find((path) => path.uid === folder.uid)?.path || ''
-  await assignmentsDB.assignedFolders.add(folder)
-  await filesDB.folders.where({ uid: folder.uid }).delete()
+  return Promise.all([
+    assignmentsDB.assignedFolders.add(folder),
+    filesDB.folders.where({ uid: folder.uid }).delete(),
+  ])
 }
 
 const updateAssignedFolder = async (
   assignedFolder: ExtendedFolder,
   newFullPath: string,
   folderUpdateCount: number,
-) => {
+): Promise<number> => {
   const existingFolder = await assignmentsDB.assignedFolders.get({
     fullPath: newFullPath,
   })
@@ -86,73 +91,74 @@ const handleFileMove = async (
   const filePaths = createFilePaths(fileTree, 'assignmentTreeRoot')
 
   const uploadFileTree = async (item: string): Promise<void> => {
+    interface Result {
+      result: ExtendedFile | ExtendedFolder
+    }
+
+    interface FunctionTable {
+      assigned: (result: Result) => Promise<void>
+      assignedFolder: (result: Result) => Promise<void>
+      file: (result: Result) => Promise<void>
+      folder: (result: Result) => Promise<void>
+    }
+
+    const idToFunctionTable: FunctionTable = {
+      assigned: async (result) => {
+        const assigned = result.result as ExtendedFile
+        const newFullPathFile =
+          filePaths.find((path) => path.uid === fileTree[item].uid)?.path || ''
+        if (newFullPathFile !== assigned.fullPath) {
+          updateCount = await updateAssignedFile(
+            assigned,
+            newFullPathFile,
+            updateCount,
+          )
+        }
+      },
+      assignedFolder: async (result) => {
+        const assignedFolder = result.result as ExtendedFolder
+        const newFullPathFolder =
+          filePaths.find((path) => path.uid === fileTree[item].uid)?.path || ''
+        if (newFullPathFolder !== assignedFolder.fullPath) {
+          folderUpdateCount = await updateAssignedFolder(
+            assignedFolder,
+            newFullPathFolder,
+            folderUpdateCount,
+          )
+        }
+      },
+      file: async (result) => {
+        fileCount++
+        await uploadFile(result.result as ExtendedFile, filePaths)
+      },
+      folder: async (result) => {
+        folderCount++
+        await uploadFolder(result.result as ExtendedFolder, filePaths)
+      },
+    }
+
+    const createPromise = (
+      db: Table<ExtendedFile | ExtendedFolder>,
+      id: keyof FunctionTable,
+      uid: string,
+    ) =>
+      db
+        .get({ uid })
+        .then((result) => (result ? { id, result } : Promise.reject()))
+
     try {
       const uid = String(fileTree[item].uid)
 
-      const filePromise = filesDB.files
-        .get({ uid })
-        .then((result) => (result ? { id: 'file', result } : Promise.reject()))
-      const assignedPromise = assignmentsDB.assignedFiles
-        .get({ uid })
-        .then((result) =>
-          result ? { id: 'assigned', result } : Promise.reject(),
-        )
-      const folderPromise = filesDB.folders
-        .get({ uid })
-        .then((result) =>
-          result ? { id: 'folder', result } : Promise.reject(),
-        )
-      const assignedFolderPromise = assignmentsDB.assignedFolders
-        .get({ uid })
-        .then((result) =>
-          result ? { id: 'assignedFolder', result } : Promise.reject(),
-        )
-
       const promises = [
-        filePromise,
-        assignedPromise,
-        folderPromise,
-        assignedFolderPromise,
+        createPromise(filesDB.files, 'file', uid),
+        createPromise(assignmentsDB.assignedFiles, 'assigned', uid),
+        createPromise(filesDB.folders, 'folder', uid),
+        createPromise(assignmentsDB.assignedFolders, 'assignedFolder', uid),
       ]
 
       const result = await Promise.any(promises)
 
-      switch (result.id) {
-        case 'file':
-          fileCount++
-          await uploadFile(result.result as ExtendedFile, filePaths)
-          break
-        case 'assigned':
-          const assigned = result.result as ExtendedFile
-          const newFullPathFile =
-            filePaths.find((path) => path.uid === fileTree[item].uid)?.path ||
-            ''
-          if (newFullPathFile !== assigned.fullPath) {
-            updateCount = await updateAssignedFile(
-              assigned,
-              newFullPathFile,
-              updateCount,
-            )
-          }
-          break
-        case 'folder':
-          folderCount++
-          await uploadFolder(result.result, filePaths)
-          break
-        case 'assignedFolder':
-          const assignedFolder = result.result as ExtendedFolder
-          const newFullPathFolder =
-            filePaths.find((path) => path.uid === fileTree[item].uid)?.path ||
-            ''
-          if (newFullPathFolder !== assignedFolder.fullPath) {
-            folderUpdateCount = await updateAssignedFolder(
-              assignedFolder,
-              newFullPathFolder,
-              folderUpdateCount,
-            )
-          }
-          break
-      }
+      await idToFunctionTable[result.id](result)
     } catch (error) {
       console.error('All promises were rejected', error)
     }
