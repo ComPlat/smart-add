@@ -33,7 +33,7 @@ const addFoldersToTree = (
 
 const constructTree = (
   inputFiles: ExtendedFile[],
-  assignmentFiles: ExtendedFile[] | undefined,
+  assignmentFiles: ExtendedFile[],
   inputRoot: string,
   assignmentRoot: string,
 ): Record<string, FileNode> => {

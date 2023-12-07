@@ -108,8 +108,6 @@ const handleCustomRequest = async ({
   } else {
     setProgress(50)
 
-    if (!uploadFileList) return
-
     const promises: Promise<Promise<number | void>[]>[] =
       uploadFileList.flatMap(async (fileObj) => {
         if (!fileObj.originFileObj) return [Promise.resolve()]
