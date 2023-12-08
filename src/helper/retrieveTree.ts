@@ -1,5 +1,5 @@
 import { ExtendedFile, ExtendedFolder } from '@/database/db'
-import { FileNode } from '@/helper/types'
+import { FileNode, FolderDepthMap } from '@/helper/types'
 
 const convertToFileTree = (
   fileTree: Record<string, FileNode>,
@@ -79,13 +79,14 @@ const retrieveTree = (
       }
     })
 
-    const folderDepthMap: { [key: number]: string[] } = {}
-    Object.keys(folderMap).forEach((key) => {
-      const depth = key.split('/').length - 1
-      folderDepthMap[depth] = folderDepthMap[depth]
-        ? [...folderDepthMap[depth], key]
-        : [key]
-    })
+    const folderDepthMap: FolderDepthMap = Object.keys(folderMap).reduce(
+      (acc: FolderDepthMap, key: string) => {
+        const depth = key.split('/').length - 1
+        acc[depth] = acc[depth] ? [...acc[depth], key] : [key]
+        return acc
+      },
+      {},
+    )
 
     files.forEach((file) => {
       const folderPath = file.fullPath.split('/').slice(0, -1).join('/')
@@ -115,7 +116,7 @@ const retrieveTree = (
       })
     })
 
-    const fileTree: Record<string, FileNode> = {
+    const fileTree: FolderDepthMap = {
       [root]: {
         canMove: false,
         children: [...rootItems, ...noFolderFiles.map((file) => file.fullPath)],

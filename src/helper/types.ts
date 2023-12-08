@@ -7,4 +7,8 @@ interface FileNode {
   uid: null | string
 }
 
-export type { FileNode }
+interface FolderDepthMap {
+  [depth: number]: string[]
+}
+
+export type { FileNode, FolderDepthMap }
