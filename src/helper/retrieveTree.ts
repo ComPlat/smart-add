@@ -6,7 +6,7 @@ const convertToFileTree = (
   folderMap: { [key: string]: TempFileNode },
   folderDepthMap: { [key: number]: string[] },
   noFolderFiles: ExtendedFile[],
-): void => {
+): Record<string, FileNode> => {
   noFolderFiles.forEach((file) => {
     fileTree[file.fullPath] = {
       canMove: true,
@@ -47,6 +47,8 @@ const convertToFileTree = (
       })
     })
   })
+
+  return fileTree
 }
 
 interface TempFileNode {
@@ -122,9 +124,7 @@ const retrieveTree = (
       },
     }
 
-    convertToFileTree(fileTree, folderMap, folderDepthMap, noFolderFiles)
-
-    return fileTree
+    return convertToFileTree(fileTree, folderMap, folderDepthMap, noFolderFiles)
   }
 
   const inputTree = convertToTree(inputFiles, inputFolders, inputRoot)
