@@ -96,22 +96,24 @@ const retrieveTree = (
       }
     })
 
-    const maxDepth = Object.keys(folderDepthMap).length
     const rootItems = folderDepthMap[0] || []
 
-    for (let i = 0; i < maxDepth - 1; i++) {
-      if (!folderDepthMap[i]) break
-      for (const folder of folderDepthMap[i]) {
-        if (folderDepthMap[i + 1]) {
-          const children = folderDepthMap[i + 1].filter((child) =>
-            child.startsWith(folder),
-          )
-          children.forEach((child) => {
-            folderMap[folder].children[child] = folderMap[child]
-          })
-        }
-      }
-    }
+    Object.keys(folderDepthMap).forEach((key) => {
+      const currentDepth = +key
+      const nextDepth = currentDepth + 1
+
+      if (!folderDepthMap[currentDepth] || !folderDepthMap[nextDepth]) return
+
+      folderDepthMap[currentDepth].forEach((folder: string) => {
+        const children = folderDepthMap[nextDepth].filter((child: string) =>
+          child.startsWith(folder),
+        )
+
+        children.forEach((child: string) => {
+          folderMap[folder].children[child] = folderMap[child]
+        })
+      })
+    })
 
     const fileTree: Record<string, FileNode> = {
       [root]: {
