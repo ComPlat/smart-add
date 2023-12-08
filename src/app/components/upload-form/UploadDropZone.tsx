@@ -69,31 +69,26 @@ const handleCustomRequest = async ({
       const createFolders = async (path: string, parentPath: string[]) => {
         const folders = path.split('/')
         let currentPath = parentPath.join('/')
-
-        const existingFolders = await filesDB.folders
-          .where('fullPath')
-          .anyOf(parentPath.concat(folders))
-          .toArray()
-
-        const promises = []
+        const promises: Promise<void>[] = []
 
         for (const folder of folders) {
           currentPath = currentPath ? `${currentPath}/${folder}` : folder
 
-          const existingFolder = existingFolders.find(
-            (folder) => folder.fullPath === currentPath,
-          )
+          const existingFolder = await filesDB.folders
+            .where('fullPath')
+            .equals(currentPath)
+            .first()
 
           if (!existingFolder) {
-            promises.push(
-              filesDB.folders.add({
-                fullPath: currentPath,
-                isFolder: true,
-                name: folder,
-                parentUid: '',
-                uid: v4(),
-              }),
-            )
+            const promise = filesDB.folders.add({
+              fullPath: currentPath,
+              isFolder: true,
+              name: folder,
+              parentUid: '',
+              uid: v4(),
+            }) as unknown as Promise<void>
+
+            promises.push(promise)
           }
         }
 
