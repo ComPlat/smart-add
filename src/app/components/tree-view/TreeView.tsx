@@ -42,11 +42,16 @@ const TreeView = () => {
     }))
     const key = Date.now()
 
+    const assignedLength = assignedFiles.length + assignedFolders.length
+    const inputLength = files.length + folders.length
+
     return {
       assignedFiles,
       assignedFolders,
+      assignedLength,
       files,
       folders,
+      inputLength,
       key,
       tree,
       treeDataProvider,
@@ -147,8 +152,8 @@ const TreeView = () => {
       <AddFoldersButton tree={db.tree} />
 
       <ClearButtonGroup
-        assignmentDBLength={db.assignedFiles.length + db.assignedFolders.length}
-        inputDBLength={db.files.length + db.folders.length}
+        assignmentDBLength={db.assignedLength}
+        inputDBLength={db.inputLength}
       />
     </UncontrolledTreeEnvironment>
   )
