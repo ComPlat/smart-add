@@ -70,23 +70,34 @@ const handleCustomRequest = async ({
         const folders = path.split('/')
         let currentPath = parentPath.join('/')
 
+        const existingFolders = await filesDB.folders
+          .where('fullPath')
+          .anyOf(parentPath.concat(folders))
+          .toArray()
+
+        const promises = []
+
         for (const folder of folders) {
           currentPath = currentPath ? `${currentPath}/${folder}` : folder
-          const existingFolder = await filesDB.folders
-            .where('fullPath')
-            .equals(currentPath)
-            .first()
+
+          const existingFolder = existingFolders.find(
+            (folder) => folder.fullPath === currentPath,
+          )
 
           if (!existingFolder) {
-            await filesDB.folders.add({
-              fullPath: currentPath,
-              isFolder: true,
-              name: folder,
-              parentUid: '',
-              uid: v4(),
-            })
+            promises.push(
+              filesDB.folders.add({
+                fullPath: currentPath,
+                isFolder: true,
+                name: folder,
+                parentUid: '',
+                uid: v4(),
+              }),
+            )
           }
         }
+
+        await Promise.all(promises)
       }
 
       // HINT: Exlude Mac OS specific folder
