@@ -12,9 +12,9 @@ export class EventEmitter<EventPayload> {
 
   private handlers: Array<EventHandler<EventPayload>> = []
 
-  private options?: EventEmitterOptions<EventPayload>
+  private options: EventEmitterOptions<EventPayload>
 
-  constructor(options?: EventEmitterOptions<EventPayload>) {
+  constructor(options: EventEmitterOptions<EventPayload> = {}) {
     this.options = options
   }
 
@@ -24,11 +24,13 @@ export class EventEmitter<EventPayload> {
   }
 
   public async emit(payload: EventPayload): Promise<void> {
-    this.options?.logger?.('emit', payload)
+    this.options.logger?.('emit', payload)
 
     const promises = this.handlers
-      .filter((handler) => handler)
-      .map((handler) => handler?.(payload))
+      .filter((handler): handler is NonNullable<typeof handler> =>
+        Boolean(handler),
+      )
+      .map((handler) => handler(payload))
       .filter((res) => typeof res?.then === 'function')
 
     await Promise.all(promises)

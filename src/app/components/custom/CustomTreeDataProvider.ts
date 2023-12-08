@@ -13,11 +13,11 @@ export class CustomTreeDataProvider<T> implements TreeDataProvider {
 
   private onDidChangeTreeDataEmitter = new EventEmitter<TreeItemIndex[]>()
 
-  private setItemName?: (item: TreeItem<T>, newName: string) => TreeItem<T>
+  private setItemName: (item: TreeItem<T>, newName: string) => TreeItem<T>
 
   constructor(
     items: Record<TreeItemIndex, TreeItem<T>>,
-    setItemName?: (item: TreeItem<T>, newName: string) => TreeItem<T>,
+    setItemName: (item: TreeItem<T>, newName: string) => TreeItem<T>,
   ) {
     this.data = { items }
     this.setItemName = setItemName
