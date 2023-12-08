@@ -116,7 +116,7 @@ const retrieveTree = (
       })
     })
 
-    const fileTree: FolderDepthMap = {
+    const fileTree: Record<string, FileNode> = {
       [root]: {
         canMove: false,
         children: [...rootItems, ...noFolderFiles.map((file) => file.fullPath)],
