@@ -7,48 +7,65 @@ const convertToFileTree = (
   folderDepthMap: { [key: number]: string[] },
   noFolderFiles: ExtendedFile[],
 ): Record<string, FileNode> => {
-  noFolderFiles.forEach((file) => {
-    fileTree[file.fullPath] = {
-      canMove: true,
-      children: [],
-      data: file.name,
-      index: file.fullPath,
-      isFolder: false,
-      uid: file.uid,
-    }
-  })
-
-  Object.keys(folderDepthMap).forEach((key) => {
-    if (!folderDepthMap[Number(key)]) return
-
-    folderDepthMap[Number(key)].forEach((folder: string) => {
-      const currentFolder = folderMap[folder]
-
-      fileTree[currentFolder.folderObj.fullPath] = {
+  const noFolderFilesNodes = noFolderFiles.reduce(
+    (acc, file) => ({
+      ...acc,
+      [file.fullPath]: {
         canMove: true,
-        children: Object.keys(currentFolder.children),
-        data: currentFolder.folderObj.name,
-        index: currentFolder.folderObj.fullPath,
-        isFolder: true,
-        uid: currentFolder.folderObj.uid,
-      }
+        children: [],
+        data: file.name,
+        index: file.fullPath,
+        isFolder: false,
+        uid: file.uid,
+      },
+    }),
+    {},
+  )
 
-      Object.values(currentFolder.children).forEach((child) => {
-        if ('extension' in child) {
-          fileTree[child.fullPath] = {
-            canMove: true,
-            children: [],
-            data: child.name,
-            index: child.fullPath,
-            isFolder: false,
-            uid: child.uid,
-          }
+  const folderDepthMapNodes = Object.keys(folderDepthMap)
+    .flatMap((key) => {
+      const folders = folderDepthMap[Number(key)]
+      if (!folders) return []
+
+      return folders.flatMap((folder) => {
+        const currentFolder = folderMap[folder]
+        const folderNode = {
+          canMove: true,
+          children: Object.keys(currentFolder.children),
+          data: currentFolder.folderObj.name,
+          index: currentFolder.folderObj.fullPath,
+          isFolder: true,
+          uid: currentFolder.folderObj.uid,
         }
+
+        const childNodes: Record<string, FileNode>[] = Object.values(
+          currentFolder.children,
+        ).flatMap((child) =>
+          'extension' in child
+            ? [
+                {
+                  [child.fullPath]: {
+                    canMove: true,
+                    children: [],
+                    data: child.name,
+                    index: child.fullPath,
+                    isFolder: false,
+                    uid: child.uid,
+                  },
+                },
+              ]
+            : [],
+        )
+
+        return [
+          { [currentFolder.folderObj.fullPath]: folderNode },
+          ...childNodes,
+        ]
       })
     })
-  })
+    .reduce((acc, curr) => ({ ...acc, ...curr }), {})
 
-  return fileTree
+  return Object.assign({}, fileTree, noFolderFilesNodes, folderDepthMapNodes)
 }
 
 interface TempFileNode {
