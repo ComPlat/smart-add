@@ -50,11 +50,15 @@ const renderItem = ({
       <button
         {...context.itemContainerWithoutChildrenProps}
         {...context.interactiveElementProps}
-        className={`flex items-center text-sm focus:outline-none
-          ${context.isSelected ? 'my-1 rounded-md bg-kit-primary-mid py-1' : ''}
+        className={`flex items-center text-sm
+          ${
+            context.isSelected
+              ? 'my-1 rounded-md bg-kit-primary-mid font-bold'
+              : ''
+          }
           ${
             isDraggingOver ? 'rounded-md bg-blue-200' : ''
-          } text-sm text-gray-800 duration-100 hover:text-kit-primary-full`}
+          } text-sm text-gray-800 duration-75 hover:text-kit-primary-full`}
         style={{
           marginLeft: `${depth * 25}px`,
         }}

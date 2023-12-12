@@ -194,6 +194,10 @@ const UploadDropZone = () => {
     listType: 'text',
     multiple: true,
     name: 'file',
+    onChange(info) {
+      setUploadFileList(info.fileList)
+      setProgress
+    },
     showUploadList: false,
   }
 

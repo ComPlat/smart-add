@@ -1,81 +1,155 @@
 'use client'
 
-import { filesDB } from '@/database/db'
-import { constructTree } from '@/helper/constructTree'
+import { assignmentsDB, filesDB } from '@/database/db'
+import { canDropAt } from '@/helper/canDropAt'
+import { handleFileMove } from '@/helper/handleFileMove'
+import { retrieveTree } from '@/helper/retrieveTree'
+import { Divider } from 'antd'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { useMemo, useState } from 'react'
 import {
-  StaticTreeDataProvider,
+  DraggingPosition,
   Tree,
+  TreeItem,
+  TreeItemIndex,
   UncontrolledTreeEnvironment,
 } from 'react-complex-tree'
 import 'react-complex-tree/lib/style-modern.css'
 
+import { CustomTreeDataProvider } from '../custom/CustomTreeDataProvider'
+import { AddFoldersButton } from '../tree-view/AddFoldersButton'
+import ClearButtonGroup from '../tree-view/ClearButtonGroup'
+import { UploadSpinner } from '../tree-view/UploadSpinner'
 import { renderItem } from '../tree-view/renderItem'
 import { ExportFiles } from './ExportFiles'
 import { UploadedFiles } from './UploadedFiles'
 
-type FileTreeProps = {
-  rootItem: string
-  treeId: string
-  treeLabel: string
-}
-
-const FileTree = ({ rootItem, treeId, treeLabel }: FileTreeProps) => {
-  return (
-    <div className="my-4 flex min-h-[150px] flex-col rounded-md bg-gray-100 px-2 [&>*]:min-h-full">
-      <Tree
-        renderItemsContainer={({ children, containerProps }) => (
-          <ul {...containerProps}>{children}</ul>
-        )}
-        renderTreeContainer={({ children, containerProps }) => (
-          <div {...containerProps}>{children}</div>
-        )}
-        renderItem={renderItem}
-        rootItem={rootItem}
-        treeId={treeId}
-        treeLabel={treeLabel}
-      />
-    </div>
-  )
-}
-
 const TreeView = () => {
-  const files = useLiveQuery(() => filesDB.files.toArray(), [])
+  const db = useLiveQuery(async () => {
+    const files = await filesDB.files.toArray()
+    const folders = await filesDB.folders.toArray()
+    const assignedFiles = await assignmentsDB.assignedFiles.toArray()
+    const assignedFolders = await assignmentsDB.assignedFolders.toArray()
+    const tree = retrieveTree(
+      files,
+      folders,
+      'inputTreeRoot',
+      assignedFiles,
+      assignedFolders,
+      'assignmentTreeRoot',
+    )
+    const treeDataProvider = new CustomTreeDataProvider(tree, (item, data) => ({
+      ...item,
+      data,
+    }))
+    const key = Date.now()
 
-  if (!files) {
-    return <div>Loading...</div>
+    const assignedLength = assignedFiles.length + assignedFolders.length
+    const inputLength = files.length + folders.length
+
+    return {
+      assignedFiles,
+      assignedFolders,
+      assignedLength,
+      files,
+      folders,
+      inputLength,
+      key,
+      tree,
+      treeDataProvider,
+    }
+  })
+
+  const [uploading, setUploading] = useState(false)
+  const [focusedItem, setFocusedItem] = useState<
+    TreeItemIndex & (TreeItemIndex | TreeItemIndex[])
+  >()
+  const [expandedItems, setExpandedItems] = useState<TreeItemIndex[]>([])
+
+  const memoizedKey = useMemo(
+    () => (db ? (uploading ? 0 : db.key) : null),
+    [uploading, db],
+  )
+
+  if (!db) return <div>Loading...</div>
+
+  const viewState = {
+    ['assignmentTree']: {
+      expandedItems,
+      focusedItem,
+    },
+    ['inputTree']: {
+      expandedItems,
+      focusedItem,
+    },
   }
 
-  const fileTree = constructTree(files)
+  const handleOnCollapseItem = (item: TreeItem) =>
+    setExpandedItems(
+      expandedItems.filter(
+        (expandedItemIndex) => expandedItemIndex !== item.index,
+      ),
+    )
+
+  const handleOnExpandItem = (item: TreeItem) =>
+    setExpandedItems([...expandedItems, item.index])
+
+  const handleOnFocusItem = (item: TreeItem) => setFocusedItem(item.index)
+
+  const handleOnDrop = () => handleFileMove(db.tree, setUploading)
+
+  const handleCanDropAt = (items: TreeItem[], target: DraggingPosition) =>
+    canDropAt(items, target, db.tree)
 
   return (
     <UncontrolledTreeEnvironment
-      dataProvider={
-        new StaticTreeDataProvider(fileTree, (item, data) => ({
-          ...item,
-          data,
-        }))
-      }
       canDragAndDrop
-      canDropAt={(_items, target) => target.treeId === 'assignmentTree'}
+      canDropAt={handleCanDropAt}
       canDropOnFolder
       canReorderItems
       canSearch={false}
-      getItemTitle={(item) => item.data}
-      // HINT: Rerender when number of files changes
-      key={files.length}
-      viewState={{}}
+      dataProvider={db.treeDataProvider}
+      getItemTitle={(item: TreeItem) => item.data}
+      key={memoizedKey}
+      onCollapseItem={handleOnCollapseItem}
+      onDrop={handleOnDrop}
+      onExpandItem={handleOnExpandItem}
+      onFocusItem={handleOnFocusItem}
+      viewState={viewState}
     >
-      <div className="ml-4 flex w-full flex-row justify-between gap-4">
+      <div className="flex w-full flex-row justify-between gap-4">
         <UploadedFiles>
-          <FileTree
+          <Divider />
+          <Tree
+            renderItemsContainer={({ children, containerProps }) => (
+              <ul {...containerProps}>{children}</ul>
+            )}
+            renderTreeContainer={({ children, containerProps }) => (
+              <div {...containerProps}>{children}</div>
+            )}
+            renderItem={renderItem}
             rootItem="inputTreeRoot"
             treeId="inputTree"
             treeLabel="Input Tree"
           />
         </UploadedFiles>
+
+        <UploadSpinner isUploading={uploading} />
+
         <ExportFiles>
-          <FileTree
+          <AddFoldersButton tree={db.tree} />
+          <ClearButtonGroup
+            assignmentDBLength={db.assignedLength}
+            inputDBLength={db.inputLength}
+          />
+          <Tree
+            renderItemsContainer={({ children, containerProps }) => (
+              <ul {...containerProps}>{children}</ul>
+            )}
+            renderTreeContainer={({ children, containerProps }) => (
+              <div {...containerProps}>{children}</div>
+            )}
+            renderItem={renderItem}
             rootItem="assignmentTreeRoot"
             treeId="assignmentTree"
             treeLabel="Assignment Tree"
