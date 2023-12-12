@@ -1,44 +1,119 @@
 'use client'
 
-import { filesDB } from '@/database/db'
-import { constructTree } from '@/helper/constructTree'
+import { assignmentsDB, filesDB } from '@/database/db'
+import { canDropAt } from '@/helper/canDropAt'
+import { handleFileMove } from '@/helper/handleFileMove'
+import { retrieveTree } from '@/helper/retrieveTree'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { useMemo, useState } from 'react'
 import {
-  StaticTreeDataProvider,
+  DraggingPosition,
   Tree,
+  TreeItem,
+  TreeItemIndex,
   UncontrolledTreeEnvironment,
 } from 'react-complex-tree'
 import 'react-complex-tree/lib/style-modern.css'
 
+import { CustomTreeDataProvider } from '../custom/CustomTreeDataProvider'
+import { AddFoldersButton } from './AddFoldersButton'
+import ClearButtonGroup from './ClearButtonGroup'
 import styles from './TreeView.module.css'
+import { UploadSpinner } from './UploadSpinner'
 import { renderItem } from './renderItem'
 
 const TreeView = () => {
-  const files = useLiveQuery(() => filesDB.files.toArray(), [])
+  const db = useLiveQuery(async () => {
+    const files = await filesDB.files.toArray()
+    const folders = await filesDB.folders.toArray()
+    const assignedFiles = await assignmentsDB.assignedFiles.toArray()
+    const assignedFolders = await assignmentsDB.assignedFolders.toArray()
+    const tree = retrieveTree(
+      files,
+      folders,
+      'inputTreeRoot',
+      assignedFiles,
+      assignedFolders,
+      'assignmentTreeRoot',
+    )
+    const treeDataProvider = new CustomTreeDataProvider(tree, (item, data) => ({
+      ...item,
+      data,
+    }))
+    const key = Date.now()
 
-  if (!files) {
-    return <div>Loading...</div>
+    const assignedLength = assignedFiles.length + assignedFolders.length
+    const inputLength = files.length + folders.length
+
+    return {
+      assignedFiles,
+      assignedFolders,
+      assignedLength,
+      files,
+      folders,
+      inputLength,
+      key,
+      tree,
+      treeDataProvider,
+    }
+  })
+
+  const [uploading, setUploading] = useState(false)
+  const [focusedItem, setFocusedItem] = useState<
+    TreeItemIndex & (TreeItemIndex | TreeItemIndex[])
+  >()
+  const [expandedItems, setExpandedItems] = useState<TreeItemIndex[]>([])
+
+  const memoizedKey = useMemo(
+    () => (db ? (uploading ? 0 : db.key) : null),
+    [uploading, db],
+  )
+
+  if (!db) return <div>Loading...</div>
+
+  const viewState = {
+    ['assignmentTree']: {
+      expandedItems,
+      focusedItem,
+    },
+    ['inputTree']: {
+      expandedItems,
+      focusedItem,
+    },
   }
 
-  const fileTree = constructTree(files)
+  const handleOnCollapseItem = (item: TreeItem) =>
+    setExpandedItems(
+      expandedItems.filter(
+        (expandedItemIndex) => expandedItemIndex !== item.index,
+      ),
+    )
+
+  const handleOnExpandItem = (item: TreeItem) =>
+    setExpandedItems([...expandedItems, item.index])
+
+  const handleOnFocusItem = (item: TreeItem) => setFocusedItem(item.index)
+
+  const handleOnDrop = () => handleFileMove(db.tree, setUploading)
+
+  const handleCanDropAt = (items: TreeItem[], target: DraggingPosition) =>
+    canDropAt(items, target, db.tree)
 
   return (
     <UncontrolledTreeEnvironment
-      dataProvider={
-        new StaticTreeDataProvider(fileTree, (item, data) => ({
-          ...item,
-          data,
-        }))
-      }
       canDragAndDrop
-      canDropAt={(_items, target) => target.treeId === 'assignmentTree'}
+      canDropAt={handleCanDropAt}
       canDropOnFolder
       canReorderItems
       canSearch={false}
-      getItemTitle={(item) => item.data}
-      // HINT: Rerender when number of files changes
-      key={files.length}
-      viewState={{}}
+      dataProvider={db.treeDataProvider}
+      getItemTitle={(item: TreeItem) => item.data}
+      key={memoizedKey}
+      onCollapseItem={handleOnCollapseItem}
+      onDrop={handleOnDrop}
+      onExpandItem={handleOnExpandItem}
+      onFocusItem={handleOnFocusItem}
+      viewState={viewState}
     >
       <div className="flex flex-row justify-between">
         <div className={styles['tree']}>
@@ -55,6 +130,9 @@ const TreeView = () => {
             treeLabel="Input Tree"
           />
         </div>
+
+        <UploadSpinner isUploading={uploading} />
+
         <div className={styles['tree']}>
           <Tree
             renderItemsContainer={({ children, containerProps }) => (
@@ -70,6 +148,13 @@ const TreeView = () => {
           />
         </div>
       </div>
+
+      <AddFoldersButton tree={db.tree} />
+
+      <ClearButtonGroup
+        assignmentDBLength={db.assignedLength}
+        inputDBLength={db.inputLength}
+      />
     </UncontrolledTreeEnvironment>
   )
 }

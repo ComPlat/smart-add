@@ -1,6 +1,6 @@
 'use client'
 
-import { ExtendedFile, filesDB } from '@/database/db'
+import { ExtendedFile, assignmentsDB } from '@/database/db'
 import { Button, message } from 'antd'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { saveAs } from 'file-saver'
@@ -11,7 +11,8 @@ interface FileTree {
 }
 
 const FileDownloader = () => {
-  const files = useLiveQuery(() => filesDB.files.toArray()) || []
+  const assignedFiles =
+    useLiveQuery(() => assignmentsDB.assignedFiles.toArray()) || []
 
   const constructTree = (files: ExtendedFile[]): FileTree =>
     files.reduce((fileTree, file) => {
@@ -33,14 +34,9 @@ const FileDownloader = () => {
     }, {} as FileTree)
 
   const handleClick = async () => {
-    if (files.length === 0) {
-      message.error('No files to download!')
-      return
-    }
-
     try {
       const zip = new JSZip()
-      const fileTree = constructTree(files)
+      const fileTree = constructTree(assignedFiles)
 
       const addFilesToZip = async (
         tree: FileTree,
@@ -73,29 +69,10 @@ const FileDownloader = () => {
     }
   }
 
-  const handleClear = () => {
-    filesDB.files.clear()
-    window.location.reload()
-  }
-
   return (
-    <div className="flex">
-      <Button
-        className="mx-2 w-1/2"
-        disabled={files.length === 0 ? true : false}
-        onClick={handleClick}
-      >
-        Download as Zip
-      </Button>
-      <Button
-        className="mx-2 w-1/2"
-        danger
-        disabled={files.length === 0 ? true : false}
-        onClick={handleClear}
-      >
-        Clear DB
-      </Button>
-    </div>
+    <Button disabled={assignedFiles.length === 0} onClick={handleClick}>
+      Download as Zip
+    </Button>
   )
 }
 
