@@ -3,7 +3,7 @@ import 'cypress-file-upload'
 
 describe('XLSX Upload and Parsing', () => {
   beforeEach(() => {
-    cy.visit('/').clearIndexedDb('filesDatabase') // HINT: Solves some mysterious race condition about IndexedDB and Cypress
+    cy.visit('/').wait(100).clearIndexedDb('filesDatabase') // HINT: Solves some mysterious race condition about IndexedDB and Cypress
   })
 
   it('should upload xlsx file', () => {
