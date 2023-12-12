@@ -2,14 +2,17 @@
 
 import { TreeView } from '../components/workspace/TreeView'
 import Header from './workspace/Header'
+import { Toolbar } from './workspace/Toolbar'
 
 const Workspace = () => (
-  <div className="flex flex-col bg-gray-100 p-4">
+  <div className="flex flex-col bg-gray-100">
     <Header />
-    <div className="mt-4 h-screen">
+    <Toolbar />
+    <div className="h-screen">
       <div className="flex h-full">
         <TreeView />
       </div>
+      T
     </div>
   </div>
 )

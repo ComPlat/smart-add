@@ -21,6 +21,8 @@ import { AddFoldersButton } from '../tree-view/AddFoldersButton'
 import ClearButtonGroup from '../tree-view/ClearButtonGroup'
 import { UploadSpinner } from '../tree-view/UploadSpinner'
 import { renderItem } from '../tree-view/renderItem'
+import ParseXlsx from '../upload-form/ParseXlsx'
+import { UploadDropZone } from '../upload-form/UploadDropZone'
 import { ExportFiles } from './ExportFiles'
 import { UploadedFiles } from './UploadedFiles'
 
@@ -117,8 +119,12 @@ const TreeView = () => {
       onFocusItem={handleOnFocusItem}
       viewState={viewState}
     >
-      <div className="flex w-full flex-row justify-between gap-4">
+      <div className="flex w-full flex-row justify-between">
         <UploadedFiles>
+          <UploadDropZone />
+          <UploadSpinner isUploading={uploading} />
+          <Divider />
+          <ParseXlsx />
           <Divider />
           <Tree
             renderItemsContainer={({ children, containerProps }) => (
@@ -134,7 +140,7 @@ const TreeView = () => {
           />
         </UploadedFiles>
 
-        <UploadSpinner isUploading={uploading} />
+        <p className="h-full w-2 bg-gray-100" />
 
         <ExportFiles>
           <AddFoldersButton tree={db.tree} />
@@ -147,7 +153,9 @@ const TreeView = () => {
               <ul {...containerProps}>{children}</ul>
             )}
             renderTreeContainer={({ children, containerProps }) => (
-              <div {...containerProps}>{children}</div>
+              <div className="h-36 bg-gray-100" {...containerProps}>
+                {children}
+              </div>
             )}
             renderItem={renderItem}
             rootItem="assignmentTreeRoot"

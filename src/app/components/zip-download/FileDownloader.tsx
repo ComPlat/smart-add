@@ -73,8 +73,9 @@ const FileDownloader = () => {
 
   return (
     <Button
+      className="m-2 rounded-lg bg-kit-primary-full p-2"
       disabled={assignedFiles.length === 0}
-      label="Download as Zip"
+      label="Download as ZIP"
       onClick={handleClick}
     />
   )
