@@ -16,7 +16,8 @@ import {
 import 'react-complex-tree/lib/style-modern.css'
 
 import { CustomTreeDataProvider } from '../custom/CustomTreeDataProvider'
-import { AddFoldersButton } from './AddFoldersButton'
+import AddReaction from '../structure-btns/AddReaction'
+import AddSample from '../structure-btns/AddSample'
 import ClearButtonGroup from './ClearButtonGroup'
 import styles from './TreeView.module.css'
 import { UploadSpinner } from './UploadSpinner'
@@ -134,6 +135,10 @@ const TreeView = () => {
         <UploadSpinner isUploading={uploading} />
 
         <div className={styles['tree']}>
+          <div className="mb-2 flex w-full">
+            <AddSample className="w-full" tree={db.tree} />
+            <AddReaction className="w-full" tree={db.tree} />
+          </div>
           <Tree
             renderItemsContainer={({ children, containerProps }) => (
               <ul {...containerProps}>{children}</ul>
@@ -149,7 +154,7 @@ const TreeView = () => {
         </div>
       </div>
 
-      <AddFoldersButton tree={db.tree} />
+      {/* <AddFoldersButton tree={db.tree} /> */}
 
       <ClearButtonGroup
         assignmentDBLength={db.assignedLength}

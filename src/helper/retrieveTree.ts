@@ -126,9 +126,16 @@ const retrieveTree = (
         return acc
 
       return folderDepthMap[currentDepth].reduce((acc, folder) => {
-        const children = folderDepthMap[nextDepth].filter((child) =>
-          child.startsWith(folder),
-        )
+        const folderSegments = folder.split('/')
+        const children = folderDepthMap[nextDepth].filter((child) => {
+          const childSegments = child.split('/')
+          return (
+            childSegments.length === folderSegments.length + 1 &&
+            folderSegments.every(
+              (segment, index) => segment === childSegments[index],
+            )
+          )
+        })
         const updatedChildren = children.reduce(
           (childAcc, child) => ({
             ...childAcc,
