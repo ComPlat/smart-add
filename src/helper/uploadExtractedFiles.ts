@@ -22,16 +22,14 @@ const uploadExtractedFiles = async (
   await Promise.all(
     extractedFiles.map(async (extractedFile) => {
       const { data, fullPath, name, path } = extractedFile
-      if (name === '') {
-        uploadedFiles++
-        return
-      }
+      if (name === '' || name.endsWith('.zip')) return
 
       const fileData = await data
       await filesDB.files.add({
         extension: name.split('.').slice(-1)[0],
         file: fileData,
         fullPath: [...parentPath, fullPath].join('/'),
+        isFolder: false,
         name,
         parentUid: file.uid.split('.')[0],
         path,
