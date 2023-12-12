@@ -86,53 +86,71 @@ const retrieveTree = (
     folders: ExtendedFolder[],
     root: string,
   ): Record<string, FileNode> => {
-    const folderMap: { [key: string]: TempFileNode } = {}
-    const noFolderFiles: ExtendedFile[] = []
-
-    folders.forEach((folder) => {
-      folderMap[folder.fullPath] = {
-        children: {},
-        folderObj: folder,
-      }
-    })
+    const folderMap: Record<string, TempFileNode> = folders.reduce(
+      (acc, folder) => ({
+        ...acc,
+        [folder.fullPath]: {
+          children: {},
+          folderObj: folder,
+        },
+      }),
+      {},
+    )
 
     const folderDepthMap: FolderDepthMap = Object.keys(folderMap).reduce(
-      (acc: FolderDepthMap, key: string) => {
+      (acc, key) => {
         const depth = key.split('/').length - 1
         acc[depth] = acc[depth] ? [...acc[depth], key] : [key]
         return acc
       },
-      {},
+      {} as FolderDepthMap,
     )
 
-    files.forEach((file) => {
+    const noFolderFiles: ExtendedFile[] = files.reduce((acc, file) => {
       const folderPath = file.fullPath.split('/').slice(0, -1).join('/')
       if (!folderMap[folderPath]) {
-        noFolderFiles.push(file)
+        return [...acc, file]
       } else {
         folderMap[folderPath].children[file.fullPath] = file
       }
-    })
+      return acc
+    }, [] as ExtendedFile[])
 
-    const rootItems = folderDepthMap[0] || []
-
-    Object.keys(folderDepthMap).forEach((key) => {
+    const updatedFolderMap: Record<string, TempFileNode> = Object.keys(
+      folderDepthMap,
+    ).reduce((acc, key) => {
       const currentDepth = +key
       const nextDepth = currentDepth + 1
 
-      if (!folderDepthMap[currentDepth] || !folderDepthMap[nextDepth]) return
+      if (!folderDepthMap[currentDepth] || !folderDepthMap[nextDepth])
+        return acc
 
-      folderDepthMap[currentDepth].forEach((folder: string) => {
-        const children = folderDepthMap[nextDepth].filter((child: string) =>
+      return folderDepthMap[currentDepth].reduce((acc, folder) => {
+        const children = folderDepthMap[nextDepth].filter((child) =>
           child.startsWith(folder),
         )
+        const updatedChildren = children.reduce(
+          (childAcc, child) => ({
+            ...childAcc,
+            [child]: folderMap[child],
+          }),
+          {},
+        )
 
-        children.forEach((child: string) => {
-          folderMap[folder].children[child] = folderMap[child]
-        })
-      })
-    })
+        return {
+          ...acc,
+          [folder]: {
+            ...acc[folder],
+            children: {
+              ...acc[folder].children,
+              ...updatedChildren,
+            },
+          },
+        }
+      }, acc)
+    }, folderMap)
 
+    const rootItems = folderDepthMap[0] || []
     const fileTree: Record<string, FileNode> = {
       [root]: {
         canMove: false,
@@ -144,7 +162,12 @@ const retrieveTree = (
       },
     }
 
-    return convertToFileTree(fileTree, folderMap, folderDepthMap, noFolderFiles)
+    return convertToFileTree(
+      fileTree,
+      updatedFolderMap,
+      folderDepthMap,
+      noFolderFiles,
+    )
   }
 
   const inputTree = convertToTree(inputFiles, inputFolders, inputRoot)
