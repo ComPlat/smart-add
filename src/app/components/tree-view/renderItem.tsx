@@ -50,15 +50,17 @@ const renderItem = ({
       <button
         {...context.itemContainerWithoutChildrenProps}
         {...context.interactiveElementProps}
-        className={`flex items-center focus:outline-none
-          ${context.isSelected ? 'text-blue-600' : ''}
-          ${isDraggingOver ? 'rounded-md bg-blue-200' : ''}`}
+        className={`flex items-center text-sm focus:outline-none
+          ${context.isSelected ? 'my-1 rounded-md bg-kit-primary-mid py-1' : ''}
+          ${
+            isDraggingOver ? 'rounded-md bg-blue-200' : ''
+          } text-sm text-gray-800 duration-100 hover:text-kit-primary-full`}
         style={{
           marginLeft: `${depth * 25}px`,
         }}
         type="button"
       >
-        <span className="mr-2">{Icon(item, context, title)}</span>
+        <span className="mx-2">{Icon(item, context, title)}</span>
         <span className={`truncate ${shouldHideTitle ? 'invisible' : ''}`}>
           {shouldHideTitle ? (
             <span className="invisible">{'\u200B'}</span>

@@ -1,6 +1,5 @@
 import { ReactNode } from 'react'
 
-import ParseXlsx from '../upload-form/ParseXlsx'
 import { UploadDropZone } from '../upload-form/UploadDropZone'
 
 const UploadedFiles = ({ children }: { children: ReactNode }) => (
@@ -12,7 +11,6 @@ const UploadedFiles = ({ children }: { children: ReactNode }) => (
       <div className="mt-4 flex h-full flex-col gap-4 rounded-3xl border-2 border-dashed border-gray-300 bg-white px-4 shadow-sm">
         <UploadDropZone />
         {children}
-        <ParseXlsx />
       </div>
     </div>
   </div>

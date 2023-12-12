@@ -82,7 +82,7 @@ const FileDownloader = () => {
   }
 
   return (
-    <div className="mt-4 flex flex-col">
+    <div className="flex gap-5">
       <Button
         icon={
           <ArchiveDownloadIcon className="h-4 w-4 self-center text-white" />

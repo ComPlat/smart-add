@@ -8,12 +8,12 @@ const Sidebar = () => (
       <MenuItem label="Workspace" />
       <div className="mx-2 mt-4 flex flex-col gap-2">
         <Message
+          key={`message-${Date.now()}`}
           percent={75.0}
           sumSize={400}
           title="4 files uploading"
           uploadedSize={300}
         />
-
         <FileDownloader />
       </div>
     </div>

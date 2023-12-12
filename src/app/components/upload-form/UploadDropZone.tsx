@@ -4,7 +4,7 @@ import { filesDB } from '@/database/db'
 import { extractFilesFromZip } from '@/helper/extractFilesFromZip'
 import { uploadExtractedFiles } from '@/helper/uploadExtractedFiles'
 import { UploadOutlined } from '@ant-design/icons'
-import { Progress, UploadProps, message } from 'antd'
+import { Progress, UploadProps } from 'antd'
 import Upload, { RcFile } from 'antd/es/upload'
 import { useState } from 'react'
 import { v4 } from 'uuid'
@@ -85,18 +85,6 @@ const UploadDropZone = () => {
     listType: 'text',
     multiple: true,
     name: 'file',
-    onChange(info) {
-      const {
-        file: { name, status },
-      } = info
-
-      if (status === 'done') {
-        message.success(`${name} uploaded successfully.`)
-      } else if (status === 'error') {
-        message.error(`Upload of file ${name} failed.`)
-      }
-      setProgress
-    },
     showUploadList: false,
   }
 
