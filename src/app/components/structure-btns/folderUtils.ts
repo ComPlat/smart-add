@@ -46,7 +46,9 @@ export const createFolder = async (path: string, name: string) => {
 }
 
 export const createSubFolders = async (basePath: string, names: string[]) => {
-  for (const name of names) {
-    await createFolder(`${basePath}/${name}`, name)
-  }
+  const createFolderPromises = names.map((name) =>
+    createFolder(`${basePath}/${name}`, name),
+  )
+
+  await Promise.all(createFolderPromises)
 }
