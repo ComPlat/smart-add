@@ -116,6 +116,14 @@ const TreeView = () => {
       onFocusItem={handleOnFocusItem}
       viewState={viewState}
     >
+      <div className="flex">
+        <div className="flex-1"></div>
+        <div className="flex flex-1">
+          <AddSample className="flex-1" tree={db.tree} />
+          <AddReaction className="flex-1" tree={db.tree} />
+        </div>
+      </div>
+
       <div className="flex flex-row justify-between">
         <div className={styles['tree']}>
           <Tree
@@ -135,10 +143,6 @@ const TreeView = () => {
         <UploadSpinner isUploading={uploading} />
 
         <div className={styles['tree']}>
-          <div className="mb-2 flex w-full">
-            <AddSample className="w-full" tree={db.tree} />
-            <AddReaction className="w-full" tree={db.tree} />
-          </div>
           <Tree
             renderItemsContainer={({ children, containerProps }) => (
               <ul {...containerProps}>{children}</ul>

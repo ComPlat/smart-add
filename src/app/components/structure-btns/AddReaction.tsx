@@ -1,7 +1,8 @@
 import { FileNode } from '@/helper/types'
 import { Button, Input, Modal } from 'antd'
-import { useState } from 'react'
+import React, { useState } from 'react'
 
+import { getUniqueFolderName } from './folderUtils'
 import { createReaction } from './templates'
 
 const AddReaction = ({
@@ -16,7 +17,7 @@ const AddReaction = ({
 
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [folderName, setFolderName] = useState(baseName)
-  const [sampleName, setSampleName] = useState(baseSampleName) // New state for sample name
+  const [sampleName, setSampleName] = useState(baseSampleName)
 
   const showModal = () => {
     setIsModalVisible(true)
@@ -25,22 +26,24 @@ const AddReaction = ({
   const handleOk = async () => {
     setIsModalVisible(false)
     if (folderName && sampleName) {
-      await createReaction(folderName, tree, sampleName) // Pass sampleName as an argument
+      const uniqueFolderName = getUniqueFolderName(folderName, tree)
+      const uniqueSampleName = getUniqueFolderName(sampleName, tree)
+      await createReaction(uniqueFolderName, tree, uniqueSampleName)
       setFolderName(baseName)
-      setSampleName(baseSampleName) // Reset sample name
+      setSampleName(baseSampleName)
     }
   }
 
   const handleCancel = () => {
     setIsModalVisible(false)
     setFolderName(baseName)
-    setSampleName(baseSampleName) // Reset sample name
+    setSampleName(baseSampleName)
   }
 
   return (
     <>
       <Button className={className} onClick={showModal}>
-        Add Structure
+        Add Reaction
       </Button>
       <Modal
         footer={[

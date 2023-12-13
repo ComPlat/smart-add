@@ -1,9 +1,8 @@
-'use client'
-
 import { FileNode } from '@/helper/types'
 import { Button, Input, Modal } from 'antd'
-import { useState } from 'react'
+import React, { useState } from 'react'
 
+import { getUniqueFolderName } from './folderUtils'
 import { createSample } from './templates'
 
 const AddSample = ({
@@ -25,7 +24,8 @@ const AddSample = ({
   const handleOk = async () => {
     setIsModalVisible(false)
     if (folderName) {
-      await createSample(folderName, tree)
+      const uniqueFolderName = getUniqueFolderName(folderName, tree)
+      await createSample(uniqueFolderName, tree)
       setFolderName(baseName)
     }
   }
