@@ -41,6 +41,9 @@ const renderItem = ({
   const isDraggingOver = context.isDraggingOver
   const shouldHideTitle = typeof title === 'string' && title.endsWith('.root')
 
+  const titleClass =
+    item.isFolder && item.children?.length === 0 ? 'text-gray-400' : ''
+
   return (
     <li
       className="flex-col"
@@ -59,8 +62,14 @@ const renderItem = ({
         }}
         type="button"
       >
-        <span className="mr-2">{Icon(item, context, title)}</span>
-        <span className={`truncate ${shouldHideTitle ? 'invisible' : ''}`}>
+        <span className={`mr-2 ${titleClass}`}>
+          {Icon(item, context, title)}
+        </span>
+        <span
+          className={`truncate ${
+            shouldHideTitle ? 'invisible' : ''
+          } ${titleClass}`}
+        >
           {shouldHideTitle ? (
             <span className="invisible">{'\u200B'}</span>
           ) : (

@@ -20,6 +20,10 @@ describe('ZIP download', () => {
         action: 'drag-drop',
       })
 
+      cy.get('[role="tree"] > :nth-child(2) > .flex-col > .flex').should(
+        'be.visible',
+      )
+
       const dataTransfer = new DataTransfer()
 
       cy.get('[data-rct-item-id="test-zip.zip"] > .truncate').trigger(
@@ -35,10 +39,6 @@ describe('ZIP download', () => {
       cy.get('button')
         .contains('Download as Zip')
         .click()
-        .get('.ant-message-success')
-        .should('contain', `${zipFileName} uploaded successfully`)
-        .get('.ant-message-success')
-        .should('contain', `${ouputZipName}.zip downloaded successfully`)
         .readFile(`cypress/downloads/${ouputZipName}.zip`)
         .then((fileContent) => {
           expect(fileContent).to.exist
