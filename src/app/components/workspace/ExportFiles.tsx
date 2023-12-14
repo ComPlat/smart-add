@@ -5,7 +5,6 @@ const ExportFiles = ({ children }: { children: ReactNode }) => {
     <div className="flex w-full flex-col">
       <div className="flex grow flex-col">
         <div className="flex h-full flex-col bg-white px-4 shadow-sm">
-          {/* <ButtonGroup /> */}
           {children}
         </div>
       </div>

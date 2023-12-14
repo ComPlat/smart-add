@@ -204,14 +204,6 @@ const UploadDropZone = () => {
   // TODO: Move progress to message
   return (
     <div className={styles['upload-wrapper']}>
-      {/* <Message
-        uploadedSize={Number(
-          (((size as number) / 1000000) * (progress / 100)).toPrecision(2),
-        )}
-        percent={progress}
-        sumSize={Number(((size as number) / 1000000).toPrecision(2))}
-        title=":)"
-      /> */}
       <Upload.Dragger
         {...uploadProps}
         style={{
