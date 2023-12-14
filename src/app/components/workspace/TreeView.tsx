@@ -21,7 +21,6 @@ import { AddFoldersButton } from '../tree-view/AddFoldersButton'
 import ClearButtonGroup from '../tree-view/ClearButtonGroup'
 import { UploadSpinner } from '../tree-view/UploadSpinner'
 import { renderItem } from '../tree-view/renderItem'
-import ParseXlsx from '../upload-form/ParseXlsx'
 import { UploadDropZone } from '../upload-form/UploadDropZone'
 import { ExportFiles } from './ExportFiles'
 import { UploadedFiles } from './UploadedFiles'
@@ -123,8 +122,6 @@ const TreeView = () => {
         <UploadedFiles>
           <UploadDropZone />
           <UploadSpinner isUploading={uploading} />
-          <Divider />
-          <ParseXlsx />
           <Divider />
           <Tree
             renderItemsContainer={({ children, containerProps }) => (

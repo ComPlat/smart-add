@@ -10,7 +10,7 @@ type ButtonProps = {
 }
 
 const defaultStyle =
-  'flex justify-center text-white gap-4 bg-black px-4 disabled:bg-slate-400 disabled:text-slate-200 disabled:shadow-none hover:bg-gray-700 duration-150'
+  'flex justify-center text-white gap-4 bg-black px-4 disabled:bg-slate-400 disabled:text-slate-200 disabled:shadow-none hover:bg-gray-700 duration-150 m-2 rounded-lg bg-kit-primary-full p-2'
 const dangerStyle =
   'flex justify-center gap-4 text-white border border-solid px-4 disabled:bg-slate-400 disabled:text-slate-200 disabled:border-slate-200 disabled:shadow-none hover:bg-red-400 duration-150'
 
