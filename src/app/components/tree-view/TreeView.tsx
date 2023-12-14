@@ -158,8 +158,6 @@ const TreeView = () => {
         </div>
       </div>
 
-      {/* <AddFoldersButton tree={db.tree} /> */}
-
       <ClearButtonGroup
         assignmentDBLength={db.assignedLength}
         inputDBLength={db.inputLength}
