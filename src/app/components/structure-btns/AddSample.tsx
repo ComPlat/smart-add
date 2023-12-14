@@ -23,9 +23,7 @@ const AddSample = ({
 
   const handleOk = async () => {
     setIsModalVisible(false)
-    const uniqueFolderName = folderName
-      ? getUniqueFolderName(folderName, tree)
-      : baseName
+    const uniqueFolderName = getUniqueFolderName(folderName, tree, baseName)
     await createSample(uniqueFolderName, tree)
     setFolderName(baseName)
   }

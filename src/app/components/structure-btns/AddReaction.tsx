@@ -25,12 +25,12 @@ const AddReaction = ({
 
   const handleOk = async () => {
     setIsModalVisible(false)
-    const uniqueFolderName = folderName
-      ? getUniqueFolderName(folderName, tree)
-      : baseName
-    const uniqueSampleName = sampleName
-      ? getUniqueFolderName(sampleName, tree)
-      : baseSampleName
+    const uniqueFolderName = getUniqueFolderName(folderName, tree, baseName)
+    const uniqueSampleName = getUniqueFolderName(
+      sampleName,
+      tree,
+      baseSampleName,
+    )
     await createReaction(uniqueFolderName, tree, uniqueSampleName)
     setFolderName(baseName)
     setSampleName(baseSampleName)

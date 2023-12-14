@@ -3,10 +3,11 @@ import { FileNode } from '@/helper/types'
 import { v4 } from 'uuid'
 
 export const getUniqueFolderName = (
-  baseName: string,
+  folderName: string,
   tree: Record<string, FileNode>,
+  baseName: string,
 ) => {
-  const cleanBaseName = baseName.replace(/_\d+$/, '')
+  const cleanBaseName = folderName.replace(/_\d+$/, '') || baseName
   const baseNamePattern = new RegExp(`^${cleanBaseName}_(\\d+)$`)
 
   const searchTree = (node: FileNode) => {
