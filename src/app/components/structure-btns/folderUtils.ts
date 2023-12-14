@@ -7,48 +7,27 @@ export const getUniqueFolderName = (
   tree: Record<string, FileNode>,
 ) => {
   const cleanBaseName = baseName.replace(/_\d+$/, '')
-
-  let highestCounter = 0
   const baseNamePattern = new RegExp(`^${cleanBaseName}_(\\d+)$`)
 
   const searchTree = (node: FileNode) => {
     const match = node.data.match(baseNamePattern)
-    if (match) {
-      const counter = parseInt(match[1], 10)
-      highestCounter = Math.max(highestCounter, counter)
-    }
-
-    if (node.children) {
-      node.children.forEach((childName: string) => {
-        if (tree[childName]) {
-          searchTree(tree[childName])
-        }
-      })
-    }
+    return match ? parseInt(match[1], 10) : 0
   }
 
-  Object.values(tree).forEach(searchTree)
-
-  const uniqueName = `${cleanBaseName}_${highestCounter + 1}`
-
-  return uniqueName
+  const highestCounter = Math.max(...Object.values(tree).map(searchTree))
+  return `${cleanBaseName}_${highestCounter + 1}`
 }
 
-export const createFolder = async (path: string, name: string) => {
-  const folder = {
+export const createFolder = async (path: string, name: string) =>
+  await assignmentsDB.assignedFolders.add({
     fullPath: path,
     isFolder: true,
     name: name,
     parentUid: v4(),
     uid: v4(),
-  }
-  await assignmentsDB.assignedFolders.add(folder)
-}
+  })
 
-export const createSubFolders = async (basePath: string, names: string[]) => {
-  const createFolderPromises = names.map((name) =>
-    createFolder(`${basePath}/${name}`, name),
+export const createSubFolders = async (basePath: string, names: string[]) =>
+  await Promise.all(
+    names.map((name) => createFolder(`${basePath}/${name}`, name)),
   )
-
-  await Promise.all(createFolderPromises)
-}
