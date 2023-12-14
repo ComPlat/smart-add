@@ -10,7 +10,11 @@ export const createSample = async (
   baseFolderName: string,
   tree: Record<string, FileNode>,
 ) => {
-  const uniqueFolderName = getUniqueFolderName(baseFolderName, tree)
+  const uniqueFolderName = getUniqueFolderName(
+    baseFolderName,
+    tree,
+    baseFolderName,
+  )
 
   const promises = [
     createFolder(uniqueFolderName, uniqueFolderName),
@@ -25,8 +29,12 @@ export const createReaction = async (
   tree: Record<string, FileNode>,
   sampleName: string,
 ) => {
-  const uniqueFolderName = getUniqueFolderName(baseFolderName, tree)
-  const uniqueSampleName = getUniqueFolderName(sampleName, tree)
+  const uniqueFolderName = getUniqueFolderName(
+    baseFolderName,
+    tree,
+    baseFolderName,
+  )
+  const uniqueSampleName = getUniqueFolderName(sampleName, tree, sampleName)
 
   const promises = [
     createFolder(uniqueFolderName, uniqueFolderName),
