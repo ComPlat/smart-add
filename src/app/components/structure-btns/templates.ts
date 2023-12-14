@@ -17,7 +17,7 @@ export const createSample = async (
     createSubFolders(uniqueFolderName, ['structure', 'analyses']),
   ]
 
-  await Promise.all(promises)
+  return Promise.all(promises)
 }
 
 export const createReaction = async (
@@ -37,5 +37,5 @@ export const createReaction = async (
     ]),
   ]
 
-  await Promise.all(promises)
+  return Promise.all(promises)
 }
