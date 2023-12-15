@@ -6,7 +6,7 @@ type ButtonProps = {
   icon?: ReactNode
   key?: string
   label?: string
-  onClick?: () => Promise<void> | void
+  onClick?: () => Promise<[void, void]> | Promise<void> | void
   variant?: 'danger' | 'default' | 'primary'
 }
 
@@ -15,7 +15,7 @@ const defaultStyle =
 const primaryStyle =
   'flex items-center justify-center text-white gap-2 disabled:bg-slate-400 disabled:text-slate-200 disabled:shadow-none hover:bg-gray-700 duration-150 m-2 rounded-lg bg-kit-primary-full p-2'
 const dangerStyle =
-  'flex items-center justify-center gap-4 text-white border border-solid px-4 disabled:bg-slate-400 disabled:text-slate-200 disabled:border-slate-200 disabled:shadow-none hover:bg-red-400 duration-150'
+  'flex items-center justify-center gap-4 text-white border border-solid px-4 disabled:bg-slate-400 disabled:text-slate-200 disabled:border-slate-200 disabled:shadow-none hover:bg-red-400 bg-red-600 duration-150 m-2 rounded-lg p-2'
 
 const Button = ({
   className,

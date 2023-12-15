@@ -1,6 +1,6 @@
 import { assignmentsDB, filesDB } from '@/database/db'
-import { Button } from 'antd'
-import React from 'react'
+
+import { Button } from '../workspace/Button'
 
 const inputDbClearHandler = async () =>
   Promise.all([filesDB.files.clear(), filesDB.folders.clear()])
@@ -20,21 +20,19 @@ const ClearButtonGroup = ({
 }) => (
   <div className="flex">
     <Button
-      className="mr-2 w-1/2"
-      danger
       disabled={inputDBLength === 0}
+      label="Clear Files DB"
       onClick={inputDbClearHandler}
-    >
-      Clear Files DB
-    </Button>
+      variant="danger"
+    />
+
     <Button
       className="mr-2 w-1/2"
-      danger
       disabled={assignmentDBLength === 0}
+      label="Clear Assignment DB"
       onClick={assignmentsDBClearHandler}
-    >
-      Clear Assignment DB
-    </Button>
+      variant="danger"
+    />
   </div>
 )
 
