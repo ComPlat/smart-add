@@ -132,7 +132,9 @@ const Workspace = () => {
                   <ul {...containerProps}>{children}</ul>
                 )}
                 renderTreeContainer={({ children, containerProps }) => (
-                  <div {...containerProps}>{children}</div>
+                  <div className="min-h-screen" {...containerProps}>
+                    {children}
+                  </div>
                 )}
                 renderItem={renderItem}
                 rootItem="inputTreeRoot"
@@ -151,7 +153,9 @@ const Workspace = () => {
                 <ul {...containerProps}>{children}</ul>
               )}
               renderTreeContainer={({ children, containerProps }) => (
-                <div {...containerProps}>{children}</div>
+                <div className="min-h-screen" {...containerProps}>
+                  {children}
+                </div>
               )}
               renderItem={renderItem}
               rootItem="assignmentTreeRoot"

@@ -53,7 +53,7 @@ const renderItem = ({
       <button
         {...context.itemContainerWithoutChildrenProps}
         {...context.interactiveElementProps}
-        className={`flex items-center text-sm
+        className={`flex items-center px-2 text-sm
           ${
             context.isSelected
               ? 'my-1 rounded-md bg-kit-primary-mid font-bold'
