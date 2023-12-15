@@ -1,11 +1,9 @@
 import { FileDownloader } from '../zip-download/FileDownloader'
-import { MenuItem } from './MenuItem'
 import { Message } from './Message'
 
 const Sidebar = () => (
   <aside className="flex w-auto flex-col">
     <div className="flex h-full flex-col items-center justify-between rounded-3xl bg-white px-4 py-6 shadow-sm">
-      <MenuItem label="Workspace" />
       <div className="mx-2 mt-4 flex flex-col gap-2">
         <Message
           key={`message-${Date.now()}`}
