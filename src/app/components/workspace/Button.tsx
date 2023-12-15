@@ -4,6 +4,7 @@ type ButtonProps = {
   className?: string
   disabled?: boolean
   icon?: ReactNode
+  key?: string
   label?: string
   onClick?: () => Promise<void> | void
   variant?: 'danger' | 'default' | 'primary'
@@ -20,6 +21,7 @@ const Button = ({
   className,
   disabled = false,
   icon,
+  key,
   label,
   onClick,
   variant = 'default',
@@ -33,10 +35,11 @@ const Button = ({
         : `${defaultStyle} ${className}`
     }
     disabled={disabled}
+    key={key}
     onClick={onClick}
   >
     {icon}
-    <div className="flex h-full items-center justify-center whitespace-nowrap text-sm font-semibold">
+    <div className="flex h-full items-center justify-center whitespace-nowrap text-sm">
       {label}
     </div>
   </button>

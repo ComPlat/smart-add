@@ -1,14 +1,19 @@
-import { FaPlus } from 'react-icons/fa6'
+import { FileNode } from '@/helper/types'
 
+import AddReaction from '../structure-btns/AddReaction'
+import AddSample from '../structure-btns/AddSample'
 import { FileDownloader } from '../zip-download/FileDownloader'
-import { Button } from './Button'
 
-const Toolbar = () => {
+type ToolbarProps = {
+  tree: Record<string, FileNode>
+}
+
+const Toolbar = ({ tree }: ToolbarProps) => {
   return (
     <div className="flex justify-between">
       <div className="flex">
-        <Button icon={<FaPlus />} label="Add Sample" />
-        <Button icon={<FaPlus />} label="Add Reaction" />
+        <AddSample tree={tree} />
+        <AddReaction tree={tree} />
       </div>
       <FileDownloader />
     </div>

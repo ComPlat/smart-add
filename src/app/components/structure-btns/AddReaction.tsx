@@ -1,7 +1,9 @@
 import { FileNode } from '@/helper/types'
-import { Button, Input, Modal } from 'antd'
-import React, { useState } from 'react'
+import { Input, Modal } from 'antd'
+import { useState } from 'react'
+import { FaPlus } from 'react-icons/fa6'
 
+import { Button } from '../workspace/Button'
 import { getUniqueFolderName } from './folderUtils'
 import { createReaction } from './templates'
 
@@ -9,7 +11,7 @@ const AddReaction = ({
   className,
   tree,
 }: {
-  className: string
+  className?: string
   tree: Record<string, FileNode>
 }) => {
   const baseName = 'Reaction'
@@ -44,22 +46,22 @@ const AddReaction = ({
 
   return (
     <>
-      <Button className={className} onClick={showModal}>
-        Add Reaction
-      </Button>
+      <Button
+        className={className}
+        icon={<FaPlus />}
+        label="Add Reaction"
+        onClick={showModal}
+      />
       <Modal
         footer={[
-          <Button key="back" onClick={handleCancel}>
-            Cancel
-          </Button>,
+          <Button key="back" label="Cancel" onClick={handleCancel} />,
           <Button
             className="bg-blue-500 text-white hover:bg-blue-600"
             key="submit"
+            label="OK"
             onClick={handleOk}
-            type="primary"
-          >
-            OK
-          </Button>,
+            variant="primary"
+          />,
         ]}
         onCancel={handleCancel}
         onOk={handleOk}

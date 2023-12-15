@@ -22,6 +22,8 @@ import { UploadSpinner } from '../tree-view/UploadSpinner'
 import { renderItem } from '../tree-view/renderItem'
 import { UploadDropZone } from '../upload-form/UploadDropZone'
 import { ExportFiles } from './ExportFiles'
+import Header from './Header'
+import { Toolbar } from './Toolbar'
 import { UploadedFiles } from './UploadedFiles'
 
 const TreeView = () => {
@@ -102,64 +104,68 @@ const TreeView = () => {
     canDropAt(items, target, db.tree)
 
   return (
-    <UncontrolledTreeEnvironment
-      canDragAndDrop
-      canDropAt={handleCanDropAt}
-      canDropOnFolder
-      canReorderItems
-      canSearch={false}
-      dataProvider={db.treeDataProvider}
-      getItemTitle={(item: TreeItem) => item.data}
-      key={memoizedKey}
-      onCollapseItem={handleOnCollapseItem}
-      onDrop={handleOnDrop}
-      onExpandItem={handleOnExpandItem}
-      onFocusItem={handleOnFocusItem}
-      viewState={viewState}
-    >
-      <div className="flex min-h-full w-full flex-row justify-between">
-        <UploadedFiles>
-          <UploadDropZone />
-          <UploadSpinner isUploading={uploading} />
-          <Divider />
-          <Tree
-            renderItemsContainer={({ children, containerProps }) => (
-              <ul {...containerProps}>{children}</ul>
-            )}
-            renderTreeContainer={({ children, containerProps }) => (
-              <div {...containerProps}>{children}</div>
-            )}
-            renderItem={renderItem}
-            rootItem="inputTreeRoot"
-            treeId="inputTree"
-            treeLabel="Input Tree"
-          />
-        </UploadedFiles>
+    <div className="flex flex-col bg-gray-100">
+      <Header />
+      <Toolbar tree={db.tree} />
+      <UncontrolledTreeEnvironment
+        canDragAndDrop
+        canDropAt={handleCanDropAt}
+        canDropOnFolder
+        canReorderItems
+        canSearch={false}
+        dataProvider={db.treeDataProvider}
+        getItemTitle={(item: TreeItem) => item.data}
+        key={memoizedKey}
+        onCollapseItem={handleOnCollapseItem}
+        onDrop={handleOnDrop}
+        onExpandItem={handleOnExpandItem}
+        onFocusItem={handleOnFocusItem}
+        viewState={viewState}
+      >
+        <div className="flex min-h-full w-full flex-row justify-between">
+          <UploadedFiles>
+            <UploadDropZone />
+            <UploadSpinner isUploading={uploading} />
+            <Divider />
+            <Tree
+              renderItemsContainer={({ children, containerProps }) => (
+                <ul {...containerProps}>{children}</ul>
+              )}
+              renderTreeContainer={({ children, containerProps }) => (
+                <div {...containerProps}>{children}</div>
+              )}
+              renderItem={renderItem}
+              rootItem="inputTreeRoot"
+              treeId="inputTree"
+              treeLabel="Input Tree"
+            />
+          </UploadedFiles>
 
-        <p className="min-h-screen w-2 bg-gray-100" />
+          <p className="min-h-screen w-2 bg-gray-100" />
 
-        <ExportFiles>
-          <ClearButtonGroup
-            assignmentDBLength={db.assignedLength}
-            inputDBLength={db.inputLength}
-          />
-          <Tree
-            renderItemsContainer={({ children, containerProps }) => (
-              <ul {...containerProps}>{children}</ul>
-            )}
-            renderTreeContainer={({ children, containerProps }) => (
-              <div className="h-36 bg-gray-100" {...containerProps}>
-                {children}
-              </div>
-            )}
-            renderItem={renderItem}
-            rootItem="assignmentTreeRoot"
-            treeId="assignmentTree"
-            treeLabel="Assignment Tree"
-          />
-        </ExportFiles>
-      </div>
-    </UncontrolledTreeEnvironment>
+          <ExportFiles>
+            <ClearButtonGroup
+              assignmentDBLength={db.assignedLength}
+              inputDBLength={db.inputLength}
+            />
+            <Tree
+              renderItemsContainer={({ children, containerProps }) => (
+                <ul {...containerProps}>{children}</ul>
+              )}
+              renderTreeContainer={({ children, containerProps }) => (
+                <div className="h-36 bg-gray-100" {...containerProps}>
+                  {children}
+                </div>
+              )}
+              renderItem={renderItem}
+              rootItem="assignmentTreeRoot"
+              treeId="assignmentTree"
+              treeLabel="Assignment Tree"
+            />
+          </ExportFiles>
+        </div>
+      </UncontrolledTreeEnvironment>
+    </div>
   )
 }
 
