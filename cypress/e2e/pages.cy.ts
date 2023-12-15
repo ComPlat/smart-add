@@ -20,8 +20,8 @@ describe('Pages', () => {
         })
       })
 
-      xit('shows message that upload was successful', () => {
-        cy.get('p').contains(fileName)
+      it('shows message that upload was successful', () => {
+        cy.get('button').contains(fileName)
 
         cy.get('.ant-message-success').should(
           'contain',
