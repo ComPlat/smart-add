@@ -76,6 +76,7 @@ const FileDownloader = () => {
       disabled={assignedFiles.length === 0}
       label="Download as ZIP"
       onClick={handleClick}
+      variant="primary"
     />
   )
 }

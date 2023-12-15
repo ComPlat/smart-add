@@ -8,12 +8,7 @@ const Workspace = () => (
   <div className="flex flex-col bg-gray-100">
     <Header />
     <Toolbar />
-    <div className="h-screen">
-      <div className="flex h-full">
-        <TreeView />
-      </div>
-      T
-    </div>
+    <TreeView />
   </div>
 )
 

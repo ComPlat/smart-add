@@ -118,7 +118,7 @@ const TreeView = () => {
       onFocusItem={handleOnFocusItem}
       viewState={viewState}
     >
-      <div className="flex w-full flex-row justify-between">
+      <div className="flex min-h-full w-full flex-row justify-between">
         <UploadedFiles>
           <UploadDropZone />
           <UploadSpinner isUploading={uploading} />
@@ -137,7 +137,7 @@ const TreeView = () => {
           />
         </UploadedFiles>
 
-        <p className="h-full w-2 bg-gray-100" />
+        <p className="min-h-screen w-2 bg-gray-100" />
 
         <ExportFiles>
           <AddFoldersButton tree={db.tree} />

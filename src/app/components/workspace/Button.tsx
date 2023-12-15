@@ -6,13 +6,15 @@ type ButtonProps = {
   icon?: ReactNode
   label?: string
   onClick?: () => Promise<void> | void
-  variant?: 'danger' | 'default'
+  variant?: 'danger' | 'default' | 'primary'
 }
 
 const defaultStyle =
-  'flex justify-center text-white gap-4 bg-black px-4 disabled:bg-slate-400 disabled:text-slate-200 disabled:shadow-none hover:bg-gray-700 duration-150 m-2 rounded-lg bg-kit-primary-full p-2'
+  'flex items-center justify-center text-kit-primary-full border border-kit-primary-full gap-2 disabled:bg-slate-400 disabled:text-slate-200 disabled:shadow-none hover:bg-gray-700 duration-150 m-2 rounded-lg bg-white p-2'
+const primaryStyle =
+  'flex items-center justify-center text-white gap-2 disabled:bg-slate-400 disabled:text-slate-200 disabled:shadow-none hover:bg-gray-700 duration-150 m-2 rounded-lg bg-kit-primary-full p-2'
 const dangerStyle =
-  'flex justify-center gap-4 text-white border border-solid px-4 disabled:bg-slate-400 disabled:text-slate-200 disabled:border-slate-200 disabled:shadow-none hover:bg-red-400 duration-150'
+  'flex items-center justify-center gap-4 text-white border border-solid px-4 disabled:bg-slate-400 disabled:text-slate-200 disabled:border-slate-200 disabled:shadow-none hover:bg-red-400 duration-150'
 
 const Button = ({
   className,
@@ -26,6 +28,8 @@ const Button = ({
     className={
       variant === 'danger'
         ? `${dangerStyle} ${className}`
+        : variant === 'primary'
+        ? `${primaryStyle} ${className}`
         : `${defaultStyle} ${className}`
     }
     disabled={disabled}
