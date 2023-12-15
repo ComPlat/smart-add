@@ -3,8 +3,7 @@
 import { filesDB } from '@/database/db'
 import { extractFilesFromZip } from '@/helper/extractFilesFromZip'
 import { uploadExtractedFiles } from '@/helper/uploadExtractedFiles'
-import { UploadOutlined } from '@ant-design/icons'
-import { Progress, Upload, UploadProps } from 'antd'
+import { Upload, UploadProps } from 'antd'
 import { RcFile, UploadFile } from 'antd/es/upload'
 import { Dispatch, SetStateAction, useState } from 'react'
 import { v4 } from 'uuid'
@@ -16,6 +15,11 @@ import styles from './UploadDropZone.module.css'
 //       so that no duplicates get uploaded
 // TODO: May cause issues when uploading folders with the same name as variable
 //       is never cleared
+
+type UploadDropZoneProps = {
+  children?: React.ReactNode
+}
+
 const uploadedFolders: string[] = []
 
 const handleCustomRequest = async ({
@@ -173,7 +177,7 @@ const handleCustomRequest = async ({
   return true
 }
 
-const UploadDropZone = () => {
+const UploadDropZone = ({ children }: UploadDropZoneProps) => {
   const [progress, setProgress] = useState<number>(0)
   const [uploadFileList, setUploadFileList] = useState<UploadFile[]>([])
   const [filePaths, setFilePaths] = useState<{ [key: string]: UploadFile }>({})
@@ -210,11 +214,13 @@ const UploadDropZone = () => {
           background: 'none',
           backgroundColor: 'none',
           border: 'none',
+          borderRadius: 'none',
         }}
         openFileDialogOnClick={false}
       >
-        <div className="flex flex-col items-center justify-center rounded-2xl bg-white">
-          <UploadOutlined className="text-5xl text-gray-300" />
+        {children}
+        {/* <div className="flex flex-col items-center justify-center rounded-2xl bg-white">
+          
           <div className="mt-4 flex flex-col">
             <div className="text-center text-base font-medium leading-6 text-black text-opacity-80">
               Drag your files or folders to this area to upload
@@ -224,9 +230,9 @@ const UploadDropZone = () => {
               saved in a browser database.
             </div>
           </div>
-        </div>
+        </div> */}
       </Upload.Dragger>
-      <Progress percent={progress} />
+      {/* <Progress percent={progress} /> */}
     </div>
   )
 }

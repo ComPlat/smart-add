@@ -13,7 +13,7 @@ type ToolbarProps = {
 
 const Toolbar = ({ assignmentDBLength, inputDBLength, tree }: ToolbarProps) => {
   return (
-    <div className="flex justify-between">
+    <aside className="flex justify-between">
       <div className="flex">
         <AddSample tree={tree} />
         <AddReaction tree={tree} />
@@ -23,7 +23,7 @@ const Toolbar = ({ assignmentDBLength, inputDBLength, tree }: ToolbarProps) => {
         />
       </div>
       <FileDownloader />
-    </div>
+    </aside>
   )
 }
 

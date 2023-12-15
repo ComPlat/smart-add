@@ -4,7 +4,7 @@ import { assignmentsDB, filesDB } from '@/database/db'
 import { canDropAt } from '@/helper/canDropAt'
 import { handleFileMove } from '@/helper/handleFileMove'
 import { retrieveTree } from '@/helper/retrieveTree'
-import { Divider } from 'antd'
+import { DownloadOutlined, UploadOutlined } from '@ant-design/icons'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useMemo, useState } from 'react'
 import {
@@ -16,7 +16,6 @@ import {
 } from 'react-complex-tree'
 
 import { CustomTreeDataProvider } from './custom/CustomTreeDataProvider'
-import { UploadSpinner } from './tree-view/UploadSpinner'
 import { renderItem } from './tree-view/renderItem'
 import { UploadDropZone } from './upload-form/UploadDropZone'
 import { ExportFiles } from './workspace/ExportFiles'
@@ -102,7 +101,7 @@ const Workspace = () => {
     canDropAt(items, target, db.tree)
 
   return (
-    <div className="flex flex-col bg-gray-100">
+    <main className="flex flex-col overflow-hidden bg-gray-100">
       <Header />
       <Toolbar
         assignmentDBLength={db.assignedLength}
@@ -124,38 +123,35 @@ const Workspace = () => {
         onFocusItem={handleOnFocusItem}
         viewState={viewState}
       >
-        <div className="flex min-h-full w-full flex-row justify-between">
+        <div className="flex min-h-full w-full flex-row justify-between overflow-hidden">
           <UploadedFiles>
-            <UploadDropZone />
-            <UploadSpinner isUploading={uploading} />
-            <Divider />
-            <Tree
-              renderItemsContainer={({ children, containerProps }) => (
-                <ul {...containerProps}>{children}</ul>
-              )}
-              renderTreeContainer={({ children, containerProps }) => (
-                <div className="h-screen" {...containerProps}>
-                  {children}
-                </div>
-              )}
-              renderItem={renderItem}
-              rootItem="inputTreeRoot"
-              treeId="inputTree"
-              treeLabel="Input Tree"
-            />
+            <UploadOutlined className="absolute left-1/4 top-1/2 -translate-x-1/2 -translate-y-1/2 text-8xl text-gray-100" />
+            <UploadDropZone>
+              <Tree
+                renderItemsContainer={({ children, containerProps }) => (
+                  <ul {...containerProps}>{children}</ul>
+                )}
+                renderTreeContainer={({ children, containerProps }) => (
+                  <div {...containerProps}>{children}</div>
+                )}
+                renderItem={renderItem}
+                rootItem="inputTreeRoot"
+                treeId="inputTree"
+                treeLabel="Input Tree"
+              />
+            </UploadDropZone>
           </UploadedFiles>
 
           <p className="min-h-screen w-2 bg-gray-100" />
 
           <ExportFiles>
+            <DownloadOutlined className="absolute left-3/4 top-1/2 -translate-x-1/2 -translate-y-1/2 text-8xl text-gray-100" />
             <Tree
               renderItemsContainer={({ children, containerProps }) => (
                 <ul {...containerProps}>{children}</ul>
               )}
               renderTreeContainer={({ children, containerProps }) => (
-                <div className="h-screen" {...containerProps}>
-                  {children}
-                </div>
+                <div {...containerProps}>{children}</div>
               )}
               renderItem={renderItem}
               rootItem="assignmentTreeRoot"
@@ -165,7 +161,7 @@ const Workspace = () => {
           </ExportFiles>
         </div>
       </UncontrolledTreeEnvironment>
-    </div>
+    </main>
   )
 }
 
