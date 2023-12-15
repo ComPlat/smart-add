@@ -6,17 +6,31 @@ export const getUniqueFolderName = (
   folderName: string,
   tree: Record<string, FileNode>,
   baseName: string,
+  appendNumberIfDuplicate: boolean = true,
 ) => {
   const cleanBaseName = folderName.replace(/_\d+$/, '') || baseName
-  const baseNamePattern = new RegExp(`^${cleanBaseName}_(\\d+)$`)
+  const baseNamePattern = new RegExp(`^${cleanBaseName}(_\\d+)?$`)
 
   const searchTree = (node: FileNode) => {
     const match = node.data.match(baseNamePattern)
-    return match ? parseInt(match[1], 10) : 0
+    return match && match[1] ? parseInt(match[1].substring(1), 10) : 0
   }
 
-  const highestCounter = Math.max(...Object.values(tree).map(searchTree))
-  return `${cleanBaseName}_${highestCounter + 1}`
+  const highestCounter = Math.max(...Object.values(tree).map(searchTree), 0)
+
+  const isDuplicate = Object.values(tree).some(
+    (node) => node.data === cleanBaseName,
+  )
+
+  if (appendNumberIfDuplicate) {
+    return `${cleanBaseName}_${highestCounter + 1}`
+  }
+
+  if (!appendNumberIfDuplicate && isDuplicate) {
+    return `${cleanBaseName}_${highestCounter + 1}`
+  }
+
+  return cleanBaseName
 }
 
 export const createFolder = async (path: string, name: string) =>

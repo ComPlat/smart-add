@@ -26,7 +26,9 @@ describe('ZIP download', () => {
 
       const dataTransfer = new DataTransfer()
 
-      cy.get('[data-rct-item-id="test-zip.zip"] > .truncate').trigger(
+      cy.wait(1_000)
+
+      cy.get('[role="tree"] > :nth-child(2) > .flex-col > .flex').trigger(
         'dragstart',
         { dataTransfer },
       )
@@ -39,6 +41,7 @@ describe('ZIP download', () => {
       cy.get('button')
         .contains('Download as Zip')
         .click()
+        .wait(1_000)
         .readFile(`cypress/downloads/${ouputZipName}.zip`)
         .then((fileContent) => {
           expect(fileContent).to.exist

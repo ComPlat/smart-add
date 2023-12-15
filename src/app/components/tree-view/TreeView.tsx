@@ -1,6 +1,11 @@
 'use client'
 
-import { assignmentsDB, filesDB } from '@/database/db'
+import {
+  ExtendedFile,
+  ExtendedFolder,
+  assignmentsDB,
+  filesDB,
+} from '@/database/db'
 import { canDropAt } from '@/helper/canDropAt'
 import { handleFileMove } from '@/helper/handleFileMove'
 import { retrieveTree } from '@/helper/retrieveTree'
@@ -15,6 +20,7 @@ import {
 } from 'react-complex-tree'
 import 'react-complex-tree/lib/style-modern.css'
 
+import ContextMenu from '../context-menu/ContextMenu'
 import { CustomTreeDataProvider } from '../custom/CustomTreeDataProvider'
 import AddReaction from '../structure-btns/AddReaction'
 import AddSample from '../structure-btns/AddSample'
@@ -22,6 +28,12 @@ import ClearButtonGroup from './ClearButtonGroup'
 import styles from './TreeView.module.css'
 import { UploadSpinner } from './UploadSpinner'
 import { renderItem } from './renderItem'
+
+const initialContextMenu = {
+  show: false,
+  x: 0,
+  y: 0,
+}
 
 const TreeView = () => {
   const db = useLiveQuery(async () => {
@@ -65,6 +77,11 @@ const TreeView = () => {
   >()
   const [expandedItems, setExpandedItems] = useState<TreeItemIndex[]>([])
 
+  const [contextMenu, setContextMenu] = useState(initialContextMenu)
+  const [contextTarget, setContextTarget] = useState<
+    ExtendedFile | ExtendedFolder | undefined
+  >()
+
   const memoizedKey = useMemo(
     () => (db ? (uploading ? 0 : db.key) : null),
     [uploading, db],
@@ -99,6 +116,30 @@ const TreeView = () => {
 
   const handleCanDropAt = (items: TreeItem[], target: DraggingPosition) =>
     canDropAt(items, target, db.tree)
+
+  const handleContextMenu = async (
+    e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>,
+  ) => {
+    e.preventDefault()
+
+    const { pageX, pageY } = e
+    const { target } = e
+
+    const targetElement = target as HTMLElement
+
+    const fullPath = String(targetElement.dataset.mykey)
+
+    const retrievedFile = await assignmentsDB.assignedFiles.get({ fullPath })
+    const retrievedFolder = await assignmentsDB.assignedFolders.get({
+      fullPath,
+    })
+
+    const retrieved = retrievedFile || retrievedFolder
+    setContextTarget(retrieved)
+    setContextMenu({ show: true, x: pageX, y: pageY })
+  }
+
+  const contextMenuClose = () => setContextMenu(initialContextMenu)
 
   return (
     <UncontrolledTreeEnvironment
@@ -142,10 +183,12 @@ const TreeView = () => {
 
         <UploadSpinner isUploading={uploading} />
 
-        <div className={styles['tree']}>
+        <div className={styles['tree']} onContextMenu={handleContextMenu}>
           <Tree
             renderItemsContainer={({ children, containerProps }) => (
-              <ul {...containerProps}>{children}</ul>
+              <ul onContextMenu={handleContextMenu} {...containerProps}>
+                {children}
+              </ul>
             )}
             renderTreeContainer={({ children, containerProps }) => (
               <div {...containerProps}>{children}</div>
@@ -156,6 +199,16 @@ const TreeView = () => {
             treeLabel="Assignment Tree"
           />
         </div>
+
+        {contextMenu.show && (
+          <ContextMenu
+            closeContextMenu={contextMenuClose}
+            targetItem={contextTarget}
+            tree={db.tree}
+            x={contextMenu.x}
+            y={contextMenu.y}
+          />
+        )}
       </div>
 
       <ClearButtonGroup
