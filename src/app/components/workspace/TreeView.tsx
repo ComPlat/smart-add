@@ -17,7 +17,6 @@ import {
 import 'react-complex-tree/lib/style-modern.css'
 
 import { CustomTreeDataProvider } from '../custom/CustomTreeDataProvider'
-import { AddFoldersButton } from '../tree-view/AddFoldersButton'
 import ClearButtonGroup from '../tree-view/ClearButtonGroup'
 import { UploadSpinner } from '../tree-view/UploadSpinner'
 import { renderItem } from '../tree-view/renderItem'
@@ -140,7 +139,6 @@ const TreeView = () => {
         <p className="min-h-screen w-2 bg-gray-100" />
 
         <ExportFiles>
-          <AddFoldersButton tree={db.tree} />
           <ClearButtonGroup
             assignmentDBLength={db.assignedLength}
             inputDBLength={db.inputLength}

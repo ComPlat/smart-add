@@ -16,7 +16,8 @@ import {
 import 'react-complex-tree/lib/style-modern.css'
 
 import { CustomTreeDataProvider } from '../custom/CustomTreeDataProvider'
-import { AddFoldersButton } from './AddFoldersButton'
+import AddReaction from '../structure-btns/AddReaction'
+import AddSample from '../structure-btns/AddSample'
 import ClearButtonGroup from './ClearButtonGroup'
 import styles from './TreeView.module.css'
 import { UploadSpinner } from './UploadSpinner'
@@ -115,6 +116,14 @@ const TreeView = () => {
       onFocusItem={handleOnFocusItem}
       viewState={viewState}
     >
+      <div className="flex">
+        <div className="flex-1"></div>
+        <div className="flex flex-1">
+          <AddSample className="flex-1" tree={db.tree} />
+          <AddReaction className="flex-1" tree={db.tree} />
+        </div>
+      </div>
+
       <div className="flex flex-row justify-between">
         <div className={styles['tree']}>
           <Tree
@@ -148,8 +157,6 @@ const TreeView = () => {
           />
         </div>
       </div>
-
-      <AddFoldersButton tree={db.tree} />
 
       <ClearButtonGroup
         assignmentDBLength={db.assignedLength}
