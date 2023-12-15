@@ -1,3 +1,4 @@
+import { Badge } from 'antd'
 import Image from 'next/image'
 import Link from 'next/link'
 import { FaRegBell } from 'react-icons/fa6'
@@ -11,9 +12,9 @@ const Header = () => (
     </Link>
     <h1 className="self-center">SmartAdd</h1>
     <div className="flex gap-2">
-      <p className="self-center">
+      <Badge className="self-center" count={0} dot>
         <FaRegBell size={20} />
-      </p>
+      </Badge>
     </div>
   </header>
 )

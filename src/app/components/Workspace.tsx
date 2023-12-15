@@ -4,7 +4,6 @@ import { assignmentsDB, filesDB } from '@/database/db'
 import { canDropAt } from '@/helper/canDropAt'
 import { handleFileMove } from '@/helper/handleFileMove'
 import { retrieveTree } from '@/helper/retrieveTree'
-import { DownloadOutlined, UploadOutlined } from '@ant-design/icons'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useMemo, useState } from 'react'
 import {
@@ -19,8 +18,10 @@ import { CustomTreeDataProvider } from './custom/CustomTreeDataProvider'
 import { renderItem } from './tree-view/renderItem'
 import { UploadDropZone } from './upload-form/UploadDropZone'
 import { ExportFiles } from './workspace/ExportFiles'
+import { ExportFilesText } from './workspace/ExportFilesText'
 import Header from './workspace/Header'
 import { Toolbar } from './workspace/Toolbar'
+import { UploadFilesText } from './workspace/UploadFilesText'
 import { UploadedFiles } from './workspace/UploadedFiles'
 
 const Workspace = () => {
@@ -125,7 +126,7 @@ const Workspace = () => {
       >
         <div className="flex min-h-full w-full flex-row justify-between overflow-hidden">
           <UploadedFiles>
-            <UploadOutlined className="absolute left-1/4 top-1/2 -translate-x-1/2 -translate-y-1/2 text-8xl text-gray-100" />
+            <UploadFilesText showText={db.inputLength === 0} />
             <UploadDropZone>
               <Tree
                 renderItemsContainer={({ children, containerProps }) => (
@@ -147,7 +148,7 @@ const Workspace = () => {
           <p className="min-h-screen w-2 bg-gray-100" />
 
           <ExportFiles>
-            <DownloadOutlined className="absolute left-3/4 top-1/2 -translate-x-1/2 -translate-y-1/2 text-8xl text-gray-100" />
+            <ExportFilesText showText={db.assignedLength === 0} />
             <Tree
               renderItemsContainer={({ children, containerProps }) => (
                 <ul {...containerProps}>{children}</ul>
