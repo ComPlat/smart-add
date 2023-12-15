@@ -10,7 +10,7 @@ type ButtonProps = {
 }
 
 const defaultStyle =
-  'flex items-center justify-center text-kit-primary-full border border-kit-primary-full gap-2 disabled:bg-slate-400 disabled:text-slate-200 disabled:shadow-none hover:bg-gray-700 duration-150 m-2 rounded-lg bg-white p-2'
+  'flex items-center justify-center text-kit-primary-full border border-kit-primary-full gap-2 disabled:bg-slate-400 disabled:text-slate-200 disabled:shadow-none hover:bg-kit-primary-light/5 duration-150 m-2 rounded-lg bg-white p-2'
 const primaryStyle =
   'flex items-center justify-center text-white gap-2 disabled:bg-slate-400 disabled:text-slate-200 disabled:shadow-none hover:bg-gray-700 duration-150 m-2 rounded-lg bg-kit-primary-full p-2'
 const dangerStyle =
