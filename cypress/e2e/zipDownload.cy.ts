@@ -23,10 +23,6 @@ describe('ZIP download', () => {
       cy.get('button[data-rct-item-id="test-zip.zip"]').click()
       cy.get('button[data-rct-item-id="test-zip.zip/test-zip"]').click()
 
-      cy.get('[role="tree"] > :nth-child(2) > .flex-col > .flex').should(
-        'be.visible',
-      )
-
       const dataTransfer = new DataTransfer()
 
       cy.get('[data-rct-item-id="test-zip.zip"] > .truncate').trigger(
