@@ -49,6 +49,9 @@ const AddFolder = ({
     setNewFolderName(baseFolderName)
   }
 
+  const handleKeyPress = (e: { key: string }) =>
+    e.key === 'Enter' && newFolderName.length > 0 && handleAddFolder()
+
   return (
     <li
       className={`${className} ${showInput && 'bg-gray-300'} relative`}
@@ -63,8 +66,10 @@ const AddFolder = ({
           <div className="absolute left-full top-[-5px] z-10 ml-2 rounded-sm border border-gray-300 bg-white p-1 shadow-lg">
             <div className="flex flex-col space-y-2">
               <input
+                autoFocus
                 className="rounded-sm px-3 py-1 shadow outline outline-gray-200 focus:outline-gray-300"
                 onChange={(e) => setNewFolderName(e.target.value)}
+                onKeyDown={handleKeyPress}
                 placeholder="Enter folder name"
                 value={newFolderName}
               />
@@ -74,14 +79,14 @@ const AddFolder = ({
                     newFolderName.length === 0
                       ? 'bg-gray-200 hover:bg-gray-200'
                       : 'hover:bg-blue-700'
-                  } rounded-sm bg-blue-500 px-3 py-1 text-white`}
+                  } flex-1 rounded-sm bg-blue-500 px-3 py-1 text-white`}
                   disabled={newFolderName.length === 0}
                   onClick={handleAddFolder}
                 >
                   Add
                 </button>
                 <button
-                  className="rounded-sm bg-red-500 px-3 py-1 text-white hover:bg-red-700"
+                  className="flex-1 rounded-sm bg-red-500 px-3 py-1 text-white hover:bg-red-700"
                   onClick={handleCancel}
                 >
                   Cancel
