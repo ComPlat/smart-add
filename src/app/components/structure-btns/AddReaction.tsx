@@ -53,16 +53,18 @@ const AddReaction = ({
         onClick={showModal}
       />
       <Modal
-        footer={[
-          <Button key="back" label="Cancel" onClick={handleCancel} />,
-          <Button
-            className="bg-blue-500 text-white hover:bg-blue-600"
-            key="submit"
-            label="OK"
-            onClick={handleOk}
-            variant="primary"
-          />,
-        ]}
+        footer={
+          <div className="flex flex-row justify-end gap-2">
+            <Button key="back" label="Cancel" onClick={handleCancel} />
+            <Button
+              className="bg-blue-500 text-white hover:bg-blue-600"
+              key="submit"
+              label="OK"
+              onClick={handleOk}
+              variant="primary"
+            />
+          </div>
+        }
         onCancel={handleCancel}
         onOk={handleOk}
         open={isModalVisible}

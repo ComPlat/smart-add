@@ -13,8 +13,8 @@ type ToolbarProps = {
 
 const Toolbar = ({ assignmentDBLength, inputDBLength, tree }: ToolbarProps) => {
   return (
-    <aside className="flex justify-between">
-      <div className="flex">
+    <aside className="flex justify-between p-2">
+      <div className="flex gap-2">
         <AddSample tree={tree} />
         <AddReaction tree={tree} />
         <ClearButtonGroup

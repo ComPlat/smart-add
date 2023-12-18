@@ -18,7 +18,7 @@ const ClearButtonGroup = ({
   assignmentDBLength: number
   inputDBLength: number
 }) => (
-  <div className="flex">
+  <div className="flex gap-2">
     <Button
       disabled={inputDBLength === 0}
       label="Clear Files DB"
@@ -27,7 +27,6 @@ const ClearButtonGroup = ({
     />
 
     <Button
-      className="mr-2 w-1/2"
       disabled={assignmentDBLength === 0}
       label="Clear Assignment DB"
       onClick={assignmentsDBClearHandler}
