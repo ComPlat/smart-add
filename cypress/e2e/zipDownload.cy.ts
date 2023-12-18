@@ -25,15 +25,13 @@ describe('ZIP download', () => {
 
       const dataTransfer = new DataTransfer()
 
-      cy.get('[data-rct-item-id="test-zip.zip"] > .truncate').trigger(
-        'dragstart',
-        { dataTransfer },
-      )
+      cy.get(
+        '[data-rct-item-id="test-zip.zip/test-zip/2023_SmartAdd.mol"]',
+      ).trigger('dragstart', {
+        dataTransfer,
+      })
 
-      cy.get('button[data-rct-item-id="test-zip.zip"]').click()
-      cy.get('button[data-rct-item-id="test-zip.zip/test-zip"]').click()
-
-      cy.get(':nth-child(2) > [role="tree"]')
+      cy.get('[data-rct-tree="assignmentTree"]')
         .trigger('dragover', {
           dataTransfer,
         })
