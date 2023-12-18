@@ -13,7 +13,7 @@ type ButtonProps = {
 const defaultStyle =
   'flex items-center justify-center text-kit-primary-full border border-kit-primary-full gap-2 disabled:bg-slate-400 disabled:text-slate-200 disabled:shadow-none hover:bg-kit-primary-light/5 duration-150 rounded-lg bg-white p-2 min-w-[80px]'
 const primaryStyle =
-  'flex items-center justify-center text-white gap-2 disabled:bg-slate-400 disabled:text-slate-200 disabled:shadow-none hover:bg-gray-700 duration-150 rounded-lg bg-kit-primary-full p-2 min-w-[80px]'
+  'flex items-center justify-center text-white gap-2 disabled:bg-slate-400 disabled:text-slate-200 disabled:shadow-none hover:bg-kit-primary-full/90 duration-150 rounded-lg bg-kit-primary-full p-2 min-w-[80px]'
 const dangerStyle =
   'flex items-center justify-center gap-2 text-white border border-solid disabled:bg-slate-400 disabled:text-slate-200 disabled:border-slate-200 disabled:shadow-none hover:bg-red-400 bg-red-600 duration-150 rounded-lg p-2'
 

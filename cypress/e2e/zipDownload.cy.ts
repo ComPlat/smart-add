@@ -29,6 +29,10 @@ describe('ZIP download', () => {
         'dragstart',
         { dataTransfer },
       )
+
+      cy.get('button[data-rct-item-id="test-zip.zip"]').click()
+      cy.get('button[data-rct-item-id="test-zip.zip/test-zip"]').click()
+
       cy.get(':nth-child(2) > [role="tree"]')
         .trigger('dragover', {
           dataTransfer,
