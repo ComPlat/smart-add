@@ -1,6 +1,6 @@
 import { ExtendedFile, ExtendedFolder } from '@/database/db'
 import { FileNode } from '@/helper/types'
-import React, { useState } from 'react'
+import React, { FC, useState } from 'react'
 import { FaPlus } from 'react-icons/fa'
 
 import {
@@ -8,17 +8,14 @@ import {
   getUniqueFolderName,
 } from '../structure-btns/folderUtils'
 
-const AddFolder = ({
-  className,
-  close,
-  item,
-  tree,
-}: {
+interface AddFolderProps {
   className?: string
   close: () => void
   item: ExtendedFile | ExtendedFolder | undefined
   tree: Record<string, FileNode>
-}) => {
+}
+
+const AddFolder: FC<AddFolderProps> = ({ className, close, item, tree }) => {
   const baseFolderName = 'New Folder'
 
   const [newFolderName, setNewFolderName] = useState(baseFolderName)

@@ -5,6 +5,7 @@ import { FC, useRef } from 'react'
 
 import AddFolder from '../context-menu/AddFolder'
 import Delete from './Delete'
+import Rename from './Rename'
 
 interface ContextMenu {
   closeContextMenu: () => void
@@ -35,6 +36,7 @@ const ContextMenu: FC<ContextMenu> = ({
         <AddFolder close={closeContextMenu} item={targetItem} tree={tree} />
         {targetItem && (
           <>
+            <Rename close={closeContextMenu} item={targetItem} tree={tree} />
             <span className="block h-px bg-gray-300"></span>
             <Delete close={closeContextMenu} item={targetItem} tree={tree} />
           </>

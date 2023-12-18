@@ -1,21 +1,19 @@
 import { ExtendedFile, ExtendedFolder } from '@/database/db'
 import { FileNode } from '@/helper/types'
 import { DeleteOutlined } from '@ant-design/icons'
+import { FC } from 'react'
 
 import deleteFile from './deleteFile'
 import deleteFolder from './deleteFolder'
 
-const Delete = ({
-  className,
-  close,
-  item,
-  tree,
-}: {
+interface DeleteProps {
   className?: string
   close: () => void
   item: ExtendedFile | ExtendedFolder
   tree: Record<string, FileNode>
-}) => {
+}
+
+const Delete: FC<DeleteProps> = ({ className, close, item, tree }) => {
   const handleDelete = (e: React.FormEvent) => {
     e.preventDefault()
 
