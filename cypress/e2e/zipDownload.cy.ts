@@ -2,9 +2,8 @@ import '@this-dot/cypress-indexeddb'
 
 describe('ZIP download', () => {
   beforeEach(() => {
-    cy.visit('/')
-    // cy.wait(3000).clearIndexedDb('filesDatabase')
-    // cy.visit('/').wait(3000).clearIndexedDb('assignmentsDatabase')
+    cy.visit('/').clearIndexedDb('filesDatabase')
+    cy.visit('/').clearIndexedDb('assignmentsDatabase')
   })
 
   const outputZipName = 'exportZip'
@@ -24,9 +23,9 @@ describe('ZIP download', () => {
       cy.get('button[data-rct-item-id="test-zip.zip"]').click()
       cy.get('button[data-rct-item-id="test-zip.zip/test-zip"]').click()
 
-      // cy.get('[role="tree"] > :nth-child(2) > .flex-col > .flex').should(
-      //   'be.visible',
-      // )
+      cy.get('[role="tree"] > :nth-child(2) > .flex-col > .flex').should(
+        'be.visible',
+      )
 
       const dataTransfer = new DataTransfer()
 
@@ -40,13 +39,13 @@ describe('ZIP download', () => {
         })
         .trigger('drop', { dataTransfer })
 
-      // cy.get('button')
-      //   .contains('Download as ZIP')
-      //   .click()
-      //   .readFile(`cypress/downloads/${outputZipName}.zip`)
-      //   .then((fileContent) => {
-      //     expect(fileContent).to.exist
-      //   })
+      cy.get('button')
+        .contains('Download as ZIP')
+        .click()
+        .readFile(`cypress/downloads/${outputZipName}.zip`)
+        .then((fileContent) => {
+          expect(fileContent).to.exist
+        })
     })
   })
 })
