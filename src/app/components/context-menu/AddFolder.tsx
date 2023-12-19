@@ -1,6 +1,7 @@
 import { ExtendedFile, ExtendedFolder } from '@/database/db'
 import { FileNode } from '@/helper/types'
-import React, { FC, useState } from 'react'
+import { useOnClickOutside } from '@/hooks/useOnClickOutside'
+import React, { FC, useRef, useState } from 'react'
 import { FaPlus } from 'react-icons/fa'
 
 import {
@@ -16,10 +17,14 @@ interface AddFolderProps {
 }
 
 const AddFolder: FC<AddFolderProps> = ({ className, close, item, tree }) => {
+  const popupRef = useRef(null)
+
   const baseFolderName = 'New Folder'
 
   const [newFolderName, setNewFolderName] = useState(baseFolderName)
   const [showInput, setShowInput] = useState(false)
+
+  useOnClickOutside(popupRef, () => showInput && setShowInput(false))
 
   const handleAddFolder = async () => {
     const parentPath = item ? tree[item.fullPath] : ''
@@ -60,7 +65,10 @@ const AddFolder: FC<AddFolderProps> = ({ className, close, item, tree }) => {
           <span>Add Folder</span>
         </span>
         {showInput && (
-          <div className="absolute left-full top-[-5px] z-10 ml-2 rounded-sm border border-gray-300 bg-white p-1 shadow-lg">
+          <div
+            className="absolute left-full top-[-5px] z-10 ml-2 rounded-sm border border-gray-300 bg-white p-1 shadow-lg"
+            ref={popupRef}
+          >
             <div className="flex flex-col space-y-2">
               <input
                 autoFocus

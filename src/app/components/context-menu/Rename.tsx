@@ -1,20 +1,26 @@
 import { ExtendedFile, ExtendedFolder } from '@/database/db'
 import { FileNode } from '@/helper/types'
-import { FC, useState } from 'react'
+import { useOnClickOutside } from '@/hooks/useOnClickOutside'
+import { FC, useRef, useState } from 'react'
 import { FaEdit } from 'react-icons/fa'
 
 import renameFile from './renameFile'
 import renameFolder from './renameFolder'
 
 interface RenameProps {
+  className?: string
   close: () => void
   item: ExtendedFile | ExtendedFolder
   tree: Record<string, FileNode>
 }
 
-const Rename: FC<RenameProps> = ({ close, item, tree }) => {
+const Rename: FC<RenameProps> = ({ className, close, item, tree }) => {
+  const popupRef = useRef(null)
+
   const [newName, setNewName] = useState(item.name)
   const [showInput, setShowInput] = useState(false)
+
+  useOnClickOutside(popupRef, () => showInput && setShowInput(false))
 
   const handleCancel = (e: { stopPropagation: () => void }) => {
     e.stopPropagation()
@@ -32,16 +38,22 @@ const Rename: FC<RenameProps> = ({ close, item, tree }) => {
   }
 
   return (
-    <li className="relative" onClick={() => setShowInput(true)}>
+    <li
+      className={`${className} ${showInput && 'bg-gray-300'} relative`}
+      onClick={() => setShowInput(true)}
+    >
       <span className="flex items-center space-x-2">
         <FaEdit />
         <span>Rename</span>
       </span>
       {showInput && (
-        <div className="absolute left-full top-[-5px] z-10 ml-2 rounded-sm border border-gray-300 bg-white p-1 shadow-lg">
+        <div
+          className="absolute left-full top-[-5px] z-10 ml-2 rounded-sm border border-gray-300 bg-white p-1 shadow-lg"
+          ref={popupRef}
+        >
           <div className="flex flex-col space-y-2">
             <input
-              className="rounded-sm px-3 py-1 text-gray-700 shadow focus:outline-none"
+              className="rounded-sm px-3 py-1 shadow focus:outline-none"
               onChange={(e) => setNewName(e.target.value)}
               placeholder="Enter new folder name"
               value={newName}
@@ -52,14 +64,14 @@ const Rename: FC<RenameProps> = ({ close, item, tree }) => {
                   newName.length === 0
                     ? 'bg-gray-200 hover:bg-gray-200'
                     : 'hover:bg-blue-700'
-                } rounded-sm bg-blue-500 px-3 py-1 text-white`}
+                } flex-1 rounded-sm bg-blue-500 px-3 py-1 text-white`}
                 disabled={newName.length === 0}
                 onClick={handleRename}
               >
                 Rename
               </button>
               <button
-                className="rounded-sm bg-red-500 px-3 py-1 text-white hover:bg-red-700"
+                className="flex-1 rounded-sm bg-red-500 px-3 py-1 text-white hover:bg-red-700"
                 onClick={handleCancel}
               >
                 Cancel
