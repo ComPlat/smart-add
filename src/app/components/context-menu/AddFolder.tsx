@@ -8,6 +8,7 @@ import {
   createFolder,
   getUniqueFolderName,
 } from '../structure-btns/folderUtils'
+import classes from './popup.module.css'
 
 interface AddFolderProps {
   className?: string
@@ -66,13 +67,13 @@ const AddFolder: FC<AddFolderProps> = ({ className, close, item, tree }) => {
         </span>
         {showInput && (
           <div
-            className="absolute left-full top-[-5px] z-10 ml-2 rounded-sm border border-gray-300 bg-white p-1 shadow-lg"
+            className={`${classes['emerge-from-lamp']} absolute left-full top-[-5px] z-10 ml-2 rounded-lg border border-gray-300 bg-white p-1 shadow-lg`}
             ref={popupRef}
           >
-            <div className="flex flex-col space-y-2">
+            <div className="flex flex-col space-y-1">
               <input
                 autoFocus
-                className="rounded-sm px-3 py-1 shadow outline outline-gray-200 focus:outline-gray-300"
+                className="rounded px-3 py-1 shadow outline outline-gray-200 focus:outline-gray-300"
                 onChange={(e) => setNewFolderName(e.target.value)}
                 onKeyDown={handleKeyPress}
                 placeholder="Enter folder name"
@@ -84,14 +85,14 @@ const AddFolder: FC<AddFolderProps> = ({ className, close, item, tree }) => {
                     newFolderName.length === 0
                       ? 'bg-gray-200 hover:bg-gray-200'
                       : 'hover:bg-blue-700'
-                  } flex-1 rounded-sm bg-blue-500 px-3 py-1 text-white`}
+                  } flex-1 rounded bg-blue-500 px-3 py-1 text-white`}
                   disabled={newFolderName.length === 0}
                   onClick={handleAddFolder}
                 >
                   Add
                 </button>
                 <button
-                  className="flex-1 rounded-sm bg-red-500 px-3 py-1 text-white hover:bg-red-700"
+                  className="flex-1 rounded bg-red-500 px-3 py-1 text-white hover:bg-red-700"
                   onClick={handleCancel}
                 >
                   Cancel

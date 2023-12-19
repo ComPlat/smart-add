@@ -6,6 +6,7 @@ import { FC, useRef, useState } from 'react'
 
 import deleteFile from './deleteFile'
 import deleteFolder from './deleteFolder'
+import classes from './popup.module.css'
 
 interface DeleteProps {
   className?: string
@@ -46,22 +47,22 @@ const Delete: FC<DeleteProps> = ({ className, close, item, tree }) => {
       </span>
       {showConfirmation && (
         <div
-          className="absolute left-full top-[-5px] z-10 ml-2 flex flex-col space-x-2 rounded-sm border border-gray-300 bg-white p-1 shadow-lg"
+          className={`${classes['emerge-from-lamp']} absolute left-full top-[-5px] z-10 ml-2 rounded-lg border border-gray-300 bg-white p-1 shadow-lg`}
           ref={popupRef}
         >
-          <div className="flex flex-col space-y-2">
+          <div className="flex flex-col space-y-1">
             <span className="w-auto min-w-[150px] max-w-[300px] whitespace-nowrap rounded-sm p-1 text-center shadow">
               Delete &quot;{item.name}&quot;?
             </span>
             <div className="flex justify-end space-x-2">
               <button
-                className="flex-1 rounded-sm bg-blue-500 px-3 py-1 text-white hover:bg-blue-700"
+                className="flex-1 rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-700"
                 onClick={handleDelete}
               >
                 Confirm
               </button>
               <button
-                className="flex-1 rounded-sm bg-red-500 px-3 py-1 text-white hover:bg-red-700"
+                className="flex-1 rounded bg-red-500 px-3 py-1 text-white hover:bg-red-700"
                 onClick={handleCancel}
               >
                 Cancel

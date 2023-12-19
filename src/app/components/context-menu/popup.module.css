@@ -1,0 +1,33 @@
+@keyframes fadeIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.1s ease-out;
+}
+
+@keyframes emergeFromLamp {
+  0% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+.emerge-from-lamp {
+  animation: emergeFromLamp 0.2s ease-out;
+  transform-origin: left center;
+}
