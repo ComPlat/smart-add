@@ -1,10 +1,5 @@
-import { UploadForm } from './components/UploadForm'
+import Workspace from './components/Workspace'
 
 export default function Home() {
-  return (
-    <main className="flex flex-col gap-8 p-8">
-      <h1 className="text-3xl">Upload</h1>
-      <UploadForm />
-    </main>
-  )
+  return <Workspace />
 }

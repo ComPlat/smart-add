@@ -2,7 +2,8 @@ import '@this-dot/cypress-indexeddb'
 
 describe('ZIP Upload', () => {
   beforeEach(() => {
-    cy.visit('/').clearIndexedDb('filesDatabase')
+    cy.visit('/')
+    cy.clearIndexedDb('filesDatabase')
   })
 
   describe('uploading zip file', () => {
@@ -13,7 +14,9 @@ describe('ZIP Upload', () => {
       cy.get('span[role=button]').selectFile(zipFile, {
         action: 'drag-drop',
       })
-      cy.get('p').should('contain', '2023_SmartAdd.mol')
+      cy.get('button[data-rct-item-id="test-zip.zip"]').click()
+      cy.get('button[data-rct-item-id="test-zip.zip/test-zip"]').click()
+      cy.get('span').should('contain', '2023_SmartAdd.mol')
     })
   })
 })

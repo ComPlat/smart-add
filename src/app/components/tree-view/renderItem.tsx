@@ -38,7 +38,7 @@ const renderItem = ({
   item,
   title,
 }: RenderItemParams) => {
-  const isDraggingOver = context.isDraggingOver
+  const { isDraggingOver } = context
   const shouldHideTitle = typeof title === 'string' && title.endsWith('.root')
 
   const titleClass =
@@ -46,19 +46,24 @@ const renderItem = ({
 
   return (
     <li
-      className="flex-col"
       title={String(title)}
       {...context.itemContainerWithChildrenProps}
+      className="grid grid-cols-1"
     >
       <button
         {...context.itemContainerWithoutChildrenProps}
         {...context.interactiveElementProps}
-        className={`flex items-center focus:outline-none
-          ${context.isSelected ? 'text-blue-600' : ''}
-          ${isDraggingOver ? 'rounded-md bg-blue-200' : ''}`}
+        className={`flex items-center px-2 text-sm
+          ${
+            context.isSelected
+              ? 'my-1 rounded-md bg-kit-primary-mid font-bold'
+              : ''
+          }
+          ${
+            isDraggingOver ? 'rounded-md bg-blue-200' : ''
+          } text-sm text-gray-800 duration-75 hover:text-kit-primary-full`}
         style={{
           marginLeft: `${depth * 25}px`,
-          maxWidth: `calc(100% - ${depth * 25}px)`,
         }}
         type="button"
       >
