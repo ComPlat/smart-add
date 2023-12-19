@@ -37,8 +37,7 @@ describe('ZIP download', () => {
         })
         .trigger('drop', { dataTransfer })
 
-      cy.get('button')
-        .contains('Download as ZIP')
+      cy.get('button[name="Download as ZIP"]')
         .click()
         .readFile(`cypress/downloads/${outputZipName}.zip`)
         .then((fileContent) => {

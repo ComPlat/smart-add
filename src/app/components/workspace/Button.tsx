@@ -36,6 +36,7 @@ const Button = ({
     }
     disabled={disabled}
     key={key}
+    name={label}
     onClick={onClick}
   >
     {icon}
