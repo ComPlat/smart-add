@@ -1,10 +1,12 @@
 'use client'
 
 import { ExtendedFile, assignmentsDB } from '@/database/db'
-import { Button, message } from 'antd'
+import { message } from 'antd'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { saveAs } from 'file-saver'
 import JSZip from 'jszip'
+
+import { Button } from '../workspace/Button'
 
 interface FileTree {
   [key: string]: Blob | FileTree
@@ -70,9 +72,12 @@ const FileDownloader = () => {
   }
 
   return (
-    <Button disabled={assignedFiles.length === 0} onClick={handleClick}>
-      Download as Zip
-    </Button>
+    <Button
+      disabled={assignedFiles.length === 0}
+      label="Download as ZIP"
+      onClick={handleClick}
+      variant="primary"
+    />
   )
 }
 

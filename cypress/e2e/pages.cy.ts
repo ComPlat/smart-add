@@ -2,7 +2,7 @@ import '@this-dot/cypress-indexeddb'
 
 describe('Pages', () => {
   beforeEach(() => {
-    cy.visit('/').clearIndexedDb('filesDatabase')
+    cy.visit('/').wait(100).clearIndexedDb('filesDatabase')
     cy.visit('/').clearIndexedDb('assignmentsDatabase')
   })
 
@@ -21,7 +21,7 @@ describe('Pages', () => {
       })
 
       it('shows message that upload was successful', () => {
-        cy.get('p').contains(fileName)
+        cy.get('button').contains(fileName)
 
         cy.get('.ant-message-success').should(
           'contain',

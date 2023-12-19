@@ -18,16 +18,17 @@ import {
   TreeItemIndex,
   UncontrolledTreeEnvironment,
 } from 'react-complex-tree'
-import 'react-complex-tree/lib/style-modern.css'
 
-import ContextMenu from '../context-menu/ContextMenu'
-import { CustomTreeDataProvider } from '../custom/CustomTreeDataProvider'
-import AddReaction from '../structure-btns/AddReaction'
-import AddSample from '../structure-btns/AddSample'
-import ClearButtonGroup from './ClearButtonGroup'
-import styles from './TreeView.module.css'
-import { UploadSpinner } from './UploadSpinner'
-import { renderItem } from './renderItem'
+import ContextMenu from './context-menu/ContextMenu'
+import { CustomTreeDataProvider } from './custom/CustomTreeDataProvider'
+import { renderItem } from './tree-view/renderItem'
+import { UploadDropZone } from './upload-form/UploadDropZone'
+import { ExportFiles } from './workspace/ExportFiles'
+import { ExportFilesText } from './workspace/ExportFilesText'
+import Header from './workspace/Header'
+import { Toolbar } from './workspace/Toolbar'
+import { UploadFilesText } from './workspace/UploadFilesText'
+import { UploadedFiles } from './workspace/UploadedFiles'
 
 const initialContextMenu = {
   show: false,
@@ -35,7 +36,7 @@ const initialContextMenu = {
   y: 0,
 }
 
-const TreeView = () => {
+const Workspace = () => {
   const db = useLiveQuery(async () => {
     const files = await filesDB.files.toArray()
     const folders = await filesDB.folders.toArray()
@@ -142,81 +143,83 @@ const TreeView = () => {
   const contextMenuClose = () => setContextMenu(initialContextMenu)
 
   return (
-    <UncontrolledTreeEnvironment
-      canDragAndDrop
-      canDropAt={handleCanDropAt}
-      canDropOnFolder
-      canReorderItems
-      canSearch={false}
-      dataProvider={db.treeDataProvider}
-      getItemTitle={(item: TreeItem) => item.data}
-      key={memoizedKey}
-      onCollapseItem={handleOnCollapseItem}
-      onDrop={handleOnDrop}
-      onExpandItem={handleOnExpandItem}
-      onFocusItem={handleOnFocusItem}
-      viewState={viewState}
-    >
-      <div className="flex">
-        <div className="flex-1"></div>
-        <div className="flex flex-1">
-          <AddSample className="flex-1" tree={db.tree} />
-          <AddReaction className="flex-1" tree={db.tree} />
-        </div>
-      </div>
-
-      <div className="flex flex-row justify-between">
-        <div className={styles['tree']}>
-          <Tree
-            renderItemsContainer={({ children, containerProps }) => (
-              <ul {...containerProps}>{children}</ul>
-            )}
-            renderTreeContainer={({ children, containerProps }) => (
-              <div {...containerProps}>{children}</div>
-            )}
-            renderItem={renderItem}
-            rootItem="inputTreeRoot"
-            treeId="inputTree"
-            treeLabel="Input Tree"
-          />
-        </div>
-
-        <UploadSpinner isUploading={uploading} />
-
-        <div className={styles['tree']} onContextMenu={handleContextMenu}>
-          <Tree
-            renderItemsContainer={({ children, containerProps }) => (
-              <ul onContextMenu={handleContextMenu} {...containerProps}>
-                {children}
-              </ul>
-            )}
-            renderTreeContainer={({ children, containerProps }) => (
-              <div {...containerProps}>{children}</div>
-            )}
-            renderItem={renderItem}
-            rootItem="assignmentTreeRoot"
-            treeId="assignmentTree"
-            treeLabel="Assignment Tree"
-          />
-        </div>
-
-        {contextMenu.show && (
-          <ContextMenu
-            closeContextMenu={contextMenuClose}
-            targetItem={contextTarget}
-            tree={db.tree}
-            x={contextMenu.x}
-            y={contextMenu.y}
-          />
-        )}
-      </div>
-
-      <ClearButtonGroup
+    <main className="flex flex-col overflow-hidden bg-gray-100">
+      <Header />
+      <Toolbar
         assignmentDBLength={db.assignedLength}
         inputDBLength={db.inputLength}
+        tree={db.tree}
       />
-    </UncontrolledTreeEnvironment>
+      <UncontrolledTreeEnvironment
+        canDragAndDrop
+        canDropAt={handleCanDropAt}
+        canDropOnFolder
+        canReorderItems
+        canSearch={false}
+        dataProvider={db.treeDataProvider}
+        getItemTitle={(item: TreeItem) => item.data}
+        key={memoizedKey}
+        onCollapseItem={handleOnCollapseItem}
+        onDrop={handleOnDrop}
+        onExpandItem={handleOnExpandItem}
+        onFocusItem={handleOnFocusItem}
+        viewState={viewState}
+      >
+        <div className="flex min-h-full w-full flex-row justify-between overflow-hidden">
+          <UploadedFiles>
+            <UploadFilesText showText={db.inputLength === 0} />
+            <UploadDropZone>
+              <Tree
+                renderItemsContainer={({ children, containerProps }) => (
+                  <ul {...containerProps}>{children}</ul>
+                )}
+                renderTreeContainer={({ children, containerProps }) => (
+                  <div className="min-h-screen" {...containerProps}>
+                    {children}
+                  </div>
+                )}
+                renderItem={renderItem}
+                rootItem="inputTreeRoot"
+                treeId="inputTree"
+                treeLabel="Input Tree"
+              />
+            </UploadDropZone>
+          </UploadedFiles>
+
+          <p className="min-h-screen w-2 bg-gray-100" />
+
+          <ExportFiles onContextMenu={handleContextMenu}>
+            <ExportFilesText showText={db.assignedLength === 0} />
+            <Tree
+              renderItemsContainer={({ children, containerProps }) => (
+                <ul onContextMenu={handleContextMenu} {...containerProps}>
+                  {children}
+                </ul>
+              )}
+              renderTreeContainer={({ children, containerProps }) => (
+                <div className="min-h-screen" {...containerProps}>
+                  {children}
+                </div>
+              )}
+              renderItem={renderItem}
+              rootItem="assignmentTreeRoot"
+              treeId="assignmentTree"
+              treeLabel="Assignment Tree"
+            />
+          </ExportFiles>
+        </div>
+      </UncontrolledTreeEnvironment>
+      {contextMenu.show && (
+        <ContextMenu
+          closeContextMenu={contextMenuClose}
+          targetItem={contextTarget}
+          tree={db.tree}
+          x={contextMenu.x}
+          y={contextMenu.y}
+        />
+      )}
+    </main>
   )
 }
 
-export { TreeView }
+export default Workspace

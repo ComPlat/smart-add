@@ -3,7 +3,6 @@
 import { filesDB } from '@/database/db'
 import { extractFilesFromZip } from '@/helper/extractFilesFromZip'
 import { uploadExtractedFiles } from '@/helper/uploadExtractedFiles'
-import { InboxOutlined } from '@ant-design/icons'
 import { Progress, Upload, UploadProps, message } from 'antd'
 import { RcFile, UploadFile } from 'antd/es/upload'
 import { Dispatch, SetStateAction, useState } from 'react'
@@ -16,6 +15,11 @@ import styles from './UploadDropZone.module.css'
 //       so that no duplicates get uploaded
 // TODO: May cause issues when uploading folders with the same name as variable
 //       is never cleared
+
+type UploadDropZoneProps = {
+  children?: React.ReactNode
+}
+
 const uploadedFolders: string[] = []
 
 const handleCustomRequest = async ({
@@ -36,8 +40,9 @@ const handleCustomRequest = async ({
   setProgress: (progress: number) => void
   uploadFileList: UploadFile[]
 }) => {
-  if (typeof file === 'string')
+  if (typeof file === 'string') {
     throw new TypeError('Uploaded file is a String!')
+  }
   if (file instanceof Blob && !(file instanceof File)) {
     throw new TypeError('Uploaded file is a Blob, not a File!')
   }
@@ -95,7 +100,7 @@ const handleCustomRequest = async ({
         await Promise.all(promises)
       }
 
-      // HINT: Exlude Mac OS specific folder
+      // HINT: Exclude MacOS specific folder
       const paths = folderPaths.filter((path) => !path.includes('__MACOSX'))
 
       for (const path of paths) await createFolders(path, parentPath)
@@ -169,10 +174,12 @@ const handleCustomRequest = async ({
       })
   }
 
+  message.success(`${file.name} uploaded successfully.`)
+
   return true
 }
 
-const UploadDropZone = () => {
+const UploadDropZone = ({ children }: UploadDropZoneProps) => {
   const [progress, setProgress] = useState<number>(0)
   const [uploadFileList, setUploadFileList] = useState<UploadFile[]>([])
   const [filePaths, setFilePaths] = useState<{ [key: string]: UploadFile }>({})
@@ -194,32 +201,29 @@ const UploadDropZone = () => {
     multiple: true,
     name: 'file',
     onChange(info) {
-      const {
-        file: { name, status },
-      } = info
-
       setUploadFileList(info.fileList)
-
-      if (status === 'done') {
-        message.success(`${name} uploaded successfully.`)
-      } else if (status === 'error') {
-        message.error(`Upload of file ${name} failed.`)
-      }
       setProgress
     },
     showUploadList: false,
   }
 
+  // HINT: Progress will be moved to notifications
   return (
     <div className={styles['upload-wrapper']}>
-      <Upload.Dragger {...uploadProps} openFileDialogOnClick={false}>
-        <InboxOutlined className="text-6xl text-blue-500" />
-        <p className="text-lg">Drag file to this area to upload</p>
-        <p className="mt-2 text-sm text-neutral-400">
-          Support for single, bulk or zip archive upload.
-        </p>
+      <Upload.Dragger
+        {...uploadProps}
+        style={{
+          background: 'none',
+          backgroundColor: 'none',
+          border: 'none',
+          borderRadius: 'none',
+        }}
+        openFileDialogOnClick={false}
+      >
+        <Progress percent={progress} />
+
+        {children}
       </Upload.Dragger>
-      <Progress percent={progress} />
     </div>
   )
 }

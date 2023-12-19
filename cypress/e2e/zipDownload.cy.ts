@@ -6,12 +6,12 @@ describe('ZIP download', () => {
     cy.visit('/').clearIndexedDb('assignmentsDatabase')
   })
 
-  const ouputZipName = 'exportZip'
+  const outputZipName = 'exportZip'
   const zipFileName = 'test-zip.zip'
   const zipFile = `cypress/fixtures/${zipFileName}`
 
   after(() => {
-    cy.exec(`rm -f cypress/downloads/${ouputZipName}.zip`)
+    cy.exec(`rm -f cypress/downloads/${outputZipName}.zip`)
   })
 
   describe('uploading ZIP file', () => {
@@ -20,29 +20,26 @@ describe('ZIP download', () => {
         action: 'drag-drop',
       })
 
-      cy.get('[role="tree"] > :nth-child(2) > .flex-col > .flex').should(
-        'be.visible',
-      )
+      cy.get('button[data-rct-item-id="test-zip.zip"]').click()
+      cy.get('button[data-rct-item-id="test-zip.zip/test-zip"]').click()
 
       const dataTransfer = new DataTransfer()
 
-      cy.wait(1_000)
+      cy.get(
+        '[data-rct-item-id="test-zip.zip/test-zip/2023_SmartAdd.mol"]',
+      ).trigger('dragstart', {
+        dataTransfer,
+      })
 
-      cy.get('[role="tree"] > :nth-child(2) > .flex-col > .flex').trigger(
-        'dragstart',
-        { dataTransfer },
-      )
-      cy.get(':nth-child(2) > [role="tree"]')
+      cy.get('[data-rct-tree="assignmentTree"]')
         .trigger('dragover', {
           dataTransfer,
         })
         .trigger('drop', { dataTransfer })
 
-      cy.get('button')
-        .contains('Download as Zip')
+      cy.get('button[name="Download as ZIP"]')
         .click()
-        .wait(1_000)
-        .readFile(`cypress/downloads/${ouputZipName}.zip`)
+        .readFile(`cypress/downloads/${outputZipName}.zip`)
         .then((fileContent) => {
           expect(fileContent).to.exist
         })
