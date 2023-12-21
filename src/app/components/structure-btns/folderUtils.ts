@@ -25,7 +25,7 @@ export const createFolder = async (path: string, name: string) => {
     isFolder: true,
     name,
     parentUid: '',
-    uid: v4() + ' ' + v4(),
+    uid: v4(),
   }
 
   // HINT: This is necessary because directly uploading new folders to the assignmentsDB
