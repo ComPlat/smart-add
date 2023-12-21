@@ -1,4 +1,4 @@
-import { assignmentsDB } from '@/database/db'
+import { ExtendedFolder, assignmentsDB, filesDB } from '@/database/db'
 import { FileNode } from '@/helper/types'
 import { v4 } from 'uuid'
 
@@ -19,14 +19,23 @@ export const getUniqueFolderName = (
   return `${cleanBaseName}_${highestCounter + 1}`
 }
 
-export const createFolder = async (path: string, name: string) =>
-  await assignmentsDB.assignedFolders.add({
+export const createFolder = async (path: string, name: string) => {
+  const folder = {
     fullPath: path,
     isFolder: true,
-    name: name,
-    parentUid: v4(),
+    name,
+    parentUid: '',
     uid: v4(),
-  })
+  }
+
+  // HINT: This is necessary because directly uploading new folders to the assignmentsDB
+  //       causes issues when then trying to move folders from input tree to assignments
+  //       tree
+  await filesDB.folders.put(folder)
+  const folder_tmp = await filesDB.folders.get({ uid: folder.uid })
+  await assignmentsDB.assignedFolders.put(folder_tmp as ExtendedFolder)
+  await filesDB.folders.where({ uid: folder.uid }).delete()
+}
 
 export const createSubFolders = async (basePath: string, names: string[]) =>
   await Promise.all(
