@@ -27,6 +27,7 @@ const Header = () => {
         content={<a onClick={hide}>Close</a>}
         onOpenChange={handleOpenChange}
         open={open}
+        placement="bottomLeft"
         title="Notifications"
         trigger="click"
       >
