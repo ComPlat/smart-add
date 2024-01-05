@@ -51,8 +51,12 @@ const Delete: FC<DeleteProps> = ({ className, close, item, tree }) => {
           ref={popupRef}
         >
           <div className="flex flex-col space-y-1">
-            <span className="w-auto min-w-[150px] max-w-[300px] whitespace-nowrap rounded-sm p-1 text-center shadow">
-              Delete &quot;{item.name}&quot;?
+            <span className="w-auto min-w-[150px] max-w-[300px] truncate whitespace-nowrap rounded-sm p-1 text-center shadow">
+              Delete{' '}
+              <span className="underline" title={item.name}>
+                {item.name}
+              </span>
+              ?
             </span>
             <div className="flex justify-end space-x-2">
               <button

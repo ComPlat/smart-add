@@ -1,4 +1,4 @@
-import { ExtendedFile, assignmentsDB } from '@/database/db'
+import { ExtendedFile, filesDB } from '@/database/db'
 
 const deleteFile = async (file: ExtendedFile) => {
   if (!('id' in file)) {
@@ -11,7 +11,7 @@ const deleteFile = async (file: ExtendedFile) => {
     )
   }
 
-  await assignmentsDB.assignedFiles.delete(file.id)
+  await filesDB.files.delete(file.id)
 }
 
 export default deleteFile

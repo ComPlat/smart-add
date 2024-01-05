@@ -40,8 +40,8 @@ const Workspace = () => {
   const db = useLiveQuery(async () => {
     const files = await filesDB.files.toArray()
     const folders = await filesDB.folders.toArray()
-    const assignedFiles = await assignmentsDB.assignedFiles.toArray()
-    const assignedFolders = await assignmentsDB.assignedFolders.toArray()
+    const assignedFiles = await assignmentsDB.files.toArray()
+    const assignedFolders = await assignmentsDB.folders.toArray()
     const tree = retrieveTree(
       files,
       folders,
@@ -80,7 +80,7 @@ const Workspace = () => {
 
   const [contextMenu, setContextMenu] = useState(initialContextMenu)
   const [contextTarget, setContextTarget] = useState<
-    ExtendedFile | ExtendedFolder | undefined
+    ExtendedFile | ExtendedFolder
   >()
 
   const memoizedKey = useMemo(
@@ -113,29 +113,40 @@ const Workspace = () => {
 
   const handleOnFocusItem = (item: TreeItem) => setFocusedItem(item.index)
 
-  const handleOnDrop = () => handleFileMove(db.tree, setUploading)
+  const handleOnDrop = (items: TreeItem[], target: DraggingPosition) =>
+    handleFileMove(items, target, db.tree, setUploading)
 
   const handleCanDropAt = (items: TreeItem[], target: DraggingPosition) =>
     canDropAt(items, target, db.tree)
 
-  const handleContextMenu = async (
+  const handleDefaultContextMenu = async (e: React.MouseEvent) => {
+    e.preventDefault()
+
+    const { pageX, pageY } = e
+
+    setContextTarget(undefined)
+    setContextMenu({ show: true, x: pageX, y: pageY })
+  }
+
+  const handleItemContextMenu = async (
     e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>,
   ) => {
     e.preventDefault()
 
-    const { pageX, pageY } = e
-    const { target } = e
+    const { pageX, pageY, target } = e
 
     const targetElement = target as HTMLElement
 
     const fullPath = String(targetElement.dataset.mykey)
 
-    const retrievedFile = await assignmentsDB.assignedFiles.get({ fullPath })
-    const retrievedFolder = await assignmentsDB.assignedFolders.get({
+    const retrievedFile = await filesDB.files.get({ fullPath })
+    const retrievedFolder = await filesDB.folders.get({
       fullPath,
     })
 
     const retrieved = retrievedFile || retrievedFolder
+    if (!retrieved) return
+
     setContextTarget(retrieved)
     setContextMenu({ show: true, x: pageX, y: pageY })
   }
@@ -151,6 +162,11 @@ const Workspace = () => {
         tree={db.tree}
       />
       <UncontrolledTreeEnvironment
+        canDrag={(items) =>
+          items.every(
+            (item) => item.data !== 'structure' && item.data !== 'analyses',
+          )
+        }
         canDragAndDrop
         canDropAt={handleCanDropAt}
         canDropOnFolder
@@ -166,12 +182,14 @@ const Workspace = () => {
         viewState={viewState}
       >
         <div className="flex min-h-full w-full flex-row justify-between overflow-hidden">
-          <UploadedFiles>
+          <UploadedFiles onContextMenu={handleDefaultContextMenu}>
             <UploadFilesText showText={db.inputLength === 0} />
             <UploadDropZone>
               <Tree
                 renderItemsContainer={({ children, containerProps }) => (
-                  <ul {...containerProps}>{children}</ul>
+                  <ul onContextMenu={handleItemContextMenu} {...containerProps}>
+                    {children}
+                  </ul>
                 )}
                 renderTreeContainer={({ children, containerProps }) => (
                   <div className="min-h-screen" {...containerProps}>
@@ -188,13 +206,11 @@ const Workspace = () => {
 
           <p className="min-h-screen w-2 bg-gray-100" />
 
-          <ExportFiles onContextMenu={handleContextMenu}>
+          <ExportFiles>
             <ExportFilesText showText={db.assignedLength === 0} />
             <Tree
               renderItemsContainer={({ children, containerProps }) => (
-                <ul onContextMenu={handleContextMenu} {...containerProps}>
-                  {children}
-                </ul>
+                <ul {...containerProps}>{children}</ul>
               )}
               renderTreeContainer={({ children, containerProps }) => (
                 <div className="min-h-screen" {...containerProps}>

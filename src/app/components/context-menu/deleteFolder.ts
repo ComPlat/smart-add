@@ -1,4 +1,4 @@
-import { ExtendedFolder, assignmentsDB } from '@/database/db'
+import { ExtendedFolder, filesDB } from '@/database/db'
 import { FileNode } from '@/helper/types'
 
 const collectItemsToDelete = (
@@ -38,12 +38,12 @@ const deleteFolder = async (
 
   await Promise.all(
     itemsToDelete.flatMap((id) => [
-      assignmentsDB.assignedFolders.where('fullPath').equals(id).delete(),
-      assignmentsDB.assignedFiles.where('fullPath').equals(id).delete(),
+      filesDB.folders.where('fullPath').equals(id).delete(),
+      filesDB.files.where('fullPath').equals(id).delete(),
     ]),
   )
 
-  await assignmentsDB.assignedFolders.delete(folder.id)
+  await filesDB.folders.delete(folder.id)
 }
 
 export default deleteFolder

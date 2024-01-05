@@ -1,4 +1,4 @@
-import { ExtendedFile, ExtendedFolder, assignmentsDB } from '@/database/db'
+import { ExtendedFile, ExtendedFolder, filesDB } from '@/database/db'
 import { FileNode } from '@/helper/types'
 
 const updatePath = (path: string, newName: string, oldName: string): string => {
@@ -12,16 +12,16 @@ const updateChildren = async (
   tree: Record<string, FileNode>,
 ) => {
   for (const child of folderTreeNode.children) {
-    const folderEntry = await assignmentsDB.assignedFolders.get({
+    const folderEntry = await filesDB.folders.get({
       fullPath: child,
     })
     const fileEntry = !folderEntry
-      ? await assignmentsDB.assignedFiles.get({ fullPath: child })
+      ? await filesDB.files.get({ fullPath: child })
       : null
 
     if (folderEntry) {
       const newFullPath = updatePath(folderEntry.fullPath, newName, item.name)
-      await assignmentsDB.assignedFolders.put({
+      await filesDB.folders.put({
         ...folderEntry,
         fullPath: newFullPath,
       })
@@ -30,7 +30,7 @@ const updateChildren = async (
       await updateChildren(entryTreeNode, newName, item, tree)
     } else if (fileEntry) {
       const newFullPath = updatePath(fileEntry.fullPath, newName, item.name)
-      await assignmentsDB.assignedFiles.put({
+      await filesDB.files.put({
         ...fileEntry,
         fullPath: newFullPath,
       })
@@ -43,7 +43,7 @@ const renameFolder = async (
   tree: Record<string, FileNode>,
   newName: string,
 ) => {
-  const folder = await assignmentsDB.assignedFolders.get({ uid: item.uid })
+  const folder = await filesDB.folders.get({ uid: item.uid })
   if (!folder) return
 
   const updated = {
@@ -57,7 +57,7 @@ const renameFolder = async (
   const folderTreeNode = tree[folder.fullPath]
 
   await updateChildren(folderTreeNode, newName, item, tree)
-  await assignmentsDB.assignedFolders.put(updated)
+  await filesDB.folders.put(updated)
 }
 
 export default renameFolder
