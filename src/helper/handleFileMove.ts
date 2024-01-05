@@ -47,19 +47,15 @@ const updateChildPaths = async (
     const childOldFullPath = `${oldPath}/${childNode.data}`
     const childNewFullPath = `${newPath}/${childNode.data}`
 
-    const oldEntry = await db
-      .table(childNode.isFolder ? 'folders' : 'files')
-      .where({ uid: childNode.uid })
-      .first()
+    const table = childNode.isFolder ? 'folders' : 'files'
 
-    await targetDB
-      .table(childNode.isFolder ? 'folders' : 'files')
-      .put({ ...oldEntry, fullPath: childNewFullPath })
+    const oldEntry = await db.table(table).where({ uid: childNode.uid }).first()
 
-    await db
-      .table(childNode.isFolder ? 'folders' : 'files')
-      .where({ uid: childNode.uid })
-      .delete()
+    await targetDB.table(table).put({ ...oldEntry, fullPath: childNewFullPath })
+
+    if (db.name !== targetDB.name) {
+      await db.table(table).where({ uid: childNode.uid }).delete()
+    }
 
     if (childNode.isFolder) {
       await updateChildPaths(
