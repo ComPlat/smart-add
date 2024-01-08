@@ -20,8 +20,21 @@ const Rename: FC<RenameProps> = ({ className, close, item, tree }) => {
 
   const [newName, setNewName] = useState(item.name)
   const [showInput, setShowInput] = useState(false)
+  const [newFullPathAvailable, setNewFullPathAvailable] = useState(false)
 
   useOnClickOutside(popupRef, () => showInput && setShowInput(false))
+
+  const validateNewName = (userInput: string) => {
+    setNewName(userInput)
+    const parentPath = item.fullPath.split('/').slice(0, -1).join('/')
+
+    const validInput = userInput.trim().length > 0
+    const nameAvailable = !tree[parentPath].children.includes(
+      parentPath + '/' + userInput,
+    )
+
+    setNewFullPathAvailable(validInput && nameAvailable)
+  }
 
   const handleCancel = (e: { stopPropagation: () => void }) => {
     e.stopPropagation()
@@ -55,18 +68,18 @@ const Rename: FC<RenameProps> = ({ className, close, item, tree }) => {
           <div className="flex flex-col space-y-1">
             <input
               className="rounded px-3 py-1 shadow focus:outline-none"
-              onChange={(e) => setNewName(e.target.value)}
+              onChange={(e) => validateNewName(e.target.value)}
               placeholder="Enter new folder name"
               value={newName}
             />
             <div className="flex justify-end space-x-2">
               <button
                 className={`${
-                  newName.length === 0
+                  !newFullPathAvailable
                     ? 'bg-gray-200 hover:bg-gray-200'
                     : 'hover:bg-blue-700'
                 } flex-1 rounded bg-blue-500 px-3 py-1 text-white`}
-                disabled={newName.length === 0}
+                disabled={!newFullPathAvailable}
                 onClick={handleRename}
               >
                 Rename

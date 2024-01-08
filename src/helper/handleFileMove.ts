@@ -16,20 +16,21 @@ const findItemInTable = async (
   return db.table(tableName).where({ fullPath: itemFullPath }).first()
 }
 
-const findItemInDatabases = async (itemFullPath: TreeItemIndex) => {
+const findItemInDatabases = async (itemFullPath: string) => {
   const databases = [filesDB, assignmentsDB]
   const tables = ['files', 'folders']
 
-  for (const db of databases) {
-    for (const table of tables) {
-      const entry = await findItemInTable(itemFullPath, db, table)
-      if (entry) {
-        return { db: db, entry, table }
-      }
-    }
-  }
+  const searchPromises = databases.flatMap((db) =>
+    tables.map((table) =>
+      findItemInTable(itemFullPath, db, table).then((entry) =>
+        entry ? { db, entry, table } : null,
+      ),
+    ),
+  )
 
-  return null
+  const results = await Promise.all(searchPromises)
+
+  return results.find((result) => result !== null) || null
 }
 
 const updateChildPaths = async (
@@ -79,7 +80,7 @@ const handleFileMove = async (
   setUploading(true)
 
   for (const item of items) {
-    const dbResult = await findItemInDatabases(item.index)
+    const dbResult = await findItemInDatabases(String(item.index))
     if (dbResult) {
       const { db, entry, table } = dbResult
       let newPath
