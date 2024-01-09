@@ -26,9 +26,11 @@ const Rename: FC<RenameProps> = ({ className, close, item, tree }) => {
 
   const validateNewName = (userInput: string) => {
     setNewName(userInput)
-    const parentPath = item.fullPath.split('/').slice(0, -1).join('/')
+    const parentPath =
+      item.fullPath.split('/').slice(0, -1).join('/') || 'inputTreeRoot'
 
     const validInput = userInput.trim().length > 0
+
     const nameAvailable = !tree[parentPath].children.includes(
       parentPath + '/' + userInput,
     )
@@ -44,6 +46,8 @@ const Rename: FC<RenameProps> = ({ className, close, item, tree }) => {
 
   const handleRename = (e: React.FormEvent) => {
     e.preventDefault()
+
+    tree[item.fullPath].data = newName
 
     if (!item.isFolder) renameFile(item as ExtendedFile, newName)
     else renameFolder(item as ExtendedFolder, tree, newName)
