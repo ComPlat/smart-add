@@ -22,15 +22,11 @@ export const getUniqueFolderName = (
     (node) => node.data === cleanBaseName,
   )
 
-  if (appendNumberIfDuplicate) {
-    return `${cleanBaseName}_${highestCounter + 1}`
+  if (!appendNumberIfDuplicate && !isDuplicate) {
+    return cleanBaseName
   }
 
-  if (!appendNumberIfDuplicate && isDuplicate) {
-    return `${cleanBaseName}_${highestCounter + 1}`
-  }
-
-  return cleanBaseName
+  return `${cleanBaseName}_${highestCounter + 1}`
 }
 
 export const createFolder = async (
@@ -46,9 +42,12 @@ export const createFolder = async (
     uid: v4(),
   }
 
-  await filesDB.folders.add(folder)
+  await filesDB.folders.put(folder)
 
   if (assignmentTree) {
+    // HINT: This is necessary because directly uploading new folders to the assignmentsDB
+    //       causes issues when then trying to move folders from input tree to assignments
+    //       tree
     const folder_tmp = await filesDB.folders.get({ uid: folder.uid })
     await assignmentsDB.folders.put(folder_tmp as ExtendedFolder)
     await filesDB.folders.where({ uid: folder.uid }).delete()

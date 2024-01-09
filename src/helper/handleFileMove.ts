@@ -13,7 +13,7 @@ const findItemInTable = async (
   db: AssignmentsDBCreator | FilesDBCreator,
   tableName: string,
 ) => {
-  return db.table(tableName).where({ fullPath: itemFullPath }).first()
+  return db.table(tableName).get({ fullPath: itemFullPath })
 }
 
 const findItemInDatabases = async (itemFullPath: string) => {
@@ -41,34 +41,63 @@ const updateChildPaths = async (
   db: AssignmentsDBCreator | FilesDBCreator,
   targetDB: AssignmentsDBCreator | FilesDBCreator,
 ) => {
-  const children = parentNode.children
-
-  for (const childIndex of children) {
+  const updatePromises = []
+  for (const childIndex of parentNode.children) {
     const childNode = tree[childIndex]
     const childOldFullPath = `${oldPath}/${childNode.data}`
     const childNewFullPath = `${newPath}/${childNode.data}`
-
     const table = childNode.isFolder ? 'folders' : 'files'
 
-    const oldEntry = await db.table(table).where({ uid: childNode.uid }).first()
+    const updatePromise = db
+      .table(table)
+      .get({ uid: childNode.uid })
+      .then((oldEntry: FileNode) => {
+        const updateEntry = { ...oldEntry, fullPath: childNewFullPath }
+        return targetDB.table(table).put(updateEntry)
+      })
 
-    await targetDB.table(table).put({ ...oldEntry, fullPath: childNewFullPath })
+    updatePromises.push(updatePromise)
 
     if (db.name !== targetDB.name) {
-      await db.table(table).where({ uid: childNode.uid }).delete()
+      updatePromises.push(
+        db.table(table).where({ uid: childNode.uid }).delete(),
+      )
     }
 
     if (childNode.isFolder) {
-      await updateChildPaths(
-        tree,
-        childNode,
-        childNewFullPath,
-        childOldFullPath,
-        db,
-        targetDB,
+      updatePromises.push(
+        updateChildPaths(
+          tree,
+          childNode,
+          childNewFullPath,
+          childOldFullPath,
+          db,
+          targetDB,
+        ),
       )
     }
   }
+
+  await Promise.all(updatePromises)
+}
+
+const calculateNewPath = (item: TreeItem, target: DraggingPosition) => {
+  if (target.targetType === 'root') {
+    return `${item.data}`
+  }
+
+  if (target.targetType === 'between-items') {
+    const parentPath =
+      target.parentItem === 'assignmentTreeRoot' ||
+      target.parentItem === 'inputTreeRoot'
+        ? ''
+        : target.parentItem
+    return `${String(parentPath).length > 0 ? parentPath + '/' : ''}${
+      item.data
+    }`
+  }
+
+  return `${target.targetItem}/${item.data}`
 }
 
 const handleFileMove = async (
@@ -81,43 +110,29 @@ const handleFileMove = async (
 
   for (const item of items) {
     const dbResult = await findItemInDatabases(String(item.index))
-    if (dbResult) {
-      const { db, entry, table } = dbResult
-      let newPath
-
-      if (target.targetType === 'root') {
-        newPath = `${item.data}`
-      } else if (target.targetType === 'between-items') {
-        const parentPath =
-          target.parentItem === 'assignmentTreeRoot' ||
-          target.parentItem === 'inputTreeRoot'
-            ? ''
-            : target.parentItem
-        newPath = `${String(parentPath).length > 0 && parentPath + '/'}${
-          item.data
-        }`
-      } else {
-        newPath = `${target.targetItem}/${item.data}`
-      }
-
-      const oldPath = entry.fullPath
-
-      const updatedEntry = { ...entry, fullPath: newPath }
-      const targetDB = target.treeId === 'inputTree' ? filesDB : assignmentsDB
-
-      if (db.name !== targetDB.name) {
-        await targetDB.table(table).put(updatedEntry)
-        await db.table(table).where({ uid: entry.uid }).delete()
-      } else {
-        await db.table(table).put(updatedEntry)
-      }
-
-      if (table === 'folders') {
-        const folderNode = tree[item.index]
-        await updateChildPaths(tree, folderNode, newPath, oldPath, db, targetDB)
-      }
-    } else {
+    if (!dbResult) {
       console.error('Item not found in any database table:', item.index)
+      return
+    }
+
+    const { db, entry, table } = dbResult
+
+    const newPath = calculateNewPath(item, target)
+    const oldPath = entry.fullPath
+
+    const updatedEntry = { ...entry, fullPath: newPath }
+    const targetDB = target.treeId === 'inputTree' ? filesDB : assignmentsDB
+
+    if (db.name !== targetDB.name) {
+      await targetDB.table(table).put(updatedEntry)
+      await db.table(table).where({ uid: entry.uid }).delete()
+    } else {
+      await db.table(table).put(updatedEntry)
+    }
+
+    if (table === 'folders') {
+      const folderNode = tree[item.index]
+      await updateChildPaths(tree, folderNode, newPath, oldPath, db, targetDB)
     }
   }
 

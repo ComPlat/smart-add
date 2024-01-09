@@ -5,51 +5,30 @@ const updatePath = (path: string, newName: string, oldName: string): string => {
   return path.replace(oldName, newName)
 }
 
-const updateChildren = async (
+const collectUpdates = async (
   folderTreeNode: FileNode,
   newName: string,
   item: ExtendedFile | ExtendedFolder,
   tree: Record<string, FileNode>,
+  updates: { files: ExtendedFile[]; folders: ExtendedFolder[] },
 ) => {
-  const updatePromises = []
-
   for (const child of folderTreeNode.children) {
-    updatePromises.push(
-      (async () => {
-        const folderEntry = await filesDB.folders.get({
-          fullPath: child,
-        })
-        const fileEntry = !folderEntry
-          ? await filesDB.files.get({ fullPath: child })
-          : null
+    const folderEntry = await filesDB.folders.get({ fullPath: child })
+    const fileEntry = !folderEntry
+      ? await filesDB.files.get({ fullPath: child })
+      : null
 
-        if (folderEntry) {
-          const newFullPath = updatePath(
-            folderEntry.fullPath,
-            newName,
-            item.name,
-          )
-          await filesDB.folders.put({
-            ...folderEntry,
-            fullPath: newFullPath,
-          })
+    if (folderEntry) {
+      const newFullPath = updatePath(folderEntry.fullPath, newName, item.name)
+      updates.folders.push({ ...folderEntry, fullPath: newFullPath })
 
-          const entryTreeNode = tree[folderEntry.fullPath]
-          updatePromises.push(
-            updateChildren(entryTreeNode, newName, item, tree),
-          )
-        } else if (fileEntry) {
-          const newFullPath = updatePath(fileEntry.fullPath, newName, item.name)
-          await filesDB.files.put({
-            ...fileEntry,
-            fullPath: newFullPath,
-          })
-        }
-      })(),
-    )
+      const entryTreeNode = tree[folderEntry.fullPath]
+      await collectUpdates(entryTreeNode, newName, item, tree, updates)
+    } else if (fileEntry) {
+      const newFullPath = updatePath(fileEntry.fullPath, newName, item.name)
+      updates.files.push({ ...fileEntry, fullPath: newFullPath })
+    }
   }
-
-  await Promise.all(updatePromises)
 }
 
 const renameFolder = async (
@@ -60,7 +39,7 @@ const renameFolder = async (
   const folder = await filesDB.folders.get({ uid: item.uid })
   if (!folder) return
 
-  const updated = {
+  const updatedFolder = {
     ...folder,
     fullPath: folder.fullPath.includes('/')
       ? folder.fullPath.split('/').slice(0, -1).join('/') + '/' + newName
@@ -69,9 +48,15 @@ const renameFolder = async (
   }
 
   const folderTreeNode = tree[folder.fullPath]
+  const updates = { files: [], folders: [updatedFolder] }
 
-  await updateChildren(folderTreeNode, newName, item, tree)
-  await filesDB.folders.put(updated)
+  await collectUpdates(folderTreeNode, newName, item, tree, updates)
+
+  // Perform bulk updates
+  await Promise.all([
+    filesDB.folders.bulkPut(updates.folders),
+    filesDB.files.bulkPut(updates.files),
+  ])
 }
 
 export default renameFolder
