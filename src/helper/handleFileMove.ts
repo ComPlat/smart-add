@@ -28,9 +28,9 @@ const findItemInDatabases = async (itemFullPath: string) => {
     ),
   )
 
-  const results = await Promise.all(searchPromises)
+  const results = (await Promise.all(searchPromises)).filter(Boolean)
 
-  return results.find((result) => result !== null) || null
+  return results.find((result) => result) || null
 }
 
 const updateChildPaths = async (
@@ -41,8 +41,7 @@ const updateChildPaths = async (
   db: AssignmentsDBCreator | FilesDBCreator,
   targetDB: AssignmentsDBCreator | FilesDBCreator,
 ) => {
-  const updatePromises = []
-  for (const childIndex of parentNode.children) {
+  const updatePromises = parentNode.children.flatMap((childIndex) => {
     const childNode = tree[childIndex]
     const childOldFullPath = `${oldPath}/${childNode.data}`
     const childNewFullPath = `${newPath}/${childNode.data}`
@@ -56,27 +55,26 @@ const updateChildPaths = async (
         return targetDB.table(table).put(updateEntry)
       })
 
-    updatePromises.push(updatePromise)
+    const deletePromise =
+      db.name !== targetDB.name
+        ? db.table(table).where({ uid: childNode.uid }).delete()
+        : null
 
-    if (db.name !== targetDB.name) {
-      updatePromises.push(
-        db.table(table).where({ uid: childNode.uid }).delete(),
-      )
-    }
-
-    if (childNode.isFolder) {
-      updatePromises.push(
-        updateChildPaths(
+    const recursiveUpdatePromise = childNode.isFolder
+      ? updateChildPaths(
           tree,
           childNode,
           childNewFullPath,
           childOldFullPath,
           db,
           targetDB,
-        ),
-      )
-    }
-  }
+        )
+      : null
+
+    return [updatePromise, deletePromise, recursiveUpdatePromise].filter(
+      Boolean,
+    )
+  })
 
   await Promise.all(updatePromises)
 }
