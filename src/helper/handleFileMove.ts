@@ -106,7 +106,7 @@ const handleFileMove = async (
 ) => {
   setUploading(true)
 
-  for (const item of items) {
+  items.forEach(async (item) => {
     const dbResult = await findItemInDatabases(String(item.index))
     if (!dbResult) {
       console.error('Item not found in any database table:', item.index)
@@ -132,7 +132,7 @@ const handleFileMove = async (
       const folderNode = tree[item.index]
       await updateChildPaths(tree, folderNode, newPath, oldPath, db, targetDB)
     }
-  }
+  })
 
   setUploading(false)
 }
