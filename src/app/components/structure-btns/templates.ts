@@ -6,7 +6,7 @@ import {
   getUniqueFolderName,
 } from './folderUtils'
 
-const analyses = ['analysis1', 'analysis2']
+const analyses = ['analysis_1', 'analysis_2']
 
 export const createSample = async (
   baseFolderName: string,
