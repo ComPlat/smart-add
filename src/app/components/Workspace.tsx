@@ -98,10 +98,6 @@ const Workspace = () => {
   const handleCanDropAt = (items: TreeItem[], target: DraggingPosition) =>
     canDropAt(items, target, db.tree)
 
-  console.log(focusedItem)
-  console.log(expandedItems)
-  console.log(db.tree)
-
   return (
     <Fragment>
       <Toolbar
