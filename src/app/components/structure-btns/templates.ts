@@ -54,3 +54,18 @@ export const createReaction = async (
 
   return Promise.all(promises)
 }
+
+export const createAnalysis = async (
+  baseFolderName: string,
+  tree: Record<string, FileNode>,
+) => {
+  const uniqueFolderName = getUniqueFolderName(
+    baseFolderName,
+    tree,
+    baseFolderName,
+  )
+
+  const promises = [createFolder(uniqueFolderName, uniqueFolderName)]
+
+  return Promise.all(promises)
+}

@@ -1,11 +1,9 @@
-'use client'
-
 import { assignmentsDB, filesDB } from '@/database/db'
 import { canDropAt } from '@/helper/canDropAt'
 import { handleFileMove } from '@/helper/handleFileMove'
 import { retrieveTree } from '@/helper/retrieveTree'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import {
   DraggingPosition,
   Tree,
@@ -19,7 +17,6 @@ import { renderItem } from './tree-view/renderItem'
 import { UploadDropZone } from './upload-form/UploadDropZone'
 import { ExportFiles } from './workspace/ExportFiles'
 import { ExportFilesText } from './workspace/ExportFilesText'
-import Header from './workspace/Header'
 import { Toolbar } from './workspace/Toolbar'
 import { UploadFilesText } from './workspace/UploadFilesText'
 import { UploadedFiles } from './workspace/UploadedFiles'
@@ -101,14 +98,18 @@ const Workspace = () => {
   const handleCanDropAt = (items: TreeItem[], target: DraggingPosition) =>
     canDropAt(items, target, db.tree)
 
+  console.log(focusedItem)
+  console.log(expandedItems)
+  console.log(db.tree)
+
   return (
-    <main className="flex flex-col overflow-hidden bg-gray-100">
-      <Header />
+    <Fragment>
       <Toolbar
         assignmentDBLength={db.assignedLength}
         inputDBLength={db.inputLength}
         tree={db.tree}
       />
+
       <UncontrolledTreeEnvironment
         canDragAndDrop
         canDropAt={handleCanDropAt}
@@ -166,7 +167,7 @@ const Workspace = () => {
           </ExportFiles>
         </div>
       </UncontrolledTreeEnvironment>
-    </main>
+    </Fragment>
   )
 }
 
