@@ -20,17 +20,17 @@ const findItemInDatabases = async (itemFullPath: string) => {
   const databases = [filesDB, assignmentsDB]
   const tables = ['files', 'folders']
 
-  const searchPromises = databases.flatMap((db) =>
-    tables.map((table) =>
-      findItemInTable(itemFullPath, db, table).then((entry) =>
-        entry ? { db, entry, table } : null,
+  const searchPromises = await Promise.all(
+    databases.flatMap((db) =>
+      tables.map((table) =>
+        findItemInTable(itemFullPath, db, table).then((entry) =>
+          entry ? { db, entry, table } : null,
+        ),
       ),
     ),
-  )
+  ).then((results) => results.filter(Boolean))
 
-  const results = (await Promise.all(searchPromises)).filter(Boolean)
-
-  return results.find((result) => result) || null
+  return searchPromises.find((result) => result) || null
 }
 
 const updateChildPaths = async (
