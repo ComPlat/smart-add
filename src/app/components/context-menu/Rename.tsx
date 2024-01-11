@@ -31,9 +31,10 @@ const Rename: FC<RenameProps> = ({ className, close, item, tree }) => {
 
     const validInput = userInput.trim().length > 0 && !userInput.includes('/')
 
-    const nameAvailable = !tree[parentPath].children.includes(
-      parentPath + '/' + userInput,
-    )
+    const newPath =
+      parentPath === 'inputTreeRoot' ? userInput : parentPath + '/' + userInput
+
+    const nameAvailable = !tree[parentPath].children.includes(newPath)
 
     setNewFullPathAvailable(validInput && nameAvailable)
   }
