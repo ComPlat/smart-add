@@ -6,6 +6,8 @@ import {
   getUniqueFolderName,
 } from './folderUtils'
 
+const analyses = ['analysis1', 'analysis2']
+
 export const createSample = async (
   baseFolderName: string,
   tree: Record<string, FileNode>,
@@ -19,6 +21,7 @@ export const createSample = async (
   const promises = [
     createFolder(uniqueFolderName, uniqueFolderName),
     createSubFolders(uniqueFolderName, ['structure', 'analyses']),
+    createSubFolders(`${uniqueFolderName}/analyses`, analyses),
   ]
 
   return Promise.all(promises)
@@ -43,6 +46,10 @@ export const createReaction = async (
       'structure',
       'analyses',
     ]),
+    createSubFolders(
+      `${uniqueFolderName}/${uniqueSampleName}/analyses`,
+      analyses,
+    ),
   ]
 
   return Promise.all(promises)
