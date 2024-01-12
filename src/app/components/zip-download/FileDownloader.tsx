@@ -42,21 +42,25 @@ const FileDownloader = () => {
       const addFilesToZip = async (
         tree: FileTree,
         path: string,
-      ): Promise<JSZip[]> => {
-        const promises: Promise<JSZip[]>[] = Object.keys(tree).map(
-          async (key) => {
-            const value = tree[key]
-            const newPath = path ? `${path}/${key}` : key
+        parentZip: JSZip = zip,
+      ): Promise<JSZip> => {
+        for (const key in tree) {
+          const value = tree[key]
+          const newPath = path ? `${path}/${key}` : key
 
-            return value instanceof Blob
-              ? [zip.file(newPath, value)]
-              : await addFilesToZip(value, newPath)
-          },
-        )
+          if (key.endsWith('.zip') && typeof value === 'object') {
+            const nestedZip = new JSZip()
+            await addFilesToZip(value, '', nestedZip)
+            const nestedBlob = await nestedZip.generateAsync({ type: 'blob' })
+            parentZip.file(newPath, nestedBlob)
+          } else if (value instanceof Blob) {
+            parentZip.file(newPath, value)
+          } else {
+            await addFilesToZip(value, newPath, parentZip)
+          }
+        }
 
-        const results = await Promise.all(promises)
-
-        return results.flat()
+        return parentZip
       }
 
       await addFilesToZip(fileTree, '')
