@@ -7,8 +7,6 @@ const canDropAt = (
   target: DraggingPosition,
   treeData: Record<string, FileNode>,
 ) => {
-  if (target.treeId === 'inputTree') return false
-
   const isDroppable = (parent: FileNode) =>
     !parent.children.some(
       (child) => treeData[child].data === treeData[items[0].index].data,

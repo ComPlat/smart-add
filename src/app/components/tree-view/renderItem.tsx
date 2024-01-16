@@ -74,6 +74,12 @@ const renderItem = ({
           className={`truncate ${
             shouldHideTitle ? 'invisible' : ''
           } ${titleClass}`}
+        />
+        <span
+          className={`truncate ${
+            shouldHideTitle ? 'invisible' : ''
+          } ${titleClass}`}
+          data-mykey={item.index}
         >
           {shouldHideTitle ? (
             <span className="invisible">{'\u200B'}</span>

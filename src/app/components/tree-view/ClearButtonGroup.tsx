@@ -6,10 +6,7 @@ const inputDbClearHandler = async () =>
   Promise.all([filesDB.files.clear(), filesDB.folders.clear()])
 
 const assignmentsDBClearHandler = async () =>
-  Promise.all([
-    assignmentsDB.assignedFiles.clear(),
-    assignmentsDB.assignedFolders.clear(),
-  ])
+  Promise.all([assignmentsDB.files.clear(), assignmentsDB.folders.clear()])
 
 const ClearButtonGroup = ({
   assignmentDBLength,
