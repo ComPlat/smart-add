@@ -1,12 +1,11 @@
 import { ExtendedFile, ExtendedFolder } from '@/database/db'
 import { FileNode } from '@/helper/types'
 import { useOnClickOutside } from '@/hooks/useOnClickOutside'
-import React, { FC, useRef } from 'react'
+import { FC, useRef } from 'react'
 
 import AddFolder from '../context-menu/AddFolder'
 import Delete from './Delete'
 import Rename from './Rename'
-import classes from './popup.module.css'
 
 interface ContextMenu {
   closeContextMenu: () => void
@@ -44,7 +43,9 @@ const ContextMenu: FC<ContextMenu> = ({
 
   return (
     <div
-      className={`${classes['animate-fade-in']} absolute z-30 rounded-lg border border-gray-300 bg-white shadow-lg`}
+      className={
+        'absolute z-30 animate-fade-in rounded-lg border border-gray-300 bg-white shadow-lg'
+      }
       ref={contextMenuRef}
       style={{ left: `${x}px`, top: `${y}px` }}
     >
