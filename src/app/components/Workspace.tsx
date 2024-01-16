@@ -1,7 +1,13 @@
-import { assignmentsDB, filesDB } from '@/database/db'
+import {
+  ExtendedFile,
+  ExtendedFolder,
+  assignmentsDB,
+  filesDB,
+} from '@/database/db'
 import { canDropAt } from '@/helper/canDropAt'
 import { handleFileMove } from '@/helper/handleFileMove'
 import { retrieveTree } from '@/helper/retrieveTree'
+import { FileNode } from '@/helper/types'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Fragment, useMemo, useState } from 'react'
 import {
@@ -20,6 +26,18 @@ import { ExportFilesText } from './workspace/ExportFilesText'
 import { Toolbar } from './workspace/Toolbar'
 import { UploadFilesText } from './workspace/UploadFilesText'
 import { UploadedFiles } from './workspace/UploadedFiles'
+
+type Database = {
+  assignedFiles: ExtendedFile[]
+  assignedFolders: ExtendedFolder[]
+  assignedLength: number
+  files: ExtendedFile[]
+  folders: ExtendedFolder[]
+  inputLength: number
+  key: number
+  tree: Record<string, FileNode>
+  treeDataProvider: CustomTreeDataProvider<string>
+}
 
 const Workspace = () => {
   const db = useLiveQuery(async () => {
@@ -44,7 +62,7 @@ const Workspace = () => {
     const assignedLength = assignedFiles.length + assignedFolders.length
     const inputLength = files.length + folders.length
 
-    return {
+    const database: Database = {
       assignedFiles,
       assignedFolders,
       assignedLength,
@@ -55,6 +73,8 @@ const Workspace = () => {
       tree,
       treeDataProvider,
     }
+
+    return database
   })
 
   const [uploading, setUploading] = useState(false)

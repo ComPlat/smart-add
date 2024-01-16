@@ -65,7 +65,5 @@ export const createAnalysis = async (
     baseFolderName,
   )
 
-  const promises = [createFolder(uniqueFolderName, uniqueFolderName)]
-
-  return Promise.all(promises)
+  return await createFolder(uniqueFolderName, uniqueFolderName)
 }
