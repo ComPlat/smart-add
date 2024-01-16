@@ -44,7 +44,7 @@ const FileDownloader = () => {
         path: string,
         parentZip: JSZip = zip,
       ): Promise<JSZip> => {
-        for (const key in tree) {
+        Object.keys(tree).forEach(async (key) => {
           const value = tree[key]
           const newPath = path ? `${path}/${key}` : key
 
@@ -58,7 +58,7 @@ const FileDownloader = () => {
           } else {
             await addFilesToZip(value, newPath, parentZip)
           }
-        }
+        })
 
         return parentZip
       }
