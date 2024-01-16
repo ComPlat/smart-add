@@ -105,14 +105,12 @@ const handleFileMove = async (
   setUploading: Dispatch<SetStateAction<boolean>>,
 ) => {
   setUploading(true)
-  const startTime = performance.now()
 
-  // Map each item to a Promise representing its processing
-  const processingPromises = items.map(async (item) => {
+  items.forEach(async (item) => {
     const dbResult = await findItemInDatabases(String(item.index))
     if (!dbResult) {
       console.error('Item not found in any database table:', item.index)
-      return // This will resolve the current iteration's promise
+      return
     }
 
     const { db, entry, table } = dbResult
@@ -136,13 +134,6 @@ const handleFileMove = async (
     }
   })
 
-  // Wait for all processing promises to complete
-  await Promise.all(processingPromises)
-
-  const endTime = performance.now()
-  const timeTaken = ((endTime - startTime) / 1000).toFixed(2) // Convert to seconds and round to 2 decimal places
-
-  console.log(`handleFileMove took ${timeTaken} seconds`)
   setUploading(false)
 }
 
