@@ -5,7 +5,6 @@ import {
   filesDB,
 } from '@/database/db'
 import { FileNode } from '@/helper/types'
-import { Dispatch, SetStateAction } from 'react'
 import { DraggingPosition, TreeItem, TreeItemIndex } from 'react-complex-tree'
 
 const findItemInTable = async (
@@ -102,7 +101,7 @@ const handleFileMove = async (
   items: TreeItem[],
   target: DraggingPosition,
   tree: Record<string, FileNode>,
-  setUploading: Dispatch<SetStateAction<boolean>>,
+  setUploading: (val: boolean) => boolean,
 ) => {
   setUploading(true)
 

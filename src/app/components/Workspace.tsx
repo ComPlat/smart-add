@@ -9,6 +9,7 @@ import {
 import { canDropAt } from '@/helper/canDropAt'
 import { handleFileMove } from '@/helper/handleFileMove'
 import { retrieveTree } from '@/helper/retrieveTree'
+import { setUploading, uploading } from '@/stores/uploadingStore'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useMemo, useState } from 'react'
 import {
@@ -72,7 +73,6 @@ const Workspace = () => {
     }
   })
 
-  const [uploading, setUploading] = useState(false)
   const [focusedItem, setFocusedItem] = useState<
     TreeItemIndex & (TreeItemIndex | TreeItemIndex[])
   >()
@@ -85,7 +85,7 @@ const Workspace = () => {
 
   const memoizedKey = useMemo(
     () => (db ? (uploading ? 0 : db.key) : null),
-    [uploading, db],
+    [db],
   )
 
   if (!db) return <div>Loading...</div>
