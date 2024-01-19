@@ -139,11 +139,7 @@ const Workspace = () => {
   return (
     <main className="flex flex-col overflow-hidden bg-gray-100">
       <Header />
-      <Toolbar
-        assignmentDBLength={0}
-        inputDBLength={db.inputLength}
-        tree={tree}
-      />
+      <Toolbar inputDBLength={db.inputLength} tree={tree} />
       <ControlledTreeEnvironment
         canDrag={(items) =>
           items.every(
