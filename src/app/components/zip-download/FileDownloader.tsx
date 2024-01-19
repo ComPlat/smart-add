@@ -1,6 +1,6 @@
 'use client'
 
-import { ExtendedFile, assignmentsDB } from '@/database/db'
+import { ExtendedFile, filesDB } from '@/database/db'
 import { message } from 'antd'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { saveAs } from 'file-saver'
@@ -13,7 +13,10 @@ interface FileTree {
 }
 
 const FileDownloader = () => {
-  const assignedFiles = useLiveQuery(() => assignmentsDB.files.toArray()) || []
+  const files = useLiveQuery(() => filesDB.files.toArray()) || []
+  const assignedFiles = files.filter(
+    (file) => file.treeId === 'assignmentTreeRoot',
+  )
 
   const constructTree = (files: ExtendedFile[]): FileTree =>
     files.reduce((fileTree, file) => {

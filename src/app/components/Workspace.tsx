@@ -1,11 +1,6 @@
 'use client'
 
-import {
-  ExtendedFile,
-  ExtendedFolder,
-  assignmentsDB,
-  filesDB,
-} from '@/database/db'
+import { ExtendedFile, ExtendedFolder, filesDB } from '@/database/db'
 import { canDropAt } from '@/helper/canDropAt'
 import { handleFileMove } from '@/helper/handleFileMove'
 import { retrieveTree } from '@/helper/retrieveTree'
@@ -42,26 +37,18 @@ const Workspace = () => {
   const db = useLiveQuery(async () => {
     const files = await filesDB.files.toArray()
     const folders = await filesDB.folders.toArray()
-    const assignedFiles = await assignmentsDB.files.toArray()
-    const assignedFolders = await assignmentsDB.folders.toArray()
-    const retrievedTree = retrieveTree(
+    const retrievedInputTree = retrieveTree(files, folders, 'inputTreeRoot')
+    const retrievedAssignmentTree = retrieveTree(
       files,
       folders,
-      'inputTreeRoot',
-      assignedFiles,
-      assignedFolders,
       'assignmentTreeRoot',
     )
-    setTree(retrievedTree)
+    setTree({ ...retrievedInputTree, ...retrievedAssignmentTree })
     const key = Date.now()
 
-    const assignedLength = assignedFiles.length + assignedFolders.length
     const inputLength = files.length + folders.length
 
     return {
-      assignedFiles,
-      assignedFolders,
-      assignedLength,
       files,
       folders,
       inputLength,
@@ -153,7 +140,7 @@ const Workspace = () => {
     <main className="flex flex-col overflow-hidden bg-gray-100">
       <Header />
       <Toolbar
-        assignmentDBLength={db.assignedLength}
+        assignmentDBLength={0}
         inputDBLength={db.inputLength}
         tree={tree}
       />
@@ -203,7 +190,7 @@ const Workspace = () => {
           <p className="min-h-screen w-2 bg-gray-100" />
 
           <ExportFiles>
-            <ExportFilesText showText={db.assignedLength === 0} />
+            <ExportFilesText showText={false} />
             <Tree
               renderItemsContainer={({ children, containerProps }) => (
                 <ul {...containerProps}>{children}</ul>

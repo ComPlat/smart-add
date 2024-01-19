@@ -1,30 +1,22 @@
-import {
-  AssignmentsDBCreator,
-  FilesDBCreator,
-  assignmentsDB,
-  filesDB,
-} from '@/database/db'
+import { FilesDBCreator, filesDB } from '@/database/db'
 import { FileNode } from '@/helper/types'
 import { DraggingPosition, TreeItem, TreeItemIndex } from 'react-complex-tree'
 
 const findItemInTable = async (
   itemFullPath: TreeItemIndex,
-  db: AssignmentsDBCreator | FilesDBCreator,
+  db: FilesDBCreator,
   tableName: string,
 ) => {
   return db.table(tableName).get({ fullPath: itemFullPath })
 }
 
-const findItemInDatabases = async (itemFullPath: string) => {
-  const databases = [filesDB, assignmentsDB]
+const findItemInDatabase = async (itemFullPath: string) => {
   const tables = ['files', 'folders']
 
   const searchPromises = await Promise.all(
-    databases.flatMap((db) =>
-      tables.map((table) =>
-        findItemInTable(itemFullPath, db, table).then((entry) =>
-          entry ? { db, entry, table } : null,
-        ),
+    tables.map((table) =>
+      findItemInTable(itemFullPath, filesDB, table).then((entry) =>
+        entry ? { db: filesDB, entry, table } : null,
       ),
     ),
   ).then((results) => results.filter(Boolean))
@@ -32,50 +24,38 @@ const findItemInDatabases = async (itemFullPath: string) => {
   return searchPromises.find((result) => result) || null
 }
 
-const updateChildPaths = async (
+const updateChildPaths = (
   tree: Record<string, FileNode>,
   parentNode: FileNode,
   newPath: string,
-  oldPath: string,
-  db: AssignmentsDBCreator | FilesDBCreator,
-  targetDB: AssignmentsDBCreator | FilesDBCreator,
+  newTreeId: string,
+  updatesBatch: {
+    fullPath: string
+    isFolder: boolean
+    treeId: string
+    uid: string
+  }[],
 ) => {
-  const updatePromises = parentNode.children.flatMap((childIndex) => {
+  parentNode.children.forEach((childIndex) => {
     const childNode = tree[childIndex]
-    const childOldFullPath = `${oldPath}/${childNode.data}`
     const childNewFullPath = `${newPath}/${childNode.data}`
-    const table = childNode.isFolder ? 'folders' : 'files'
+    updatesBatch.push({
+      fullPath: childNewFullPath,
+      isFolder: childNode.isFolder,
+      treeId: newTreeId,
+      uid: String(childNode.uid),
+    })
 
-    const updatePromise = db
-      .table(table)
-      .get({ uid: childNode.uid })
-      .then((oldEntry: FileNode) => {
-        const updateEntry = { ...oldEntry, fullPath: childNewFullPath }
-        return targetDB.table(table).put(updateEntry)
-      })
-
-    const deletePromise =
-      db.name !== targetDB.name
-        ? db.table(table).where({ uid: childNode.uid }).delete()
-        : null
-
-    const recursiveUpdatePromise = childNode.isFolder
-      ? updateChildPaths(
-          tree,
-          childNode,
-          childNewFullPath,
-          childOldFullPath,
-          db,
-          targetDB,
-        )
-      : null
-
-    return [updatePromise, deletePromise, recursiveUpdatePromise].filter(
-      Boolean,
-    )
+    if (childNode.isFolder) {
+      updateChildPaths(
+        tree,
+        childNode,
+        childNewFullPath,
+        newTreeId,
+        updatesBatch,
+      )
+    }
   })
-
-  await Promise.all(updatePromises)
 }
 
 const calculateNewPath = (item: TreeItem, target: DraggingPosition) => {
@@ -102,33 +82,54 @@ const handleFileMove = async (
   target: DraggingPosition,
   tree: Record<string, FileNode>,
 ) => {
-  items.forEach(async (item) => {
-    const dbResult = await findItemInDatabases(String(item.index))
+  const updatesBatch: {
+    fullPath: string
+    isFolder: boolean
+    treeId: string
+    uid: string
+  }[] = []
+
+  for (const item of items) {
+    const dbResult = await findItemInDatabase(String(item.index))
     if (!dbResult) {
-      console.error('Item not found in any database table:', item.index)
-      return
+      console.error('Item not found in database:', item.index)
+      continue
     }
 
-    const { db, entry, table } = dbResult
+    const { entry, table } = dbResult
 
     const newPath = calculateNewPath(item, target)
-    const oldPath = entry.fullPath
+    const newTreeId =
+      target.treeId === 'inputTree' ? 'inputTreeRoot' : 'assignmentTreeRoot'
 
-    const updatedEntry = { ...entry, fullPath: newPath }
-    const targetDB = target.treeId === 'inputTree' ? filesDB : assignmentsDB
-
-    if (db.name !== targetDB.name) {
-      await targetDB.table(table).put(updatedEntry)
-      await db.table(table).where({ uid: entry.uid }).delete()
-    } else {
-      await db.table(table).put(updatedEntry)
-    }
+    updatesBatch.push({
+      fullPath: newPath,
+      isFolder: table === 'folders',
+      treeId: newTreeId,
+      uid: entry.uid,
+    })
 
     if (table === 'folders') {
       const folderNode = tree[item.index]
-      await updateChildPaths(tree, folderNode, newPath, oldPath, db, targetDB)
+      updateChildPaths(tree, folderNode, newPath, newTreeId, updatesBatch)
     }
-  })
+  }
+
+  if (updatesBatch.length > 0) {
+    await filesDB.transaction(
+      'rw',
+      filesDB.files,
+      filesDB.folders,
+      async () => {
+        for (const update of updatesBatch) {
+          const table = update.isFolder ? filesDB.folders : filesDB.files
+          await table
+            .where({ uid: update.uid })
+            .modify({ fullPath: update.fullPath, treeId: update.treeId })
+        }
+      },
+    )
+  }
 }
 
 export { handleFileMove }
