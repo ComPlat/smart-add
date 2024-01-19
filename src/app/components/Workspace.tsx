@@ -73,6 +73,7 @@ const Workspace = () => {
     TreeItemIndex & (TreeItemIndex | TreeItemIndex[])
   >()
   const [expandedItems, setExpandedItems] = useState<TreeItemIndex[]>([])
+  const [selectedItems, setSelectedItems] = useState<TreeItemIndex[]>([])
 
   const [contextMenu, setContextMenu] = useState(initialContextMenu)
   const [contextTarget, setContextTarget] = useState<
@@ -85,10 +86,12 @@ const Workspace = () => {
     ['assignmentTree']: {
       expandedItems,
       focusedItem,
+      selectedItems,
     },
     ['inputTree']: {
       expandedItems,
       focusedItem,
+      selectedItems,
     },
   }
 
@@ -103,6 +106,8 @@ const Workspace = () => {
     setExpandedItems([...expandedItems, item.index])
 
   const handleOnFocusItem = (item: TreeItem) => setFocusedItem(item.index)
+
+  const handleOnSelectItem = (items: TreeItemIndex[]) => setSelectedItems(items)
 
   const handleOnDrop = (items: TreeItem[], target: DraggingPosition) =>
     handleFileMove(items, target, tree)
@@ -169,6 +174,7 @@ const Workspace = () => {
         onDrop={handleOnDrop}
         onExpandItem={handleOnExpandItem}
         onFocusItem={handleOnFocusItem}
+        onSelectItems={handleOnSelectItem}
         viewState={viewState}
       >
         <div className="flex min-h-full w-full flex-row justify-between overflow-hidden">
