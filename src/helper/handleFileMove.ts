@@ -101,10 +101,7 @@ const handleFileMove = async (
   items: TreeItem[],
   target: DraggingPosition,
   tree: Record<string, FileNode>,
-  setUploading: (val: boolean) => boolean,
 ) => {
-  setUploading(true)
-
   items.forEach(async (item) => {
     const dbResult = await findItemInDatabases(String(item.index))
     if (!dbResult) {
@@ -132,8 +129,6 @@ const handleFileMove = async (
       await updateChildPaths(tree, folderNode, newPath, oldPath, db, targetDB)
     }
   })
-
-  setUploading(false)
 }
 
 export { handleFileMove }

@@ -9,19 +9,18 @@ import {
 import { canDropAt } from '@/helper/canDropAt'
 import { handleFileMove } from '@/helper/handleFileMove'
 import { retrieveTree } from '@/helper/retrieveTree'
-import { setUploading, uploading } from '@/stores/uploadingStore'
+import { FileNode } from '@/helper/types'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import {
+  ControlledTreeEnvironment,
   DraggingPosition,
   Tree,
   TreeItem,
   TreeItemIndex,
-  UncontrolledTreeEnvironment,
 } from 'react-complex-tree'
 
 import ContextMenu from './context-menu/ContextMenu'
-import { CustomTreeDataProvider } from './custom/CustomTreeDataProvider'
 import { renderItem } from './tree-view/renderItem'
 import { UploadDropZone } from './upload-form/UploadDropZone'
 import { ExportFiles } from './workspace/ExportFiles'
@@ -38,12 +37,14 @@ const initialContextMenu = {
 }
 
 const Workspace = () => {
+  const [tree, setTree] = useState({} as Record<string, FileNode>)
+
   const db = useLiveQuery(async () => {
     const files = await filesDB.files.toArray()
     const folders = await filesDB.folders.toArray()
     const assignedFiles = await assignmentsDB.files.toArray()
     const assignedFolders = await assignmentsDB.folders.toArray()
-    const tree = retrieveTree(
+    const retrievedTree = retrieveTree(
       files,
       folders,
       'inputTreeRoot',
@@ -51,10 +52,7 @@ const Workspace = () => {
       assignedFolders,
       'assignmentTreeRoot',
     )
-    const treeDataProvider = new CustomTreeDataProvider(tree, (item, data) => ({
-      ...item,
-      data,
-    }))
+    setTree(retrievedTree)
     const key = Date.now()
 
     const assignedLength = assignedFiles.length + assignedFolders.length
@@ -68,8 +66,6 @@ const Workspace = () => {
       folders,
       inputLength,
       key,
-      tree,
-      treeDataProvider,
     }
   })
 
@@ -82,11 +78,6 @@ const Workspace = () => {
   const [contextTarget, setContextTarget] = useState<
     ExtendedFile | ExtendedFolder
   >()
-
-  const memoizedKey = useMemo(
-    () => (db ? (uploading ? 0 : db.key) : null),
-    [db],
-  )
 
   if (!db) return <div>Loading...</div>
 
@@ -114,10 +105,10 @@ const Workspace = () => {
   const handleOnFocusItem = (item: TreeItem) => setFocusedItem(item.index)
 
   const handleOnDrop = (items: TreeItem[], target: DraggingPosition) =>
-    handleFileMove(items, target, db.tree, setUploading)
+    handleFileMove(items, target, tree)
 
   const handleCanDropAt = (items: TreeItem[], target: DraggingPosition) =>
-    canDropAt(items, target, db.tree)
+    canDropAt(items, target, tree)
 
   const handleDefaultContextMenu = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -159,9 +150,9 @@ const Workspace = () => {
       <Toolbar
         assignmentDBLength={db.assignedLength}
         inputDBLength={db.inputLength}
-        tree={db.tree}
+        tree={tree}
       />
-      <UncontrolledTreeEnvironment
+      <ControlledTreeEnvironment
         canDrag={(items) =>
           items.every(
             (item) => item.data !== 'structure' && item.data !== 'analyses',
@@ -172,9 +163,8 @@ const Workspace = () => {
         canDropOnFolder
         canReorderItems
         canSearch={false}
-        dataProvider={db.treeDataProvider}
         getItemTitle={(item: TreeItem) => item.data}
-        key={memoizedKey}
+        items={tree}
         onCollapseItem={handleOnCollapseItem}
         onDrop={handleOnDrop}
         onExpandItem={handleOnExpandItem}
@@ -224,12 +214,12 @@ const Workspace = () => {
             />
           </ExportFiles>
         </div>
-      </UncontrolledTreeEnvironment>
+      </ControlledTreeEnvironment>
       {contextMenu.show && (
         <ContextMenu
           closeContextMenu={contextMenuClose}
           targetItem={contextTarget}
-          tree={db.tree}
+          tree={tree}
           x={contextMenu.x}
           y={contextMenu.y}
         />

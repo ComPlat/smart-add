@@ -3,7 +3,6 @@
 import { filesDB } from '@/database/db'
 import { extractFilesFromZip } from '@/helper/extractFilesFromZip'
 import { uploadExtractedFiles } from '@/helper/uploadExtractedFiles'
-import { setUploading } from '@/stores/uploadingStore'
 import { Progress, Upload, UploadProps, message } from 'antd'
 import { RcFile, UploadFile } from 'antd/es/upload'
 import { Dispatch, SetStateAction, useState } from 'react'
@@ -66,7 +65,6 @@ const handleCustomRequest = async ({
   if (zipTypes.includes(file.type)) {
     try {
       setProgress(0)
-      setUploading(true)
       const extractedFiles = await extractFilesFromZip(file as RcFile)
 
       const folderPaths = extractedFiles.map((file) =>
@@ -113,7 +111,6 @@ const handleCustomRequest = async ({
         parentPath,
         setProgress,
       )
-      setUploading(false)
       setProgress(100)
       onSuccess?.(file)
     } catch (err) {
@@ -121,7 +118,6 @@ const handleCustomRequest = async ({
     }
   } else {
     setProgress(50)
-    setUploading(true)
 
     const promises: Promise<Promise<number | void>[]>[] =
       uploadFileList.flatMap(async (fileObj) => {
@@ -169,7 +165,6 @@ const handleCustomRequest = async ({
         uid: v4(),
       })
       .then(async () => {
-        setUploading(false)
         setProgress(100)
         onSuccess?.(file)
         return true
