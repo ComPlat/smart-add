@@ -5,6 +5,7 @@ import { canDropAt } from '@/helper/canDropAt'
 import { handleFileMove } from '@/helper/handleFileMove'
 import { retrieveTree } from '@/helper/retrieveTree'
 import { FileNode } from '@/helper/types'
+import { getTotalLength } from '@/helper/utils'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
 import {
@@ -31,24 +32,31 @@ const initialContextMenu = {
   y: 0,
 }
 
+const [inputTreeRoot, assignmentTreeRoot] = [
+  'inputTreeRoot',
+  'assignmentTreeRoot',
+]
+
 const Workspace = () => {
   const [tree, setTree] = useState({} as Record<string, FileNode>)
 
   const db = useLiveQuery(async () => {
     const files = await filesDB.files.toArray()
     const folders = await filesDB.folders.toArray()
-    const retrievedInputTree = retrieveTree(files, folders, 'inputTreeRoot')
+    const retrievedInputTree = retrieveTree(files, folders, inputTreeRoot)
     const retrievedAssignmentTree = retrieveTree(
       files,
       folders,
-      'assignmentTreeRoot',
+      assignmentTreeRoot,
     )
     setTree({ ...retrievedInputTree, ...retrievedAssignmentTree })
     const key = Date.now()
 
-    const inputLength = files.length + folders.length
+    const inputLength = getTotalLength(files, folders, inputTreeRoot)
+    const assignedLength = getTotalLength(files, folders, assignmentTreeRoot)
 
     return {
+      assignedLength,
       files,
       folders,
       inputLength,
@@ -176,7 +184,7 @@ const Workspace = () => {
                   </div>
                 )}
                 renderItem={renderItem}
-                rootItem="inputTreeRoot"
+                rootItem={inputTreeRoot}
                 treeId="inputTree"
                 treeLabel="Input Tree"
               />
@@ -186,7 +194,7 @@ const Workspace = () => {
           <p className="min-h-screen w-2 bg-gray-100" />
 
           <ExportFiles>
-            <ExportFilesText showText={false} />
+            <ExportFilesText showText={db.assignedLength === 0} />
             <Tree
               renderItemsContainer={({ children, containerProps }) => (
                 <ul {...containerProps}>{children}</ul>
@@ -197,7 +205,7 @@ const Workspace = () => {
                 </div>
               )}
               renderItem={renderItem}
-              rootItem="assignmentTreeRoot"
+              rootItem={assignmentTreeRoot}
               treeId="assignmentTree"
               treeLabel="Assignment Tree"
             />
