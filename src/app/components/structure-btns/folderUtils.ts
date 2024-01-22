@@ -1,4 +1,4 @@
-import { ExtendedFolder, assignmentsDB, filesDB } from '@/database/db'
+import { filesDB } from '@/database/db'
 import { FileNode } from '@/helper/types'
 import { v4 } from 'uuid'
 
@@ -39,19 +39,11 @@ export const createFolder = async (
     isFolder: true,
     name: name,
     parentUid: v4(),
+    treeId: assignmentTree ? 'assignmentTreeRoot' : 'inputTreeRoot',
     uid: v4(),
   }
 
   await filesDB.folders.put(folder)
-
-  if (assignmentTree) {
-    // HINT: This is necessary because directly uploading new folders to the assignmentsDB
-    //       causes issues when then trying to move folders from input tree to assignments
-    //       tree
-    const folder_tmp = await filesDB.folders.get({ uid: folder.uid })
-    await assignmentsDB.folders.put(folder_tmp as ExtendedFolder)
-    await filesDB.folders.where({ uid: folder.uid }).delete()
-  }
 }
 
 export const createSubFolders = async (basePath: string, names: string[]) =>

@@ -22,6 +22,8 @@ type UploadDropZoneProps = {
 
 const uploadedFolders: string[] = []
 
+const targetTreeRoot = 'inputTreeRoot'
+
 const handleCustomRequest = async ({
   file,
   filePaths,
@@ -90,6 +92,7 @@ const handleCustomRequest = async ({
               isFolder: true,
               name: folder,
               parentUid: '',
+              treeId: targetTreeRoot,
               uid: v4(),
             }) as unknown as Promise<void>
 
@@ -144,6 +147,7 @@ const handleCustomRequest = async ({
             isFolder: true,
             name: folderName,
             parentUid: '',
+            treeId: targetTreeRoot,
             uid: v4(),
           })
         })
@@ -162,6 +166,7 @@ const handleCustomRequest = async ({
         name: file.name,
         parentUid: file.uid.split('_')[0],
         path: parentPath,
+        treeId: targetTreeRoot,
         uid: v4(),
       })
       .then(async () => {
