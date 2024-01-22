@@ -89,47 +89,46 @@ const handleFileMove = async (
     uid: string
   }[] = []
 
-  for (const item of items) {
-    const dbResult = await findItemInDatabase(String(item.index))
-    if (!dbResult) {
-      console.error('Item not found in database:', item.index)
-      continue
-    }
+  await Promise.all(
+    items.map(async (item) => {
+      const dbResult = await findItemInDatabase(String(item.index))
+      if (!dbResult) {
+        console.error('Item not found in database:', item.index)
+        return
+      }
 
-    const { entry, table } = dbResult
+      const { entry, table } = dbResult
 
-    const newPath = calculateNewPath(item, target)
-    const newTreeId =
-      target.treeId === 'inputTree' ? 'inputTreeRoot' : 'assignmentTreeRoot'
+      const newPath = calculateNewPath(item, target)
+      const newTreeId =
+        target.treeId === 'inputTree' ? 'inputTreeRoot' : 'assignmentTreeRoot'
 
-    updatesBatch.push({
-      fullPath: newPath,
-      isFolder: table === 'folders',
-      treeId: newTreeId,
-      uid: entry.uid,
-    })
+      updatesBatch.push({
+        fullPath: newPath,
+        isFolder: table === 'folders',
+        treeId: newTreeId,
+        uid: entry.uid,
+      })
 
-    if (table === 'folders') {
-      const folderNode = tree[item.index]
-      updateChildPaths(tree, folderNode, newPath, newTreeId, updatesBatch)
-    }
-  }
+      if (table === 'folders') {
+        const folderNode = tree[item.index]
+        updateChildPaths(tree, folderNode, newPath, newTreeId, updatesBatch)
+      }
+    }),
+  )
 
-  if (updatesBatch.length > 0) {
-    await filesDB.transaction(
-      'rw',
-      filesDB.files,
-      filesDB.folders,
-      async () => {
-        for (const update of updatesBatch) {
-          const table = update.isFolder ? filesDB.folders : filesDB.files
-          await table
-            .where({ uid: update.uid })
-            .modify({ fullPath: update.fullPath, treeId: update.treeId })
-        }
-      },
+  if (updatesBatch.length === 0) return
+
+  await filesDB.transaction('rw', filesDB.files, filesDB.folders, async () => {
+    await Promise.all(
+      updatesBatch.map(async (update) => {
+        const table = update.isFolder ? filesDB.folders : filesDB.files
+        return table
+          .where({ uid: update.uid })
+          .modify({ fullPath: update.fullPath, treeId: update.treeId })
+      }),
     )
-  }
+  })
 }
 
 export { handleFileMove }
