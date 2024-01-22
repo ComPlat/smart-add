@@ -35,8 +35,13 @@ const updateChildPaths = (
     treeId: string
     uid: string
   }[],
-) => {
-  parentNode.children.forEach((childIndex) => {
+): {
+  fullPath: string
+  isFolder: boolean
+  treeId: string
+  uid: string
+}[] => {
+  parentNode.children.map((childIndex) => {
     const childNode = tree[childIndex]
     const childNewFullPath = `${newPath}/${childNode.data}`
     updatesBatch.push({
@@ -56,6 +61,8 @@ const updateChildPaths = (
       )
     }
   })
+
+  return updatesBatch
 }
 
 const calculateNewPath = (item: TreeItem, target: DraggingPosition) => {
@@ -89,46 +96,49 @@ const handleFileMove = async (
     uid: string
   }[] = []
 
-  await Promise.all(
-    items.map(async (item) => {
-      const dbResult = await findItemInDatabase(String(item.index))
-      if (!dbResult) {
-        console.error('Item not found in database:', item.index)
-        return
-      }
+  const itemsPromises = items.map(async (item) => {
+    const dbResult = await findItemInDatabase(String(item.index))
+    if (!dbResult) {
+      return console.error('Item not found in database:', item.index)
+    }
 
-      const { entry, table } = dbResult
+    const { entry, table } = dbResult
 
-      const newPath = calculateNewPath(item, target)
-      const newTreeId =
-        target.treeId === 'inputTree' ? 'inputTreeRoot' : 'assignmentTreeRoot'
+    const newPath = calculateNewPath(item, target)
+    const newTreeId =
+      target.treeId === 'inputTree' ? 'inputTreeRoot' : 'assignmentTreeRoot'
 
-      updatesBatch.push({
-        fullPath: newPath,
-        isFolder: table === 'folders',
-        treeId: newTreeId,
-        uid: entry.uid,
-      })
+    updatesBatch.push({
+      fullPath: newPath,
+      isFolder: table === 'folders',
+      treeId: newTreeId,
+      uid: entry.uid,
+    })
 
-      if (table === 'folders') {
-        const folderNode = tree[item.index]
-        updateChildPaths(tree, folderNode, newPath, newTreeId, updatesBatch)
-      }
-    }),
-  )
+    if (table === 'folders') {
+      const folderNode = tree[item.index]
+      updateChildPaths(tree, folderNode, newPath, newTreeId, updatesBatch)
+    }
+  })
+
+  await Promise.all(itemsPromises)
 
   if (updatesBatch.length === 0) return
 
-  await filesDB.transaction('rw', filesDB.files, filesDB.folders, async () => {
-    await Promise.all(
-      updatesBatch.map(async (update) => {
-        const table = update.isFolder ? filesDB.folders : filesDB.files
-        return table
-          .where({ uid: update.uid })
-          .modify({ fullPath: update.fullPath, treeId: update.treeId })
-      }),
-    )
-  })
+  await filesDB.transaction(
+    'rw',
+    filesDB.files,
+    filesDB.folders,
+    async () =>
+      await Promise.all(
+        updatesBatch.map(async (update) => {
+          const table = update.isFolder ? filesDB.folders : filesDB.files
+          return table
+            .where({ uid: update.uid })
+            .modify({ fullPath: update.fullPath, treeId: update.treeId })
+        }),
+      ),
+  )
 }
 
 export { handleFileMove }
