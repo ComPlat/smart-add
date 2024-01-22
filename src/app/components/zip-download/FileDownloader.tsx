@@ -13,10 +13,10 @@ interface FileTree {
 }
 
 const FileDownloader = () => {
-  const files = useLiveQuery(() => filesDB.files.toArray()) || []
-  const assignedFiles = files.filter(
-    (file) => file.treeId === 'assignmentTreeRoot',
-  )
+  const assignedFiles =
+    useLiveQuery(() =>
+      filesDB.files.where('treeId').equals('assignmentTreeRoot').toArray(),
+    ) || []
 
   const constructTree = (files: ExtendedFile[]): FileTree =>
     files.reduce((fileTree, file) => {
