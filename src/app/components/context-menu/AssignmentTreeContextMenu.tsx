@@ -42,6 +42,8 @@ const AssignmentTreeContextMenu: FC<AssignmentTreeContextMenu> = ({
 
     // return <p>Hello</p>
 
+    console.log(targetItem)
+
     if (targetItem) {
       return (
         <>

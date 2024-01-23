@@ -26,6 +26,8 @@ const FileTreeContextMenu: FC<FileTreeContextMenu> = ({
   useOnClickOutside(contextMenuRef, closeContextMenu)
 
   const renderContextMenu = () => {
+    console.log(targetItem)
+
     if (targetItem) {
       return (
         <>

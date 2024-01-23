@@ -139,8 +139,8 @@ const Workspace = () => {
     const { pageX, pageY } = e
 
     setContextTarget(undefined)
-    fileTreeContextMenuClose()
     setAssignmentTreeContextMenu({ show: true, x: pageX, y: pageY })
+    fileTreeContextMenuClose()
   }
 
   const handleFileTreeItemContextMenu = async (
@@ -164,6 +164,29 @@ const Workspace = () => {
 
     setContextTarget(retrieved)
     setFileTreeContextMenu({ show: true, x: pageX, y: pageY })
+  }
+
+  const handleAssignmentTreeItemContextMenu = async (
+    e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>,
+  ) => {
+    e.preventDefault()
+
+    const { pageX, pageY, target } = e
+
+    const targetElement = target as HTMLElement
+
+    const fullPath = String(targetElement.dataset.mykey)
+
+    const retrievedFile = await filesDB.files.get({ fullPath })
+    const retrievedFolder = await filesDB.folders.get({
+      fullPath,
+    })
+
+    const retrieved = retrievedFile || retrievedFolder
+    if (!retrieved) return
+
+    setContextTarget(retrieved)
+    setAssignmentTreeContextMenu({ show: true, x: pageX, y: pageY })
   }
 
   const fileTreeContextMenuClose = () =>
@@ -230,7 +253,12 @@ const Workspace = () => {
             <ExportFilesText showText={db.assignedLength === 0} />
             <Tree
               renderItemsContainer={({ children, containerProps }) => (
-                <ul {...containerProps}>{children}</ul>
+                <ul
+                  onContextMenu={handleAssignmentTreeItemContextMenu}
+                  {...containerProps}
+                >
+                  {children}
+                </ul>
               )}
               renderTreeContainer={({ children, containerProps }) => (
                 <div className="min-h-screen" {...containerProps}>
