@@ -53,7 +53,7 @@ const AssignmentTreeContextMenu: FC<AssignmentTreeContextMenu> = ({
       )
     }
 
-    return null
+    return <p>Assignment tree context menu</p>
   }
 
   return (

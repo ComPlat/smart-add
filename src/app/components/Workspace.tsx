@@ -16,6 +16,7 @@ import {
   TreeItemIndex,
 } from 'react-complex-tree'
 
+import AssignmentTreeContextMenu from './context-menu/AssignmentTreeContextMenu'
 import FileTreeContextMenu from './context-menu/FileTreeContextMenu'
 import { renderItem } from './tree-view/renderItem'
 import { UploadDropZone } from './upload-form/UploadDropZone'
@@ -81,6 +82,8 @@ const Workspace = () => {
 
   const [fileTreeContextMenu, setFileTreeContextMenu] =
     useState(initialContextMenu)
+  const [assignmentTreeContextMenu, setAssignmentTreeContextMenu] =
+    useState(initialContextMenu)
   const [contextTarget, setContextTarget] = useState<
     ExtendedFile | ExtendedFolder
   >()
@@ -127,6 +130,17 @@ const Workspace = () => {
 
     setContextTarget(undefined)
     setFileTreeContextMenu({ show: true, x: pageX, y: pageY })
+    assignmentTreeContextMenuClose()
+  }
+
+  const handleAssignmentTreeContextMenu = async (e: React.MouseEvent) => {
+    e.preventDefault()
+
+    const { pageX, pageY } = e
+
+    setContextTarget(undefined)
+    fileTreeContextMenuClose()
+    setAssignmentTreeContextMenu({ show: true, x: pageX, y: pageY })
   }
 
   const handleFileTreeItemContextMenu = async (
@@ -152,7 +166,10 @@ const Workspace = () => {
     setFileTreeContextMenu({ show: true, x: pageX, y: pageY })
   }
 
-  const contextMenuClose = () => setFileTreeContextMenu(initialContextMenu)
+  const fileTreeContextMenuClose = () =>
+    setFileTreeContextMenu(initialContextMenu)
+  const assignmentTreeContextMenuClose = () =>
+    setAssignmentTreeContextMenu(initialContextMenu)
 
   return (
     <Fragment>
@@ -209,7 +226,7 @@ const Workspace = () => {
 
           <p className="min-h-screen w-2 bg-gray-100" />
 
-          <ExportFiles>
+          <ExportFiles onContextMenu={handleAssignmentTreeContextMenu}>
             <ExportFilesText showText={db.assignedLength === 0} />
             <Tree
               renderItemsContainer={({ children, containerProps }) => (
@@ -230,11 +247,20 @@ const Workspace = () => {
       </ControlledTreeEnvironment>
       {fileTreeContextMenu.show && (
         <FileTreeContextMenu
-          closeContextMenu={contextMenuClose}
+          closeContextMenu={fileTreeContextMenuClose}
           targetItem={contextTarget}
           tree={tree}
           x={fileTreeContextMenu.x}
           y={fileTreeContextMenu.y}
+        />
+      )}
+      {assignmentTreeContextMenu.show && (
+        <AssignmentTreeContextMenu
+          closeContextMenu={assignmentTreeContextMenuClose}
+          targetItem={contextTarget}
+          tree={tree}
+          x={assignmentTreeContextMenu.x}
+          y={assignmentTreeContextMenu.y}
         />
       )}
     </Fragment>
