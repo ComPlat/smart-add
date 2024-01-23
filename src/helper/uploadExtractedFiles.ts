@@ -2,6 +2,8 @@ import { filesDB } from '@/database/db'
 import { RcFile } from 'antd/es/upload'
 import { v4 } from 'uuid'
 
+const targetTreeRoot = 'inputTreeRoot'
+
 const uploadExtractedFiles = async (
   extractedFiles: {
     data: Promise<File>
@@ -33,6 +35,7 @@ const uploadExtractedFiles = async (
         name,
         parentUid: file.uid.split('.')[0],
         path,
+        treeId: targetTreeRoot,
         uid: file.uid + '_' + v4(),
       })
 

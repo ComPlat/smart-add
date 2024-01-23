@@ -1,6 +1,6 @@
 'use client'
 
-import { ExtendedFile, assignmentsDB } from '@/database/db'
+import { ExtendedFile, filesDB } from '@/database/db'
 import { message } from 'antd'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { saveAs } from 'file-saver'
@@ -13,7 +13,10 @@ interface FileTree {
 }
 
 const FileDownloader = () => {
-  const assignedFiles = useLiveQuery(() => assignmentsDB.files.toArray()) || []
+  const assignedFiles =
+    useLiveQuery(() =>
+      filesDB.files.where('treeId').equals('assignmentTreeRoot').toArray(),
+    ) || []
 
   const constructTree = (files: ExtendedFile[]): FileTree =>
     files.reduce((fileTree, file) => {
@@ -42,21 +45,26 @@ const FileDownloader = () => {
       const addFilesToZip = async (
         tree: FileTree,
         path: string,
-      ): Promise<JSZip[]> => {
-        const promises: Promise<JSZip[]>[] = Object.keys(tree).map(
-          async (key) => {
-            const value = tree[key]
-            const newPath = path ? `${path}/${key}` : key
+        parentZip: JSZip = zip,
+      ) => {
+        await Promise.all(
+          Object.entries(tree).map(async ([name, value]) => {
+            const newPath = path ? `${path}/${name}` : name
 
-            return value instanceof Blob
-              ? [zip.file(newPath, value)]
-              : await addFilesToZip(value, newPath)
-          },
+            if (name.endsWith('.zip') && typeof value === 'object') {
+              const nestedZip = new JSZip()
+              await addFilesToZip(value, '', nestedZip)
+              const nestedBlob = await nestedZip.generateAsync({ type: 'blob' })
+              parentZip.file(newPath, nestedBlob)
+            } else if (value instanceof Blob) {
+              parentZip.file(newPath, value)
+            } else {
+              await addFilesToZip(value, newPath, parentZip)
+            }
+          }),
         )
 
-        const results = await Promise.all(promises)
-
-        return results.flat()
+        return parentZip
       }
 
       await addFilesToZip(fileTree, '')

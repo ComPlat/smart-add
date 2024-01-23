@@ -3,7 +3,6 @@ import '@this-dot/cypress-indexeddb'
 describe('ZIP download', () => {
   beforeEach(() => {
     cy.visit('/').clearIndexedDb('filesDatabase')
-    cy.visit('/').clearIndexedDb('assignmentsDatabase')
   })
 
   const outputZipName = 'exportZip'

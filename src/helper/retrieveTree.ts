@@ -76,10 +76,7 @@ interface TempFileNode {
 const retrieveTree = (
   inputFiles: ExtendedFile[],
   inputFolders: ExtendedFolder[],
-  inputRoot: string,
-  assignmentFiles: ExtendedFile[],
-  assignmentFolders: ExtendedFolder[],
-  assignmentRoot: string,
+  treeId: string,
 ): Record<string, FileNode> => {
   const convertToTree = (
     files: ExtendedFile[],
@@ -177,14 +174,13 @@ const retrieveTree = (
     )
   }
 
-  const inputTree = convertToTree(inputFiles, inputFolders, inputRoot)
-  const assignmentTree = convertToTree(
-    assignmentFiles,
-    assignmentFolders,
-    assignmentRoot,
+  const filteredFiles = inputFiles.filter((file) => file.treeId === treeId)
+  const filteredFolders = inputFolders.filter(
+    (folder) => folder.treeId === treeId,
   )
 
-  return { ...inputTree, ...assignmentTree }
+  const tree = convertToTree(filteredFiles, filteredFolders, treeId)
+  return tree
 }
 
 export { retrieveTree }

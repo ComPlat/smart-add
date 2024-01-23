@@ -10,6 +10,7 @@ export type ExtendedFile = {
   name: string
   parentUid: string
   path: string[]
+  treeId: string
   uid: string
 }
 
@@ -19,6 +20,7 @@ export type ExtendedFolder = {
   isFolder: boolean
   name: string
   parentUid: string
+  treeId: string
   uid: string
 }
 
@@ -29,24 +31,10 @@ export class FilesDBCreator extends Dexie {
   constructor() {
     super('filesDatabase')
     this.version(1).stores({
-      files: '++id, fullPath, name, uid, extension, parentUid',
-      folders: '++id, fullPath, name, uid, parentUid',
-    })
-  }
-}
-
-export class AssignmentsDBCreator extends Dexie {
-  files!: Table<ExtendedFile, number>
-  folders!: Table<ExtendedFolder, number>
-
-  constructor() {
-    super('assignmentsDatabase')
-    this.version(1).stores({
-      files: '++id, fullPath, name, uid, extension, parentUid',
-      folders: '++id, fullPath, name, uid, parentUid',
+      files: '++id, fullPath, name, uid, extension, parentUid, treeId',
+      folders: '++id, fullPath, name, uid, parentUid, treeId',
     })
   }
 }
 
 export const filesDB = new FilesDBCreator()
-export const assignmentsDB = new AssignmentsDBCreator()
