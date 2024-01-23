@@ -3,11 +3,11 @@ import { FileNode } from '@/helper/types'
 import { useOnClickOutside } from '@/hooks/useOnClickOutside'
 import { FC, useRef } from 'react'
 
-import AddFolder from '../context-menu/AddFolder'
+import AddFolder from './AddFolder'
 import Delete from './Delete'
 import Rename from './Rename'
 
-interface ContextMenu {
+interface FileTreeContextMenu {
   closeContextMenu: () => void
   targetItem?: ExtendedFile | ExtendedFolder
   tree: Record<string, FileNode>
@@ -15,7 +15,7 @@ interface ContextMenu {
   y: number
 }
 
-const ContextMenu: FC<ContextMenu> = ({
+const FileTreeContextMenu: FC<FileTreeContextMenu> = ({
   closeContextMenu,
   targetItem,
   tree,
@@ -56,4 +56,4 @@ const ContextMenu: FC<ContextMenu> = ({
   )
 }
 
-export default ContextMenu
+export default FileTreeContextMenu

@@ -18,7 +18,8 @@ import {
   UncontrolledTreeEnvironment,
 } from 'react-complex-tree'
 
-import ContextMenu from './context-menu/ContextMenu'
+import AssignmentTreeContextMenu from './context-menu/AssignmentTreeContextMenu'
+import FileTreeContextMenu from './context-menu/FileTreeContextMenu'
 import { CustomTreeDataProvider } from './custom/CustomTreeDataProvider'
 import { renderItem } from './tree-view/renderItem'
 import { UploadDropZone } from './upload-form/UploadDropZone'
@@ -90,7 +91,10 @@ const Workspace = () => {
   >()
   const [expandedItems, setExpandedItems] = useState<TreeItemIndex[]>([])
 
-  const [contextMenu, setContextMenu] = useState(initialContextMenu)
+  const [fileTreeContextMenu, setFileTreeContextMenu] =
+    useState(initialContextMenu)
+  const [assignmentTreeContextMenu, setAssignmentTreeContextMenu] =
+    useState(initialContextMenu)
   const [contextTarget, setContextTarget] = useState<
     ExtendedFile | ExtendedFolder
   >()
@@ -137,7 +141,7 @@ const Workspace = () => {
     const { pageX, pageY } = e
 
     setContextTarget(undefined)
-    setContextMenu({ show: true, x: pageX, y: pageY })
+    setFileTreeContextMenu({ show: true, x: pageX, y: pageY })
   }
 
   const handleAssignmentTreeContextMenu = async (e: React.MouseEvent) => {
@@ -146,7 +150,7 @@ const Workspace = () => {
     const { pageX, pageY } = e
 
     setContextTarget(undefined)
-    setContextMenu({ show: true, x: pageX, y: pageY })
+    setAssignmentTreeContextMenu({ show: true, x: pageX, y: pageY })
   }
 
   const handleFileTreeItemContextMenu = async (
@@ -169,7 +173,7 @@ const Workspace = () => {
     if (!retrieved) return
 
     setContextTarget(retrieved)
-    setContextMenu({ show: true, x: pageX, y: pageY })
+    setFileTreeContextMenu({ show: true, x: pageX, y: pageY })
   }
 
   const handleAssignmentTreeItemContextMenu = async (
@@ -192,10 +196,20 @@ const Workspace = () => {
     if (!retrieved) return
 
     setContextTarget(retrieved)
-    setContextMenu({ show: true, x: pageX, y: pageY })
+    setFileTreeContextMenu({ show: true, x: pageX, y: pageY })
   }
 
-  const contextMenuClose = () => setContextMenu(initialContextMenu)
+  const contextMenuClose = () => {
+    if (fileTreeContextMenu) {
+      setFileTreeContextMenu(initialContextMenu)
+      setAssignmentTreeContextMenu({ show: false, x: 0, y: 0 })
+    }
+
+    if (assignmentTreeContextMenu) {
+      setAssignmentTreeContextMenu(initialContextMenu)
+      setFileTreeContextMenu({ show: false, x: 0, y: 0 })
+    }
+  }
 
   return (
     <Fragment>
@@ -277,13 +291,22 @@ const Workspace = () => {
           </ExportFiles>
         </div>
       </UncontrolledTreeEnvironment>
-      {contextMenu.show && (
-        <ContextMenu
+      {fileTreeContextMenu.show && (
+        <FileTreeContextMenu
           closeContextMenu={contextMenuClose}
           targetItem={contextTarget}
           tree={db.tree}
-          x={contextMenu.x}
-          y={contextMenu.y}
+          x={fileTreeContextMenu.x}
+          y={fileTreeContextMenu.y}
+        />
+      )}
+      {assignmentTreeContextMenu.show && (
+        <AssignmentTreeContextMenu
+          closeContextMenu={contextMenuClose}
+          targetItem={contextTarget}
+          tree={db.tree}
+          x={assignmentTreeContextMenu.x}
+          y={assignmentTreeContextMenu.y}
         />
       )}
     </Fragment>

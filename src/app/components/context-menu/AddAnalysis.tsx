@@ -4,43 +4,40 @@ import { useOnClickOutside } from '@/hooks/useOnClickOutside'
 import { FC, useRef, useState } from 'react'
 import { FaPlus } from 'react-icons/fa'
 
-import {
-  createFolder,
-  getUniqueFolderName,
-} from '../structure-btns/folderUtils'
+import { getUniqueFolderName } from '../structure-btns/folderUtils'
+import { createAnalysis } from '../structure-btns/templates'
 
-interface AddFolderProps {
+interface AddAnalysisProps {
   className?: string
   close: () => void
   item: ExtendedFile | ExtendedFolder | undefined
   tree: Record<string, FileNode>
 }
 
-const AddFolder: FC<AddFolderProps> = ({ className, close, item, tree }) => {
-  const baseFolderName = 'New Folder'
+const AddAnalysis: FC<AddAnalysisProps> = ({
+  className,
+  close,
+  item,
+  tree,
+}) => {
+  const baseName = 'analysis'
 
   const popupRef = useRef(null)
 
-  const [newFolderName, setNewFolderName] = useState(baseFolderName)
+  const [folderName, setFolderName] = useState(baseName)
   const [showInput, setShowInput] = useState(false)
 
   useOnClickOutside(popupRef, () => showInput && setShowInput(false))
 
-  const handleAddFolder = async () => {
+  const handleAddAnalysis = async () => {
     const parentPath = item ? tree[item.fullPath] : ''
-    const uniqueFolderName = getUniqueFolderName(
-      newFolderName,
-      tree,
-      baseFolderName,
-      false,
-    )
-    const newFolderIndex = `${
-      parentPath && parentPath.index + '/'
-    }${uniqueFolderName}`
+    const uniqueFolderName = getUniqueFolderName(folderName, tree, baseName)
 
-    await createFolder(newFolderIndex, uniqueFolderName)
+    console.log(parentPath)
 
-    setNewFolderName(baseFolderName)
+    await createAnalysis(uniqueFolderName, tree)
+
+    setFolderName(baseName)
     setShowInput(false)
     close()
   }
@@ -48,11 +45,11 @@ const AddFolder: FC<AddFolderProps> = ({ className, close, item, tree }) => {
   const handleCancel = (e: { stopPropagation: () => void }) => {
     e.stopPropagation()
     setShowInput(false)
-    setNewFolderName(baseFolderName)
+    setFolderName(baseName)
   }
 
   const handleKeyPress = (e: { key: string }) =>
-    e.key === 'Enter' && newFolderName.length > 0 && handleAddFolder()
+    e.key === 'Enter' && folderName.length > 0 && handleAddAnalysis()
 
   return (
     <li
@@ -62,7 +59,7 @@ const AddFolder: FC<AddFolderProps> = ({ className, close, item, tree }) => {
       <div className="flex items-center space-x-2">
         <span className="flex items-center space-x-2">
           <FaPlus />
-          <span>Add Folder</span>
+          <span>Add Analysis</span>
         </span>
         {showInput && (
           <div
@@ -73,20 +70,20 @@ const AddFolder: FC<AddFolderProps> = ({ className, close, item, tree }) => {
               <input
                 autoFocus
                 className="rounded px-3 py-1 shadow outline outline-gray-200 focus:outline-gray-300"
-                onChange={(e) => setNewFolderName(e.target.value)}
+                onChange={(e) => setFolderName(e.target.value)}
                 onKeyDown={handleKeyPress}
                 placeholder="Enter folder name"
-                value={newFolderName}
+                value={folderName}
               />
               <div className="flex justify-end space-x-2">
                 <button
                   className={`${
-                    newFolderName.length === 0
+                    folderName.length === 0
                       ? 'bg-gray-200 hover:bg-gray-200'
                       : 'hover:bg-blue-700'
                   } flex-1 rounded bg-blue-500 px-3 py-1 text-white`}
-                  disabled={newFolderName.length === 0}
-                  onClick={handleAddFolder}
+                  disabled={folderName.length === 0}
+                  onClick={handleAddAnalysis}
                 >
                   Add
                 </button>
@@ -105,4 +102,4 @@ const AddFolder: FC<AddFolderProps> = ({ className, close, item, tree }) => {
   )
 }
 
-export default AddFolder
+export default AddAnalysis
