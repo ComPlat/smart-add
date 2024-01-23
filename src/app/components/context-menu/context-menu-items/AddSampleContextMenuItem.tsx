@@ -1,26 +1,23 @@
-import { ExtendedFile, ExtendedFolder } from '@/database/db'
 import { FileNode } from '@/helper/types'
 import { useOnClickOutside } from '@/hooks/useOnClickOutside'
 import { FC, useRef, useState } from 'react'
 import { FaPlus } from 'react-icons/fa'
 
-import { getUniqueFolderName } from '../structure-btns/folderUtils'
-import { createAnalysis } from '../structure-btns/templates'
+import { getUniqueFolderName } from '../../structure-btns/folderUtils'
+import { createSample } from '../../structure-btns/templates'
 
 interface AddAnalysisProps {
   className?: string
   close: () => void
-  item: ExtendedFile | ExtendedFolder | undefined
   tree: Record<string, FileNode>
 }
 
-const AddAnalysis: FC<AddAnalysisProps> = ({
+const AddSampleContextMenuItem: FC<AddAnalysisProps> = ({
   className,
   close,
-  item,
   tree,
 }) => {
-  const baseName = 'analysis'
+  const baseName = 'Sample'
 
   const popupRef = useRef(null)
 
@@ -29,13 +26,10 @@ const AddAnalysis: FC<AddAnalysisProps> = ({
 
   useOnClickOutside(popupRef, () => showInput && setShowInput(false))
 
-  const handleAddAnalysis = async () => {
-    const parentPath = item ? tree[item.fullPath] : ''
+  const handleAddSample = async () => {
     const uniqueFolderName = getUniqueFolderName(folderName, tree, baseName)
 
-    console.log(parentPath)
-
-    await createAnalysis(uniqueFolderName, tree)
+    await createSample(uniqueFolderName, tree)
 
     setFolderName(baseName)
     setShowInput(false)
@@ -49,7 +43,7 @@ const AddAnalysis: FC<AddAnalysisProps> = ({
   }
 
   const handleKeyPress = (e: { key: string }) =>
-    e.key === 'Enter' && folderName.length > 0 && handleAddAnalysis()
+    e.key === 'Enter' && folderName.length > 0 && handleAddSample()
 
   return (
     <li
@@ -59,7 +53,7 @@ const AddAnalysis: FC<AddAnalysisProps> = ({
       <div className="flex items-center space-x-2">
         <span className="flex items-center space-x-2">
           <FaPlus />
-          <span>Add Analysis</span>
+          <span>Add Sample</span>
         </span>
         {showInput && (
           <div
@@ -83,7 +77,7 @@ const AddAnalysis: FC<AddAnalysisProps> = ({
                       : 'hover:bg-blue-700'
                   } flex-1 rounded bg-blue-500 px-3 py-1 text-white`}
                   disabled={folderName.length === 0}
-                  onClick={handleAddAnalysis}
+                  onClick={handleAddSample}
                 >
                   Add
                 </button>
@@ -102,4 +96,4 @@ const AddAnalysis: FC<AddAnalysisProps> = ({
   )
 }
 
-export default AddAnalysis
+export default AddSampleContextMenuItem

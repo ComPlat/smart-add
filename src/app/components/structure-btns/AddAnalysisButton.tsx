@@ -6,7 +6,7 @@ import { Button } from '../workspace/Button'
 import { getUniqueFolderName } from './folderUtils'
 import { createAnalysis } from './templates'
 
-const AddAnalysis = ({
+const AddAnalysisButton = ({
   className,
   tree,
 }: {
@@ -35,4 +35,4 @@ const AddAnalysis = ({
   )
 }
 
-export default AddAnalysis
+export default AddAnalysisButton

@@ -4,8 +4,8 @@ import { useOnClickOutside } from '@/hooks/useOnClickOutside'
 import { DeleteOutlined } from '@ant-design/icons'
 import { FC, useRef, useState } from 'react'
 
-import deleteFile from './deleteFile'
-import deleteFolder from './deleteFolder'
+import deleteFile from '../deleteFile'
+import deleteFolder from '../deleteFolder'
 
 interface DeleteProps {
   className?: string
@@ -14,7 +14,12 @@ interface DeleteProps {
   tree: Record<string, FileNode>
 }
 
-const Delete: FC<DeleteProps> = ({ className, close, item, tree }) => {
+const DeleteContextMenuItem: FC<DeleteProps> = ({
+  className,
+  close,
+  item,
+  tree,
+}) => {
   const popupRef = useRef(null)
 
   const [showConfirmation, setShowConfirmation] = useState(false)
@@ -78,4 +83,4 @@ const Delete: FC<DeleteProps> = ({ className, close, item, tree }) => {
   )
 }
 
-export default Delete
+export default DeleteContextMenuItem

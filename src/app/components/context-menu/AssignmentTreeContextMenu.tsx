@@ -3,10 +3,12 @@ import { FileNode } from '@/helper/types'
 import { useOnClickOutside } from '@/hooks/useOnClickOutside'
 import { FC, useRef } from 'react'
 
-import AddAnalysis from './AddAnalysis'
 import ContextMenuItem from './ContextMenuItem'
-import Delete from './Delete'
-import Rename from './Rename'
+import AddAnalysisContextMenuItem from './context-menu-items/AddAnalysisContextMenuItem'
+import AddReactionContextMenuItem from './context-menu-items/AddReactionContextMenuItem'
+import AddSampleContextMenuItem from './context-menu-items/AddSampleContextMenuItem'
+import Delete from './context-menu-items/DeleteContextMenuItem'
+import Rename from './context-menu-items/RenameContextMenuItem'
 
 interface AssignmentTreeContextMenu {
   closeContextMenu: () => void
@@ -31,23 +33,25 @@ const AssignmentTreeContextMenu: FC<AssignmentTreeContextMenu> = ({
     //   return (
     //     <>
     //       {targetItem.isFolder && (
-    //         <AddFolder close={closeContextMenu} item={targetItem} tree={tree} />
+    //         <AddFolderContextMenuItem close={closeContextMenu} item={targetItem} tree={tree} />
     //       )}
-    //       <Rename close={closeContextMenu} item={targetItem} tree={tree} />
+    //       <RenameContextMenuItem close={closeContextMenu} item={targetItem} tree={tree} />
     //       <span className="block h-px bg-gray-300"></span>
-    //       <Delete close={closeContextMenu} item={targetItem} tree={tree} />
+    //       <DeleteContextMenuItem close={closeContextMenu} item={targetItem} tree={tree} />
     //     </>
     //   )
     // }
 
     // return <p>Hello</p>
 
-    console.log(targetItem)
-
     if (targetItem) {
       return (
         <>
-          <AddAnalysis close={closeContextMenu} item={targetItem} tree={tree} />
+          <AddAnalysisContextMenuItem
+            close={closeContextMenu}
+            item={targetItem}
+            tree={tree}
+          />
           <Rename close={closeContextMenu} item={targetItem} tree={tree} />
           <span className="block h-px bg-gray-300"></span>
           <Delete close={closeContextMenu} item={targetItem} tree={tree} />
@@ -55,7 +59,12 @@ const AssignmentTreeContextMenu: FC<AssignmentTreeContextMenu> = ({
       )
     }
 
-    return <p>Assignment tree context menu</p>
+    return (
+      <>
+        <AddSampleContextMenuItem close={closeContextMenu} tree={tree} />
+        <AddReactionContextMenuItem close={closeContextMenu} tree={tree} />
+      </>
+    )
   }
 
   return (

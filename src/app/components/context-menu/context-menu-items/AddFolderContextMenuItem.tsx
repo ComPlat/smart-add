@@ -7,7 +7,7 @@ import { FaPlus } from 'react-icons/fa'
 import {
   createFolder,
   getUniqueFolderName,
-} from '../structure-btns/folderUtils'
+} from '../../structure-btns/folderUtils'
 
 interface AddFolderProps {
   className?: string
@@ -16,7 +16,12 @@ interface AddFolderProps {
   tree: Record<string, FileNode>
 }
 
-const AddFolder: FC<AddFolderProps> = ({ className, close, item, tree }) => {
+const AddFolderContextMenuItem: FC<AddFolderProps> = ({
+  className,
+  close,
+  item,
+  tree,
+}) => {
   const baseFolderName = 'New Folder'
 
   const popupRef = useRef(null)
@@ -105,4 +110,4 @@ const AddFolder: FC<AddFolderProps> = ({ className, close, item, tree }) => {
   )
 }
 
-export default AddFolder
+export default AddFolderContextMenuItem
