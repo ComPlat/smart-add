@@ -13,14 +13,11 @@ import styles from './UploadDropZone.module.css'
 // HINT: Necessary because of the way the Ant Design Upload Component
 //       handles dropped folders. Need to store already uploaded folders
 //       so that no duplicates get uploaded
-// TODO: May cause issues when uploading folders with the same name as variable
-//       is never cleared
+const uploadedFolders: string[] = []
 
 type UploadDropZoneProps = {
   children?: React.ReactNode
 }
-
-const uploadedFolders: string[] = []
 
 const targetTreeRoot = 'inputTreeRoot'
 
@@ -29,7 +26,6 @@ const handleCustomRequest = async ({
   filePaths,
   onSuccess,
   setFilePaths,
-  setFolderPaths,
   setProgress,
   uploadFileList,
 }: {
@@ -81,10 +77,9 @@ const handleCustomRequest = async ({
         for (const folder of folders) {
           currentPath = currentPath ? `${currentPath}/${folder}` : folder
 
-          const existingFolder = await filesDB.folders
-            .where('fullPath')
-            .equals(currentPath)
-            .first()
+          const existingFolder = await filesDB.folders.get({
+            fullPath: currentPath,
+          })
 
           if (!existingFolder) {
             const promise = filesDB.folders.add({
@@ -155,8 +150,6 @@ const handleCustomRequest = async ({
 
     await Promise.all(promises)
 
-    setFolderPaths(uploadedFolders)
-
     filesDB.files
       .add({
         extension: file.webkitRelativePath.split('.').slice(-1)[0],
@@ -189,6 +182,16 @@ const UploadDropZone = ({ children }: UploadDropZoneProps) => {
   const [uploadFileList, setUploadFileList] = useState<UploadFile[]>([])
   const [filePaths, setFilePaths] = useState<{ [key: string]: UploadFile }>({})
   const [folderPaths, setFolderPaths] = useState<string[]>([])
+  const [key, setKey] = useState<number>(0)
+
+  const resetUploadState = () => {
+    setProgress(0)
+    setUploadFileList([])
+    setFilePaths({})
+    setFolderPaths([])
+    uploadedFolders.length = 0
+    setKey((prevKey) => prevKey + 1)
+  }
 
   const uploadProps: UploadProps = {
     customRequest: (options) =>
@@ -208,13 +211,16 @@ const UploadDropZone = ({ children }: UploadDropZoneProps) => {
     onChange(info) {
       setUploadFileList(info.fileList)
       setProgress
+
+      if (info.fileList.every((file) => file.status === 'done'))
+        resetUploadState()
     },
     showUploadList: false,
   }
 
   // HINT: Progress will be moved to notifications
   return (
-    <div className={styles['upload-wrapper']}>
+    <div className={styles['upload-wrapper']} key={key}>
       <Upload.Dragger
         {...uploadProps}
         style={{
