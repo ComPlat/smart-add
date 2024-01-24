@@ -3,7 +3,7 @@ import '@this-dot/cypress-indexeddb'
 describe('ZIP Upload', () => {
   beforeEach(() => {
     cy.visit('/')
-    cy.clearIndexedDb('filesDatabase')
+    cy.wait(3000).clearIndexedDb('filesDatabase')
   })
 
   describe('uploading zip file', () => {
