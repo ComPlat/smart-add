@@ -36,12 +36,13 @@ describe('ZIP download', () => {
         })
         .trigger('drop', { dataTransfer })
 
-      cy.get('button[name="Download as ZIP"]')
-        .click()
-        .readFile(`cypress/downloads/${outputZipName}.zip`)
-        .then((fileContent) => {
+      cy.get('button[name="Download as ZIP"]').should('be.visible').click()
+
+      cy.readFile(`cypress/downloads/${outputZipName}.zip`).should(
+        (fileContent) => {
           expect(fileContent).to.exist
-        })
+        },
+      )
     })
   })
 })
