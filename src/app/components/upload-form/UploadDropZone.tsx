@@ -186,9 +186,7 @@ const UploadDropZone = ({ children }: UploadDropZoneProps) => {
 
   const resetUploadState = () => {
     setProgress(0)
-    setUploadFileList([])
     setFilePaths({})
-    setFolderPaths([])
     uploadedFolders.length = 0
     setKey((prevKey) => prevKey + 1)
   }
@@ -238,4 +236,5 @@ const UploadDropZone = ({ children }: UploadDropZoneProps) => {
     </div>
   )
 }
+
 export { UploadDropZone, handleCustomRequest }
