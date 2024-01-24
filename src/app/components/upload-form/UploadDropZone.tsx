@@ -208,9 +208,6 @@ const UploadDropZone = ({ children }: UploadDropZoneProps) => {
     onChange(info) {
       setUploadFileList(info.fileList)
       setProgress
-
-      if (info.fileList.every((file) => file.status === 'done'))
-        resetUploadState()
     },
     showUploadList: false,
   }
@@ -226,6 +223,8 @@ const UploadDropZone = ({ children }: UploadDropZoneProps) => {
           border: 'none',
           borderRadius: 'none',
         }}
+        fileList={[]}
+        onDrop={resetUploadState}
         openFileDialogOnClick={false}
       >
         <Progress percent={progress} />
