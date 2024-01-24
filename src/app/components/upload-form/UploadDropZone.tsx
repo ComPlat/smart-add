@@ -77,9 +77,10 @@ const handleCustomRequest = async ({
         for (const folder of folders) {
           currentPath = currentPath ? `${currentPath}/${folder}` : folder
 
-          const existingFolder = await filesDB.folders.get({
-            fullPath: currentPath,
-          })
+          const existingFolder = await filesDB.folders
+            .where('fullPath')
+            .equals(currentPath)
+            .first()
 
           if (!existingFolder) {
             const promise = filesDB.folders.add({
