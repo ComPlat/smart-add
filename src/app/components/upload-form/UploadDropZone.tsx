@@ -13,14 +13,11 @@ import styles from './UploadDropZone.module.css'
 // HINT: Necessary because of the way the Ant Design Upload Component
 //       handles dropped folders. Need to store already uploaded folders
 //       so that no duplicates get uploaded
-// TODO: May cause issues when uploading folders with the same name as variable
-//       is never cleared
+const uploadedFolders: string[] = []
 
 type UploadDropZoneProps = {
   children?: React.ReactNode
 }
-
-const uploadedFolders: string[] = []
 
 const targetTreeRoot = 'inputTreeRoot'
 
@@ -29,7 +26,6 @@ const handleCustomRequest = async ({
   filePaths,
   onSuccess,
   setFilePaths,
-  setFolderPaths,
   setProgress,
   uploadFileList,
 }: {
@@ -155,8 +151,6 @@ const handleCustomRequest = async ({
 
     await Promise.all(promises)
 
-    setFolderPaths(uploadedFolders)
-
     filesDB.files
       .add({
         extension: file.webkitRelativePath.split('.').slice(-1)[0],
@@ -189,6 +183,12 @@ const UploadDropZone = ({ children }: UploadDropZoneProps) => {
   const [uploadFileList, setUploadFileList] = useState<UploadFile[]>([])
   const [filePaths, setFilePaths] = useState<{ [key: string]: UploadFile }>({})
   const [folderPaths, setFolderPaths] = useState<string[]>([])
+
+  const resetUploadState = () => {
+    setProgress(0)
+    setFilePaths({})
+    uploadedFolders.length = 0
+  }
 
   const uploadProps: UploadProps = {
     customRequest: (options) =>
@@ -223,6 +223,8 @@ const UploadDropZone = ({ children }: UploadDropZoneProps) => {
           border: 'none',
           borderRadius: 'none',
         }}
+        fileList={[]}
+        onDrop={resetUploadState}
         openFileDialogOnClick={false}
       >
         <Progress percent={progress} />
@@ -232,4 +234,5 @@ const UploadDropZone = ({ children }: UploadDropZoneProps) => {
     </div>
   )
 }
+
 export { UploadDropZone, handleCustomRequest }
