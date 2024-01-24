@@ -183,13 +183,11 @@ const UploadDropZone = ({ children }: UploadDropZoneProps) => {
   const [uploadFileList, setUploadFileList] = useState<UploadFile[]>([])
   const [filePaths, setFilePaths] = useState<{ [key: string]: UploadFile }>({})
   const [folderPaths, setFolderPaths] = useState<string[]>([])
-  const [key, setKey] = useState<number>(0)
 
   const resetUploadState = () => {
     setProgress(0)
     setFilePaths({})
     uploadedFolders.length = 0
-    setKey((prevKey) => prevKey + 1)
   }
 
   const uploadProps: UploadProps = {
@@ -219,7 +217,7 @@ const UploadDropZone = ({ children }: UploadDropZoneProps) => {
 
   // HINT: Progress will be moved to notifications
   return (
-    <div className={styles['upload-wrapper']} key={key}>
+    <div className={styles['upload-wrapper']}>
       <Upload.Dragger
         {...uploadProps}
         style={{
