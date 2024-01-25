@@ -3,11 +3,12 @@ import { FileNode } from '@/helper/types'
 import { useOnClickOutside } from '@/hooks/useOnClickOutside'
 import { FC, useRef } from 'react'
 
+import ContextMenuItem from './ContextMenuItem'
 import AddFolderContextMenuItem from './context-menu-items/AddFolderContextMenuItem'
 import DeleteContextMenuItem from './context-menu-items/DeleteContextMenuItem'
 import RenameContextMenuItem from './context-menu-items/RenameContextMenuItem'
 
-interface FileTreeContextMenu {
+type FileTreeContextMenu = {
   closeContextMenu: () => void
   targetItem?: ExtendedFile | ExtendedFolder
   tree: Record<string, FileNode>
@@ -25,9 +26,7 @@ const FileTreeContextMenu: FC<FileTreeContextMenu> = ({
   const contextMenuRef = useRef<HTMLDivElement>(null)
   useOnClickOutside(contextMenuRef, closeContextMenu)
 
-  const renderContextMenu = () => {
-    console.log(targetItem)
-
+  const ContextMenu = () => {
     if (targetItem) {
       return (
         <>
@@ -69,9 +68,7 @@ const FileTreeContextMenu: FC<FileTreeContextMenu> = ({
       ref={contextMenuRef}
       style={{ left: `${x}px`, top: `${y}px` }}
     >
-      <ul className="px-1 [&>li:hover]:bg-gray-300 [&>li]:my-1 [&>li]:cursor-pointer [&>li]:rounded [&>li]:px-2 [&>li]:py-1">
-        {renderContextMenu()}
-      </ul>
+      <ContextMenuItem renderContextMenu={<ContextMenu />} />
     </div>
   )
 }

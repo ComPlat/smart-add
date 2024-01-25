@@ -10,7 +10,7 @@ import AddSampleContextMenuItem from './context-menu-items/AddSampleContextMenuI
 import DeleteContextMenuItem from './context-menu-items/DeleteContextMenuItem'
 import RenameContextMenuItem from './context-menu-items/RenameContextMenuItem'
 
-interface AssignmentTreeContextMenu {
+type AssignmentTreeContextMenu = {
   closeContextMenu: () => void
   targetItem?: ExtendedFile | ExtendedFolder
   tree: Record<string, FileNode>
@@ -28,7 +28,7 @@ const AssignmentTreeContextMenu: FC<AssignmentTreeContextMenu> = ({
   const contextMenuRef = useRef<HTMLDivElement>(null)
   useOnClickOutside(contextMenuRef, closeContextMenu)
 
-  const renderContextMenu = () => {
+  const ContextMenu = () => {
     if (targetItem) {
       return (
         <>
@@ -68,7 +68,7 @@ const AssignmentTreeContextMenu: FC<AssignmentTreeContextMenu> = ({
       ref={contextMenuRef}
       style={{ left: `${x}px`, top: `${y}px` }}
     >
-      <ContextMenuItem renderContextMenu={renderContextMenu()} />
+      <ContextMenuItem renderContextMenu={<ContextMenu />} />
     </div>
   )
 }
