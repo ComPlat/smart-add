@@ -19,6 +19,29 @@ type ContextMenu = {
   tree: Record<string, FileNode>
 }
 
+const DefaultContextMenu = ({
+  closeContextMenu,
+  targetItem,
+  tree,
+}: {
+  closeContextMenu: () => void
+  targetItem: ExtendedFile | ExtendedFolder
+  tree: Record<string, FileNode>
+}) => (
+  <>
+    <RenameContextMenuItem
+      close={closeContextMenu}
+      item={targetItem}
+      tree={tree}
+    />
+    <DeleteContextMenuItem
+      close={closeContextMenu}
+      item={targetItem}
+      tree={tree}
+    />
+  </>
+)
+
 const ContextMenu = ({
   closeContextMenu,
   isAnalysesFolder,
@@ -26,32 +49,40 @@ const ContextMenu = ({
   targetItem,
   tree,
 }: ContextMenu) => {
-  if (targetItem) {
+  if (!targetItem) {
     return (
       <>
-        {isAnalysesFolder && (
-          <AddAnalysisContextMenuItem
-            close={closeContextMenu}
-            item={targetItem}
-            tree={tree}
-          />
-        )}
-        {!(isAnalysesFolder || isStructureFolder) && (
-          <>
-            <RenameContextMenuItem
-              close={closeContextMenu}
-              item={targetItem}
-              tree={tree}
-            />
-            <DeleteContextMenuItem
-              close={closeContextMenu}
-              item={targetItem}
-              tree={tree}
-            />
-          </>
-        )}
-        <span className="block h-px bg-gray-300" />
+        <AddSampleContextMenuItem close={closeContextMenu} tree={tree} />
+        <AddReactionContextMenuItem close={closeContextMenu} tree={tree} />
       </>
+    )
+  }
+
+  if (isAnalysesFolder) {
+    return (
+      <>
+        <AddAnalysisContextMenuItem
+          close={closeContextMenu}
+          item={targetItem}
+          tree={tree}
+        />
+        <span className="block h-px bg-gray-300" />
+        <DefaultContextMenu
+          closeContextMenu={closeContextMenu}
+          targetItem={targetItem}
+          tree={tree}
+        />
+      </>
+    )
+  }
+
+  if (!isAnalysesFolder && !isStructureFolder) {
+    return (
+      <DefaultContextMenu
+        closeContextMenu={closeContextMenu}
+        targetItem={targetItem}
+        tree={tree}
+      />
     )
   }
 
@@ -71,7 +102,9 @@ const AssignmentTreeContextMenu: FC<TreeContextMenu> = ({
   y,
 }) => {
   const contextMenuRef = useRef<HTMLDivElement>(null)
-  const isAnalysesFolder = targetItem?.fullPath.includes('analyses')
+  const isAnalysesFolder =
+    targetItem?.fullPath.includes('analyses') &&
+    !targetItem?.fullPath.includes('analysis')
   const isStructureFolder = targetItem?.fullPath.includes('structure')
 
   useOnClickOutside(contextMenuRef, closeContextMenu)

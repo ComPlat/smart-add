@@ -4,7 +4,6 @@ import { useOnClickOutside } from '@/hooks/useOnClickOutside'
 import { FC, useRef, useState } from 'react'
 import { FaPlus } from 'react-icons/fa'
 
-import { getUniqueFolderName } from '../../structure-btns/folderUtils'
 import { createAnalysis } from '../../structure-btns/templates'
 
 interface AddAnalysisProps {
@@ -17,6 +16,7 @@ interface AddAnalysisProps {
 const AddAnalysisContextMenuItem: FC<AddAnalysisProps> = ({
   className,
   close,
+  item,
   tree,
 }) => {
   const baseName = 'analysis'
@@ -29,9 +29,7 @@ const AddAnalysisContextMenuItem: FC<AddAnalysisProps> = ({
   useOnClickOutside(popupRef, () => showInput && setShowInput(false))
 
   const handleAddAnalysis = async () => {
-    const uniqueFolderName = getUniqueFolderName(folderName, tree, baseName)
-
-    await createAnalysis(uniqueFolderName, tree)
+    if (item) createAnalysis(folderName, item.fullPath, tree)
 
     setFolderName(baseName)
     setShowInput(false)

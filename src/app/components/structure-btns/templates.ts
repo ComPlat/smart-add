@@ -61,6 +61,7 @@ export const createReaction = async (
 
 export const createAnalysis = async (
   baseFolderName: string,
+  fullPath: string,
   tree: Record<string, FileNode>,
 ) => {
   const uniqueFolderName = getUniqueFolderName(
@@ -69,5 +70,9 @@ export const createAnalysis = async (
     baseFolderName,
   )
 
-  return await createFolder(uniqueFolderName, uniqueFolderName)
+  return await createFolder(
+    `${fullPath}/${uniqueFolderName}`,
+    uniqueFolderName,
+    true,
+  )
 }
