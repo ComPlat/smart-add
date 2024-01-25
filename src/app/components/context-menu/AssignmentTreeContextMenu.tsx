@@ -5,11 +5,10 @@ import { TreeContextMenu } from '@/types/TreeContextMenu'
 import { FC, useRef } from 'react'
 
 import ContextMenuContainer from './ContextMenuItem'
+import DefaultContextMenu from './DefaultContextMenu'
 import AddAnalysisContextMenuItem from './context-menu-items/AddAnalysisContextMenuItem'
 import AddReactionContextMenuItem from './context-menu-items/AddReactionContextMenuItem'
 import AddSampleContextMenuItem from './context-menu-items/AddSampleContextMenuItem'
-import DeleteContextMenuItem from './context-menu-items/DeleteContextMenuItem'
-import RenameContextMenuItem from './context-menu-items/RenameContextMenuItem'
 
 type ContextMenu = {
   closeContextMenu: () => void
@@ -18,29 +17,6 @@ type ContextMenu = {
   targetItem?: ExtendedFile | ExtendedFolder
   tree: Record<string, FileNode>
 }
-
-const DefaultContextMenu = ({
-  closeContextMenu,
-  targetItem,
-  tree,
-}: {
-  closeContextMenu: () => void
-  targetItem: ExtendedFile | ExtendedFolder
-  tree: Record<string, FileNode>
-}) => (
-  <>
-    <RenameContextMenuItem
-      close={closeContextMenu}
-      item={targetItem}
-      tree={tree}
-    />
-    <DeleteContextMenuItem
-      close={closeContextMenu}
-      item={targetItem}
-      tree={tree}
-    />
-  </>
-)
 
 const ClickOnAnalysisContextMenu = ({
   closeContextMenu,
@@ -57,7 +33,6 @@ const ClickOnAnalysisContextMenu = ({
       item={targetItem}
       tree={tree}
     />
-    <span className="block h-px bg-gray-300" />
     <DefaultContextMenu
       closeContextMenu={closeContextMenu}
       targetItem={targetItem}
