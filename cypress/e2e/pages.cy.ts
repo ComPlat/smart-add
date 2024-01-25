@@ -2,8 +2,7 @@ import '@this-dot/cypress-indexeddb'
 
 describe('Pages', () => {
   beforeEach(() => {
-    cy.visit('/')
-    cy.clearIndexedDb('filesDatabase')
+    cy.visit('/').clearIndexedDb('filesDatabase')
   })
 
   describe('UploadForm', () => {
