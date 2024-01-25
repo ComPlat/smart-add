@@ -7,8 +7,8 @@ import ContextMenuItem from './ContextMenuItem'
 import AddAnalysisContextMenuItem from './context-menu-items/AddAnalysisContextMenuItem'
 import AddReactionContextMenuItem from './context-menu-items/AddReactionContextMenuItem'
 import AddSampleContextMenuItem from './context-menu-items/AddSampleContextMenuItem'
-import Delete from './context-menu-items/DeleteContextMenuItem'
-import Rename from './context-menu-items/RenameContextMenuItem'
+import DeleteContextMenuItem from './context-menu-items/DeleteContextMenuItem'
+import RenameContextMenuItem from './context-menu-items/RenameContextMenuItem'
 
 interface AssignmentTreeContextMenu {
   closeContextMenu: () => void
@@ -29,21 +29,6 @@ const AssignmentTreeContextMenu: FC<AssignmentTreeContextMenu> = ({
   useOnClickOutside(contextMenuRef, closeContextMenu)
 
   const renderContextMenu = () => {
-    // if (targetItem) {
-    //   return (
-    //     <>
-    //       {targetItem.isFolder && (
-    //         <AddFolderContextMenuItem close={closeContextMenu} item={targetItem} tree={tree} />
-    //       )}
-    //       <RenameContextMenuItem close={closeContextMenu} item={targetItem} tree={tree} />
-    //       <span className="block h-px bg-gray-300"></span>
-    //       <DeleteContextMenuItem close={closeContextMenu} item={targetItem} tree={tree} />
-    //     </>
-    //   )
-    // }
-
-    // return <p>Hello</p>
-
     if (targetItem) {
       return (
         <>
@@ -52,9 +37,17 @@ const AssignmentTreeContextMenu: FC<AssignmentTreeContextMenu> = ({
             item={targetItem}
             tree={tree}
           />
-          <Rename close={closeContextMenu} item={targetItem} tree={tree} />
+          <RenameContextMenuItem
+            close={closeContextMenu}
+            item={targetItem}
+            tree={tree}
+          />
           <span className="block h-px bg-gray-300"></span>
-          <Delete close={closeContextMenu} item={targetItem} tree={tree} />
+          <DeleteContextMenuItem
+            close={closeContextMenu}
+            item={targetItem}
+            tree={tree}
+          />
         </>
       )
     }
