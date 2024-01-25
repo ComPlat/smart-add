@@ -1,24 +1,15 @@
-import { ExtendedFile, ExtendedFolder } from '@/database/db'
-import { FileNode } from '@/helper/types'
 import { useOnClickOutside } from '@/hooks/useOnClickOutside'
+import { TreeContextMenu } from '@/types/TreeContextMenu'
 import { FC, useRef } from 'react'
 
-import ContextMenuItem from './ContextMenuItem'
+import { default as ContextMenuContainer } from './ContextMenuItem'
 import AddAnalysisContextMenuItem from './context-menu-items/AddAnalysisContextMenuItem'
 import AddReactionContextMenuItem from './context-menu-items/AddReactionContextMenuItem'
 import AddSampleContextMenuItem from './context-menu-items/AddSampleContextMenuItem'
 import DeleteContextMenuItem from './context-menu-items/DeleteContextMenuItem'
 import RenameContextMenuItem from './context-menu-items/RenameContextMenuItem'
 
-type AssignmentTreeContextMenu = {
-  closeContextMenu: () => void
-  targetItem?: ExtendedFile | ExtendedFolder
-  tree: Record<string, FileNode>
-  x: number
-  y: number
-}
-
-const AssignmentTreeContextMenu: FC<AssignmentTreeContextMenu> = ({
+const AssignmentTreeContextMenu: FC<TreeContextMenu> = ({
   closeContextMenu,
   targetItem,
   tree,
@@ -61,15 +52,9 @@ const AssignmentTreeContextMenu: FC<AssignmentTreeContextMenu> = ({
   }
 
   return (
-    <div
-      className={
-        'absolute z-30 animate-fade-in rounded-lg border border-gray-300 bg-white shadow-lg'
-      }
-      ref={contextMenuRef}
-      style={{ left: `${x}px`, top: `${y}px` }}
-    >
-      <ContextMenuItem renderContextMenu={<ContextMenu />} />
-    </div>
+    <ContextMenuContainer contextMenuRef={contextMenuRef} x={x} y={y}>
+      <ContextMenu />
+    </ContextMenuContainer>
   )
 }
 
