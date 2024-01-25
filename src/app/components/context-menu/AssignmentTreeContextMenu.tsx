@@ -42,6 +42,44 @@ const DefaultContextMenu = ({
   </>
 )
 
+const ClickOnAnalysisContextMenu = ({
+  closeContextMenu,
+  targetItem,
+  tree,
+}: {
+  closeContextMenu: () => void
+  targetItem: ExtendedFile | ExtendedFolder
+  tree: Record<string, FileNode>
+}) => (
+  <>
+    <AddAnalysisContextMenuItem
+      close={closeContextMenu}
+      item={targetItem}
+      tree={tree}
+    />
+    <span className="block h-px bg-gray-300" />
+    <DefaultContextMenu
+      closeContextMenu={closeContextMenu}
+      targetItem={targetItem}
+      tree={tree}
+    />
+  </>
+)
+
+const CreateStructureContextMenu = ({
+  closeContextMenu,
+  tree,
+}: {
+  closeContextMenu: () => void
+
+  tree: Record<string, FileNode>
+}) => (
+  <>
+    <AddSampleContextMenuItem close={closeContextMenu} tree={tree} />
+    <AddReactionContextMenuItem close={closeContextMenu} tree={tree} />
+  </>
+)
+
 const ContextMenu = ({
   closeContextMenu,
   isAnalysesFolder,
@@ -51,30 +89,21 @@ const ContextMenu = ({
 }: ContextMenu) => {
   if (!targetItem) {
     return (
-      <>
-        <AddSampleContextMenuItem close={closeContextMenu} tree={tree} />
-        <AddReactionContextMenuItem close={closeContextMenu} tree={tree} />
-      </>
+      <CreateStructureContextMenu
+        closeContextMenu={closeContextMenu}
+        tree={tree}
+      />
     )
   }
 
-  if (isAnalysesFolder) {
+  if (isAnalysesFolder)
     return (
-      <>
-        <AddAnalysisContextMenuItem
-          close={closeContextMenu}
-          item={targetItem}
-          tree={tree}
-        />
-        <span className="block h-px bg-gray-300" />
-        <DefaultContextMenu
-          closeContextMenu={closeContextMenu}
-          targetItem={targetItem}
-          tree={tree}
-        />
-      </>
+      <ClickOnAnalysisContextMenu
+        closeContextMenu={closeContextMenu}
+        targetItem={targetItem}
+        tree={tree}
+      />
     )
-  }
 
   if (!isAnalysesFolder && !isStructureFolder) {
     return (
@@ -87,10 +116,10 @@ const ContextMenu = ({
   }
 
   return (
-    <>
-      <AddSampleContextMenuItem close={closeContextMenu} tree={tree} />
-      <AddReactionContextMenuItem close={closeContextMenu} tree={tree} />
-    </>
+    <CreateStructureContextMenu
+      closeContextMenu={closeContextMenu}
+      tree={tree}
+    />
   )
 }
 
