@@ -2,7 +2,7 @@ import { useOnClickOutside } from '@/hooks/useOnClickOutside'
 import { TreeContextMenu } from '@/types/TreeContextMenu'
 import { FC, useRef } from 'react'
 
-import { default as ContextMenuContainer } from './ContextMenuItem'
+import ContextMenuContainer from './ContextMenuItem'
 import AddAnalysisContextMenuItem from './context-menu-items/AddAnalysisContextMenuItem'
 import AddReactionContextMenuItem from './context-menu-items/AddReactionContextMenuItem'
 import AddSampleContextMenuItem from './context-menu-items/AddSampleContextMenuItem'
