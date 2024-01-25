@@ -69,6 +69,12 @@ const FileDownloader = () => {
 
       await addFilesToZip(fileTree, '')
 
+      const exportJson = new File(['{}'], 'export.json', {
+        lastModified: Date.now(),
+        type: 'application/json',
+      })
+      zip.file('export.json', exportJson)
+
       const blob = await zip.generateAsync({ type: 'blob' })
 
       saveAs(blob, 'exportZip')
