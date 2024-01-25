@@ -17,7 +17,6 @@ interface AddAnalysisProps {
 const AddAnalysisContextMenuItem: FC<AddAnalysisProps> = ({
   className,
   close,
-  item,
   tree,
 }) => {
   const baseName = 'analysis'
@@ -30,10 +29,7 @@ const AddAnalysisContextMenuItem: FC<AddAnalysisProps> = ({
   useOnClickOutside(popupRef, () => showInput && setShowInput(false))
 
   const handleAddAnalysis = async () => {
-    const parentPath = item ? tree[item.fullPath] : ''
     const uniqueFolderName = getUniqueFolderName(folderName, tree, baseName)
-
-    console.log(parentPath)
 
     await createAnalysis(uniqueFolderName, tree)
 

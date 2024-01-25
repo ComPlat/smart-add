@@ -33,7 +33,7 @@ const FileTreeContextMenu: FC<TreeContextMenu> = ({
             item={targetItem}
             tree={tree}
           />
-          <span className="block h-px bg-gray-300"></span>
+          <span className="block h-px bg-gray-300" />
           <DeleteContextMenuItem
             close={closeContextMenu}
             item={targetItem}

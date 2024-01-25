@@ -1,6 +1,5 @@
 import { FileNode } from '@/helper/types'
 
-import AddAnalysisButton from '../structure-btns/AddAnalysisButton'
 import AddReactionButton from '../structure-btns/AddReactionButton'
 import AddSampleButton from '../structure-btns/AddSampleButton'
 import ClearButtonGroup from '../tree-view/ClearButtonGroup'
@@ -18,7 +17,6 @@ const Toolbar = ({ assignedLength, inputLength, tree }: ToolbarProps) => {
       <div className="flex gap-2">
         <AddSampleButton tree={tree} />
         <AddReactionButton tree={tree} />
-        <AddAnalysisButton tree={tree} />
         <ClearButtonGroup
           assignedLength={assignedLength}
           inputLength={inputLength}
