@@ -55,13 +55,12 @@ const CreateStructureContextMenu = ({
   </>
 )
 
-const ContextMenu = ({
-  closeContextMenu,
-  isAnalysesFolder,
-  isStructureFolder,
-  targetItem,
-  tree,
-}: ContextMenu) => {
+const ContextMenu = ({ closeContextMenu, targetItem, tree }: ContextMenu) => {
+  const isAnalysesFolder =
+    targetItem?.fullPath.includes('analyses') &&
+    !targetItem?.fullPath.includes('analysis')
+  const isStructureFolder = targetItem?.fullPath.includes('structure')
+
   if (!targetItem) {
     return (
       <CreateStructureContextMenu
@@ -106,10 +105,6 @@ const AssignmentTreeContextMenu: FC<TreeContextMenu> = ({
   y,
 }) => {
   const contextMenuRef = useRef<HTMLDivElement>(null)
-  const isAnalysesFolder =
-    targetItem?.fullPath.includes('analyses') &&
-    !targetItem?.fullPath.includes('analysis')
-  const isStructureFolder = targetItem?.fullPath.includes('structure')
 
   useOnClickOutside(contextMenuRef, closeContextMenu)
 
@@ -117,8 +112,6 @@ const AssignmentTreeContextMenu: FC<TreeContextMenu> = ({
     <ContextMenuContainer contextMenuRef={contextMenuRef} x={x} y={y}>
       <ContextMenu
         closeContextMenu={closeContextMenu}
-        isAnalysesFolder={isAnalysesFolder}
-        isStructureFolder={isStructureFolder}
         targetItem={targetItem}
         tree={tree}
       />
