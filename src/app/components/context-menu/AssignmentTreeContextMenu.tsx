@@ -70,7 +70,7 @@ const ContextMenu = ({ closeContextMenu, targetItem, tree }: ContextMenu) => {
     )
   }
 
-  if (isAnalysesFolder)
+  if (isAnalysesFolder) {
     return (
       <ClickOnAnalysisContextMenu
         closeContextMenu={closeContextMenu}
@@ -78,6 +78,7 @@ const ContextMenu = ({ closeContextMenu, targetItem, tree }: ContextMenu) => {
         tree={tree}
       />
     )
+  }
 
   if (!isAnalysesFolder && !isStructureFolder) {
     return (
