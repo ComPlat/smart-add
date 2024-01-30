@@ -143,3 +143,41 @@ An item will not be displayed or thrown an error message when one of the followi
 
 - when one header items differs from the default
 - when content of a cell is of a different type
+
+## Export.json structure
+
+### Reaction
+
+- Labimotion::ElementKlass
+- Labimotion::SegmentKlass
+- Labimotion::DatasetKlass
+- Collection
+- Sample
+- CollectionsSample
+- Fingerprint
+- Molecule
+- MoleculeName
+- Container
+- Labimotion::Dataset
+- Attachment
+- Reaction
+- CollectionsReaction
+- ReactionsStartingMaterialSample
+- ReactionsReactantSample
+- ReactionsProductSample
+
+### Sample
+
+- Collection
+- Sample
+- CollectionsSample
+- Fingerprint
+- Molecule
+- MoleculeName
+- Container
+- Attachment
+
+### Analysis
+
+- Dataset
+- Attachment
