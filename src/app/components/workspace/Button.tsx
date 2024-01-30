@@ -29,7 +29,6 @@ const Button = ({
   className,
   disabled = false,
   icon,
-  key,
   label,
   onClick,
   variant = 'default',
@@ -43,7 +42,6 @@ const Button = ({
         : `${defaultStyle} ${className}`
     }
     disabled={disabled}
-    key={key}
     name={label}
     onClick={onClick}
   >

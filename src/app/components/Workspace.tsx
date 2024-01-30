@@ -7,7 +7,7 @@ import { retrieveTree } from '@/helper/retrieveTree'
 import { FileNode } from '@/helper/types'
 import { getTotalLength } from '@/helper/utils'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import {
   ControlledTreeEnvironment,
   DraggingPosition,
@@ -16,15 +16,23 @@ import {
   TreeItemIndex,
 } from 'react-complex-tree'
 
-import ContextMenu from './context-menu/ContextMenu'
+import AssignmentTreeContextMenu from './context-menu/AssignmentTreeContextMenu'
+import FileTreeContextMenu from './context-menu/FileTreeContextMenu'
 import { renderItem } from './tree-view/renderItem'
 import { UploadDropZone } from './upload-form/UploadDropZone'
 import { ExportFiles } from './workspace/ExportFiles'
 import { ExportFilesText } from './workspace/ExportFilesText'
-import Header from './workspace/Header'
 import { Toolbar } from './workspace/Toolbar'
 import { UploadFilesText } from './workspace/UploadFilesText'
 import { UploadedFiles } from './workspace/UploadedFiles'
+
+type Database = {
+  assignedLength: number
+  files: ExtendedFile[]
+  folders: ExtendedFolder[]
+  inputLength: number
+  key: number
+}
 
 const initialContextMenu = {
   show: false,
@@ -55,13 +63,15 @@ const Workspace = () => {
     const inputLength = getTotalLength(files, folders, inputTreeRoot)
     const assignedLength = getTotalLength(files, folders, assignmentTreeRoot)
 
-    return {
+    const database: Database = {
       assignedLength,
       files,
       folders,
       inputLength,
       key,
     }
+
+    return database
   })
 
   const [focusedItem, setFocusedItem] = useState<
@@ -70,7 +80,10 @@ const Workspace = () => {
   const [expandedItems, setExpandedItems] = useState<TreeItemIndex[]>([])
   const [selectedItems, setSelectedItems] = useState<TreeItemIndex[]>([])
 
-  const [contextMenu, setContextMenu] = useState(initialContextMenu)
+  const [fileTreeContextMenu, setFileTreeContextMenu] =
+    useState(initialContextMenu)
+  const [assignmentTreeContextMenu, setAssignmentTreeContextMenu] =
+    useState(initialContextMenu)
   const [contextTarget, setContextTarget] = useState<
     ExtendedFile | ExtendedFolder
   >()
@@ -110,16 +123,27 @@ const Workspace = () => {
   const handleCanDropAt = (items: TreeItem[], target: DraggingPosition) =>
     canDropAt(items, target, tree)
 
-  const handleDefaultContextMenu = async (e: React.MouseEvent) => {
+  const handleFileTreeContextMenu = async (e: React.MouseEvent) => {
     e.preventDefault()
 
     const { pageX, pageY } = e
 
     setContextTarget(undefined)
-    setContextMenu({ show: true, x: pageX, y: pageY })
+    setFileTreeContextMenu({ show: true, x: pageX, y: pageY })
+    assignmentTreeContextMenuClose()
   }
 
-  const handleItemContextMenu = async (
+  const handleAssignmentTreeContextMenu = async (e: React.MouseEvent) => {
+    e.preventDefault()
+
+    const { pageX, pageY } = e
+
+    setContextTarget(undefined)
+    setAssignmentTreeContextMenu({ show: true, x: pageX, y: pageY })
+    fileTreeContextMenuClose()
+  }
+
+  const handleFileTreeItemContextMenu = async (
     e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>,
   ) => {
     e.preventDefault()
@@ -139,14 +163,39 @@ const Workspace = () => {
     if (!retrieved) return
 
     setContextTarget(retrieved)
-    setContextMenu({ show: true, x: pageX, y: pageY })
+    setFileTreeContextMenu({ show: true, x: pageX, y: pageY })
   }
 
-  const contextMenuClose = () => setContextMenu(initialContextMenu)
+  const handleAssignmentTreeItemContextMenu = async (
+    e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>,
+  ) => {
+    e.preventDefault()
+
+    const { pageX, pageY, target } = e
+
+    const targetElement = target as HTMLElement
+
+    const fullPath = String(targetElement.dataset.mykey)
+
+    const retrievedFile = await filesDB.files.get({ fullPath })
+    const retrievedFolder = await filesDB.folders.get({
+      fullPath,
+    })
+
+    const retrieved = retrievedFile || retrievedFolder
+    if (!retrieved) return
+
+    setContextTarget(retrieved)
+    setAssignmentTreeContextMenu({ show: true, x: pageX, y: pageY })
+  }
+
+  const fileTreeContextMenuClose = () =>
+    setFileTreeContextMenu(initialContextMenu)
+  const assignmentTreeContextMenuClose = () =>
+    setAssignmentTreeContextMenu(initialContextMenu)
 
   return (
-    <main className="flex flex-col overflow-hidden bg-gray-100">
-      <Header />
+    <Fragment>
       <Toolbar
         assignedLength={db.assignedLength}
         inputLength={db.inputLength}
@@ -173,12 +222,15 @@ const Workspace = () => {
         viewState={viewState}
       >
         <div className="flex min-h-full w-full flex-row justify-between overflow-hidden">
-          <UploadedFiles onContextMenu={handleDefaultContextMenu}>
+          <UploadedFiles onContextMenu={handleFileTreeContextMenu}>
             <UploadFilesText showText={db.inputLength === 0} />
             <UploadDropZone>
               <Tree
                 renderItemsContainer={({ children, containerProps }) => (
-                  <ul onContextMenu={handleItemContextMenu} {...containerProps}>
+                  <ul
+                    onContextMenu={handleFileTreeItemContextMenu}
+                    {...containerProps}
+                  >
                     {children}
                   </ul>
                 )}
@@ -197,11 +249,16 @@ const Workspace = () => {
 
           <p className="min-h-screen w-2 bg-gray-100" />
 
-          <ExportFiles>
+          <ExportFiles onContextMenu={handleAssignmentTreeContextMenu}>
             <ExportFilesText showText={db.assignedLength === 0} />
             <Tree
               renderItemsContainer={({ children, containerProps }) => (
-                <ul {...containerProps}>{children}</ul>
+                <ul
+                  onContextMenu={handleAssignmentTreeItemContextMenu}
+                  {...containerProps}
+                >
+                  {children}
+                </ul>
               )}
               renderTreeContainer={({ children, containerProps }) => (
                 <div className="min-h-screen" {...containerProps}>
@@ -216,16 +273,25 @@ const Workspace = () => {
           </ExportFiles>
         </div>
       </ControlledTreeEnvironment>
-      {contextMenu.show && (
-        <ContextMenu
-          closeContextMenu={contextMenuClose}
+      {fileTreeContextMenu.show && (
+        <FileTreeContextMenu
+          closeContextMenu={fileTreeContextMenuClose}
           targetItem={contextTarget}
           tree={tree}
-          x={contextMenu.x}
-          y={contextMenu.y}
+          x={fileTreeContextMenu.x}
+          y={fileTreeContextMenu.y}
         />
       )}
-    </main>
+      {assignmentTreeContextMenu.show && (
+        <AssignmentTreeContextMenu
+          closeContextMenu={assignmentTreeContextMenuClose}
+          targetItem={contextTarget}
+          tree={tree}
+          x={assignmentTreeContextMenu.x}
+          y={assignmentTreeContextMenu.y}
+        />
+      )}
+    </Fragment>
   )
 }
 

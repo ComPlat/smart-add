@@ -1,14 +1,13 @@
 import { ExtendedFile, ExtendedFolder } from '@/database/db'
 import { FileNode } from '@/helper/types'
 import { useOnClickOutside } from '@/hooks/useOnClickOutside'
-import React, { FC, useRef, useState } from 'react'
+import { FC, useRef, useState } from 'react'
 import { FaPlus } from 'react-icons/fa'
 
 import {
   createFolder,
   getUniqueFolderName,
-} from '../structure-btns/folderUtils'
-import classes from './popup.module.css'
+} from '../../structure-btns/folderUtils'
 
 interface AddFolderProps {
   className?: string
@@ -17,10 +16,15 @@ interface AddFolderProps {
   tree: Record<string, FileNode>
 }
 
-const AddFolder: FC<AddFolderProps> = ({ className, close, item, tree }) => {
-  const popupRef = useRef(null)
-
+const AddFolderContextMenuItem: FC<AddFolderProps> = ({
+  className,
+  close,
+  item,
+  tree,
+}) => {
   const baseFolderName = 'New Folder'
+
+  const popupRef = useRef(null)
 
   const [newFolderName, setNewFolderName] = useState(baseFolderName)
   const [showInput, setShowInput] = useState(false)
@@ -67,7 +71,7 @@ const AddFolder: FC<AddFolderProps> = ({ className, close, item, tree }) => {
         </span>
         {showInput && (
           <div
-            className={`${classes['emerge-from-lamp']} absolute left-full top-[-5px] z-10 ml-2 rounded-lg border border-gray-300 bg-white p-1 shadow-lg`}
+            className="absolute left-full top-[-5px] z-10 ml-2 origin-left-center animate-emerge-from-lamp rounded-lg border border-gray-300 bg-white p-1 shadow-lg "
             ref={popupRef}
           >
             <div className="flex flex-col space-y-1">
@@ -106,4 +110,4 @@ const AddFolder: FC<AddFolderProps> = ({ className, close, item, tree }) => {
   )
 }
 
-export default AddFolder
+export default AddFolderContextMenuItem

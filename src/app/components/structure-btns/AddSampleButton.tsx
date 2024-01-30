@@ -7,7 +7,7 @@ import { Button } from '../workspace/Button'
 import { getUniqueFolderName } from './folderUtils'
 import { createSample } from './templates'
 
-const AddSample = ({
+const AddSampleButton = ({
   className,
   tree,
 }: {
@@ -71,4 +71,4 @@ const AddSample = ({
   )
 }
 
-export default AddSample
+export default AddSampleButton

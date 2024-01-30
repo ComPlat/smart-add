@@ -5,6 +5,10 @@ const config: Config = {
   plugins: [],
   theme: {
     extend: {
+      animation: {
+        'emerge-from-lamp': 'emergeFromLamp 0.2s ease-out',
+        'fade-in': 'fadeIn 0.1s ease-out',
+      },
       colors: {
         kit: {
           primary: {
@@ -13,6 +17,28 @@ const config: Config = {
             mid: 'rgba(70, 120, 178, 0.10)',
           },
         },
+      },
+      keyframes: {
+        emergeFromLamp: {
+          '0%': {
+            opacity: '0',
+            transform: 'scaleX(0)',
+          },
+          '50%': {
+            opacity: '0.5',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'scaleX(1)',
+          },
+        },
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+      },
+      transformOrigin: {
+        'left-center': 'left center',
       },
     },
   },
