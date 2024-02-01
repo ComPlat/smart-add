@@ -25,6 +25,7 @@ import Header from './workspace/Header'
 import { Toolbar } from './workspace/Toolbar'
 import { UploadFilesText } from './workspace/UploadFilesText'
 import { UploadedFiles } from './workspace/UploadedFiles'
+import { generateExportJson as generateJson } from './zip-download/jsonGenerator'
 
 const initialContextMenu = {
   show: false,
@@ -52,10 +53,19 @@ const Workspace = () => {
     setTree({ ...retrievedInputTree, ...retrievedAssignmentTree })
     const key = Date.now()
 
+    const assignedFiles = files.filter(
+      (file) => file.treeId === assignmentTreeRoot,
+    )
+    const assignedFolders = folders.filter(
+      (folder) => folder.treeId === assignmentTreeRoot,
+    )
+
     const inputLength = getTotalLength(files, folders, inputTreeRoot)
     const assignedLength = getTotalLength(files, folders, assignmentTreeRoot)
 
     return {
+      assignedFiles,
+      assignedFolders,
       assignedLength,
       files,
       folders,
@@ -152,6 +162,13 @@ const Workspace = () => {
         inputLength={db.inputLength}
         tree={tree}
       />
+      <button
+        className="m-2 rounded-md bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+        onClick={() => generateJson(db.assignedFiles, db.assignedFolders)}
+        // onClick={() => generateJson()}
+      >
+        Get export.json output
+      </button>
       <ControlledTreeEnvironment
         canDrag={(items) =>
           items.every(

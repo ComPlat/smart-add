@@ -33,20 +33,28 @@ export const createFolder = async (
   path: string,
   name: string,
   assignmentTree: boolean = false,
+  parentUid: string = '',
 ) => {
   const folder = {
     fullPath: path,
     isFolder: true,
     name: name,
-    parentUid: v4(),
+    parentUid: parentUid,
     treeId: assignmentTree ? 'assignmentTreeRoot' : 'inputTreeRoot',
     uid: v4(),
   }
 
   await filesDB.folders.put(folder)
+  return folder // Return the folder object
 }
 
-export const createSubFolders = async (basePath: string, names: string[]) =>
+export const createSubFolders = async (
+  basePath: string,
+  names: string[],
+  parentUid: string,
+) =>
   await Promise.all(
-    names.map((name) => createFolder(`${basePath}/${name}`, name, true)),
+    names.map((name) =>
+      createFolder(`${basePath}/${name}`, name, true, parentUid),
+    ),
   )

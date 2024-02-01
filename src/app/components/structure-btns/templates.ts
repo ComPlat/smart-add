@@ -16,9 +16,18 @@ export const createSample = async (
     baseFolderName,
   )
 
+  const parentFolder = await createFolder(
+    uniqueFolderName,
+    uniqueFolderName,
+    true,
+  )
+
   const promises = [
-    createFolder(uniqueFolderName, uniqueFolderName, true),
-    createSubFolders(uniqueFolderName, ['structure', 'analyses']),
+    createSubFolders(
+      uniqueFolderName,
+      ['structure', 'analyses'],
+      parentFolder.uid,
+    ),
   ]
 
   return Promise.all(promises)
@@ -36,17 +45,20 @@ export const createReaction = async (
   )
   const uniqueSampleName = getUniqueFolderName(sampleName, tree, sampleName)
 
+  await createFolder(uniqueFolderName, uniqueFolderName, true)
+
+  const sampleFolder = await createFolder(
+    `${uniqueFolderName}/${uniqueSampleName}`,
+    uniqueSampleName,
+    true,
+  )
+
   const promises = [
-    createFolder(uniqueFolderName, uniqueFolderName, true),
-    createFolder(
+    createSubFolders(
       `${uniqueFolderName}/${uniqueSampleName}`,
-      uniqueSampleName,
-      true,
+      ['structure', 'analyses'],
+      sampleFolder.uid,
     ),
-    createSubFolders(`${uniqueFolderName}/${uniqueSampleName}`, [
-      'structure',
-      'analyses',
-    ]),
   ]
 
   return Promise.all(promises)
