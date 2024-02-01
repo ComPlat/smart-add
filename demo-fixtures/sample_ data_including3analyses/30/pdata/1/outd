@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TopSpin 3.5 pl 6
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= nmr
+$$ 2022-08-05 10:44:27.984 +0200  nmr@ibg-4-babsi
+$$ /opt/topspin3.5pl6/data/complat/nmr/data/HMS/data/HMS/nmr/HMS-Q545-A/10/pdata/1/outd
+$$ process /opt/topspin3.5pl6/prog/mod/xwish3
+##$CURPLOT= < ±*	Ô±*	à±*	>
+##$CURPRIN= <$1#1#0#1#1#1#1#1#0#-1#-1#1#-1>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/1D_H.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

@@ -1,0 +1,23 @@
+##TITLE= Audit trail, TopSpin 3.5 pl 6
+##JCAMPDX= 5.01
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= nmr
+$$ /opt/topspin3.5pl6/data/complat/nmr/data/HMS/data/HMS/nmr/HMS-Q545-A/10/audita.txt
+##AUDIT TRAIL=  $$ (NUMBER, WHEN, WHO, WHERE, PROCESS, VERSION, WHAT)
+(   1,<2022-08-05 10:52:14.978 +0200>,<nmr>,<ibg-4-babsi>,<go4>,<TopSpin 3.5.6>,
+      <created by zg
+	started at 2022-08-05 10:50:39.956 +0200,
+	POWCHK enabled, PULCHK disabled,
+       configuration hash MD5:
+       BD EC 3A 2C 88 C1 7D BD 5D CB D8 46 40 13 68 60
+       data hash MD5: 64K
+       C7 D1 6E 8B A8 DB B8 6A 82 6A 97 48 72 9D 0F C0>)
+(   2,<2022-08-05 10:52:15.273 +0200>,<nmr>,<ibg-4-babsi>,<audit>,<TopSpin 3.5.6>,
+      <user comment:
+       ICON-NMR User ID: HMS
+       data hash MD5: 64K
+       C7 D1 6E 8B A8 DB B8 6A 82 6A 97 48 72 9D 0F C0>)
+##END=
+
+$$ hash MD5
+$$ 4D 25 53 C4 30 E9 C5 9A 17 EB C8 90 C3 AC 39 C4
