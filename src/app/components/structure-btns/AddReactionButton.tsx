@@ -7,7 +7,7 @@ import { Button } from '../workspace/Button'
 import { getUniqueFolderName } from './folderUtils'
 import { createReaction } from './templates'
 
-const AddReaction = ({
+const AddReactionButton = ({
   className,
   tree,
 }: {
@@ -106,4 +106,4 @@ const AddReaction = ({
   )
 }
 
-export default AddReaction
+export default AddReactionButton

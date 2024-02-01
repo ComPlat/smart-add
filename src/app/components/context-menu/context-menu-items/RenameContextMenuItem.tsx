@@ -4,9 +4,8 @@ import { useOnClickOutside } from '@/hooks/useOnClickOutside'
 import { FC, useRef, useState } from 'react'
 import { FaEdit } from 'react-icons/fa'
 
-import classes from './popup.module.css'
-import renameFile from './renameFile'
-import renameFolder from './renameFolder'
+import renameFile from '../renameFile'
+import renameFolder from '../renameFolder'
 
 interface RenameProps {
   className?: string
@@ -15,7 +14,12 @@ interface RenameProps {
   tree: Record<string, FileNode>
 }
 
-const Rename: FC<RenameProps> = ({ className, close, item, tree }) => {
+const RenameContextMenuItem: FC<RenameProps> = ({
+  className,
+  close,
+  item,
+  tree,
+}) => {
   const popupRef = useRef(null)
 
   const [newName, setNewName] = useState(item.name)
@@ -67,7 +71,7 @@ const Rename: FC<RenameProps> = ({ className, close, item, tree }) => {
       </span>
       {showInput && (
         <div
-          className={`${classes['emerge-from-lamp']} absolute left-full top-[-5px] z-10 ml-2 rounded-lg border border-gray-300 bg-white p-1 shadow-lg`}
+          className="absolute left-full top-[-5px] z-10 ml-2 origin-left-center animate-emerge-from-lamp rounded-lg border border-gray-300 bg-white p-1 shadow-lg"
           ref={popupRef}
         >
           <div className="flex flex-col space-y-1">
@@ -103,4 +107,4 @@ const Rename: FC<RenameProps> = ({ className, close, item, tree }) => {
   )
 }
 
-export default Rename
+export default RenameContextMenuItem
