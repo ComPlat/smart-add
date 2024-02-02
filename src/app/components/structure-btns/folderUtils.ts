@@ -1,4 +1,4 @@
-import { filesDB } from '@/database/db'
+import { ExtendedFolder, filesDB } from '@/database/db'
 import { FileNode } from '@/helper/types'
 import { v4 } from 'uuid'
 
@@ -34,7 +34,7 @@ export const createFolder = async (
   name: string,
   assignmentTree: boolean = false,
   parentUid: string = '',
-) => {
+): Promise<ExtendedFolder> => {
   const folder = {
     fullPath: path,
     isFolder: true,
@@ -45,7 +45,7 @@ export const createFolder = async (
   }
 
   await filesDB.folders.put(folder)
-  return folder // Return the folder object
+  return folder
 }
 
 export const createSubFolders = async (

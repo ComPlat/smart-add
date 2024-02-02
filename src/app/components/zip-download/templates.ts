@@ -14,7 +14,7 @@ export const collectionTemplate = {
   user_id: null,
   ancestry: '',
   label: '',
-  shared_by_id: null,
+  shared_by_id: '',
   is_shared: false,
   permission_level: 0,
   sample_detail_level: 0,

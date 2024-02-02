@@ -25,7 +25,6 @@ export const createSample = async (
   )
 
   const promises = [
-    createFolder(uniqueFolderName, uniqueFolderName, true),
     createSubFolders(
       uniqueFolderName,
       ['structure', 'analyses'],

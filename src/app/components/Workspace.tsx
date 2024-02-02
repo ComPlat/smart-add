@@ -216,7 +216,6 @@ const Workspace = () => {
       <button
         className="m-2 rounded-md bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
         onClick={() => generateExportJson(db.assignedFiles, db.assignedFolders)}
-        // onClick={() => generateJson()}
       >
         Get export.json output
       </button>
