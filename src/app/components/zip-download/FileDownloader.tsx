@@ -7,6 +7,7 @@ import { saveAs } from 'file-saver'
 import JSZip from 'jszip'
 
 import { Button } from '../workspace/Button'
+import { generateExportJson } from './jsonGenerator'
 
 interface FileTree {
   [key: string]: Blob | FileTree
@@ -16,6 +17,10 @@ const FileDownloader = () => {
   const assignedFiles =
     useLiveQuery(() =>
       filesDB.files.where('treeId').equals('assignmentTreeRoot').toArray(),
+    ) || []
+  const assignedFolders =
+    useLiveQuery(() =>
+      filesDB.folders.where('treeId').equals('assignmentTreeRoot').toArray(),
     ) || []
 
   const constructTree = (files: ExtendedFile[]): FileTree =>
@@ -69,10 +74,18 @@ const FileDownloader = () => {
 
       await addFilesToZip(fileTree, '')
 
-      const exportJson = new File(['{}'], 'export.json', {
-        lastModified: Date.now(),
-        type: 'application/json',
-      })
+      const exportJsonData = await generateExportJson(
+        assignedFiles,
+        assignedFolders,
+      )
+      const exportJson = new File(
+        [JSON.stringify(exportJsonData)],
+        'export.json',
+        {
+          lastModified: Date.now(),
+          type: 'application/json',
+        },
+      )
       zip.file('export.json', exportJson)
 
       const blob = await zip.generateAsync({ type: 'blob' })

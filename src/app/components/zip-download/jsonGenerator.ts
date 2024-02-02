@@ -51,72 +51,67 @@ export async function generateExportJson(
   assignedFiles: ExtendedFile[],
   assignedFolders: ExtendedFolder[],
 ) {
-  const newCollection = assignedFolders
-    .filter((folder) => folder.name.includes('Collection_'))
-    .map((folder) => {
-      const collection_id = folder.uid
-      return {
-        [collection_id]: {
-          ...collectionSchema.parse({
-            ...collectionTemplate,
-            user_id,
-            label: folder.name,
-            created_at: currentDate,
-            updated_at: currentDate,
-          }),
-        },
+  const newCollection = assignedFolders.reduce((acc, folder) => {
+    if (folder.name.includes('Collection_')) {
+      acc[v4()] = {
+        ...collectionSchema.parse({
+          ...collectionTemplate,
+          user_id,
+          label: folder.name,
+          created_at: currentDate,
+          updated_at: currentDate,
+        }),
       }
-    })
-    .reduce((acc, collection) => ({ ...acc, ...collection }), {})
+    }
+    return acc
+  }, {} as KeyValuePair<Collection>)
 
-  const newSamples = assignedFolders
-    .filter((folder) => folder.name.includes('Sample_'))
-    .map((folder) => {
-      const sample_id = v4()
-      return {
-        [sample_id]: {
-          ...sampleSchema.parse({
-            ...sampleTemplate,
-            user_id,
-            name: folder.name,
-            created_at: currentDate,
-            updated_at: currentDate,
-          }),
-        },
+  const newSamples = assignedFolders.reduce((acc, folder) => {
+    if (folder.name.includes('Sample_')) {
+      acc[v4()] = {
+        ...sampleSchema.parse({
+          ...sampleTemplate,
+          user_id,
+          name: folder.name,
+          created_at: currentDate,
+          updated_at: currentDate,
+        }),
       }
-    })
-    .reduce((acc, sample) => ({ ...acc, ...sample }), {})
+    }
+    return acc
+  }, {} as KeyValuePair<Sample>)
 
-  const newReactions = assignedFolders
-    .filter((folder) => folder.name.includes('Reaction_'))
-    .map((folder) => {
-      const reaction_id = v4()
-      return {
-        [reaction_id]: {
-          ...reactionSchema.parse({
-            ...reactionTemplate,
-            user_id,
-            name: folder.name,
-            created_at: currentDate,
-            updated_at: currentDate,
-          }),
-        },
+  const newReactions = assignedFolders.reduce((acc, folder) => {
+    if (folder.name.includes('Reaction_')) {
+      acc[v4()] = {
+        ...reactionSchema.parse({
+          ...reactionTemplate,
+          user_id,
+          name: folder.name,
+          created_at: currentDate,
+          updated_at: currentDate,
+        }),
       }
-    })
-    .reduce((acc, reaction) => ({ ...acc, ...reaction }), {})
+    }
+    return acc
+  }, {} as KeyValuePair<Reaction>)
 
   const exportJson = {
     ...initialJson,
     Collection: {
       ...initialJson.Collection,
-      ...Object.assign({}, newCollection),
+      ...newCollection,
     },
-    Sample: { ...initialJson.Sample, ...Object.assign({}, newSamples) },
+    Sample: {
+      ...initialJson.Sample,
+      ...newSamples,
+    },
     Reaction: {
       ...initialJson.Reaction,
-      ...Object.assign({}, newReactions),
+      ...newReactions,
     },
   }
 
   console.log(exportJson)
+  return exportJson
 }
