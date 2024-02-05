@@ -27,6 +27,8 @@ import { UploadFilesText } from './workspace/UploadFilesText'
 import { UploadedFiles } from './workspace/UploadedFiles'
 
 type Database = {
+  assignedFiles: ExtendedFile[]
+  assignedFolders: ExtendedFolder[]
   assignedLength: number
   files: ExtendedFile[]
   folders: ExtendedFolder[]
@@ -60,10 +62,19 @@ const Workspace = () => {
     setTree({ ...retrievedInputTree, ...retrievedAssignmentTree })
     const key = Date.now()
 
+    const assignedFiles = files.filter(
+      (file) => file.treeId === assignmentTreeRoot,
+    )
+    const assignedFolders = folders.filter(
+      (folder) => folder.treeId === assignmentTreeRoot,
+    )
+
     const inputLength = getTotalLength(files, folders, inputTreeRoot)
     const assignedLength = getTotalLength(files, folders, assignmentTreeRoot)
 
     const database: Database = {
+      assignedFiles,
+      assignedFolders,
       assignedLength,
       files,
       folders,

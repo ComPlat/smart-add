@@ -32,6 +32,7 @@ const updateChildPaths = (
   updatesBatch: {
     fullPath: string
     isFolder: boolean
+    parentUid: string
     treeId: string
     uid: string
   }[],
@@ -47,6 +48,7 @@ const updateChildPaths = (
     updatesBatch.push({
       fullPath: childNewFullPath,
       isFolder: childNode.isFolder,
+      parentUid: String(parentNode.uid),
       treeId: newTreeId,
       uid: String(childNode.uid),
     })
@@ -92,6 +94,7 @@ const handleFileMove = async (
   const updatesBatch: {
     fullPath: string
     isFolder: boolean
+    parentUid: string
     treeId: string
     uid: string
   }[] = []
@@ -108,9 +111,20 @@ const handleFileMove = async (
     const newTreeId =
       target.treeId === 'inputTree' ? 'inputTreeRoot' : 'assignmentTreeRoot'
 
+    let parentUid = null
+    if (target.targetType === 'item') {
+      parentUid = tree[target.targetItem].uid
+    } else if (target.targetType === 'between-items') {
+      // TODO: Not sure yet
+      parentUid = tree[target.parentItem].uid
+    } else if (target.targetType === 'root') {
+      parentUid = null
+    }
+
     updatesBatch.push({
       fullPath: newPath,
       isFolder: table === 'folders',
+      parentUid: String(parentUid),
       treeId: newTreeId,
       uid: entry.uid,
     })
@@ -133,9 +147,11 @@ const handleFileMove = async (
       await Promise.all(
         updatesBatch.map(async (update) => {
           const table = update.isFolder ? filesDB.folders : filesDB.files
-          return table
-            .where({ uid: update.uid })
-            .modify({ fullPath: update.fullPath, treeId: update.treeId })
+          return table.where({ uid: update.uid }).modify({
+            fullPath: update.fullPath,
+            parentUid: update.parentUid,
+            treeId: update.treeId,
+          })
         }),
       ),
   )
