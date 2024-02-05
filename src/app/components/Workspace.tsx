@@ -25,7 +25,6 @@ import { ExportFilesText } from './workspace/ExportFilesText'
 import { Toolbar } from './workspace/Toolbar'
 import { UploadFilesText } from './workspace/UploadFilesText'
 import { UploadedFiles } from './workspace/UploadedFiles'
-import { generateExportJson } from './zip-download/jsonGenerator'
 
 type Database = {
   assignedFiles: ExtendedFile[]
@@ -213,12 +212,6 @@ const Workspace = () => {
         inputLength={db.inputLength}
         tree={tree}
       />
-      <button
-        className="m-2 rounded-md bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
-        onClick={() => generateExportJson(db.assignedFiles, db.assignedFolders)}
-      >
-        Get export.json output
-      </button>
       <ControlledTreeEnvironment
         canDrag={(items) =>
           items.every(

@@ -112,6 +112,5 @@ export async function generateExportJson(
     },
   }
 
-  console.log(exportJson)
   return exportJson
 }
