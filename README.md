@@ -182,7 +182,7 @@ An item will not be displayed or thrown an error message when one of the followi
 - Dataset
 - Attachment
 
-Note: The `container type` of a Container can be
+The `container type` of a Container can be one of the following types:
 
 - analysis
 - analyses
