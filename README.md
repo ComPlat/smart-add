@@ -181,3 +181,23 @@ An item will not be displayed or thrown an error message when one of the followi
 
 - Dataset
 - Attachment
+
+Note: The `container type` of a Container can be
+
+- analysis
+- analyses
+- dataset
+
+Also, Container has `extended_metadata` where the following information is saved:
+
+- kind
+- index
+- report
+- status
+- instrument
+
+If `container_type` is a analysis, it additionally has the following attribute inside of `extended_metadata`:
+
+- content
+
+If `container_type` is null, the object is either a sample or a reaction.
