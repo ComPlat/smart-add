@@ -21,7 +21,7 @@ import {
   collectionSchema,
   reactionSchema,
   sampleSchema,
-} from './zodSchemata'
+} from './zodSchemes'
 
 const currentDate = new Date().toISOString()
 const user_id = 'guest'
