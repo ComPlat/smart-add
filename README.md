@@ -201,3 +201,57 @@ If `container_type` is a analysis, it additionally has the following attribute i
 - content
 
 If `container_type` is null, the object is either a sample or a reaction.
+
+## Export.json structure relations
+```mermaid
+erDiagram
+    COLLECTION {
+        string collection_id
+    }
+    COLLECTIONS-SAMPLE {
+        string sample_id
+    }
+    COLLECTIONS-REACTION {
+        string reaction_id
+    }
+    SAMPLE {
+        string sample_id
+    }
+    REACTION {
+        string reaction_id
+    }
+    MOLECULE {
+        string molecule_id
+    }
+    MOLECULE-NAME {
+        string molecule_name_id
+    }
+    FINGERPRINT {
+        string fingerprint_id
+    }
+    CONTAINER {
+        string containable_id
+    }
+    ATTACHMENT {
+        string attachable_id
+    }
+    ANALYSES {
+        string ancestry
+    }
+    ANALYSIS {
+        string analysis_id
+    }
+    
+    COLLECTION ||--o{ COLLECTIONS-SAMPLE : "collection_id"
+    COLLECTION ||--o{ COLLECTIONS-REACTION : "collection_id"
+    COLLECTIONS-SAMPLE ||--|| SAMPLE : "sample_id"
+    COLLECTIONS-REACTION ||--|| REACTION : "reaction_id"
+    SAMPLE ||--o{ ANALYSES : "ancestry"
+    REACTION ||--o{ ANALYSES : "ancestry"
+    SAMPLE ||--|| MOLECULE : "molecule_id"
+    MOLECULE ||--|| MOLECULE-NAME : "molecule_name_id"
+    MOLECULE ||--|| FINGERPRINT : "fingerprint_id"
+    REACTION ||--|| CONTAINER : "containable_id"
+    CONTAINER ||--o{ ATTACHMENT : "attachable_id"
+    ANALYSES ||--|{ ANALYSIS : "analysis_id"
+```
