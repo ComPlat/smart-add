@@ -35,13 +35,16 @@ const InspectorSidebar = ({
   })
 
   useEffect(() => {
-    if (focusedItem)
-      setRetrievedItem(
-        database?.folders.filter((folder) => folder.name === focusedItem) ||
-          database?.files.filter((files) => files.name === focusedItem),
-      )
-    {
-      setIsOpen(true)
+    if (focusedItem) {
+      const items = [
+        ...(database?.files || []),
+        ...(database?.folders || []),
+      ].filter((item) => item.fullPath === focusedItem)
+
+      if (items.length > 0) {
+        setRetrievedItem(items)
+        setIsOpen(true)
+      }
     }
   }, [database?.files, database?.folders, focusedItem])
 
