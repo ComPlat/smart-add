@@ -238,7 +238,7 @@ const Workspace = ({ focusedItem, setFocusedItem }: FocusedItemProps) => {
         onSelectItems={handleOnSelectItem}
         viewState={viewState}
       >
-        <div className="flex min-h-full w-full flex-row justify-between gap-2 overflow-hidden">
+        <div className="flex w-full flex-row justify-between gap-2 overflow-hidden">
           <UploadedFiles onContextMenu={handleFileTreeContextMenu}>
             <UploadFilesText showText={db.inputLength === 0} />
             <UploadDropZone>
