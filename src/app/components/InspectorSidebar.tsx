@@ -3,13 +3,159 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState } from 'react'
 import { TreeItemIndex } from 'react-complex-tree'
 
-const InputField = () => (
+interface TextInputFieldProps {
+  autoFocus?: boolean
+  className?: string
+  id?: string
+  name: string
+  onChange: React.ChangeEventHandler<HTMLInputElement>
+  placeholder?: string
+  value?: string
+}
+
+const TextInputField: React.FC<TextInputFieldProps> = ({
+  autoFocus = false,
+  className = '',
+  id,
+  name,
+  onChange,
+  placeholder = 'Enter text...',
+  value,
+}) => (
   <input
-    autoFocus
-    className="rounded border px-3 py-1 outline-gray-200 duration-100 hover:border-kit-primary-full focus:border-kit-primary-full"
-    id="text-1"
-    name="text-1"
+    autoFocus={autoFocus}
+    className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+    id={id}
+    name={name}
+    onChange={onChange}
+    placeholder={placeholder}
     type="text"
+    value={value}
+  />
+)
+
+interface NumberInputFieldProps {
+  autoFocus?: boolean
+  className?: string
+  id?: string
+  name: string
+  onChange: React.ChangeEventHandler<HTMLInputElement>
+  placeholder?: string
+  value?: string
+}
+
+const NumberInputField: React.FC<NumberInputFieldProps> = ({
+  autoFocus = false,
+  className = '',
+  id,
+  name,
+  onChange,
+  placeholder = 'Enter number...',
+  value,
+}) => (
+  <input
+    autoFocus={autoFocus}
+    className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+    id={id}
+    name={name}
+    onChange={onChange}
+    placeholder={placeholder}
+    type="number"
+    value={value}
+  />
+)
+
+interface DateInputFieldProps {
+  autoFocus?: boolean
+  className?: string
+  id?: string
+  name: string
+  onChange: React.ChangeEventHandler<HTMLInputElement>
+  placeholder?: string
+  value?: string
+}
+
+const DateInputField: React.FC<DateInputFieldProps> = ({
+  autoFocus = false,
+  className = '',
+  id,
+  name,
+  onChange,
+  placeholder = 'Enter date...',
+  value,
+}) => (
+  <input
+    autoFocus={autoFocus}
+    className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+    id={id}
+    name={name}
+    onChange={onChange}
+    placeholder={placeholder}
+    type="date"
+    value={value}
+  />
+)
+
+interface CheckboxFieldProps {
+  checked: boolean
+  className?: string
+  id?: string
+  label?: string
+  name: string
+  onChange: React.ChangeEventHandler<HTMLInputElement>
+}
+
+const CheckboxField: React.FC<CheckboxFieldProps> = ({
+  checked = false,
+  className = '',
+  id,
+  label = '',
+  name,
+  onChange,
+}) => (
+  <label>
+    <input
+      checked={checked}
+      className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+      id={id}
+      name={name}
+      onChange={onChange}
+      type="checkbox"
+    />{' '}
+    {label}
+  </label>
+)
+
+interface TextareaFieldProps {
+  autoFocus?: boolean
+  className?: string
+  id?: string
+  name: string
+  onChange: React.ChangeEventHandler<HTMLTextAreaElement>
+  placeholder?: string
+  rows?: number
+  value?: string
+}
+
+const TextareaField: React.FC<TextareaFieldProps> = ({
+  autoFocus = false,
+  className = '',
+  id,
+  name,
+  onChange,
+  placeholder = 'Enter text...',
+  rows = 3,
+  value,
+}) => (
+  <textarea
+    autoFocus={autoFocus}
+    className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+    id={id}
+    name={name}
+    onChange={onChange}
+    placeholder={placeholder}
+    rows={rows}
+    value={value}
   />
 )
 
@@ -84,11 +230,21 @@ const InspectorSidebar = ({
             <p className="font-bold">
               {retrievedItem.map((item) => item.name)}
             </p>
-            <InputField />
-            <InputField />
-            <InputField />
-            <InputField />
-            <InputField />
+            <div className="flex flex-col gap-4">
+              <TextInputField
+                name={retrievedItem[0].name}
+                onChange={() => {}}
+              />
+              <NumberInputField name={''} onChange={() => {}} />
+              <DateInputField name={''} onChange={() => {}} />
+              <CheckboxField
+                checked={true}
+                label="Checked?"
+                name={''}
+                onChange={() => {}}
+              />
+              <TextareaField name={''} onChange={() => {}} />
+            </div>
           </div>
         </aside>
       )}
