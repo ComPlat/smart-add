@@ -3,9 +3,8 @@ import { TreeItemIndex } from 'react-complex-tree'
 
 describe('<UploadForm />', () => {
   it('renders', () => {
-    const mockFocusedItem = {} as
-      | (TreeItemIndex & (TreeItemIndex | TreeItemIndex[]))
-      | undefined
+    const mockFocusedItem = {} as TreeItemIndex &
+      (TreeItemIndex | TreeItemIndex[])
     const mockSetFocusedItem = () => {}
 
     cy.mount(
