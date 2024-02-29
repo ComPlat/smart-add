@@ -22,16 +22,19 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
   placeholder = 'Enter text...',
   value,
 }) => (
-  <input
-    autoFocus={autoFocus}
-    className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
-    id={id}
-    name={name}
-    onChange={onChange}
-    placeholder={placeholder}
-    type="text"
-    value={value}
-  />
+  <label className="flex flex-col">
+    {name}
+    <input
+      autoFocus={autoFocus}
+      className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+      id={id}
+      name={name}
+      onChange={onChange}
+      placeholder={placeholder}
+      type="text"
+      value={value}
+    />
+  </label>
 )
 
 interface NumberInputFieldProps {
@@ -41,7 +44,7 @@ interface NumberInputFieldProps {
   name: string
   onChange: React.ChangeEventHandler<HTMLInputElement>
   placeholder?: string
-  value?: string
+  value?: number
 }
 
 const NumberInputField: React.FC<NumberInputFieldProps> = ({
@@ -53,16 +56,19 @@ const NumberInputField: React.FC<NumberInputFieldProps> = ({
   placeholder = 'Enter number...',
   value,
 }) => (
-  <input
-    autoFocus={autoFocus}
-    className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
-    id={id}
-    name={name}
-    onChange={onChange}
-    placeholder={placeholder}
-    type="number"
-    value={value}
-  />
+  <label className="flex flex-col">
+    {name}
+    <input
+      autoFocus={autoFocus}
+      className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+      id={id}
+      name={name}
+      onChange={onChange}
+      placeholder={placeholder}
+      type="number"
+      value={value}
+    />
+  </label>
 )
 
 interface DateInputFieldProps {
@@ -84,23 +90,25 @@ const DateInputField: React.FC<DateInputFieldProps> = ({
   placeholder = 'Enter date...',
   value,
 }) => (
-  <input
-    autoFocus={autoFocus}
-    className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
-    id={id}
-    name={name}
-    onChange={onChange}
-    placeholder={placeholder}
-    type="date"
-    value={value}
-  />
+  <label className="flex flex-col">
+    {name}
+    <input
+      autoFocus={autoFocus}
+      className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+      id={id}
+      name={name}
+      onChange={onChange}
+      placeholder={placeholder}
+      type="date"
+      value={value}
+    />
+  </label>
 )
 
 interface CheckboxFieldProps {
   checked: boolean
   className?: string
   id?: string
-  label?: string
   name: string
   onChange: React.ChangeEventHandler<HTMLInputElement>
 }
@@ -109,11 +117,10 @@ const CheckboxField: React.FC<CheckboxFieldProps> = ({
   checked = false,
   className = '',
   id,
-  label = '',
   name,
   onChange,
 }) => (
-  <label>
+  <label className="flex gap-2">
     <input
       checked={checked}
       className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
@@ -121,8 +128,8 @@ const CheckboxField: React.FC<CheckboxFieldProps> = ({
       name={name}
       onChange={onChange}
       type="checkbox"
-    />{' '}
-    {label}
+    />
+    {name}
   </label>
 )
 
@@ -147,16 +154,19 @@ const TextareaField: React.FC<TextareaFieldProps> = ({
   rows = 3,
   value,
 }) => (
-  <textarea
-    autoFocus={autoFocus}
-    className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
-    id={id}
-    name={name}
-    onChange={onChange}
-    placeholder={placeholder}
-    rows={rows}
-    value={value}
-  />
+  <label className="flex flex-col">
+    {name}
+    <textarea
+      autoFocus={autoFocus}
+      className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+      id={id}
+      name={name}
+      onChange={onChange}
+      placeholder={placeholder}
+      rows={rows}
+      value={value}
+    />
+  </label>
 )
 
 const InspectorSidebar = ({
@@ -232,18 +242,26 @@ const InspectorSidebar = ({
             </p>
             <div className="flex flex-col gap-4">
               <TextInputField
-                name={retrievedItem[0].name}
+                name={'Test Text'}
                 onChange={() => {}}
+                value={retrievedItem[0].name}
               />
-              <NumberInputField name={''} onChange={() => {}} />
-              <DateInputField name={''} onChange={() => {}} />
+              <NumberInputField
+                name={'Test Number'}
+                onChange={() => {}}
+                value={retrievedItem[0].id}
+              />
+              <DateInputField name={'Test Date'} onChange={() => {}} />
               <CheckboxField
-                checked={true}
-                label="Checked?"
-                name={''}
+                checked={retrievedItem[0].isFolder}
+                name={'Test Checkbox'}
                 onChange={() => {}}
               />
-              <TextareaField name={''} onChange={() => {}} />
+              <TextareaField
+                name={'Test Area'}
+                onChange={() => {}}
+                value={retrievedItem[0].fullPath}
+              />
             </div>
           </div>
         </aside>
