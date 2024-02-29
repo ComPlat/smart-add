@@ -176,7 +176,7 @@ const InspectorSidebar = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [retrievedItem, setRetrievedItem] = useState<
-    ExtendedFile[] | ExtendedFolder[] | undefined
+    ExtendedFile | ExtendedFolder | undefined
   >()
 
   const handleClose = () => {
@@ -198,7 +198,7 @@ const InspectorSidebar = ({
       ].filter((item) => item.fullPath === focusedItem)
 
       if (items.length > 0) {
-        setRetrievedItem(items)
+        setRetrievedItem(items[0])
         setIsOpen(true)
       }
     }
@@ -237,30 +237,28 @@ const InspectorSidebar = ({
                 />
               </svg>
             </button>
-            <p className="font-bold">
-              {retrievedItem.map((item) => item.name)}
-            </p>
+            <p className="font-bold">{retrievedItem.name}</p>
             <div className="flex flex-col gap-4">
               <TextInputField
                 name={'Test Text'}
                 onChange={() => {}}
-                value={retrievedItem[0].name}
+                value={retrievedItem.name}
               />
               <NumberInputField
                 name={'Test Number'}
                 onChange={() => {}}
-                value={retrievedItem[0].id}
+                value={retrievedItem.id}
               />
               <DateInputField name={'Test Date'} onChange={() => {}} />
               <CheckboxField
-                checked={retrievedItem[0].isFolder}
+                checked={retrievedItem.isFolder}
                 name={'Test Checkbox'}
                 onChange={() => {}}
               />
               <TextareaField
                 name={'Test Area'}
                 onChange={() => {}}
-                value={retrievedItem[0].fullPath}
+                value={retrievedItem.fullPath}
               />
             </div>
           </div>
