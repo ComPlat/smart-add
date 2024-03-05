@@ -7,7 +7,7 @@ import { retrieveTree } from '@/helper/retrieveTree'
 import { FileNode } from '@/helper/types'
 import { getTotalLength } from '@/helper/utils'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Fragment, useState } from 'react'
+import { Dispatch, Fragment, SetStateAction, useState } from 'react'
 import {
   ControlledTreeEnvironment,
   DraggingPosition,
@@ -36,6 +36,15 @@ type Database = {
   key: number
 }
 
+type FocusedItemProps = {
+  focusedItem: (TreeItemIndex & (TreeItemIndex | TreeItemIndex[])) | undefined
+  setFocusedItem: Dispatch<
+    SetStateAction<
+      (TreeItemIndex & (TreeItemIndex | TreeItemIndex[])) | undefined
+    >
+  >
+}
+
 const initialContextMenu = {
   show: false,
   x: 0,
@@ -47,7 +56,7 @@ const [inputTreeRoot, assignmentTreeRoot] = [
   'assignmentTreeRoot',
 ]
 
-const Workspace = () => {
+const Workspace = ({ focusedItem, setFocusedItem }: FocusedItemProps) => {
   const [tree, setTree] = useState({} as Record<string, FileNode>)
 
   const db = useLiveQuery(async () => {
@@ -85,9 +94,6 @@ const Workspace = () => {
     return database
   })
 
-  const [focusedItem, setFocusedItem] = useState<
-    TreeItemIndex & (TreeItemIndex | TreeItemIndex[])
-  >()
   const [expandedItems, setExpandedItems] = useState<TreeItemIndex[]>([])
   const [selectedItems, setSelectedItems] = useState<TreeItemIndex[]>([])
 
@@ -232,7 +238,7 @@ const Workspace = () => {
         onSelectItems={handleOnSelectItem}
         viewState={viewState}
       >
-        <div className="flex min-h-full w-full flex-row justify-between overflow-hidden">
+        <div className="flex w-full flex-row justify-between gap-2 overflow-hidden">
           <UploadedFiles onContextMenu={handleFileTreeContextMenu}>
             <UploadFilesText showText={db.inputLength === 0} />
             <UploadDropZone>
@@ -246,7 +252,7 @@ const Workspace = () => {
                   </ul>
                 )}
                 renderTreeContainer={({ children, containerProps }) => (
-                  <div className="min-h-screen" {...containerProps}>
+                  <div className="h-[85vh] overflow-y-auto" {...containerProps}>
                     {children}
                   </div>
                 )}
@@ -257,8 +263,6 @@ const Workspace = () => {
               />
             </UploadDropZone>
           </UploadedFiles>
-
-          <p className="min-h-screen w-2 bg-gray-100" />
 
           <ExportFiles onContextMenu={handleAssignmentTreeContextMenu}>
             <ExportFilesText showText={db.assignedLength === 0} />
@@ -272,7 +276,7 @@ const Workspace = () => {
                 </ul>
               )}
               renderTreeContainer={({ children, containerProps }) => (
-                <div className="min-h-screen" {...containerProps}>
+                <div className="h-[85vh] overflow-y-auto" {...containerProps}>
                   {children}
                 </div>
               )}

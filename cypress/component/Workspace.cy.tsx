@@ -1,7 +1,17 @@
 import Workspace from '@/app/components/Workspace'
+import { TreeItemIndex } from 'react-complex-tree'
 
 describe('<UploadForm />', () => {
   it('renders', () => {
-    cy.mount(<Workspace />)
+    const mockFocusedItem = {} as TreeItemIndex &
+      (TreeItemIndex | TreeItemIndex[])
+    const mockSetFocusedItem = () => {}
+
+    cy.mount(
+      <Workspace
+        focusedItem={mockFocusedItem}
+        setFocusedItem={mockSetFocusedItem}
+      />,
+    )
   })
 })
