@@ -7,6 +7,7 @@ import { Progress, Upload, UploadProps, message } from 'antd'
 import { RcFile, UploadFile } from 'antd/es/upload'
 import { Dispatch, SetStateAction, useState } from 'react'
 import { v4 } from 'uuid'
+import * as XLSX from 'xlsx'
 
 import styles from './UploadDropZone.module.css'
 
@@ -115,6 +116,33 @@ const handleCustomRequest = async ({
     } catch (err) {
       console.error('Failed to extract and upload ZIP file:', err)
     }
+  } else if (file instanceof File && file.name.endsWith('.xlsx')) {
+    const readWorkbook = (file: File) => {
+      return new Promise<Record<string, object[]>>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = (event) => {
+          const arrayBuffer = event.target?.result
+          if (!arrayBuffer) return reject(new Error('No array buffer'))
+
+          const workbook = XLSX.read(arrayBuffer, { type: 'binary' })
+          const worksheets = workbook.Sheets
+
+          const worksheetData = {} as Record<string, object[][]>
+
+          Object.keys(worksheets).forEach((name) => {
+            const worksheet = worksheets[name]
+            worksheetData[name] = XLSX.utils.sheet_to_json(worksheet)
+          })
+
+          resolve(worksheetData)
+        }
+        reader.readAsArrayBuffer(file)
+      })
+    }
+
+    const worksheetData = await readWorkbook(file)
+
+    console.log(worksheetData)
   } else {
     setProgress(50)
 
