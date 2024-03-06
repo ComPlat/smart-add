@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { JSONTree } from 'react-json-tree'
 import * as XLSX from 'xlsx'
 
+// TODO: Remove component when automatic processing of XLSX files is implemented
 const ParseXlsx = () => {
   const [fullPath, setFullPath] = useState('')
   const [output, setOutput] = useState(null as XLSX.WorkBook | null)

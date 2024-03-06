@@ -2,12 +2,12 @@
 
 import { filesDB } from '@/database/db'
 import { extractFilesFromZip } from '@/helper/extractFilesFromZip'
+import { readSpreadsheet } from '@/helper/readSpreadsheet'
 import { uploadExtractedFiles } from '@/helper/uploadExtractedFiles'
 import { Progress, Upload, UploadProps, message } from 'antd'
 import { RcFile, UploadFile } from 'antd/es/upload'
 import { Dispatch, SetStateAction, useState } from 'react'
 import { v4 } from 'uuid'
-import * as XLSX from 'xlsx'
 
 import styles from './UploadDropZone.module.css'
 
@@ -116,89 +116,96 @@ const handleCustomRequest = async ({
     } catch (err) {
       console.error('Failed to extract and upload ZIP file:', err)
     }
-  } else if (file instanceof File && file.name.endsWith('.xlsx')) {
-    const readWorkbook = (file: File) => {
-      return new Promise<Record<string, object[]>>((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = (event) => {
-          const arrayBuffer = event.target?.result
-          if (!arrayBuffer) return reject(new Error('No array buffer'))
-
-          const workbook = XLSX.read(arrayBuffer, { type: 'binary' })
-          const worksheets = workbook.Sheets
-
-          const worksheetData = {} as Record<string, object[][]>
-
-          Object.keys(worksheets).forEach((name) => {
-            const worksheet = worksheets[name]
-            worksheetData[name] = XLSX.utils.sheet_to_json(worksheet)
-          })
-
-          resolve(worksheetData)
-        }
-        reader.readAsArrayBuffer(file)
-      })
-    }
-
-    const worksheetData = await readWorkbook(file)
-
-    console.log(worksheetData)
   } else {
     setProgress(50)
 
-    const promises: Promise<Promise<number | void>[]>[] =
-      uploadFileList.flatMap(async (fileObj) => {
-        if (!fileObj.originFileObj) return [Promise.resolve()]
+    if (file.name.endsWith('.xlsx')) {
+      const worksheetData = await readSpreadsheet(file)
 
-        const path = fileObj.originFileObj.webkitRelativePath
-        const safeFilePaths = filePaths ? filePaths : {}
-
-        if (path in safeFilePaths) return [Promise.resolve()]
-
-        setFilePaths({ ...filePaths, [path]: fileObj })
-
-        const pathParts = path.split('/')
-        return pathParts.slice(0, -1).flatMap(async (_part, i) => {
-          const currentFolder = pathParts.slice(0, i + 1).join('/')
-
-          if (uploadedFolders.includes(currentFolder)) return Promise.resolve()
-
-          uploadedFolders.push(currentFolder)
-
-          const folderName = currentFolder.split('/').slice(-1)[0]
-          return await filesDB.folders.add({
-            fullPath: currentFolder,
-            isFolder: true,
-            name: folderName,
-            parentUid: '',
-            treeId: targetTreeRoot,
-            uid: v4(),
-          })
-        })
-      })
-
-    await Promise.all(promises)
-
-    filesDB.files
-      .add({
-        extension: file.webkitRelativePath.split('.').slice(-1)[0],
-        file,
+      // Create a file as folder for XLSX
+      await filesDB.folders.add({
         fullPath: file.webkitRelativePath,
-        isFolder: false,
+        isFolder: true,
         name: file.name,
-        parentUid: file.uid.split('_')[0],
-        path: parentPath,
+        parentUid: '',
         treeId: targetTreeRoot,
         uid: v4(),
       })
-      .then(async () => {
-        setProgress(100)
-        onSuccess?.(file)
-        return true
-      })
-      .catch((err) => {
-        console.error('Failed to save file:', err)
-      })
+
+      // Create subfolders for each sheet
+      for (const key in worksheetData) {
+        const folderPath = `${file.webkitRelativePath}/${key}`
+
+        await filesDB.folders.add({
+          fullPath: folderPath,
+          isFolder: true,
+          name: key,
+          parentUid: file.uid,
+          treeId: targetTreeRoot,
+          uid: v4(),
+        })
+      }
+
+      setProgress(100)
+      onSuccess?.(file)
+      return true
+    } else {
+      const promises: Promise<Promise<number | void>[]>[] =
+        uploadFileList.flatMap(async (fileObj) => {
+          if (!fileObj.originFileObj) return [Promise.resolve()]
+
+          const path = fileObj.originFileObj.webkitRelativePath
+          const safeFilePaths = filePaths ? filePaths : {}
+
+          if (path in safeFilePaths) return [Promise.resolve()]
+
+          setFilePaths({ ...filePaths, [path]: fileObj })
+
+          const pathParts = path.split('/')
+          return pathParts.slice(0, -1).flatMap(async (_part, i) => {
+            const currentFolder = pathParts.slice(0, i + 1).join('/')
+
+            if (uploadedFolders.includes(currentFolder))
+              return Promise.resolve()
+
+            uploadedFolders.push(currentFolder)
+
+            const folderName = currentFolder.split('/').slice(-1)[0]
+
+            await filesDB.folders.add({
+              fullPath: currentFolder,
+              isFolder: true,
+              name: folderName,
+              parentUid: '',
+              treeId: targetTreeRoot,
+              uid: v4(),
+            })
+          })
+        })
+
+      await Promise.all(promises)
+
+      filesDB.files
+        .add({
+          extension: file.webkitRelativePath.split('.').slice(-1)[0],
+          file,
+          fullPath: file.webkitRelativePath,
+          isFolder: false,
+          name: file.name,
+          parentUid: file.uid.split('_')[0],
+          path: parentPath,
+          treeId: targetTreeRoot,
+          uid: v4(),
+        })
+        .then(async () => {
+          setProgress(100)
+          onSuccess?.(file)
+          return true
+        })
+        .catch((err) => {
+          console.error('Failed to save file:', err)
+        })
+    }
   }
 
   message.success(`${file.name} uploaded successfully.`)
