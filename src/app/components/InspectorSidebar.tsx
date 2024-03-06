@@ -299,7 +299,7 @@ const InspectorSidebar = ({
               name: updatedName,
             })
 
-            setItem((prevItem) => {
+            setItem((prevItem: ExtendedFile | ExtendedFolder | null) => {
               if (!prevItem) return null
               if ('isFolder' in prevItem) {
                 return {
