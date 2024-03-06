@@ -44,6 +44,11 @@ const renameFolder = async (
     fullPath: folder.fullPath.includes('/')
       ? folder.fullPath.split('/').slice(0, -1).join('/') + '/' + newName
       : newName,
+    metadata: {
+      ...folder.metadata,
+      name: newName,
+      updated_at: new Date().toISOString(),
+    },
     name: newName,
   }
 

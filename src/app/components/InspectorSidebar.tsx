@@ -1,11 +1,18 @@
 import { ExtendedFile, ExtendedFolder, filesDB } from '@/database/db'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { TreeItemIndex } from 'react-complex-tree'
+
+const formatLabel = (text: string): string =>
+  text
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
 
 interface TextInputFieldProps {
   autoFocus?: boolean
   className?: string
+  disabled?: boolean
   id?: string
   name: string
   onChange: React.ChangeEventHandler<HTMLInputElement>
@@ -16,6 +23,7 @@ interface TextInputFieldProps {
 const TextInputField: React.FC<TextInputFieldProps> = ({
   autoFocus = false,
   className = '',
+  disabled = false,
   id,
   name,
   onChange,
@@ -23,10 +31,11 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
   value,
 }) => (
   <label className="flex flex-col">
-    {name}
+    {formatLabel(name)}
     <input
       autoFocus={autoFocus}
       className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+      disabled={disabled}
       id={id}
       name={name}
       onChange={onChange}
@@ -53,57 +62,55 @@ const NumberInputField: React.FC<NumberInputFieldProps> = ({
   id,
   name,
   onChange,
-  placeholder = 'Enter number...',
   value,
 }) => (
   <label className="flex flex-col">
-    {name}
+    {formatLabel(name)}
     <input
       autoFocus={autoFocus}
       className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
       id={id}
       name={name}
       onChange={onChange}
-      placeholder={placeholder}
       type="number"
       value={value}
     />
   </label>
 )
 
-interface DateInputFieldProps {
-  autoFocus?: boolean
-  className?: string
-  id?: string
-  name: string
-  onChange: React.ChangeEventHandler<HTMLInputElement>
-  placeholder?: string
-  value?: string
-}
+// interface DateInputFieldProps {
+//   autoFocus?: boolean
+//   className?: string
+//   id?: string
+//   name: string
+//   onChange: React.ChangeEventHandler<HTMLInputElement>
+//   placeholder?: string
+//   value?: string
+// }
 
-const DateInputField: React.FC<DateInputFieldProps> = ({
-  autoFocus = false,
-  className = '',
-  id,
-  name,
-  onChange,
-  placeholder = 'Enter date...',
-  value,
-}) => (
-  <label className="flex flex-col">
-    {name}
-    <input
-      autoFocus={autoFocus}
-      className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
-      id={id}
-      name={name}
-      onChange={onChange}
-      placeholder={placeholder}
-      type="date"
-      value={value}
-    />
-  </label>
-)
+// const DateInputField: React.FC<DateInputFieldProps> = ({
+//   autoFocus = false,
+//   className = '',
+//   id,
+//   name,
+//   onChange,
+//   placeholder = 'Enter date...',
+//   value,
+// }) => (
+//   <label className="flex flex-col">
+//     {name}
+//     <input
+//       autoFocus={autoFocus}
+//       className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+//       id={id}
+//       name={name}
+//       onChange={onChange}
+//       placeholder={placeholder}
+//       type="date"
+//       value={value}
+//     />
+//   </label>
+// )
 
 interface CheckboxFieldProps {
   checked: boolean
@@ -129,45 +136,99 @@ const CheckboxField: React.FC<CheckboxFieldProps> = ({
       onChange={onChange}
       type="checkbox"
     />
-    {name}
+    {formatLabel(name)}
   </label>
 )
 
-interface TextareaFieldProps {
-  autoFocus?: boolean
-  className?: string
-  id?: string
-  name: string
-  onChange: React.ChangeEventHandler<HTMLTextAreaElement>
-  placeholder?: string
-  rows?: number
-  value?: string
+// interface TextareaFieldProps {
+//   autoFocus?: boolean
+//   className?: string
+//   id?: string
+//   name: string
+//   onChange: React.ChangeEventHandler<HTMLTextAreaElement>
+//   placeholder?: string
+//   rows?: number
+//   value?: string
+// }
+
+// const TextareaField: React.FC<TextareaFieldProps> = ({
+//   autoFocus = false,
+//   className = '',
+//   id,
+//   name,
+//   onChange,
+//   placeholder = 'Enter text...',
+//   rows = 3,
+//   value,
+// }) => (
+//   <label className="flex flex-col">
+//     {name}
+//     <textarea
+//       autoFocus={autoFocus}
+//       className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+//       id={id}
+//       name={name}
+//       onChange={onChange}
+//       placeholder={placeholder}
+//       rows={rows}
+//       value={value}
+//     />
+//   </label>
+// )
+
+function determineInputComponent(
+  key: string,
+  value: boolean | null | number | string | undefined,
+  handleInputChange: {
+    (arg0: ChangeEvent<HTMLInputElement>, arg1: string): void
+    (e: ChangeEvent<HTMLInputElement>, key: string): void
+  },
+) {
+  const disabled =
+    key.toLowerCase().includes('id') || key.toLowerCase().includes('ancestry')
+      ? true
+      : false
+  const inputType = typeof value
+  switch (inputType) {
+    case 'string':
+      return (
+        <TextInputField
+          disabled={disabled}
+          key={key}
+          name={key}
+          onChange={(e) => handleInputChange(e, key)}
+          value={value as string}
+        />
+      )
+    case 'number':
+      return (
+        <NumberInputField
+          key={key}
+          name={key}
+          onChange={(e) => handleInputChange(e, key)}
+          value={value as number}
+        />
+      )
+    case 'boolean':
+      return (
+        <CheckboxField
+          checked={value as boolean}
+          key={key}
+          name={key}
+          onChange={(e) => handleInputChange(e, key)}
+        />
+      )
+    default:
+      return (
+        <TextInputField
+          key={key}
+          name={key}
+          onChange={(e) => handleInputChange(e, key)}
+          value={''}
+        />
+      )
+  }
 }
-
-const TextareaField: React.FC<TextareaFieldProps> = ({
-  autoFocus = false,
-  className = '',
-  id,
-  name,
-  onChange,
-  placeholder = 'Enter text...',
-  rows = 3,
-  value,
-}) => (
-  <label className="flex flex-col">
-    {name}
-    <textarea
-      autoFocus={autoFocus}
-      className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
-      id={id}
-      name={name}
-      onChange={onChange}
-      placeholder={placeholder}
-      rows={rows}
-      value={value}
-    />
-  </label>
-)
 
 const InspectorSidebar = ({
   focusedItem,
@@ -175,18 +236,11 @@ const InspectorSidebar = ({
   focusedItem: (TreeItemIndex & (TreeItemIndex | TreeItemIndex[])) | undefined
 }) => {
   const [isOpen, setIsOpen] = useState(false)
-  const [retrievedItem, setRetrievedItem] = useState<
-    ExtendedFile | ExtendedFolder | undefined
-  >()
-
-  const handleClose = () => {
-    setIsOpen(false)
-  }
+  const [item, setItem] = useState<ExtendedFile | ExtendedFolder | null>(null)
 
   const database = useLiveQuery(async () => {
     const files = await filesDB.files.toArray()
     const folders = await filesDB.folders.toArray()
-
     return { files, folders }
   })
 
@@ -198,15 +252,80 @@ const InspectorSidebar = ({
       ].filter((item) => item.fullPath === focusedItem)
 
       if (items.length > 0) {
-        setRetrievedItem(items[0])
+        setItem(items[0])
         setIsOpen(true)
       }
     }
   }, [database?.files, database?.folders, focusedItem])
 
+  const handleClose = () => {
+    setIsOpen(false)
+  }
+
+  const handleInputChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    key: string,
+  ) => {
+    const target = e.target
+    let newValue
+
+    if (target.type === 'checkbox') {
+      newValue = target.checked
+    } else if (target.type === 'number') {
+      newValue = target.valueAsNumber
+    } else {
+      newValue = target.value
+    }
+
+    if (item && item.fullPath) {
+      const fullPath = item.fullPath
+      try {
+        await filesDB.transaction(
+          'rw',
+          [filesDB.files, filesDB.folders],
+          async () => {
+            const dbItem = await filesDB.folders.get({ fullPath })
+            if (!dbItem) return
+
+            const updatedMetadata = { ...dbItem.metadata, [key]: newValue }
+
+            let updatedName = item.name
+            if (key === 'name') {
+              updatedName = newValue as string
+            }
+
+            await filesDB.folders.where({ fullPath }).modify({
+              metadata: updatedMetadata,
+              name: updatedName,
+            })
+
+            setItem((prevItem) => {
+              if (!prevItem) return null
+              if ('isFolder' in prevItem) {
+                return {
+                  ...(prevItem as ExtendedFolder),
+                  metadata: updatedMetadata,
+                  name: updatedName,
+                }
+              } else {
+                return {
+                  ...(prevItem as ExtendedFile),
+                  metadata: updatedMetadata,
+                  name: updatedName,
+                }
+              }
+            })
+          },
+        )
+      } catch (error) {
+        console.error('Failed to update item in Dexie DB', error)
+      }
+    }
+  }
+
   return (
     <>
-      {isOpen && retrievedItem && (
+      {isOpen && item && (
         <aside
           className={`right-0 top-0 ml-2 w-[30vw] flex-col rounded-tl-xl bg-white ${
             isOpen ? 'translate-x-0' : 'translate-x-full'
@@ -237,29 +356,12 @@ const InspectorSidebar = ({
                 />
               </svg>
             </button>
-            <p className="font-bold">{retrievedItem.name}</p>
+            <p className="font-bold">{item.name}</p>
             <div className="flex flex-col gap-4">
-              <TextInputField
-                name={'Test Text'}
-                onChange={() => {}}
-                value={retrievedItem.name}
-              />
-              <NumberInputField
-                name={'Test Number'}
-                onChange={() => {}}
-                value={retrievedItem.id}
-              />
-              <DateInputField name={'Test Date'} onChange={() => {}} />
-              <CheckboxField
-                checked={retrievedItem.isFolder}
-                name={'Test Checkbox'}
-                onChange={() => {}}
-              />
-              <TextareaField
-                name={'Test Area'}
-                onChange={() => {}}
-                value={retrievedItem.fullPath}
-              />
+              {item.metadata &&
+                Object.entries(item.metadata).map(([key, value]) =>
+                  determineInputComponent(key, value, handleInputChange),
+                )}
             </div>
           </div>
         </aside>
