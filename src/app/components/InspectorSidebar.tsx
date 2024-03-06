@@ -267,7 +267,7 @@ const InspectorSidebar = ({
     key: string,
   ) => {
     const target = e.target
-    let newValue
+    let newValue: boolean | number | string | undefined
 
     if (target.type === 'checkbox') {
       newValue = target.checked
