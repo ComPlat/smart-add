@@ -337,3 +337,67 @@ export const reactionSchema = z.object({
   duration: z.string(),
 })
 export type Reaction = z.infer<typeof reactionSchema>
+
+export const reactionsWorksheetTableSchema = z.object({
+  'r short label': z.string().nullable(),
+  description: z.string().nullable(),
+  temperature: z.string().nullable(),
+  duration: z.string().nullable(),
+})
+export type ReactionsWorksheetTable = z.infer<
+  typeof reactionsWorksheetTableSchema
+>
+
+export const sampleWorksheetTableSchema = z.object({
+  'molecule name': z.string().nullable(),
+  'sample name': z.string().nullable(),
+  'sample external label': z.string().nullable(),
+  'short label': z.string().nullable(),
+  description: z.string().nullable(),
+  'real amount': z.string().nullable(),
+  'real unit': z.string().nullable(),
+  'target amount': z.string().nullable(),
+  'target unit': z.string().nullable(),
+  molarity_value: z.string().nullable(),
+  density: z.string().nullable(),
+  molfile: z.string().nullable(),
+  solvent: z.string().nullable(),
+  location: z.string().nullable(),
+  secret: z.string().nullable(),
+  'sample readout': z.string().nullable(),
+  'melting pt': z.string().nullable(),
+  'boiling pt': z.string().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+  user_labels: z.string().nullable(),
+  literatures: z.string().nullable(),
+  'canonical smiles': z.string().nullable(),
+  'residue type': z.string().nullable(),
+  decoupled: z.string().nullable(),
+  'molecular mass (decoupled)': z.string().nullable(),
+  'sum formula (decoupled)': z.string().nullable(),
+  'stereo abs': z.string().nullable(),
+  'stereo rel': z.string().nullable(),
+  'cas|image': z.string().nullable(),
+})
+export type SampleWorksheetTable = z.infer<typeof sampleWorksheetTableSchema>
+
+export const sampleAnalysesTableSchema = z.object({
+  'sample name': z.string().nullable(),
+  'sample external label': z.string().nullable(),
+  'short label': z.string().nullable(),
+  name: z.string().nullable(),
+  description: z.string().nullable(),
+  uuid: z.string().nullable(),
+  kind: z.string().nullable(),
+  status: z.string().nullable(),
+  content: z.string().nullable(),
+  'dataset name': z.string().nullable(),
+  instrument: z.string().nullable(),
+  'dataset description': z.string().nullable(),
+  filename: z.string().nullable(),
+  checksum: z.string().nullable(),
+})
+export type SampleAnalysesWorksheetTable = z.infer<
+  typeof sampleAnalysesTableSchema
+>

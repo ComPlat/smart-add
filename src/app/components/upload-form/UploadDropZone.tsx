@@ -9,6 +9,11 @@ import { RcFile, UploadFile } from 'antd/es/upload'
 import { Dispatch, SetStateAction, useState } from 'react'
 import { v4 } from 'uuid'
 
+import {
+  ReactionsWorksheetTable,
+  SampleAnalysesWorksheetTable,
+  SampleWorksheetTable,
+} from '../zip-download/zodSchemes'
 import styles from './UploadDropZone.module.css'
 
 // HINT: Necessary because of the way the Ant Design Upload Component
@@ -133,17 +138,54 @@ const handleCustomRequest = async ({
       })
 
       // Create subfolders for each sheet
-      for (const key in worksheetData) {
-        const folderPath = `${file.webkitRelativePath}/${key}`
+      for (const table in worksheetData) {
+        const folderPath = `${file.webkitRelativePath}/${table}`
+
+        console.log(table)
 
         await filesDB.folders.add({
           fullPath: folderPath,
           isFolder: true,
-          name: key,
+          name: table,
           parentUid: file.uid,
           treeId: targetTreeRoot,
           uid: v4(),
         })
+
+        // Create files for each subfolder
+        for (const row of worksheetData[table]) {
+          const sortValue = () => {
+            switch (table) {
+              case 'reactions':
+                return (row as ReactionsWorksheetTable)[
+                  'r short label'
+                ] as string
+              case 'sample':
+                return (row as SampleWorksheetTable)['molecule name'] as string
+              case 'sample_analyses':
+                return (row as SampleAnalysesWorksheetTable)[
+                  'sample name'
+                ] as string
+              default:
+                return ''
+            }
+          }
+
+          await filesDB.files.add({
+            extension: '',
+            file: new File(
+              [JSON.stringify(row)],
+              `${folderPath}/${sortValue()}`,
+            ),
+            fullPath: `${folderPath}/${sortValue()}`,
+            isFolder: false,
+            name: sortValue(),
+            parentUid: file.uid,
+            path: parentPath,
+            treeId: targetTreeRoot,
+            uid: v4(),
+          })
+        }
       }
 
       setProgress(100)
