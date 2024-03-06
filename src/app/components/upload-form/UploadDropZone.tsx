@@ -121,133 +121,123 @@ const handleCustomRequest = async ({
     } catch (err) {
       console.error('Failed to extract and upload ZIP file:', err)
     }
-  } else {
-    setProgress(50)
+  } else if (file.name.endsWith('.xlsx')) {
+    const worksheetData = await readSpreadsheet(file)
 
-    if (file.name.endsWith('.xlsx')) {
-      const worksheetData = await readSpreadsheet(file)
+    // Create a file as folder for XLSX
+    await filesDB.folders.add({
+      fullPath: file.webkitRelativePath,
+      isFolder: true,
+      name: file.name,
+      parentUid: '',
+      treeId: targetTreeRoot,
+      uid: v4(),
+    })
 
-      // Create a file as folder for XLSX
+    // Create subfolders for each sheet
+    for (const table in worksheetData) {
+      const folderPath = `${file.webkitRelativePath}/${table}`
+
+      console.log(table)
+
       await filesDB.folders.add({
-        fullPath: file.webkitRelativePath,
+        fullPath: folderPath,
         isFolder: true,
-        name: file.name,
-        parentUid: '',
+        name: table,
+        parentUid: file.uid,
         treeId: targetTreeRoot,
         uid: v4(),
       })
 
-      // Create subfolders for each sheet
-      for (const table in worksheetData) {
-        const folderPath = `${file.webkitRelativePath}/${table}`
-
-        console.log(table)
-
-        await filesDB.folders.add({
-          fullPath: folderPath,
-          isFolder: true,
-          name: table,
-          parentUid: file.uid,
-          treeId: targetTreeRoot,
-          uid: v4(),
-        })
-
-        // Create files for each subfolder
-        for (const row of worksheetData[table]) {
-          const sortValue = () => {
-            switch (table) {
-              case 'reactions':
-                return (row as ReactionsWorksheetTable)[
-                  'r short label'
-                ] as string
-              case 'sample':
-                return (row as SampleWorksheetTable)['molecule name'] as string
-              case 'sample_analyses':
-                return (row as SampleAnalysesWorksheetTable)[
-                  'sample name'
-                ] as string
-              default:
-                return ''
-            }
+      // Create files for each subfolder
+      for (const row of worksheetData[table]) {
+        const sortValue = () => {
+          switch (table) {
+            case 'reactions':
+              return (row as ReactionsWorksheetTable)['r short label'] as string
+            case 'sample':
+              return (row as SampleWorksheetTable)['molecule name'] as string
+            case 'sample_analyses':
+              return (row as SampleAnalysesWorksheetTable)[
+                'sample name'
+              ] as string
+            default:
+              return ''
           }
-
-          await filesDB.files.add({
-            extension: '',
-            file: new File(
-              [JSON.stringify(row)],
-              `${folderPath}/${sortValue()}`,
-            ),
-            fullPath: `${folderPath}/${sortValue()}`,
-            isFolder: false,
-            name: sortValue(),
-            parentUid: file.uid,
-            path: parentPath,
-            treeId: targetTreeRoot,
-            uid: v4(),
-          })
         }
-      }
 
-      setProgress(100)
-      onSuccess?.(file)
-      return true
-    } else {
-      const promises: Promise<Promise<number | void>[]>[] =
-        uploadFileList.flatMap(async (fileObj) => {
-          if (!fileObj.originFileObj) return [Promise.resolve()]
-
-          const path = fileObj.originFileObj.webkitRelativePath
-          const safeFilePaths = filePaths ? filePaths : {}
-
-          if (path in safeFilePaths) return [Promise.resolve()]
-
-          setFilePaths({ ...filePaths, [path]: fileObj })
-
-          const pathParts = path.split('/')
-          return pathParts.slice(0, -1).flatMap(async (_part, i) => {
-            const currentFolder = pathParts.slice(0, i + 1).join('/')
-
-            if (uploadedFolders.includes(currentFolder))
-              return Promise.resolve()
-
-            uploadedFolders.push(currentFolder)
-
-            const folderName = currentFolder.split('/').slice(-1)[0]
-
-            await filesDB.folders.add({
-              fullPath: currentFolder,
-              isFolder: true,
-              name: folderName,
-              parentUid: '',
-              treeId: targetTreeRoot,
-              uid: v4(),
-            })
-          })
-        })
-
-      await Promise.all(promises)
-
-      filesDB.files
-        .add({
-          extension: file.webkitRelativePath.split('.').slice(-1)[0],
-          file,
-          fullPath: file.webkitRelativePath,
+        await filesDB.files.add({
+          extension: '',
+          file: new File([JSON.stringify(row)], `${folderPath}/${sortValue()}`),
+          fullPath: `${folderPath}/${sortValue()}`,
           isFolder: false,
-          name: file.name,
-          parentUid: file.uid.split('_')[0],
+          name: sortValue(),
+          parentUid: file.uid,
           path: parentPath,
           treeId: targetTreeRoot,
           uid: v4(),
         })
-        .then(async () => {
-          setProgress(100)
-          onSuccess?.(file)
-          return true
-        })
-        .catch((err) => {
-          console.error('Failed to save file:', err)
-        })
+      }
     }
+
+    setProgress(100)
+    onSuccess?.(file)
+    return true
+  } else {
+    const promises: Promise<Promise<number | void>[]>[] =
+      uploadFileList.flatMap(async (fileObj) => {
+        if (!fileObj.originFileObj) return [Promise.resolve()]
+
+        const path = fileObj.originFileObj.webkitRelativePath
+        const safeFilePaths = filePaths ? filePaths : {}
+
+        if (path in safeFilePaths) return [Promise.resolve()]
+
+        setFilePaths({ ...filePaths, [path]: fileObj })
+
+        const pathParts = path.split('/')
+        return pathParts.slice(0, -1).flatMap(async (_part, i) => {
+          const currentFolder = pathParts.slice(0, i + 1).join('/')
+
+          if (uploadedFolders.includes(currentFolder)) return Promise.resolve()
+
+          uploadedFolders.push(currentFolder)
+
+          const folderName = currentFolder.split('/').slice(-1)[0]
+
+          await filesDB.folders.add({
+            fullPath: currentFolder,
+            isFolder: true,
+            name: folderName,
+            parentUid: '',
+            treeId: targetTreeRoot,
+            uid: v4(),
+          })
+        })
+      })
+
+    await Promise.all(promises)
+
+    filesDB.files
+      .add({
+        extension: file.webkitRelativePath.split('.').slice(-1)[0],
+        file,
+        fullPath: file.webkitRelativePath,
+        isFolder: false,
+        name: file.name,
+        parentUid: file.uid.split('_')[0],
+        path: parentPath,
+        treeId: targetTreeRoot,
+        uid: v4(),
+      })
+      .then(async () => {
+        setProgress(100)
+        onSuccess?.(file)
+        return true
+      })
+      .catch((err) => {
+        console.error('Failed to save file:', err)
+      })
   }
 
   message.success(`${file.name} uploaded successfully.`)
