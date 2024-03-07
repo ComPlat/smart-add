@@ -1,4 +1,4 @@
-import { ExtendedFile, ExtendedFolder, filesDB } from '@/database/db'
+import { ExtendedFile, ExtendedFolder, Metadata, filesDB } from '@/database/db'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { TreeItemIndex } from 'react-complex-tree'
@@ -287,33 +287,34 @@ const InspectorSidebar = ({
             const dbItem = await filesDB.folders.get({ fullPath })
             if (!dbItem) return
 
-            const updatedMetadata = { ...dbItem.metadata, [key]: newValue }
+            let updatedMetadata = { ...dbItem.metadata, [key]: newValue }
 
             let updatedName = item.name
             if (key === 'name') {
               updatedName = newValue as string
             }
 
+            updatedMetadata = Object.entries(updatedMetadata).reduce(
+              (acc, [key, value]) => {
+                if (value !== undefined) acc[key] = value
+                return acc
+              },
+              {} as Metadata,
+            )
+
             await filesDB.folders.where({ fullPath }).modify({
               metadata: updatedMetadata,
               name: updatedName,
             })
 
-            setItem((prevItem: ExtendedFile | ExtendedFolder | null) => {
+            setItem((prevItem) => {
               if (!prevItem) return null
-              if ('isFolder' in prevItem) {
-                return {
-                  ...(prevItem as ExtendedFolder),
-                  metadata: updatedMetadata,
-                  name: updatedName,
-                }
-              } else {
-                return {
-                  ...(prevItem as ExtendedFile),
-                  metadata: updatedMetadata,
-                  name: updatedName,
-                }
-              }
+
+              return {
+                ...prevItem,
+                metadata: updatedMetadata,
+                name: updatedName,
+              } as ExtendedFile | ExtendedFolder
             })
           },
         )
