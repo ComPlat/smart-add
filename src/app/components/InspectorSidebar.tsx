@@ -115,31 +115,32 @@ const NumberInputField: React.FC<NumberInputFieldProps> = ({
 interface DateInputFieldProps {
   autoFocus?: boolean
   className?: string
-  disabled?: boolean
   id?: string
   name: string
   onChange: React.ChangeEventHandler<HTMLInputElement>
+  raw?: boolean
+  storedDate?: string
   value?: string
 }
 
 const DateInputField: React.FC<DateInputFieldProps> = ({
   autoFocus = false,
   className = '',
-  disabled = false,
   id,
   name,
   onChange,
+  raw = false,
+  storedDate,
   value,
 }) => (
   <label className="flex flex-col">
     {formatLabel(name)}
-    {disabled ? (
-      <p className="px-4 py-1">{value}</p>
+    {raw ? (
+      <p className="px-4 py-1">{storedDate}</p>
     ) : (
       <input
         autoFocus={autoFocus}
         className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
-        disabled={disabled}
         id={id}
         name={name}
         onChange={onChange}
@@ -200,10 +201,11 @@ function determineInputComponent(
       if (isISODateTime(value as string)) {
         return (
           <DateInputField
-            disabled={true}
             key={key}
             name={key}
             onChange={(e) => handleInputChange(e, key)}
+            raw={true}
+            storedDate={value as string}
             value={new Date(value as string).toISOString().split('T')[0]}
           />
         )
