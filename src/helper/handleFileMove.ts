@@ -146,12 +146,10 @@ const handleFileMove = async (
       await Promise.all(
         updatesBatch.map(async (update) => {
           const table = update.isFolder ? filesDB.folders : filesDB.files
-          // Modify the metadata attributes of the file or folder
           await table.where({ uid: update.uid }).modify((item) => {
             item.fullPath = update.fullPath
             item.parentUid = update.parentUid
             item.treeId = update.treeId
-            // Update metadata attributes here
             if (item.metadata) {
               item.metadata.parent_id = update.parentUid
               item.metadata.ancestry = update.parentUid
