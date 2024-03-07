@@ -3,7 +3,17 @@ import { z } from 'zod'
 
 const uuidSchema = z.string().nullable()
 
-const datetimeSchema = z.string()
+const datetimeSchema = z.string().refine(
+  (value) => {
+    const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
+    return regex.test(value)
+  },
+  {
+    message:
+      "Invalid datetime format, must be ISO 8601 (e.g., '2017-02-13T08:13:14.480Z')",
+  },
+)
+export type DateTime = z.infer<typeof datetimeSchema>
 
 export const reactionSampleSchema = z.object({
   reaction_id: uuidSchema,

@@ -1,7 +1,11 @@
 import { ExtendedFile, ExtendedFolder, Metadata, filesDB } from '@/database/db'
+import { retrieveTree } from '@/helper/retrieveTree'
+import { FileNode } from '@/helper/types'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { TreeItemIndex } from 'react-complex-tree'
+
+import renameFolder from './context-menu/renameFolder'
 
 const formatLabel = (text: string): string =>
   text
@@ -26,29 +30,53 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
   disabled = false,
   id,
   name,
-  onChange,
+  onChange: onSubmit,
   placeholder = 'Enter text...',
-  value,
-}) => (
-  <label className="flex flex-col">
-    {formatLabel(name)}
-    <input
-      autoFocus={autoFocus}
-      className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
-      disabled={disabled}
-      id={id}
-      name={name}
-      onChange={onChange}
-      placeholder={placeholder}
-      type="text"
-      value={value}
-    />
-  </label>
-)
+  value: initialValue,
+}) => {
+  const [value, setValue] = useState(initialValue)
+
+  useEffect(() => {
+    setValue(initialValue)
+  }, [initialValue])
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(event.target.value)
+  }
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      onSubmit(event as unknown as ChangeEvent<HTMLInputElement>)
+    }
+  }
+
+  return (
+    <label className="flex flex-col">
+      {formatLabel(name)}
+      {disabled ? (
+        <p className="px-4 py-1">{value || 'None'}</p>
+      ) : (
+        <input
+          autoFocus={autoFocus}
+          className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+          disabled={disabled}
+          id={id}
+          name={name}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          type="text"
+          value={value}
+        />
+      )}
+    </label>
+  )
+}
 
 interface NumberInputFieldProps {
   autoFocus?: boolean
   className?: string
+  disabled?: boolean
   id?: string
   name: string
   onChange: React.ChangeEventHandler<HTMLInputElement>
@@ -59,6 +87,7 @@ interface NumberInputFieldProps {
 const NumberInputField: React.FC<NumberInputFieldProps> = ({
   autoFocus = false,
   className = '',
+  disabled = false,
   id,
   name,
   onChange,
@@ -66,55 +95,65 @@ const NumberInputField: React.FC<NumberInputFieldProps> = ({
 }) => (
   <label className="flex flex-col">
     {formatLabel(name)}
-    <input
-      autoFocus={autoFocus}
-      className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
-      id={id}
-      name={name}
-      onChange={onChange}
-      type="number"
-      value={value}
-    />
+    {disabled ? (
+      <p className="px-4 py-1">{value}</p>
+    ) : (
+      <input
+        autoFocus={autoFocus}
+        className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+        disabled={disabled}
+        id={id}
+        name={name}
+        onChange={onChange}
+        type="number"
+        value={value || ''}
+      />
+    )}
   </label>
 )
 
-// interface DateInputFieldProps {
-//   autoFocus?: boolean
-//   className?: string
-//   id?: string
-//   name: string
-//   onChange: React.ChangeEventHandler<HTMLInputElement>
-//   placeholder?: string
-//   value?: string
-// }
+interface DateInputFieldProps {
+  autoFocus?: boolean
+  className?: string
+  disabled?: boolean
+  id?: string
+  name: string
+  onChange: React.ChangeEventHandler<HTMLInputElement>
+  value?: string
+}
 
-// const DateInputField: React.FC<DateInputFieldProps> = ({
-//   autoFocus = false,
-//   className = '',
-//   id,
-//   name,
-//   onChange,
-//   placeholder = 'Enter date...',
-//   value,
-// }) => (
-//   <label className="flex flex-col">
-//     {name}
-//     <input
-//       autoFocus={autoFocus}
-//       className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
-//       id={id}
-//       name={name}
-//       onChange={onChange}
-//       placeholder={placeholder}
-//       type="date"
-//       value={value}
-//     />
-//   </label>
-// )
+const DateInputField: React.FC<DateInputFieldProps> = ({
+  autoFocus = false,
+  className = '',
+  disabled = false,
+  id,
+  name,
+  onChange,
+  value,
+}) => (
+  <label className="flex flex-col">
+    {formatLabel(name)}
+    {disabled ? (
+      <p className="px-4 py-1">{value}</p>
+    ) : (
+      <input
+        autoFocus={autoFocus}
+        className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+        disabled={disabled}
+        id={id}
+        name={name}
+        onChange={onChange}
+        type="date"
+        value={value || ''}
+      />
+    )}
+  </label>
+)
 
 interface CheckboxFieldProps {
   checked: boolean
   className?: string
+  disabled?: boolean
   id?: string
   name: string
   onChange: React.ChangeEventHandler<HTMLInputElement>
@@ -123,6 +162,7 @@ interface CheckboxFieldProps {
 const CheckboxField: React.FC<CheckboxFieldProps> = ({
   checked = false,
   className = '',
+  disabled = false,
   id,
   name,
   onChange,
@@ -131,6 +171,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = ({
     <input
       checked={checked}
       className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+      disabled={disabled}
       id={id}
       name={name}
       onChange={onChange}
@@ -140,69 +181,47 @@ const CheckboxField: React.FC<CheckboxFieldProps> = ({
   </label>
 )
 
-// interface TextareaFieldProps {
-//   autoFocus?: boolean
-//   className?: string
-//   id?: string
-//   name: string
-//   onChange: React.ChangeEventHandler<HTMLTextAreaElement>
-//   placeholder?: string
-//   rows?: number
-//   value?: string
-// }
-
-// const TextareaField: React.FC<TextareaFieldProps> = ({
-//   autoFocus = false,
-//   className = '',
-//   id,
-//   name,
-//   onChange,
-//   placeholder = 'Enter text...',
-//   rows = 3,
-//   value,
-// }) => (
-//   <label className="flex flex-col">
-//     {name}
-//     <textarea
-//       autoFocus={autoFocus}
-//       className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
-//       id={id}
-//       name={name}
-//       onChange={onChange}
-//       placeholder={placeholder}
-//       rows={rows}
-//       value={value}
-//     />
-//   </label>
-// )
-
 function determineInputComponent(
   key: string,
   value: boolean | null | number | string | undefined,
-  handleInputChange: {
-    (arg0: ChangeEvent<HTMLInputElement>, arg1: string): void
-    (e: ChangeEvent<HTMLInputElement>, key: string): void
-  },
+  handleInputChange: (e: ChangeEvent<HTMLInputElement>, key: string) => void,
 ) {
   const disabled =
     key.toLowerCase().includes('id') || key.toLowerCase().includes('ancestry')
-      ? true
-      : false
   const inputType = typeof value
+
+  const isISODateTime = (value: string): boolean => {
+    const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
+    return regex.test(value)
+  }
+
   switch (inputType) {
     case 'string':
-      return (
-        <TextInputField
-          disabled={disabled}
-          key={key}
-          name={key}
-          onChange={(e) => handleInputChange(e, key)}
-          value={value as string}
-        />
-      )
+      if (isISODateTime(value as string)) {
+        return (
+          <DateInputField
+            disabled={true}
+            key={key}
+            name={key}
+            onChange={(e) => handleInputChange(e, key)}
+            value={new Date(value as string).toISOString().split('T')[0]}
+          />
+        )
+      } else {
+        return (
+          <TextInputField
+            disabled={disabled}
+            key={key}
+            name={key}
+            onChange={(e) => handleInputChange(e, key)}
+            value={value as string}
+          />
+        )
+      }
     case 'number':
       return (
         <NumberInputField
+          disabled={disabled}
           key={key}
           name={key}
           onChange={(e) => handleInputChange(e, key)}
@@ -213,6 +232,7 @@ function determineInputComponent(
       return (
         <CheckboxField
           checked={value as boolean}
+          disabled={disabled}
           key={key}
           name={key}
           onChange={(e) => handleInputChange(e, key)}
@@ -221,10 +241,11 @@ function determineInputComponent(
     default:
       return (
         <TextInputField
+          disabled={disabled}
           key={key}
           name={key}
           onChange={(e) => handleInputChange(e, key)}
-          value={''}
+          value=""
         />
       )
   }
@@ -233,14 +254,28 @@ function determineInputComponent(
 const InspectorSidebar = ({
   focusedItem,
 }: {
-  focusedItem: (TreeItemIndex & (TreeItemIndex | TreeItemIndex[])) | undefined
+  focusedItem: TreeItemIndex | undefined
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [item, setItem] = useState<ExtendedFile | ExtendedFolder | null>(null)
+  const [tree, setTree] = useState({} as Record<string, FileNode>)
 
   const database = useLiveQuery(async () => {
     const files = await filesDB.files.toArray()
     const folders = await filesDB.folders.toArray()
+
+    const [inputTreeRoot, assignmentTreeRoot] = [
+      'inputTreeRoot',
+      'assignmentTreeRoot',
+    ]
+    const retrievedInputTree = retrieveTree(files, folders, inputTreeRoot)
+    const retrievedAssignmentTree = retrieveTree(
+      files,
+      folders,
+      assignmentTreeRoot,
+    )
+    setTree({ ...retrievedInputTree, ...retrievedAssignmentTree })
+
     return { files, folders }
   })
 
@@ -263,7 +298,7 @@ const InspectorSidebar = ({
   }
 
   const handleInputChange = async (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: ChangeEvent<HTMLInputElement>,
     key: string,
   ) => {
     const target = e.target
@@ -306,6 +341,9 @@ const InspectorSidebar = ({
               metadata: updatedMetadata,
               name: updatedName,
             })
+
+            renameFolder(item as ExtendedFolder, tree, updatedName)
+            item.name !== updatedName && handleClose()
 
             setItem((prevItem) => {
               if (!prevItem) return null
