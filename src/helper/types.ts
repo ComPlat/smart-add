@@ -6,7 +6,7 @@ interface FileNode {
   data: string
   index: string
   isFolder: boolean
-  metadata: Metadata
+  metadata?: Metadata
   uid: null | string
 }
 
