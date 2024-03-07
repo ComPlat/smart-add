@@ -112,14 +112,15 @@ const NumberInputField: React.FC<NumberInputFieldProps> = ({
   </label>
 )
 
+import React from 'react'
+
 interface DateInputFieldProps {
   autoFocus?: boolean
   className?: string
   id?: string
   name: string
-  onChange: React.ChangeEventHandler<HTMLInputElement>
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   raw?: boolean
-  storedDate?: string
   value?: string
 }
 
@@ -130,26 +131,39 @@ const DateInputField: React.FC<DateInputFieldProps> = ({
   name,
   onChange,
   raw = false,
-  storedDate,
-  value,
-}) => (
-  <label className="flex flex-col">
-    {formatLabel(name)}
-    {raw ? (
-      <p className="px-4 py-1">{storedDate}</p>
-    ) : (
+  value = '',
+}) => {
+  const formatDateForInput = (isoString: string): string => {
+    return isoString.split('T')[0]
+  }
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let newValue = event.target.value
+    if (!raw && newValue) {
+      newValue += 'T00:00:00.000Z'
+    }
+    const newEvent = {
+      ...event,
+      target: { ...event.target, value: newValue },
+    }
+    onChange(newEvent)
+  }
+
+  return (
+    <label className="flex flex-col">
+      {name}
       <input
         autoFocus={autoFocus}
         className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
         id={id}
         name={name}
-        onChange={onChange}
-        type="date"
-        value={value || ''}
+        onChange={handleInputChange}
+        type={raw ? 'text' : 'date'}
+        value={raw ? value : formatDateForInput(value)}
       />
-    )}
-  </label>
-)
+    </label>
+  )
+}
 
 interface CheckboxFieldProps {
   checked: boolean
@@ -204,9 +218,8 @@ function determineInputComponent(
             key={key}
             name={key}
             onChange={(e) => handleInputChange(e, key)}
-            raw={true}
-            storedDate={value as string}
-            value={new Date(value as string).toISOString().split('T')[0]}
+            raw={false}
+            value={value as string}
           />
         )
       } else {
