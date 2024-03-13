@@ -2,6 +2,7 @@ import { ExtendedFile, ExtendedFolder, Metadata, filesDB } from '@/database/db'
 import { retrieveTree } from '@/helper/retrieveTree'
 import { FileNode } from '@/helper/types'
 import { useLiveQuery } from 'dexie-react-hooks'
+import React from 'react'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { TreeItemIndex } from 'react-complex-tree'
 
@@ -111,8 +112,6 @@ const NumberInputField: React.FC<NumberInputFieldProps> = ({
     )}
   </label>
 )
-
-import React from 'react'
 
 interface DateInputFieldProps {
   autoFocus?: boolean
