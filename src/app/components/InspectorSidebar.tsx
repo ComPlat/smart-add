@@ -327,53 +327,53 @@ const InspectorSidebar = ({
       newValue = target.value
     }
 
-    if (item && item.fullPath) {
-      const fullPath = item.fullPath
-      try {
-        await filesDB.transaction(
-          'rw',
-          [filesDB.files, filesDB.folders],
-          async () => {
-            const dbItem = await filesDB.folders.get({ fullPath })
-            if (!dbItem) return
+    if (!item || !item.fullPath) return
 
-            let updatedMetadata = { ...dbItem.metadata, [key]: newValue }
+    const fullPath = item.fullPath
+    try {
+      await filesDB.transaction(
+        'rw',
+        [filesDB.files, filesDB.folders],
+        async () => {
+          const dbItem = await filesDB.folders.get({ fullPath })
+          if (!dbItem) return
 
-            let updatedName = item.name
-            if (key === 'name') {
-              updatedName = newValue as string
-            }
+          let updatedMetadata = { ...dbItem.metadata, [key]: newValue }
 
-            updatedMetadata = Object.entries(updatedMetadata).reduce(
-              (acc, [key, value]) => {
-                if (value !== undefined) acc[key] = value
-                return acc
-              },
-              {} as Metadata,
-            )
+          let updatedName = item.name
+          if (key === 'name') {
+            updatedName = newValue as string
+          }
 
-            await filesDB.folders.where({ fullPath }).modify({
+          updatedMetadata = Object.entries(updatedMetadata).reduce(
+            (acc, [key, value]) => {
+              if (value !== undefined) acc[key] = value
+              return acc
+            },
+            {} as Metadata,
+          )
+
+          await filesDB.folders.where({ fullPath }).modify({
+            metadata: updatedMetadata,
+            name: updatedName,
+          })
+
+          renameFolder(item as ExtendedFolder, tree, updatedName)
+          item.name !== updatedName && handleClose()
+
+          setItem((prevItem) => {
+            if (!prevItem) return null
+
+            return {
+              ...prevItem,
               metadata: updatedMetadata,
               name: updatedName,
-            })
-
-            renameFolder(item as ExtendedFolder, tree, updatedName)
-            item.name !== updatedName && handleClose()
-
-            setItem((prevItem) => {
-              if (!prevItem) return null
-
-              return {
-                ...prevItem,
-                metadata: updatedMetadata,
-                name: updatedName,
-              } as ExtendedFile | ExtendedFolder
-            })
-          },
-        )
-      } catch (error) {
-        console.error('Failed to update item in Dexie DB', error)
-      }
+            } as ExtendedFile | ExtendedFolder
+          })
+        },
+      )
+    } catch (error) {
+      console.error('Failed to update item in Dexie DB', error)
     }
   }
 
