@@ -1,6 +1,6 @@
 import { ExtendedFolder, filesDB } from '@/database/db'
+import { Metadata } from '@/database/db'
 import { FileNode } from '@/helper/types'
-import { Metadata } from 'next'
 import { v4 } from 'uuid'
 
 export const getUniqueFolderName = (
@@ -40,10 +40,9 @@ export const createFolder = async (
   const folder: ExtendedFolder = {
     fullPath: path,
     isFolder: true,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metadata: metadata as any,
-    name: name,
-    parentUid: parentUid,
+    metadata,
+    name,
+    parentUid,
     treeId: assignmentTree ? 'assignmentTreeRoot' : 'inputTreeRoot',
     uid: v4(),
   }
