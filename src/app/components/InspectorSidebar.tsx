@@ -311,20 +311,25 @@ const InspectorSidebar = ({
     setIsOpen(false)
   }
 
+  const extractValue = (
+    target: EventTarget & HTMLInputElement,
+  ): boolean | number | string | undefined => {
+    switch (target.type) {
+      case 'checkbox':
+        return target.checked
+      case 'number':
+        return target.valueAsNumber
+      default:
+        return target.value
+    }
+  }
+
   const handleInputChange = async (
     e: ChangeEvent<HTMLInputElement>,
     key: string,
   ) => {
     const target = e.target
-    let newValue: boolean | number | string | undefined
-
-    if (target.type === 'checkbox') {
-      newValue = target.checked
-    } else if (target.type === 'number') {
-      newValue = target.valueAsNumber
-    } else {
-      newValue = target.value
-    }
+    const newValue = extractValue(target)
 
     if (!item || !item.fullPath) return
 
