@@ -7,6 +7,7 @@ import { ChangeEvent, useEffect, useState } from 'react'
 import { TreeItemIndex } from 'react-complex-tree'
 
 import renameFolder from './context-menu/renameFolder'
+import { datetimeSchema } from './zip-download/zodSchemes'
 
 const formatLabel = (text: string): string =>
   text
@@ -204,14 +205,9 @@ function determineInputComponent(
     key.toLowerCase().includes('id') || key.toLowerCase().includes('ancestry')
   const inputType = typeof value
 
-  const isISODateTime = (value: string): boolean => {
-    const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
-    return regex.test(value)
-  }
-
   switch (inputType) {
     case 'string':
-      if (isISODateTime(value as string)) {
+      if (datetimeSchema.safeParse(value).success) {
         return (
           <DateInputField
             key={key}
