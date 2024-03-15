@@ -124,7 +124,6 @@ const handleCustomRequest = async ({
   } else if (file.name.endsWith('.xlsx')) {
     const worksheetData = await readSpreadsheet(file)
 
-    // Create a file as folder for XLSX
     await filesDB.folders.add({
       fullPath: file.webkitRelativePath,
       isFolder: true,
@@ -134,11 +133,8 @@ const handleCustomRequest = async ({
       uid: v4(),
     })
 
-    // Create subfolders for each sheet
     for (const table in worksheetData) {
       const folderPath = `${file.webkitRelativePath}/${table}`
-
-      console.log(table)
 
       await filesDB.folders.add({
         fullPath: folderPath,
@@ -149,7 +145,6 @@ const handleCustomRequest = async ({
         uid: v4(),
       })
 
-      // Create files for each subfolder
       for (const row of worksheetData[table]) {
         const sortValue = () => {
           switch (table) {
@@ -158,25 +153,31 @@ const handleCustomRequest = async ({
             case 'sample':
               return (row as SampleWorksheetTable)['molecule name'] as string
             case 'sample_analyses':
-              return (row as SampleAnalysesWorksheetTable)[
-                'sample name'
-              ] as string
+              return (
+                ((row as SampleAnalysesWorksheetTable)[
+                  'sample name'
+                ] as string) || '(empty)'
+              )
             default:
-              return ''
+              return '(not defined)'
           }
         }
 
-        await filesDB.files.add({
-          extension: '',
-          file: new File([JSON.stringify(row)], `${folderPath}/${sortValue()}`),
-          fullPath: `${folderPath}/${sortValue()}`,
-          isFolder: false,
-          name: sortValue(),
-          parentUid: file.uid,
-          path: parentPath,
-          treeId: targetTreeRoot,
-          uid: v4(),
-        })
+        sortValue() !== '(empty)' &&
+          (await filesDB.files.add({
+            extension: '',
+            file: new File(
+              [JSON.stringify(row)],
+              `${folderPath}/${sortValue()}`,
+            ),
+            fullPath: `${folderPath}/${sortValue()}`,
+            isFolder: false,
+            name: sortValue(),
+            parentUid: file.uid,
+            path: parentPath,
+            treeId: targetTreeRoot,
+            uid: v4(),
+          }))
       }
     }
 
