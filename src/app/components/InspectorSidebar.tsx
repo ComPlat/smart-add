@@ -32,26 +32,10 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
   disabled = false,
   id,
   name,
-  onChange: onSubmit,
+  onChange,
   placeholder = 'Enter text...',
-  value: initialValue,
+  value = '',
 }) => {
-  const [value, setValue] = useState(initialValue)
-
-  useEffect(() => {
-    setValue(initialValue)
-  }, [initialValue])
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(event.target.value)
-  }
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
-      onSubmit(event as unknown as ChangeEvent<HTMLInputElement>)
-    }
-  }
-
   return (
     <label className="flex flex-col">
       {formatLabel(name)}
@@ -64,8 +48,7 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
           disabled={disabled}
           id={id}
           name={name}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
+          onChange={onChange}
           placeholder={placeholder}
           type="text"
           value={value}
