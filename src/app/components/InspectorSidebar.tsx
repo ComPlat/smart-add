@@ -113,24 +113,9 @@ const DateInputField: React.FC<DateInputFieldProps> = ({
   id,
   name,
   onChange,
-  raw = false,
   value = '',
 }) => {
-  const formatDateForInput = (isoString: string): string => {
-    return isoString.split('T')[0]
-  }
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    let newValue = event.target.value
-    if (!raw && newValue) {
-      newValue += 'T00:00:00.000Z'
-    }
-    const newEvent = {
-      ...event,
-      target: { ...event.target, value: newValue },
-    }
-    onChange(newEvent)
-  }
+  const formattedValue = value ? value.slice(0, -1) : ''
 
   return (
     <label className="flex flex-col">
@@ -140,9 +125,9 @@ const DateInputField: React.FC<DateInputFieldProps> = ({
         className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
         id={id}
         name={name}
-        onChange={handleInputChange}
-        type={raw ? 'text' : 'date'}
-        value={raw ? value : formatDateForInput(value)}
+        onChange={onChange}
+        type="datetime-local"
+        value={formattedValue}
       />
     </label>
   )
@@ -310,7 +295,12 @@ const InspectorSidebar = ({
     key: string,
   ) => {
     const target = e.target
-    const newValue = extractValue(target)
+    let newValue = extractValue(target)
+
+    if (typeof newValue === 'string') {
+      const parsedDate = new Date(newValue)
+      if (!isNaN(parsedDate.getTime())) newValue += 'Z'
+    }
 
     if (!item || !item.fullPath) return
 
