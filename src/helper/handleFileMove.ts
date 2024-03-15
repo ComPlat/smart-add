@@ -115,7 +115,6 @@ const handleFileMove = async (
     if (target.targetType === 'item') {
       parentUid = tree[target.targetItem].uid
     } else if (target.targetType === 'between-items') {
-      // TODO: Not sure yet
       parentUid = tree[target.parentItem].uid
     } else if (target.targetType === 'root') {
       parentUid = null
@@ -147,10 +146,15 @@ const handleFileMove = async (
       await Promise.all(
         updatesBatch.map(async (update) => {
           const table = update.isFolder ? filesDB.folders : filesDB.files
-          return table.where({ uid: update.uid }).modify({
-            fullPath: update.fullPath,
-            parentUid: update.parentUid,
-            treeId: update.treeId,
+          await table.where({ uid: update.uid }).modify((item) => {
+            item.fullPath = update.fullPath
+            item.parentUid = update.parentUid
+            item.treeId = update.treeId
+            if (item.metadata) {
+              item.metadata.parent_id = update.parentUid
+              item.metadata.ancestry = update.parentUid
+              item.metadata.updated_at = new Date().toISOString()
+            }
           })
         }),
       ),

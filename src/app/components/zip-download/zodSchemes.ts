@@ -3,7 +3,8 @@ import { z } from 'zod'
 
 const uuidSchema = z.string().nullable()
 
-const datetimeSchema = z.string()
+export const datetimeSchema = z.string().datetime()
+export type DateTime = z.infer<typeof datetimeSchema>
 
 export const reactionSampleSchema = z.object({
   reaction_id: uuidSchema,
