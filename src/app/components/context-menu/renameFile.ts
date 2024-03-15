@@ -12,6 +12,11 @@ const renameFile = async (item: ExtendedFile, newName: string) => {
     fullPath: file.fullPath.includes('/')
       ? file.fullPath.split('/').slice(0, -1).join('/') + '/' + newName
       : newName,
+    metadata: {
+      ...file.metadata,
+      name: newName,
+      updated_at: new Date().toISOString(),
+    },
     name: newName,
   }
 
