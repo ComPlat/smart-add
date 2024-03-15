@@ -202,7 +202,9 @@ function determineInputComponent(
   handleInputChange: (e: ChangeEvent<HTMLInputElement>, key: string) => void,
 ) {
   const disabled =
-    key.toLowerCase().includes('id') || key.toLowerCase().includes('ancestry')
+    key.toLowerCase().includes('id') ||
+    key.toLowerCase().includes('ancestry') ||
+    key.toLowerCase() === 'name'
   const inputType = typeof value
 
   switch (inputType) {
