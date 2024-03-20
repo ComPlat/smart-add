@@ -164,15 +164,16 @@ const handleCustomRequest = async ({
       worksheetData: Record<string, object[]>,
     ) => {
       const folderPath = `${file.webkitRelativePath}/${tableName}`
-      await addFolder(folderPath, tableName, file.uid as string)
 
-      const filePromises = worksheetData[tableName].map((row) => {
+      addFolder(folderPath, tableName, file.uid as string)
+
+      const filePromises = worksheetData[tableName].map(async (row) => {
         const sortValue = () => {
           switch (tableName) {
             case 'reactions':
               return (row as ReactionsWorksheetTable)['r short label'] as string
             case 'sample':
-              return (row as SampleWorksheetTable)['canonical smiles'] as string
+              return (row as SampleWorksheetTable)['molecule name'] as string
             case 'sample_analyses':
               return (
                 ((row as SampleAnalysesWorksheetTable)[
@@ -180,21 +181,22 @@ const handleCustomRequest = async ({
                 ] as string) || '(empty)'
               )
             default:
-              return '(empty)'
+              return '(not defined)'
           }
         }
 
-        return addFile(folderPath, row, sortValue)
+        if (sortValue() !== '(empty)') {
+          return addFile(folderPath, row, sortValue)
+        }
       })
-
       return await Promise.all(filePromises)
     }
 
-    await addFolder(file.webkitRelativePath, file.name, '')
+    addFolder(file.webkitRelativePath, file.name, '')
 
-    const tablePromises = Object.keys(worksheetData).map((tableName) =>
-      processTable(tableName, worksheetData),
-    )
+    const tablePromises = Object.keys(worksheetData).map(async (tableName) => {
+      processTable(tableName, worksheetData)
+    })
     await Promise.all(tablePromises)
 
     setProgress(100)
