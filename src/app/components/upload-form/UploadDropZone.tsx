@@ -124,34 +124,55 @@ const handleCustomRequest = async ({
   } else if (file.name.endsWith('.xlsx')) {
     const worksheetData = await readSpreadsheet(file)
 
-    await filesDB.folders.add({
-      fullPath: file.webkitRelativePath,
-      isFolder: true,
-      name: file.name,
-      parentUid: '',
-      treeId: targetTreeRoot,
-      uid: v4(),
-    })
-
-    for (const table in worksheetData) {
-      const folderPath = `${file.webkitRelativePath}/${table}`
-
-      await filesDB.folders.add({
+    const addFolder = async (
+      folderPath: string,
+      name: string,
+      parentUid: string,
+    ) => {
+      return filesDB.folders.add({
         fullPath: folderPath,
         isFolder: true,
-        name: table,
-        parentUid: file.uid,
+        name,
+        parentUid,
         treeId: targetTreeRoot,
         uid: v4(),
       })
+    }
 
-      for (const row of worksheetData[table]) {
+    const addFile = async (
+      folderPath: string,
+      row: object,
+      sortValue: () => string,
+    ) => {
+      if (sortValue() !== '(empty)') {
+        return filesDB.files.add({
+          extension: '',
+          file: new File([JSON.stringify(row)], `${folderPath}/${sortValue()}`),
+          fullPath: `${folderPath}/${sortValue()}`,
+          isFolder: false,
+          name: sortValue(),
+          parentUid: file.uid as string,
+          path: parentPath,
+          treeId: targetTreeRoot,
+          uid: v4(),
+        })
+      }
+    }
+
+    const processTable = async (
+      tableName: string,
+      worksheetData: Record<string, object[]>,
+    ) => {
+      const folderPath = `${file.webkitRelativePath}/${tableName}`
+      await addFolder(folderPath, tableName, file.uid as string)
+
+      const filePromises = worksheetData[tableName].map((row) => {
         const sortValue = () => {
-          switch (table) {
+          switch (tableName) {
             case 'reactions':
               return (row as ReactionsWorksheetTable)['r short label'] as string
             case 'sample':
-              return (row as SampleWorksheetTable)['molecule name'] as string
+              return (row as SampleWorksheetTable)['canonical smiles'] as string
             case 'sample_analyses':
               return (
                 ((row as SampleAnalysesWorksheetTable)[
@@ -159,27 +180,22 @@ const handleCustomRequest = async ({
                 ] as string) || '(empty)'
               )
             default:
-              return '(not defined)'
+              return '(empty)'
           }
         }
 
-        sortValue() !== '(empty)' &&
-          (await filesDB.files.add({
-            extension: '',
-            file: new File(
-              [JSON.stringify(row)],
-              `${folderPath}/${sortValue()}`,
-            ),
-            fullPath: `${folderPath}/${sortValue()}`,
-            isFolder: false,
-            name: sortValue(),
-            parentUid: file.uid,
-            path: parentPath,
-            treeId: targetTreeRoot,
-            uid: v4(),
-          }))
-      }
+        return addFile(folderPath, row, sortValue)
+      })
+
+      return await Promise.all(filePromises)
     }
+
+    await addFolder(file.webkitRelativePath, file.name, '')
+
+    const tablePromises = Object.keys(worksheetData).map((tableName) =>
+      processTable(tableName, worksheetData),
+    )
+    await Promise.all(tablePromises)
 
     setProgress(100)
     onSuccess?.(file)
