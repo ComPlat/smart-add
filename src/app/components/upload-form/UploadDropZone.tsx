@@ -173,7 +173,7 @@ const handleCustomRequest = async ({
             case 'reactions':
               return (row as ReactionsWorksheetTable)['r short label'] as string
             case 'sample':
-              return (row as SampleWorksheetTable)['canonical smiles'] as string
+              return (row as SampleWorksheetTable)['molecule name'] as string
             case 'sample_analyses':
               return (
                 ((row as SampleAnalysesWorksheetTable)[
