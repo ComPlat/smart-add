@@ -7,7 +7,12 @@ import { ChangeEvent, useEffect, useState } from 'react'
 import { TreeItemIndex } from 'react-complex-tree'
 
 import renameFolder from './context-menu/renameFolder'
-import { datetimeSchema } from './zip-download/zodSchemes'
+import {
+  ArrayType,
+  TemperatureObject,
+  TextObject,
+  datetimeSchema,
+} from './zip-download/zodSchemes'
 
 const formatLabel = (text: string): string =>
   text
@@ -166,7 +171,15 @@ const CheckboxField: React.FC<CheckboxFieldProps> = ({
 
 function determineInputComponent(
   key: string,
-  value: boolean | null | number | string | undefined,
+  value:
+    | ArrayType
+    | TemperatureObject
+    | TextObject
+    | boolean
+    | null
+    | number
+    | string
+    | undefined,
   handleInputChange: (e: ChangeEvent<HTMLInputElement>, key: string) => void,
 ) {
   const disabled =
@@ -175,6 +188,7 @@ function determineInputComponent(
     key.toLowerCase() === 'name'
   const inputType = typeof value
 
+  // TODO: Add support for array, temperature, and text objects
   switch (inputType) {
     case 'string':
       if (datetimeSchema.safeParse(value).success) {
