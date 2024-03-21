@@ -63,20 +63,26 @@ export const createSample = async (
     baseFolderName,
     true,
     '',
-    getMetadata('', uniqueFolderName, 'sample', '') as Sample,
+    getMetadata('', uniqueFolderName, 'sample'),
+    'sample',
   )
   const analysesFolder = await createFolder(
     `${uniqueFolderName}/analyses`,
     'analyses',
     true,
     '',
-    getMetadata(sampleFolder.uid, 'analyses', 'analyses', '') as Container,
+    getMetadata(sampleFolder.uid, 'analyses', 'analyses'),
+    // TODO: maybe needs to be 'analyses' instead of default 'folder'?
   )
 
   const promises = [
-    createSubFolders(uniqueFolderName, ['structure'], sampleFolder.uid, [
-      getMetadata(sampleFolder.uid, 'structure', 'structure', '') as Container,
-    ]),
+    createSubFolders(
+      uniqueFolderName,
+      ['structure'],
+      sampleFolder.uid,
+      [getMetadata(sampleFolder.uid, 'structure', 'structure', '')],
+      // TODO: maybe needs to be 'structure' instead of default 'folder'?
+    ),
     createSubFolders(
       `${uniqueFolderName}/analyses`,
       analyses,
@@ -90,6 +96,7 @@ export const createSample = async (
             '',
           ) as Container,
       ),
+      // TODO: maybe needs to be 'analysis' instead of default 'folder'?
     ),
   ]
 
@@ -112,21 +119,24 @@ export const createReaction = async (
     baseFolderName,
     true,
     '',
-    getMetadata('', uniqueFolderName, 'reaction', '') as Reaction,
+    getMetadata('', uniqueFolderName, 'reaction', ''),
+    'reaction',
   )
   const sampleFolder = await createFolder(
     `${uniqueFolderName}/${sampleName}`,
     sampleName,
     true,
     '',
-    getMetadata(reactionFolder.uid, sampleName, 'sample', '') as Sample,
+    getMetadata(reactionFolder.uid, sampleName, 'sample', ''),
+    'sample',
   )
   const analysesFolder = await createFolder(
     `${uniqueFolderName}/${sampleName}/analyses`,
     'analyses',
     true,
     '',
-    getMetadata(sampleFolder.uid, 'analyses', 'analyses', '') as Container,
+    getMetadata(sampleFolder.uid, 'analyses', 'analyses', ''),
+    // TODO: maybe needs to be 'analyses' instead of default 'folder'?
   )
 
   const promises = [
