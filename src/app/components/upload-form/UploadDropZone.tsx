@@ -84,6 +84,7 @@ const handleCustomRequest = async ({
 
           if (!existingFolder) {
             const promise = filesDB.folders.add({
+              dtype: 'folder',
               fullPath: currentPath,
               isFolder: true,
               name: folder,
@@ -139,6 +140,7 @@ const handleCustomRequest = async ({
 
           const folderName = currentFolder.split('/').slice(-1)[0]
           return await filesDB.folders.add({
+            dtype: 'folder',
             fullPath: currentFolder,
             isFolder: true,
             name: folderName,

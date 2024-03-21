@@ -36,8 +36,10 @@ export const createFolder = async (
   assignmentTree: boolean = false,
   parentUid: string = '',
   metadata: Metadata = {},
+  dtype: string = 'folder',
 ): Promise<ExtendedFolder> => {
   const folder: ExtendedFolder = {
+    dtype,
     fullPath: path,
     isFolder: true,
     metadata,
@@ -56,6 +58,7 @@ export const createSubFolders = async (
   names: string[],
   parentUid: string,
   metadatas: Metadata[] = [],
+  dtypes: string[] = Array(names.length).fill('folder'),
 ) => {
   return await Promise.all(
     names.map((name, index) =>
@@ -65,6 +68,7 @@ export const createSubFolders = async (
         true,
         parentUid,
         metadatas[index],
+        dtypes[index],
       ),
     ),
   )
