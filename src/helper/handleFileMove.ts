@@ -1,4 +1,9 @@
-import { FilesDBCreator, filesDB } from '@/database/db'
+import {
+  ExtendedFile,
+  ExtendedFolder,
+  FilesDBCreator,
+  filesDB,
+} from '@/database/db'
 import { FileNode } from '@/helper/types'
 import { DraggingPosition, TreeItem, TreeItemIndex } from 'react-complex-tree'
 
@@ -157,7 +162,7 @@ const handleFileMove = async (
             item.metadata.ancestry = update.parentUid
             item.metadata.updated_at = new Date().toISOString()
           }
-          await table.put(item)
+          await table.put(item as ExtendedFile & ExtendedFolder)
         }),
       ),
   )
