@@ -14,35 +14,39 @@ const getMetadata = (
   type: string,
   containable_type?: string,
 ): Container | Reaction | Sample => {
-  if (type === 'sample') {
-    return {
-      ...sampleTemplate,
-      ancestry: parent_id,
-      created_at: new Date().toISOString(),
-      name,
-      updated_at: new Date().toISOString(),
-    } as Sample
-  } else if (type === 'reaction') {
-    return {
-      ...reactionTemplate,
-      ancestry: parent_id,
-      created_at: new Date().toISOString(),
-      name,
-      updated_at: new Date().toISOString(),
-    } as Reaction
-  } else {
-    return {
-      ancestry: parent_id,
-      containable_id: '',
-      containable_type: containable_type || '',
-      container_type: type || '',
-      created_at: new Date().toISOString(),
-      description: '',
-      extended_metadata: {},
-      name,
-      parent_id,
-      updated_at: new Date().toISOString(),
-    } as Container
+  switch (type) {
+    case 'sample':
+      return {
+        ...sampleTemplate,
+        ancestry: parent_id,
+        created_at: new Date().toISOString(),
+        name,
+        updated_at: new Date().toISOString(),
+      } as Sample
+      break
+    case 'reaction':
+      return {
+        ...reactionTemplate,
+        ancestry: parent_id,
+        created_at: new Date().toISOString(),
+        name,
+        updated_at: new Date().toISOString(),
+      } as Reaction
+      break
+    default:
+      return {
+        ancestry: parent_id,
+        containable_id: '',
+        containable_type: containable_type || '',
+        container_type: type || '',
+        created_at: new Date().toISOString(),
+        description: '',
+        extended_metadata: {},
+        name,
+        parent_id,
+        updated_at: new Date().toISOString(),
+      } as Container
+      break
   }
 }
 

@@ -49,6 +49,7 @@ const getInitialJson = () => ({
   ReactionsProductSample: {} as KeyValuePair<ReactionSample>,
 })
 
+// TODO: Add dummy Molecule and MoleculeName data to make export importable
 export async function generateExportJson(
   assignedFiles: ExtendedFile[],
   assignedFolders: ExtendedFolder[],
@@ -79,65 +80,66 @@ export async function generateExportJson(
   }
 
   processedFolders.forEach((folder) => {
-    const isReaction = folder.dtype === 'reaction'
-    const isSample = folder.dtype === 'sample'
-    const isContainer = folder.dtype === 'folder'
+    switch (folder.dtype) {
+      case 'reaction':
+        const reactionId = v4()
+        uidMap[folder.uid] = reactionId
+        const reactionData = {
+          ...reactionTemplate,
+          ...folder.metadata,
+          created_at: currentDate,
+          updated_at: currentDate,
+          user_id,
+        }
 
-    if (isReaction) {
-      const reactionId = v4()
-      uidMap[folder.uid] = reactionId
-      const reactionData = {
-        ...reactionTemplate,
-        ...folder.metadata,
-        created_at: currentDate,
-        updated_at: currentDate,
-        user_id,
-      }
+        exportJson.Reaction[reactionId] = reactionData
 
-      exportJson.Reaction[reactionId] = reactionData
+        const collectionsReactionId = v4()
+        const collectionsReactionData = {
+          ...collectionsReactionTemplate,
+          collection_id: collectionId,
+          reaction_id: reactionId,
+        }
 
-      const collectionsReactionId = v4()
-      const collectionsReactionData = {
-        ...collectionsReactionTemplate,
-        collection_id: collectionId,
-        reaction_id: reactionId,
-      }
+        exportJson.CollectionsReaction[collectionsReactionId] =
+          collectionsReactionData
+        break
+      case 'sample':
+        const sampleId = v4()
+        uidMap[folder.uid] = sampleId
+        const sampleData = {
+          ...sampleTemplate,
+          ...folder.metadata,
+          created_at: currentDate,
+          updated_at: currentDate,
+          user_id,
+        }
 
-      exportJson.CollectionsReaction[collectionsReactionId] =
-        collectionsReactionData
-    } else if (isSample) {
-      const sampleId = v4()
-      uidMap[folder.uid] = sampleId
-      const sampleData = {
-        ...sampleTemplate,
-        ...folder.metadata,
-        created_at: currentDate,
-        updated_at: currentDate,
-        user_id,
-      }
+        exportJson.Sample[sampleId] = sampleData
 
-      exportJson.Sample[sampleId] = sampleData
+        const collectionsSampleId = v4()
+        const collectionsSampleData = {
+          ...collectionsSampleTemplate,
+          collection_id: collectionId,
+          sample_id: sampleId,
+        }
 
-      const collectionsSampleId = v4()
-      const collectionsSampleData = {
-        ...collectionsSampleTemplate,
-        collection_id: collectionId,
-        sample_id: sampleId,
-      }
+        exportJson.CollectionsSample[collectionsSampleId] =
+          collectionsSampleData
+        break
+      case 'folder':
+        const containerId = v4()
+        uidMap[folder.uid] = containerId
+        const containerData = {
+          ...containerTemplate,
+          ...folder.metadata,
+          created_at: currentDate,
+          updated_at: currentDate,
+          user_id,
+        }
 
-      exportJson.CollectionsSample[collectionsSampleId] = collectionsSampleData
-    } else if (isContainer) {
-      const containerId = v4()
-      uidMap[folder.uid] = containerId
-      const containerData = {
-        ...containerTemplate,
-        ...folder.metadata,
-        created_at: currentDate,
-        updated_at: currentDate,
-        user_id,
-      }
-
-      exportJson.Container[containerId] = containerData
+        exportJson.Container[containerId] = containerData
+        break
     }
   })
 
