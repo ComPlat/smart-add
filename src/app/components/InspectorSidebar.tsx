@@ -1,4 +1,10 @@
-import { ExtendedFile, ExtendedFolder, Metadata, filesDB } from '@/database/db'
+import {
+  ExtendedFile,
+  ExtendedFolder,
+  Metadata,
+  MetadataValue,
+  filesDB,
+} from '@/database/db'
 import { retrieveTree } from '@/helper/retrieveTree'
 import { FileNode } from '@/helper/types'
 import { useLiveQuery } from 'dexie-react-hooks'
@@ -7,12 +13,7 @@ import { ChangeEvent, useEffect, useState } from 'react'
 import { TreeItemIndex } from 'react-complex-tree'
 
 import renameFolder from './context-menu/renameFolder'
-import {
-  ArrayType,
-  TemperatureObject,
-  TextObject,
-  datetimeSchema,
-} from './zip-download/zodSchemes'
+import { datetimeSchema } from './zip-download/zodSchemes'
 
 const formatLabel = (text: string): string =>
   text
@@ -171,15 +172,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = ({
 
 function determineInputComponent(
   key: string,
-  value:
-    | ArrayType
-    | TemperatureObject
-    | TextObject
-    | boolean
-    | null
-    | number
-    | string
-    | undefined,
+  value: MetadataValue,
   handleInputChange: (e: ChangeEvent<HTMLInputElement>, key: string) => void,
 ) {
   const disabled =

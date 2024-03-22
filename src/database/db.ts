@@ -17,6 +17,16 @@ export type Metadata = {
     | string
 }
 
+export type MetadataValue =
+  | ArrayType
+  | TemperatureObject
+  | TextObject
+  | boolean
+  | null
+  | number
+  | string
+  | undefined
+
 export type ExtendedFile = {
   extension: string
   file: Blob | RcFile
