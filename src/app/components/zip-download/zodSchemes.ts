@@ -2,6 +2,7 @@
 import { z } from 'zod'
 
 const uuidSchema = z.string().nullable()
+const nullableString = z.string().nullable()
 
 export const datetimeSchema = z.string().datetime()
 export type DateTime = z.infer<typeof datetimeSchema>
@@ -40,39 +41,39 @@ export const collectionSchema = z.object({
 export type Collection = z.infer<typeof collectionSchema>
 
 export const sampleSchema = z.object({
-  name: z.string().nullable(),
+  name: nullableString,
   target_amount_value: z.number(),
   target_amount_unit: z.string(),
   created_at: datetimeSchema,
   updated_at: datetimeSchema,
-  description: z.string().nullable(),
+  description: nullableString,
   molecule_id: uuidSchema,
   molfile: z.string(),
   purity: z.number().nullable(),
-  solvent: z.string().nullable(),
-  impurities: z.string().nullable(),
-  location: z.string().nullable(),
+  solvent: nullableString,
+  impurities: nullableString,
+  location: nullableString,
   is_top_secret: z.boolean(),
   ancestry: z.string(),
   external_label: z.string(),
   created_by: uuidSchema,
   short_label: z.string(),
   real_amount_value: z.number().nullable(),
-  real_amount_unit: z.string().nullable(),
-  imported_readout: z.string().nullable(),
+  real_amount_unit: nullableString,
+  imported_readout: nullableString,
   deleted_at: z.null(),
-  sample_svg_file: z.string().nullable(),
+  sample_svg_file: nullableString,
   user_id: uuidSchema,
-  identifier: z.string().nullable(),
+  identifier: nullableString,
   density: z.number(),
   melting_point: z.number().nullable(),
   boiling_point: z.number().nullable(),
   fingerprint_id: uuidSchema,
   xref: z.any().nullable(),
   molarity_value: z.number(),
-  molarity_unit: z.string().nullable(),
+  molarity_unit: nullableString,
   molecule_name_id: uuidSchema,
-  molfile_version: z.string().nullable(),
+  molfile_version: nullableString,
   stereo: z.any(),
 })
 export type Sample = z.infer<typeof sampleSchema>
@@ -196,8 +197,8 @@ export const wellSchema = z.object({
   position_y: z.number(),
   created_at: datetimeSchema,
   updated_at: datetimeSchema,
-  readout: z.string().nullable(),
-  additive: z.string().nullable(),
+  readout: nullableString,
+  additive: nullableString,
   deleted_at: z.null(),
 })
 export type Well = z.infer<typeof wellSchema>
@@ -253,10 +254,10 @@ export type CollectionsResearchPlan = z.infer<
 export const containerSchema = z.object({
   ancestry: z.string(),
   containable_id: uuidSchema,
-  containable_type: z.string().nullable(),
-  name: z.string().nullable(),
-  container_type: z.string().nullable(),
-  description: z.string().nullable(),
+  containable_type: nullableString,
+  name: nullableString,
+  container_type: nullableString,
+  description: nullableString,
   extended_metadata: z.any(),
   created_at: datetimeSchema,
   updated_at: datetimeSchema,
@@ -279,7 +280,7 @@ export const attachmentSchema = z.object({
   bucket: z.string(),
   key: z.string(),
   thumb: z.boolean(),
-  folder: z.string().nullable(),
+  folder: nullableString,
   attachable_type: z.string(),
   aasm_state: z.string(),
 })
@@ -338,3 +339,67 @@ export const reactionSchema = z.object({
   duration: z.string(),
 })
 export type Reaction = z.infer<typeof reactionSchema>
+
+export const reactionsWorksheetTableSchema = z.object({
+  'r short label': nullableString,
+  description: nullableString,
+  temperature: nullableString,
+  duration: nullableString,
+})
+export type ReactionsWorksheetTable = z.infer<
+  typeof reactionsWorksheetTableSchema
+>
+
+export const sampleWorksheetTableSchema = z.object({
+  'molecule name': nullableString,
+  'sample name': nullableString,
+  'sample external label': nullableString,
+  'short label': nullableString,
+  description: nullableString,
+  'real amount': nullableString,
+  'real unit': nullableString,
+  'target amount': nullableString,
+  'target unit': nullableString,
+  molarity_value: nullableString,
+  density: nullableString,
+  molfile: nullableString,
+  solvent: nullableString,
+  location: nullableString,
+  secret: nullableString,
+  'sample readout': nullableString,
+  'melting pt': nullableString,
+  'boiling pt': nullableString,
+  created_at: nullableString,
+  updated_at: nullableString,
+  user_labels: nullableString,
+  literatures: nullableString,
+  'canonical smiles': nullableString,
+  'residue type': nullableString,
+  decoupled: nullableString,
+  'molecular mass (decoupled)': nullableString,
+  'sum formula (decoupled)': nullableString,
+  'stereo abs': nullableString,
+  'stereo rel': nullableString,
+  'cas|image': nullableString,
+})
+export type SampleWorksheetTable = z.infer<typeof sampleWorksheetTableSchema>
+
+export const sampleAnalysesTableSchema = z.object({
+  'sample name': nullableString,
+  'sample external label': nullableString,
+  'short label': nullableString,
+  name: nullableString,
+  description: nullableString,
+  uuid: nullableString,
+  kind: nullableString,
+  status: nullableString,
+  content: nullableString,
+  'dataset name': nullableString,
+  instrument: nullableString,
+  'dataset description': nullableString,
+  filename: nullableString,
+  checksum: nullableString,
+})
+export type SampleAnalysesWorksheetTable = z.infer<
+  typeof sampleAnalysesTableSchema
+>
