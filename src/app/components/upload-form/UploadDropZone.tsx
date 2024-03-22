@@ -2,12 +2,18 @@
 
 import { filesDB } from '@/database/db'
 import { extractFilesFromZip } from '@/helper/extractFilesFromZip'
+import { readSpreadsheet } from '@/helper/readSpreadsheet'
 import { uploadExtractedFiles } from '@/helper/uploadExtractedFiles'
 import { Progress, Upload, UploadProps, message } from 'antd'
 import { RcFile, UploadFile } from 'antd/es/upload'
 import { Dispatch, SetStateAction, useState } from 'react'
 import { v4 } from 'uuid'
 
+import {
+  ReactionsWorksheetTable,
+  SampleAnalysesWorksheetTable,
+  SampleWorksheetTable,
+} from '../zip-download/zodSchemes'
 import styles from './UploadDropZone.module.css'
 
 // HINT: Necessary because of the way the Ant Design Upload Component
@@ -116,9 +122,87 @@ const handleCustomRequest = async ({
     } catch (err) {
       console.error('Failed to extract and upload ZIP file:', err)
     }
-  } else {
-    setProgress(50)
+  } else if (file.name.endsWith('.xlsx')) {
+    const worksheetData = await readSpreadsheet(file)
 
+    const addFolder = async (
+      folderPath: string,
+      name: string,
+      parentUid: string,
+    ) => {
+      return filesDB.folders.add({
+        dtype: 'folder',
+        fullPath: folderPath,
+        isFolder: true,
+        name,
+        parentUid,
+        treeId: targetTreeRoot,
+        uid: v4(),
+      })
+    }
+
+    const addFile = async (
+      folderPath: string,
+      row: object,
+      sortValue: () => string,
+    ) => {
+      if (sortValue() === '(empty)') return
+
+      return filesDB.files.add({
+        extension: '',
+        file: new File([JSON.stringify(row)], `${folderPath}/${sortValue()}`),
+        fullPath: `${folderPath}/${sortValue()}`,
+        isFolder: false,
+        name: sortValue(),
+        parentUid: file.uid as string,
+        path: parentPath,
+        treeId: targetTreeRoot,
+        uid: v4(),
+      })
+    }
+
+    const processTable = async (
+      tableName: string,
+      worksheetData: Record<string, object[]>,
+    ) => {
+      const folderPath = `${file.webkitRelativePath}/${tableName}`
+
+      addFolder(folderPath, tableName, file.uid as string)
+
+      const filePromises = worksheetData[tableName].map(async (row) => {
+        const sortValue = () => {
+          switch (tableName) {
+            case 'reactions':
+              return (row as ReactionsWorksheetTable)['r short label'] as string
+            case 'sample':
+              return (row as SampleWorksheetTable)['canonical smiles'] as string
+            case 'sample_analyses':
+              return (
+                ((row as SampleAnalysesWorksheetTable)[
+                  'sample name'
+                ] as string) || '(empty)'
+              )
+            default:
+              return '(not defined)'
+          }
+        }
+
+        return addFile(folderPath, row, sortValue)
+      })
+      return await Promise.all(filePromises)
+    }
+
+    addFolder(file.webkitRelativePath, file.name, '')
+
+    const tablePromises = Object.keys(worksheetData).map(async (tableName) => {
+      processTable(tableName, worksheetData)
+    })
+    await Promise.all(tablePromises)
+
+    setProgress(100)
+    onSuccess?.(file)
+    return true
+  } else {
     const promises: Promise<Promise<number | void>[]>[] =
       uploadFileList.flatMap(async (fileObj) => {
         if (!fileObj.originFileObj) return [Promise.resolve()]
