@@ -57,6 +57,8 @@ export async function generateExportJson(
     ...initialJson,
   }
 
+  const uidMap = {} as Record<string, string>
+
   const collectionId = v4()
   const collectionData = {
     ...collectionTemplate,
@@ -85,6 +87,7 @@ export async function generateExportJson(
 
     if (isReaction) {
       const reactionId = v4()
+      uidMap[folder.uid] = reactionId
       const reactionData = {
         ...reactionTemplate,
         ...folder.metadata,
@@ -106,6 +109,7 @@ export async function generateExportJson(
         collectionsReactionData
     } else if (isSample) {
       const sampleId = v4()
+      uidMap[folder.uid] = sampleId
       const sampleData = {
         ...sampleTemplate,
         ...folder.metadata,
@@ -126,6 +130,7 @@ export async function generateExportJson(
       exportJson.CollectionsSample[collectionsSampleId] = collectionsSampleData
     } else if (isContainer) {
       const containerId = v4()
+      uidMap[folder.uid] = containerId
       const containerData = {
         ...containerTemplate,
         ...folder.metadata,
@@ -144,9 +149,11 @@ export async function generateExportJson(
       ...attachmentTemplate,
       created_at: currentDate,
       updated_at: currentDate,
-      attachable_id: processedFolders.find(
-        (folder) => folder.uid === file.parentUid,
-      )?.uid,
+      attachable_id:
+        uidMap[
+          processedFolders.find((folder) => folder.uid === file.parentUid)
+            ?.uid || ''
+        ],
       filename: file.name,
       identifier: file.uid,
       content_type: file.file.type,
