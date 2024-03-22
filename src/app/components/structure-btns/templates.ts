@@ -72,17 +72,12 @@ export const createSample = async (
     true,
     '',
     getMetadata(sampleFolder.uid, 'analyses', 'analyses'),
-    // TODO: maybe needs to be 'analyses' instead of default 'folder'?
   )
 
   const promises = [
-    createSubFolders(
-      uniqueFolderName,
-      ['structure'],
-      sampleFolder.uid,
-      [getMetadata(sampleFolder.uid, 'structure', 'structure', '')],
-      // TODO: maybe needs to be 'structure' instead of default 'folder'?
-    ),
+    createSubFolders(uniqueFolderName, ['structure'], sampleFolder.uid, [
+      getMetadata(sampleFolder.uid, 'structure', 'structure', ''),
+    ]),
     createSubFolders(
       `${uniqueFolderName}/analyses`,
       analyses,
@@ -96,7 +91,6 @@ export const createSample = async (
             '',
           ) as Container,
       ),
-      // TODO: maybe needs to be 'analysis' instead of default 'folder'?
     ),
   ]
 
@@ -136,7 +130,6 @@ export const createReaction = async (
     true,
     '',
     getMetadata(sampleFolder.uid, 'analyses', 'analyses', ''),
-    // TODO: maybe needs to be 'analyses' instead of default 'folder'?
   )
 
   const promises = [
