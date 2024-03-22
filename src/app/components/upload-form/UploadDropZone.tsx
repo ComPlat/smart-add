@@ -144,19 +144,19 @@ const handleCustomRequest = async ({
       row: object,
       sortValue: () => string,
     ) => {
-      if (sortValue() !== '(empty)') {
-        return filesDB.files.add({
-          extension: '',
-          file: new File([JSON.stringify(row)], `${folderPath}/${sortValue()}`),
-          fullPath: `${folderPath}/${sortValue()}`,
-          isFolder: false,
-          name: sortValue(),
-          parentUid: file.uid as string,
-          path: parentPath,
-          treeId: targetTreeRoot,
-          uid: v4(),
-        })
-      }
+      if (sortValue() === '(empty)') return
+
+      return filesDB.files.add({
+        extension: '',
+        file: new File([JSON.stringify(row)], `${folderPath}/${sortValue()}`),
+        fullPath: `${folderPath}/${sortValue()}`,
+        isFolder: false,
+        name: sortValue(),
+        parentUid: file.uid as string,
+        path: parentPath,
+        treeId: targetTreeRoot,
+        uid: v4(),
+      })
     }
 
     const processTable = async (
