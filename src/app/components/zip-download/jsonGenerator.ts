@@ -32,8 +32,8 @@ interface KeyValuePair<T> {
   [key: string]: T
 }
 
-/* eslint-disable perfectionist/sort-objects */
-const initialJson = {
+const getInitialJson = () => ({
+  /* eslint-disable perfectionist/sort-objects */
   Collection: {} as KeyValuePair<Collection>,
   Sample: {} as KeyValuePair<Sample>,
   CollectionsSample: {} as KeyValuePair<CollectionsSample>,
@@ -47,15 +47,13 @@ const initialJson = {
   ReactionsStartingMaterialSample: {} as KeyValuePair<ReactionSample>,
   ReactionsReactantSample: {} as KeyValuePair<ReactionSample>,
   ReactionsProductSample: {} as KeyValuePair<ReactionSample>,
-}
+})
 
 export async function generateExportJson(
   assignedFiles: ExtendedFile[],
   assignedFolders: ExtendedFolder[],
 ) {
-  const exportJson = {
-    ...initialJson,
-  }
+  const exportJson = getInitialJson()
 
   const uidMap = {} as Record<string, string>
 
