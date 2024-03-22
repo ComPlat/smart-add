@@ -51,8 +51,11 @@ const FileDownloader = () => {
       const addFilesToZip = async (tree: FileTree, parentZip: JSZip = zip) => {
         await Promise.all(
           Object.entries(tree).map(async ([name, value]) => {
-            const extension = name.split('.').pop() // Get the file extension
-            const newFilename = `${v4()}.${extension}`
+            const splitName = name.split('.')
+            const extension = splitName.slice(-1)[0]
+            const newFilename = `${v4()}${
+              extension && splitName.length > 1 ? `.${extension}` : ''
+            }`
 
             const newPath = `attachments/${newFilename}`
 
