@@ -23,7 +23,6 @@ const getMetadata = (
         name,
         updated_at: new Date().toISOString(),
       } as Sample
-      break
     case 'reaction':
       return {
         ...reactionTemplate,
@@ -32,8 +31,7 @@ const getMetadata = (
         name,
         updated_at: new Date().toISOString(),
       } as Reaction
-      break
-    default:
+    case 'folder':
       return {
         ancestry: parent_id,
         containable_id: '',
@@ -46,7 +44,8 @@ const getMetadata = (
         parent_id,
         updated_at: new Date().toISOString(),
       } as Container
-      break
+    default:
+      throw new Error(`Invalid type: ${type}`)
   }
 }
 
