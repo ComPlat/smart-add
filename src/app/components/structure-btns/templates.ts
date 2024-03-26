@@ -14,22 +14,24 @@ const getMetadata = (
   type: string,
   containable_type?: string,
 ): Container | Reaction | Sample => {
+  const currentDate = new Date().toISOString()
+
   switch (type) {
     case 'sample':
       return {
         ...sampleTemplate,
         ancestry: parent_id,
-        created_at: new Date().toISOString(),
+        created_at: currentDate,
         name,
-        updated_at: new Date().toISOString(),
+        updated_at: currentDate,
       } as Sample
     case 'reaction':
       return {
         ...reactionTemplate,
         ancestry: parent_id,
-        created_at: new Date().toISOString(),
+        created_at: currentDate,
         name,
-        updated_at: new Date().toISOString(),
+        updated_at: currentDate,
       } as Reaction
     case 'folder':
       return {
@@ -37,12 +39,12 @@ const getMetadata = (
         containable_id: '',
         containable_type: containable_type || '',
         container_type: type || '',
-        created_at: new Date().toISOString(),
+        created_at: currentDate,
         description: '',
         extended_metadata: {},
         name,
         parent_id,
-        updated_at: new Date().toISOString(),
+        updated_at: currentDate,
       } as Container
     default:
       throw new Error(`Invalid type: ${type}`)

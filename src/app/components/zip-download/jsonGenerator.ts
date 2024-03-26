@@ -7,6 +7,8 @@ import {
   collectionsReactionTemplate,
   collectionsSampleTemplate,
   containerTemplate,
+  moleculeNameTemplate,
+  moleculeTemplate,
   reactionTemplate,
   sampleTemplate,
 } from './templates'
@@ -22,7 +24,12 @@ import {
   Reaction,
   ReactionSample,
   Sample,
-  collectionSchema,
+  attachmentSchema,
+  containerSchema,
+  moleculeNameSchema,
+  moleculeSchema,
+  reactionSchema,
+  sampleSchema,
 } from './zodSchemes'
 
 const currentDate = new Date().toISOString()
@@ -49,27 +56,15 @@ const getInitialJson = () => ({
   ReactionsProductSample: {} as KeyValuePair<ReactionSample>,
 })
 
-// TODO: Add dummy Molecule and MoleculeName data to make export importable
-export async function generateExportJson(
+export const generateExportJson = async (
   assignedFiles: ExtendedFile[],
   assignedFolders: ExtendedFolder[],
-) {
-  const exportJson = getInitialJson()
-
+) => {
+  const initialJson = getInitialJson()
   const uidMap = {} as Record<string, string>
-
-  const collectionId = v4()
-  const collectionData = {
-    ...collectionTemplate,
-    created_at: currentDate,
-    updated_at: currentDate,
-    user_id,
-  }
-  exportJson.Collection[collectionId] = collectionSchema.parse(collectionData)
 
   const uniqueFoldersByPath = new Set()
   const processedFolders = [] as ExtendedFolder[]
-
   for (const folder of assignedFolders) {
     const fullPath = folder.fullPath
 
@@ -79,89 +74,192 @@ export async function generateExportJson(
     }
   }
 
-  processedFolders.forEach((folder) => {
-    switch (folder.dtype) {
-      case 'reaction':
-        const reactionId = v4()
-        uidMap[folder.uid] = reactionId
-        const reactionData = {
-          ...reactionTemplate,
-          ...folder.metadata,
-          created_at: currentDate,
-          updated_at: currentDate,
-          user_id,
-        }
+  const collectionId = v4()
+  const newCollection = {
+    [collectionId]: {
+      ...collectionTemplate,
+      created_at: currentDate,
+      updated_at: currentDate,
+      label: 'Exported Collection',
+      user_id,
+    },
+  }
 
-        exportJson.Reaction[reactionId] = reactionData
+  const newSamples = processedFolders
+    .filter((folder) => folder.dtype === 'sample')
+    .map((folder) => {
+      const sampleId = v4()
+      uidMap[folder.uid] = sampleId
+      return {
+        [sampleId]: {
+          ...sampleSchema.parse({
+            ...sampleTemplate,
+            ...folder.metadata,
+            created_at: currentDate,
+            updated_at: currentDate,
+            user_id,
+            name: folder.name,
+          }),
+        },
+      }
+    })
+    .reduce((acc, sample) => ({ ...acc, ...sample }), {})
 
-        const collectionsReactionId = v4()
-        const collectionsReactionData = {
-          ...collectionsReactionTemplate,
-          collection_id: collectionId,
-          reaction_id: reactionId,
-        }
-
-        exportJson.CollectionsReaction[collectionsReactionId] =
-          collectionsReactionData
-        break
-      case 'sample':
-        const sampleId = v4()
-        uidMap[folder.uid] = sampleId
-        const sampleData = {
-          ...sampleTemplate,
-          ...folder.metadata,
-          created_at: currentDate,
-          updated_at: currentDate,
-          user_id,
-        }
-
-        exportJson.Sample[sampleId] = sampleData
-
-        const collectionsSampleId = v4()
-        const collectionsSampleData = {
+  const newCollectionsSamples = Object.entries(newSamples)
+    .map(([sampleId]) => {
+      const collectionsSampleId = v4()
+      return {
+        [collectionsSampleId]: {
           ...collectionsSampleTemplate,
           collection_id: collectionId,
           sample_id: sampleId,
-        }
+        },
+      }
+    })
+    .reduce((acc, collectionsSample) => ({ ...acc, ...collectionsSample }), {})
 
-        exportJson.CollectionsSample[collectionsSampleId] =
-          collectionsSampleData
-        break
-      case 'folder':
-        const containerId = v4()
-        uidMap[folder.uid] = containerId
-        const containerData = {
-          ...containerTemplate,
-          ...folder.metadata,
-          created_at: currentDate,
-          updated_at: currentDate,
-          user_id,
-        }
+  const newReactions = processedFolders
+    .filter((folder) => folder.dtype === 'reaction')
+    .map((folder) => {
+      const reactionId = v4()
+      uidMap[folder.uid] = reactionId
+      return {
+        [reactionId]: {
+          ...reactionSchema.parse({
+            ...reactionTemplate,
+            ...folder.metadata,
+            created_at: currentDate,
+            updated_at: currentDate,
+            user_id,
+            name: folder.name,
+          }),
+        },
+      }
+    })
+    .reduce((acc, reaction) => ({ ...acc, ...reaction }), {})
 
-        exportJson.Container[containerId] = containerData
-        break
-    }
-  })
+  const newCollectionsReactions = Object.entries(newReactions)
+    .map(([reactionId]) => {
+      const collectionsReactionId = v4()
+      return {
+        [collectionsReactionId]: {
+          ...collectionsReactionTemplate,
+          collection_id: collectionId,
+          reaction_id: reactionId,
+        },
+      }
+    })
+    .reduce(
+      (acc, collectionsReaction) => ({ ...acc, ...collectionsReaction }),
+      {},
+    )
 
-  assignedFiles.forEach((file) => {
-    const attachmentId = v4()
-    const attachmentData = {
-      ...attachmentTemplate,
-      created_at: currentDate,
-      updated_at: currentDate,
-      attachable_id:
-        uidMap[
-          processedFolders.find((folder) => folder.uid === file.parentUid)
-            ?.uid || ''
-        ],
-      filename: file.name,
-      identifier: file.uid,
-      content_type: file.file.type,
-      attachable_type: 'Container',
-    } as Attachment
+  // TODO: DUMMY DATA
+  const moleculeId = v4()
+  const newMolecules = {
+    [moleculeId]: {
+      ...moleculeSchema.parse({
+        ...moleculeTemplate,
+        created_at: currentDate,
+        updated_at: currentDate,
+        molfile_version: 'dummy_molecule_version',
+      }),
+    },
+  }
 
-    exportJson.Attachment[attachmentId] = attachmentData
-  })
+  // TODO: DUMMY DATA
+  const moleculeNameId = v4()
+  const newMoleculeNames = {
+    [moleculeNameId]: {
+      ...moleculeNameSchema.parse({
+        ...moleculeNameTemplate,
+        molecule_id: moleculeId,
+        created_at: currentDate,
+        updated_at: currentDate,
+        name: 'dummy_molecule_name',
+      }),
+    },
+  }
+
+  // TODO: containable_id needs to be set
+  const newContainers = processedFolders
+    .map((folder) => {
+      const containerId = v4()
+      return {
+        [containerId]: {
+          ...containerSchema.parse({
+            ...containerTemplate,
+            ...folder.metadata,
+            user_id,
+            name: folder.name,
+            created_at: currentDate,
+            updated_at: currentDate,
+            container_type: folder.dtype,
+            description: '',
+            parent_id: uidMap[folder.parentUid] || 'root',
+          }),
+        },
+      }
+    })
+    .reduce((acc, container) => ({ ...acc, ...container }), {})
+
+  const newAttachments = assignedFiles
+    .map((file) => {
+      const attachmentId = v4()
+      return {
+        [attachmentId]: {
+          ...attachmentSchema.parse({
+            ...attachmentTemplate,
+            created_at: currentDate,
+            updated_at: currentDate,
+            attachable_id: uidMap[file.parentUid] || '',
+            filename: file.name,
+            identifier: file.uid,
+            content_type: file.file.type,
+            attachable_type: 'Container',
+          }),
+        },
+      }
+    })
+    .reduce((acc, attachment) => ({ ...acc, ...attachment }), {})
+
+  const exportJson = {
+    ...initialJson,
+    Collection: {
+      ...initialJson.Collection,
+      ...Object.assign({}, newCollection),
+    },
+    Sample: { ...initialJson.Sample, ...Object.assign({}, newSamples) },
+    CollectionsSample: {
+      ...initialJson.CollectionsSample,
+      ...Object.assign({}, newCollectionsSamples),
+    },
+    Fingerprint: {},
+    Molecule: {
+      ...initialJson.Molecule,
+      ...Object.assign({}, newMolecules),
+    },
+    MoleculeName: {
+      ...initialJson.MoleculeName,
+      ...Object.assign({}, newMoleculeNames),
+    },
+    Container: {
+      ...initialJson.Container,
+      ...Object.assign({}, newContainers),
+    },
+    Attachment: {
+      ...initialJson.Attachment,
+      ...Object.assign({}, newAttachments),
+    },
+    Reaction: {
+      ...initialJson.Reaction,
+      ...Object.assign({}, newReactions),
+    },
+    CollectionsReaction: {
+      ...initialJson.CollectionsReaction,
+      ...Object.assign({}, newCollectionsReactions),
+    },
+  }
 
   return exportJson
 }
