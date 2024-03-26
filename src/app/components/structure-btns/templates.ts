@@ -33,7 +33,9 @@ const getMetadata = (
         name,
         updated_at: currentDate,
       } as Reaction
-    case 'folder':
+    case 'structure':
+    case 'analyses':
+    case 'analysis':
       return {
         ancestry: parent_id,
         containable_id: '',
