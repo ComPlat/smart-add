@@ -61,10 +61,29 @@ function getAncestry(
   allFolders: ExtendedFolder[],
 ): string {
   const pathComponents = folder.fullPath.split('/')
-  const replacedPathComponents = pathComponents.map((component) => {
+  const replacedPathComponents = []
+
+  const stopIndex = allFolders.findIndex(
+    (f) => f.dtype === 'sample' || f.dtype === 'reaction',
+  )
+  const endIndex = stopIndex === -1 ? pathComponents.length : stopIndex + 1
+
+  for (let i = 0; i < endIndex; i++) {
+    const component = pathComponents[i]
     const matchingFolder = allFolders.find((f) => f.name === component)
-    return matchingFolder ? matchingFolder.uid : component
-  })
+    if (!matchingFolder) {
+      replacedPathComponents.push(component)
+      continue
+    }
+    replacedPathComponents.push(matchingFolder.uid)
+    if (
+      matchingFolder.dtype === 'sample' ||
+      matchingFolder.dtype === 'reaction'
+    ) {
+      matchingFolder.parentUid = ''
+    }
+  }
+
   return replacedPathComponents.join('/')
 }
 
