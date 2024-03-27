@@ -1,3 +1,4 @@
+/* eslint-disable perfectionist/sort-objects */
 import { ExtendedFile, ExtendedFolder } from '@/database/db'
 import { v4 } from 'uuid'
 
@@ -13,17 +14,6 @@ import {
   sampleTemplate,
 } from './templates'
 import {
-  Attachment,
-  Collection,
-  CollectionsReaction,
-  CollectionsSample,
-  Container,
-  Fingerprint,
-  Molecule,
-  MoleculeName,
-  Reaction,
-  ReactionSample,
-  Sample,
   attachmentSchema,
   containerSchema,
   moleculeNameSchema,
@@ -34,27 +24,6 @@ import {
 
 const currentDate = new Date().toISOString()
 const user_id = 'guest'
-
-interface KeyValuePair<T> {
-  [key: string]: T
-}
-
-const getInitialJson = () => ({
-  /* eslint-disable perfectionist/sort-objects */
-  Collection: {} as KeyValuePair<Collection>,
-  Sample: {} as KeyValuePair<Sample>,
-  CollectionsSample: {} as KeyValuePair<CollectionsSample>,
-  Fingerprint: {} as KeyValuePair<Fingerprint>,
-  Molecule: {} as KeyValuePair<Molecule>,
-  MoleculeName: {} as KeyValuePair<MoleculeName>,
-  Container: {} as KeyValuePair<Container>,
-  Attachment: {} as KeyValuePair<Attachment>,
-  Reaction: {} as KeyValuePair<Reaction>,
-  CollectionsReaction: {} as KeyValuePair<CollectionsReaction>,
-  ReactionsStartingMaterialSample: {} as KeyValuePair<ReactionSample>,
-  ReactionsReactantSample: {} as KeyValuePair<ReactionSample>,
-  ReactionsProductSample: {} as KeyValuePair<ReactionSample>,
-})
 
 function getAncestry(
   folder: ExtendedFolder,
@@ -75,7 +44,6 @@ export const generateExportJson = async (
   assignedFiles: ExtendedFile[],
   assignedFolders: ExtendedFolder[],
 ) => {
-  const initialJson = getInitialJson()
   const uidMap = {} as Record<string, string>
 
   const uniqueFoldersByPath = new Set()
@@ -240,39 +208,30 @@ export const generateExportJson = async (
     .reduce((acc, attachment) => ({ ...acc, ...attachment }), {})
 
   const exportJson = {
-    ...initialJson,
     Collection: {
-      ...initialJson.Collection,
       ...Object.assign({}, newCollection),
     },
-    Sample: { ...initialJson.Sample, ...Object.assign({}, newSamples) },
+    Sample: { ...Object.assign({}, newSamples) },
     CollectionsSample: {
-      ...initialJson.CollectionsSample,
       ...Object.assign({}, newCollectionsSamples),
     },
     Fingerprint: {},
     Molecule: {
-      ...initialJson.Molecule,
       ...Object.assign({}, newMolecules),
     },
     MoleculeName: {
-      ...initialJson.MoleculeName,
       ...Object.assign({}, newMoleculeNames),
     },
     Container: {
-      ...initialJson.Container,
       ...Object.assign({}, newContainers),
     },
     Attachment: {
-      ...initialJson.Attachment,
       ...Object.assign({}, newAttachments),
     },
     Reaction: {
-      ...initialJson.Reaction,
       ...Object.assign({}, newReactions),
     },
     CollectionsReaction: {
-      ...initialJson.CollectionsReaction,
       ...Object.assign({}, newCollectionsReactions),
     },
   }
