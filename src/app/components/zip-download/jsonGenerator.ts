@@ -56,6 +56,18 @@ const getInitialJson = () => ({
   ReactionsProductSample: {} as KeyValuePair<ReactionSample>,
 })
 
+function getAncestry(
+  folder: ExtendedFolder,
+  allFolders: ExtendedFolder[],
+): string {
+  const pathComponents = folder.fullPath.split('/')
+  const replacedPathComponents = pathComponents.map((component) => {
+    const matchingFolder = allFolders.find((f) => f.name === component)
+    return matchingFolder ? matchingFolder.uid : component
+  })
+  return replacedPathComponents.join('/')
+}
+
 export const generateExportJson = async (
   assignedFiles: ExtendedFile[],
   assignedFolders: ExtendedFolder[],
@@ -95,6 +107,7 @@ export const generateExportJson = async (
           ...sampleSchema.parse({
             ...sampleTemplate,
             ...folder.metadata,
+            ancestry: getAncestry(folder, assignedFolders),
             created_at: currentDate,
             updated_at: currentDate,
             user_id,
@@ -190,6 +203,7 @@ export const generateExportJson = async (
           ...containerSchema.parse({
             ...containerTemplate,
             ...folder.metadata,
+            ancestry: getAncestry(folder, assignedFolders),
             user_id,
             name: folder.name,
             created_at: currentDate,
