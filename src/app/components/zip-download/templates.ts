@@ -158,7 +158,7 @@ export const reactionTemplate = {
   short_label: '',
   created_by: null,
   role: '',
-  origin: null,
+  origin: {},
   rinchi_string: '',
   rinchi_long_key: '',
   rinchi_short_key: '',

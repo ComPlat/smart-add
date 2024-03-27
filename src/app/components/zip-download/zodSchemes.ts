@@ -314,7 +314,7 @@ export const literatureSchema = z.object({
 })
 export type Literature = z.infer<typeof literatureSchema>
 
-const arraySchema = z.array(z.any())
+const arraySchema = z.array(z.union([z.string(), z.number()]))
 
 export type ArrayType = z.infer<typeof arraySchema>
 
@@ -326,8 +326,8 @@ export const reactionSchema = z.object({
   timestamp_start: z.string(),
   timestamp_stop: z.string(),
   observation: textObjectSchema,
-  purification: z.array(z.any()),
-  dangerous_products: z.array(z.any()),
+  purification: arraySchema,
+  dangerous_products: arraySchema,
   tlc_solvents: z.string(),
   tlc_description: z.string(),
   rf_value: z.string(),
