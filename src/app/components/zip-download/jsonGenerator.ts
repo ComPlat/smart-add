@@ -25,6 +25,16 @@ import {
 const currentDate = new Date().toISOString()
 const user_id = 'guest'
 
+function generateUidMap(assignedFolders: ExtendedFolder[]) {
+  const uidMap: Record<string, string> = {}
+
+  assignedFolders.forEach((folder) => {
+    uidMap[folder.uid] = v4()
+  })
+
+  return uidMap
+}
+
 function getAncestry(
   folder: ExtendedFolder,
   allFolders: ExtendedFolder[],
@@ -51,8 +61,6 @@ export const generateExportJson = async (
   assignedFiles: ExtendedFile[],
   assignedFolders: ExtendedFolder[],
 ) => {
-  const uidMap = {} as Record<string, string>
-
   const uniqueFoldersByPath = new Set()
   const processedFolders = [] as ExtendedFolder[]
   for (const folder of assignedFolders) {
@@ -63,6 +71,7 @@ export const generateExportJson = async (
       processedFolders.push(folder)
     }
   }
+  const uidMap = generateUidMap(processedFolders)
 
   const collectionId = v4()
   const newCollection = {
@@ -77,23 +86,19 @@ export const generateExportJson = async (
 
   const newSamples = processedFolders
     .filter((folder) => folder.dtype === 'sample')
-    .map((folder) => {
-      const sampleId = v4()
-      uidMap[folder.uid] = sampleId
-      return {
-        [sampleId]: {
-          ...sampleSchema.parse({
-            ...sampleTemplate,
-            ...folder.metadata,
-            ancestry: getAncestry(folder, assignedFolders, uidMap),
-            created_at: currentDate,
-            updated_at: currentDate,
-            user_id,
-            name: folder.name,
-          }),
-        },
-      }
-    })
+    .map((folder) => ({
+      [uidMap[folder.uid]]: {
+        ...sampleSchema.parse({
+          ...sampleTemplate,
+          ...folder.metadata,
+          ancestry: getAncestry(folder, assignedFolders, uidMap),
+          created_at: currentDate,
+          updated_at: currentDate,
+          user_id,
+          name: folder.name,
+        }),
+      },
+    }))
     .reduce((acc, sample) => ({ ...acc, ...sample }), {})
 
   const newCollectionsSamples = Object.entries(newSamples)
@@ -111,23 +116,19 @@ export const generateExportJson = async (
 
   const newReactions = processedFolders
     .filter((folder) => folder.dtype === 'reaction')
-    .map((folder) => {
-      const reactionId = v4()
-      uidMap[folder.uid] = reactionId
-      return {
-        [reactionId]: {
-          ...reactionSchema.parse({
-            ...reactionTemplate,
-            ...folder.metadata,
-            ancestry: getAncestry(folder, assignedFolders, uidMap),
-            created_at: currentDate,
-            updated_at: currentDate,
-            user_id,
-            name: folder.name,
-          }),
-        },
-      }
-    })
+    .map((folder) => ({
+      [uidMap[folder.uid]]: {
+        ...reactionSchema.parse({
+          ...reactionTemplate,
+          ...folder.metadata,
+          ancestry: getAncestry(folder, assignedFolders, uidMap),
+          created_at: currentDate,
+          updated_at: currentDate,
+          user_id,
+          name: folder.name,
+        }),
+      },
+    }))
     .reduce((acc, reaction) => ({ ...acc, ...reaction }), {})
 
   const newCollectionsReactions = Object.entries(newReactions)
@@ -175,25 +176,21 @@ export const generateExportJson = async (
 
   // TODO: containable_id needs to be set
   const newContainers = processedFolders
-    .map((folder) => {
-      const containerId = v4()
-      uidMap[folder.uid] = containerId
-      return {
-        [containerId]: {
-          ...containerSchema.parse({
-            ...containerTemplate,
-            ...folder.metadata,
-            ancestry: getAncestry(folder, assignedFolders, uidMap),
-            user_id,
-            name: folder.name,
-            created_at: currentDate,
-            updated_at: currentDate,
-            description: '',
-            parent_id: uidMap[folder.parentUid] || 'root',
-          }),
-        },
-      }
-    })
+    .map((folder) => ({
+      [uidMap[folder.uid]]: {
+        ...containerSchema.parse({
+          ...containerTemplate,
+          ...folder.metadata,
+          ancestry: getAncestry(folder, assignedFolders, uidMap),
+          user_id,
+          name: folder.name,
+          created_at: currentDate,
+          updated_at: currentDate,
+          description: '',
+          parent_id: uidMap[folder.parentUid] || 'root',
+        }),
+      },
+    }))
     .reduce((acc, container) => ({ ...acc, ...container }), {})
 
   const newAttachments = assignedFiles
