@@ -61,29 +61,13 @@ function getAncestry(
   allFolders: ExtendedFolder[],
 ): string {
   const pathComponents = folder.fullPath.split('/')
-  const replacedPathComponents = []
-
-  const stopIndex = allFolders.findIndex(
-    (f) => f.dtype === 'sample' || f.dtype === 'reaction',
-  )
-  const endIndex = stopIndex === -1 ? pathComponents.length : stopIndex + 1
-
-  for (let i = 0; i < endIndex; i++) {
-    const component = pathComponents[i]
+  const replacedPathComponents = pathComponents.reduce((acc, component) => {
     const matchingFolder = allFolders.find((f) => f.name === component)
-    if (!matchingFolder) {
-      replacedPathComponents.push(component)
-      continue
+    if (matchingFolder && matchingFolder.dtype === 'folder') {
+      acc.push(matchingFolder.uid)
     }
-    replacedPathComponents.push(matchingFolder.uid)
-    if (
-      matchingFolder.dtype === 'sample' ||
-      matchingFolder.dtype === 'reaction'
-    ) {
-      matchingFolder.parentUid = ''
-    }
-  }
-
+    return acc
+  }, [] as string[])
   return replacedPathComponents.join('/')
 }
 
@@ -227,7 +211,6 @@ export const generateExportJson = async (
             name: folder.name,
             created_at: currentDate,
             updated_at: currentDate,
-            container_type: folder.dtype,
             description: '',
             parent_id: uidMap[folder.parentUid] || 'root',
           }),
