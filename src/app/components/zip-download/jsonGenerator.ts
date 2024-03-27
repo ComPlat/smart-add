@@ -28,15 +28,22 @@ const user_id = 'guest'
 function getAncestry(
   folder: ExtendedFolder,
   allFolders: ExtendedFolder[],
+  uidMap: Record<string, string>,
 ): string {
+  if (folder.dtype === 'sample' || folder.dtype === 'reaction') return ''
+
   const pathComponents = folder.fullPath.split('/')
   const replacedPathComponents = pathComponents.reduce((acc, component) => {
     const matchingFolder = allFolders.find((f) => f.name === component)
-    if (matchingFolder && matchingFolder.dtype === 'folder') {
-      acc.push(matchingFolder.uid)
+    if (matchingFolder && matchingFolder !== folder) {
+      const uid = uidMap[matchingFolder.uid]
+      if (uid && !acc.includes(uid)) {
+        acc.push(uid)
+      }
     }
     return acc
   }, [] as string[])
+
   return replacedPathComponents.join('/')
 }
 
@@ -78,7 +85,7 @@ export const generateExportJson = async (
           ...sampleSchema.parse({
             ...sampleTemplate,
             ...folder.metadata,
-            ancestry: getAncestry(folder, assignedFolders),
+            ancestry: getAncestry(folder, assignedFolders, uidMap),
             created_at: currentDate,
             updated_at: currentDate,
             user_id,
@@ -112,6 +119,7 @@ export const generateExportJson = async (
           ...reactionSchema.parse({
             ...reactionTemplate,
             ...folder.metadata,
+            ancestry: getAncestry(folder, assignedFolders, uidMap),
             created_at: currentDate,
             updated_at: currentDate,
             user_id,
@@ -169,12 +177,13 @@ export const generateExportJson = async (
   const newContainers = processedFolders
     .map((folder) => {
       const containerId = v4()
+      uidMap[folder.uid] = containerId
       return {
         [containerId]: {
           ...containerSchema.parse({
             ...containerTemplate,
             ...folder.metadata,
-            ancestry: getAncestry(folder, assignedFolders),
+            ancestry: getAncestry(folder, assignedFolders, uidMap),
             user_id,
             name: folder.name,
             created_at: currentDate,
