@@ -26,13 +26,10 @@ const currentDate = new Date().toISOString()
 const user_id = 'guest'
 
 function generateUidMap(assignedFolders: ExtendedFolder[]) {
-  const uidMap: Record<string, string> = {}
-
-  assignedFolders.forEach((folder) => {
+  return assignedFolders.reduce((uidMap: Record<string, string>, folder) => {
     uidMap[folder.uid] = v4()
-  })
-
-  return uidMap
+    return uidMap
+  }, {})
 }
 
 function getAncestry(
