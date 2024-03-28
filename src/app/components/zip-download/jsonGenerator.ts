@@ -170,14 +170,29 @@ export const generateExportJson = async (
     },
   }
 
-  // TODO: containable_id needs to be set
   const uidToContainer = processedFolders.reduce((acc, folder) => {
+    const dtypeMapping = {
+      sample: {
+        containable_id: uidMap[folder.uid],
+        containable_type: 'Sample',
+      },
+      reaction: {
+        containable_id: uidMap[folder.uid],
+        containable_type: 'Reaction',
+      },
+    }
+
+    const { containable_id = '', containable_type = '' } =
+      dtypeMapping[folder.dtype as keyof typeof dtypeMapping] || {}
+
     const container = {
       [uidMap[folder.uid]]: {
         ...containerSchema.parse({
           ...containerTemplate,
           ...folder.metadata,
           ancestry: getAncestry(folder, assignedFolders, uidMap),
+          containable_id,
+          containable_type,
           user_id,
           name: folder.name,
           created_at: currentDate,
