@@ -182,7 +182,7 @@ export const generateExportJson = async (
       },
     }
 
-    const { containable_id = '', containable_type = '' } =
+    const { containable_id = null, containable_type = null } =
       dtypeMapping[folder.dtype as keyof typeof dtypeMapping] || {}
 
     const container = {
