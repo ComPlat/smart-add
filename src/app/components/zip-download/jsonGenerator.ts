@@ -79,6 +79,7 @@ export const generateExportJson = async (
 
   const uidToSample = processedFolders.reduce((acc, folder) => {
     if (folder.dtype !== 'sample') return acc
+
     const sample = {
       [uidMap[folder.uid]]: {
         ...sampleSchema.parse({
@@ -112,6 +113,7 @@ export const generateExportJson = async (
 
   const uidToReaction = processedFolders.reduce((acc, folder) => {
     if (folder.dtype !== 'reaction') return acc
+
     const reaction = {
       [uidMap[folder.uid]]: {
         ...reactionSchema.parse({
