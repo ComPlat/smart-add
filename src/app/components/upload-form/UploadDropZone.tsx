@@ -177,7 +177,7 @@ const handleCustomRequest = async ({
             case 'sample':
               return (
                 ((row as SampleWorksheetTable)['canonical smiles'] as string)
-                  // TODO: Adjust 'canonical smiles' using %2F (URL encoding) to replace "/" in the name to avoid file tree issues.
+                  // HINT: Adjust 'canonical smiles' using %2F (URL encoding) to replace "/" in the name to avoid file tree issues.
                   //        However, changing the name directly affects the value, potentially causing issues
                   //        when referencing it elsewhere in the codebase.
                   .replaceAll('/', '%2F')
