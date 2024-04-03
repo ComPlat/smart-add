@@ -175,7 +175,13 @@ const handleCustomRequest = async ({
             case 'reactions':
               return (row as ReactionsWorksheetTable)['r short label'] as string
             case 'sample':
-              return (row as SampleWorksheetTable)['canonical smiles'] as string
+              return (
+                ((row as SampleWorksheetTable)['canonical smiles'] as string)
+                  // HINT: Adjust 'canonical smiles' using %2F (URL encoding) to replace "/" in the name to avoid file tree issues.
+                  //        However, changing the name directly affects the value, potentially causing issues
+                  //        when referencing it elsewhere in the codebase.
+                  .replaceAll('/', '%2F')
+              )
             case 'sample_analyses':
               return (
                 ((row as SampleAnalysesWorksheetTable)[
