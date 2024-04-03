@@ -1,4 +1,10 @@
-import { ExtendedFile, ExtendedFolder, Metadata, filesDB } from '@/database/db'
+import {
+  ExtendedFile,
+  ExtendedFolder,
+  Metadata,
+  MetadataValue,
+  filesDB,
+} from '@/database/db'
 import { retrieveTree } from '@/helper/retrieveTree'
 import { FileNode } from '@/helper/types'
 import { useLiveQuery } from 'dexie-react-hooks'
@@ -166,7 +172,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = ({
 
 function determineInputComponent(
   key: string,
-  value: boolean | null | number | string | undefined,
+  value: MetadataValue,
   handleInputChange: (e: ChangeEvent<HTMLInputElement>, key: string) => void,
 ) {
   const disabled =
@@ -175,6 +181,7 @@ function determineInputComponent(
     key.toLowerCase() === 'name'
   const inputType = typeof value
 
+  // TODO: Add support for array, temperature, and text objects
   switch (inputType) {
     case 'string':
       if (datetimeSchema.safeParse(value).success) {

@@ -1,9 +1,31 @@
+import {
+  ArrayType,
+  TemperatureObject,
+  TextObject,
+} from '@/app/components/zip-download/zodSchemes'
 import { RcFile } from 'antd/es/upload'
 import Dexie, { Table } from 'dexie'
 
 export type Metadata = {
-  [key: string]: boolean | null | number | string
+  [key: string]:
+    | ArrayType
+    | TemperatureObject
+    | TextObject
+    | boolean
+    | null
+    | number
+    | string
 }
+
+export type MetadataValue =
+  | ArrayType
+  | TemperatureObject
+  | TextObject
+  | boolean
+  | null
+  | number
+  | string
+  | undefined
 
 export type ExtendedFile = {
   extension: string
@@ -20,6 +42,7 @@ export type ExtendedFile = {
 }
 
 export type ExtendedFolder = {
+  dtype: string
   fullPath: string
   id?: number
   isFolder: boolean
@@ -38,7 +61,7 @@ export class FilesDBCreator extends Dexie {
     super('filesDatabase')
     this.version(1).stores({
       files: '++id, fullPath, name, uid, extension, parentUid, treeId',
-      folders: '++id, fullPath, name, uid, parentUid, treeId',
+      folders: '++id, fullPath, name, uid, parentUid, treeId, dtype',
     })
   }
 }
