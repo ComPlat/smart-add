@@ -160,11 +160,15 @@ const textObjectSchema = z.object({
   ),
 })
 
+export type TextObject = z.infer<typeof textObjectSchema>
+
 const temperatureObjectSchema = z.object({
   data: z.array(z.any()),
   userText: z.string(),
   valueUnit: z.string(),
 })
+
+export type TemperatureObject = z.infer<typeof temperatureObjectSchema>
 
 export const collectionsReactionSchema = z.object({
   collection_id: uuidSchema,
@@ -310,6 +314,10 @@ export const literatureSchema = z.object({
 })
 export type Literature = z.infer<typeof literatureSchema>
 
+const arraySchema = z.array(z.union([z.string(), z.number()]))
+
+export type ArrayType = z.infer<typeof arraySchema>
+
 export const reactionSchema = z.object({
   name: z.string(),
   created_at: datetimeSchema.transform((val) => val ?? null),
@@ -318,8 +326,8 @@ export const reactionSchema = z.object({
   timestamp_start: z.string(),
   timestamp_stop: z.string(),
   observation: textObjectSchema,
-  purification: z.array(z.any()),
-  dangerous_products: z.array(z.any()),
+  purification: arraySchema,
+  dangerous_products: arraySchema,
   tlc_solvents: z.string(),
   tlc_description: z.string(),
   rf_value: z.string(),

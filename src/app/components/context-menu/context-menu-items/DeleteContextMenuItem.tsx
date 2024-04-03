@@ -30,7 +30,7 @@ const DeleteContextMenuItem: FC<DeleteProps> = ({
     e.preventDefault()
 
     if (!item.isFolder) deleteFile(item as ExtendedFile)
-    else deleteFolder(item, tree)
+    else deleteFolder(item as ExtendedFolder, tree)
 
     close()
   }

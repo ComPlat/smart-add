@@ -1,30 +1,57 @@
 import { FileNode } from '@/helper/types'
 
-import { Container } from '../zip-download/zodSchemes'
+import { reactionTemplate, sampleTemplate } from '../zip-download/templates'
+import { Container, Reaction, Sample } from '../zip-download/zodSchemes'
 import {
   createFolder,
   createSubFolders,
   getUniqueFolderName,
 } from './folderUtils'
 
-const getContainerMetadata = (
+const getMetadata = (
   parent_id: string,
   name: string,
-  container_type: string,
-  description: string,
-  extended_metadata: null | object,
-): Container => ({
-  ancestry: parent_id,
-  containable_id: null,
-  containable_type: null,
-  container_type,
-  created_at: new Date().toISOString(),
-  description,
-  extended_metadata,
-  name,
-  parent_id,
-  updated_at: new Date().toISOString(),
-})
+  type: string,
+  containable_type?: string,
+): Container | Reaction | Sample => {
+  const currentDate = new Date().toISOString()
+
+  switch (type) {
+    case 'sample':
+      return {
+        ...sampleTemplate,
+        ancestry: parent_id,
+        created_at: currentDate,
+        name,
+        updated_at: currentDate,
+      } as Sample
+    case 'reaction':
+      return {
+        ...reactionTemplate,
+        ancestry: parent_id,
+        created_at: currentDate,
+        name,
+        updated_at: currentDate,
+      } as Reaction
+    case 'structure':
+    case 'analyses':
+    case 'analysis':
+      return {
+        ancestry: parent_id,
+        containable_id: '',
+        containable_type: containable_type || '',
+        container_type: type || '',
+        created_at: currentDate,
+        description: '',
+        extended_metadata: {},
+        name,
+        parent_id,
+        updated_at: currentDate,
+      } as Container
+    default:
+      throw new Error(`Invalid type: ${type}`)
+  }
+}
 
 const analyses = ['analysis_1', 'analysis_2']
 
@@ -43,38 +70,33 @@ export const createSample = async (
     baseFolderName,
     true,
     '',
-    getContainerMetadata('', uniqueFolderName, 'sample', '', null),
+    getMetadata('', uniqueFolderName, 'sample'),
+    'sample',
   )
   const analysesFolder = await createFolder(
     `${uniqueFolderName}/analyses`,
     'analyses',
     true,
     '',
-    getContainerMetadata(sampleFolder.uid, 'analyses', 'analyses', '', null),
+    getMetadata(sampleFolder.uid, 'analyses', 'analyses'),
   )
 
   const promises = [
     createSubFolders(uniqueFolderName, ['structure'], sampleFolder.uid, [
-      getContainerMetadata(
-        sampleFolder.uid,
-        'structure',
-        'structure',
-        '',
-        null,
-      ),
+      getMetadata(sampleFolder.uid, 'structure', 'structure', ''),
     ]),
     createSubFolders(
       `${uniqueFolderName}/analyses`,
       analyses,
       analysesFolder.uid,
-      analyses.map((analysis) =>
-        getContainerMetadata(
-          analysesFolder.uid,
-          analysis,
-          'analysis',
-          '',
-          null,
-        ),
+      analyses.map(
+        (analysis) =>
+          getMetadata(
+            analysesFolder.uid,
+            analysis,
+            'analysis',
+            '',
+          ) as Container,
       ),
     ),
   ]
@@ -98,21 +120,23 @@ export const createReaction = async (
     baseFolderName,
     true,
     '',
-    getContainerMetadata('', uniqueFolderName, 'reaction', '', null),
+    getMetadata('', uniqueFolderName, 'reaction', ''),
+    'reaction',
   )
   const sampleFolder = await createFolder(
     `${uniqueFolderName}/${sampleName}`,
     sampleName,
     true,
     '',
-    getContainerMetadata(reactionFolder.uid, sampleName, 'sample', '', null),
+    getMetadata(reactionFolder.uid, sampleName, 'sample', ''),
+    'sample',
   )
   const analysesFolder = await createFolder(
     `${uniqueFolderName}/${sampleName}/analyses`,
     'analyses',
     true,
     '',
-    getContainerMetadata(sampleFolder.uid, 'analyses', 'analyses', '', null),
+    getMetadata(sampleFolder.uid, 'analyses', 'analyses', ''),
   )
 
   const promises = [
@@ -121,34 +145,27 @@ export const createReaction = async (
       ['structure', 'analyses'],
       sampleFolder.uid,
       [
-        getContainerMetadata(
+        getMetadata(
           sampleFolder.uid,
           'structure',
           'structure',
           '',
-          null,
-        ),
-        getContainerMetadata(
-          sampleFolder.uid,
-          'analyses',
-          'analyses',
-          '',
-          null,
-        ),
+        ) as Container,
+        getMetadata(sampleFolder.uid, 'analyses', 'analyses', '') as Container,
       ],
     ),
     createSubFolders(
       `${uniqueFolderName}/${sampleName}/analyses`,
       analyses,
       analysesFolder.uid,
-      analyses.map((analysis) =>
-        getContainerMetadata(
-          analysesFolder.uid,
-          analysis,
-          'analysis',
-          '',
-          null,
-        ),
+      analyses.map(
+        (analysis) =>
+          getMetadata(
+            analysesFolder.uid,
+            analysis,
+            'analysis',
+            '',
+          ) as Container,
       ),
     ),
   ]
@@ -173,6 +190,6 @@ export const createAnalysis = async (
     uniqueFolderName,
     true,
     '',
-    getContainerMetadata('', uniqueFolderName, analysisName, '', null),
+    getMetadata('', uniqueFolderName, analysisName, '') as Container,
   )
 }
