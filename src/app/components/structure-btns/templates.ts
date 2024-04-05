@@ -77,7 +77,7 @@ export const createSample = async (
     `${uniqueFolderName}/analyses`,
     'analyses',
     true,
-    '',
+    sampleFolder.uid,
     getMetadata(sampleFolder.uid, 'analyses', 'analyses'),
   )
 
