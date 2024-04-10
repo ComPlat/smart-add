@@ -8,8 +8,7 @@ import {
 import { retrieveTree } from '@/helper/retrieveTree'
 import { FileNode } from '@/helper/types'
 import { useLiveQuery } from 'dexie-react-hooks'
-import React from 'react'
-import { ChangeEvent, useEffect, useState } from 'react'
+import React, { ChangeEvent, useEffect, useState } from 'react'
 import { TreeItemIndex } from 'react-complex-tree'
 
 import renameFolder from './context-menu/renameFolder'
@@ -43,14 +42,14 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
   value = '',
 }) => {
   return (
-    <label className="flex flex-col">
-      {formatLabel(name)}
+    <label className="flex flex-col text-sm">
+      <p className="font-bold">{formatLabel(name)}</p>
       {disabled ? (
-        <p className="px-4 py-1">{value || 'None'}</p>
+        <p className="py-1">{value || 'None'}</p>
       ) : (
         <input
           autoFocus={autoFocus}
-          className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+          className={`mt-2 rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
           disabled={disabled}
           id={id}
           name={name}
@@ -84,14 +83,14 @@ const NumberInputField: React.FC<NumberInputFieldProps> = ({
   onChange,
   value,
 }) => (
-  <label className="flex flex-col">
-    {formatLabel(name)}
+  <label className="flex flex-col text-sm">
+    <p className="font-bold">{formatLabel(name)}</p>
     {disabled ? (
-      <p className="px-4 py-1">{value}</p>
+      <p className="py-1">{value}</p>
     ) : (
       <input
         autoFocus={autoFocus}
-        className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+        className={`mt-2 rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
         disabled={disabled}
         id={id}
         name={name}
@@ -124,11 +123,11 @@ const DateInputField: React.FC<DateInputFieldProps> = ({
   const formattedValue = value ? value.slice(0, -1) : ''
 
   return (
-    <label className="flex flex-col">
-      {name}
+    <label className="flex flex-col text-sm">
+      <p className="font-bold">{name}</p>
       <input
         autoFocus={autoFocus}
-        className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+        className={`mt-2 rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
         id={id}
         name={name}
         onChange={onChange}
@@ -159,14 +158,14 @@ const CheckboxField: React.FC<CheckboxFieldProps> = ({
   <label className="flex gap-2">
     <input
       checked={checked}
-      className={`rounded border px-3 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+      className={`rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
       disabled={disabled}
       id={id}
       name={name}
       onChange={onChange}
       type="checkbox"
     />
-    {formatLabel(name)}
+    <p className="text-sm">{formatLabel(name)}</p>
   </label>
 )
 
@@ -363,11 +362,11 @@ const InspectorSidebar = ({
     <>
       {isOpen && item && (
         <aside
-          className={`right-0 top-0 ml-2 w-[30vw] flex-col rounded-tl-xl bg-white ${
+          className={`right-0 top-0 ml-2 w-1/3 flex-col rounded-tl-xl bg-white ${
             isOpen ? 'translate-x-0' : 'translate-x-full'
           } z-40 max-h-screen overflow-y-auto p-4 duration-300 ease-in-out`}
         >
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-8">
             <button onClick={handleClose}>
               <svg
                 className="absolute right-2 top-2 h-6 w-6 cursor-pointer duration-100 hover:text-kit-primary-full"
@@ -393,7 +392,7 @@ const InspectorSidebar = ({
               </svg>
             </button>
             <p className="font-bold">{item.name}</p>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-6">
               {item.metadata &&
                 Object.entries(item.metadata).map(([key, value]) =>
                   determineInputComponent(key, value, handleInputChange),
