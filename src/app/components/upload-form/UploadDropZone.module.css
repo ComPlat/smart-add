@@ -1,3 +1,7 @@
 .upload-wrapper :global(.ant-upload-btn) {
   cursor: default;
 }
+
+.upload-wrapper {
+  height: 100%;
+}
