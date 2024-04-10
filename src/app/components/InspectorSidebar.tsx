@@ -391,7 +391,7 @@ const InspectorSidebar = ({
                 />
               </svg>
             </button>
-            <p className="font-bold">{item.name}</p>
+            <p className="truncate font-bold">{item.name}</p>
             <div className="flex flex-col gap-6">
               {item.metadata &&
                 Object.entries(item.metadata).map(([key, value]) =>
