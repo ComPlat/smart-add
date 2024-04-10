@@ -49,7 +49,12 @@ function getAncestry(
     return acc
   }, [] as string[])
 
-  return replacedPathComponents.join('/')
+  const currentFolderUid = uidMap[folder.uid]
+  const filteredPathComponents = replacedPathComponents.filter(
+    (uid) => uid !== currentFolderUid,
+  )
+
+  return filteredPathComponents.join('/')
 }
 
 export const generateExportJson = async (
