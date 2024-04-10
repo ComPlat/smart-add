@@ -147,6 +147,7 @@ An item will not be displayed or thrown an error message when one of the followi
 ## Export.json structure
 
 ### Reaction
+(Labimotion Classes are not required for the import to work)
 
 - Labimotion::ElementKlass
 - Labimotion::SegmentKlass
