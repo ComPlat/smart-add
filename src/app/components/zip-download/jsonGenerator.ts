@@ -30,6 +30,15 @@ function generateUidMap(assignedFolders: ExtendedFolder[]) {
   }, {})
 }
 
+function generateSampleReactionUidMap(assignedFolders: ExtendedFolder[]) {
+  return assignedFolders.reduce((uidMap: Record<string, string>, folder) => {
+    if (folder.dtype === 'sample' || folder.dtype === 'reaction') {
+      uidMap[folder.uid] = v4()
+    }
+    return uidMap
+  }, {})
+}
+
 function getAncestry(
   folder: ExtendedFolder,
   allFolders: ExtendedFolder[],
@@ -61,13 +70,17 @@ export const generateExportJson = async (
   assignedFiles: ExtendedFile[],
   assignedFolders: ExtendedFolder[],
 ) => {
-  const uniqueFoldersByPath = new Set(
-    assignedFolders.map((folder) => folder.fullPath),
-  )
-  const processedFolders = assignedFolders.filter((folder) =>
-    uniqueFoldersByPath.has(folder.fullPath),
-  )
+  const uniqueFolderPaths = new Set<string>()
+  const uniqueFolders: ExtendedFolder[] = []
+  for (const folder of assignedFolders) {
+    if (!uniqueFolderPaths.has(folder.fullPath)) {
+      uniqueFolders.push(folder)
+      uniqueFolderPaths.add(folder.fullPath)
+    }
+  }
+  const processedFolders = uniqueFolders
   const uidMap = generateUidMap(processedFolders)
+  const sampleReactionUidMap = generateSampleReactionUidMap(processedFolders)
 
   const collectionId = v4()
   const uidToCollection = {
@@ -132,7 +145,7 @@ export const generateExportJson = async (
     if (folder.dtype !== 'sample') return acc
 
     const sample = {
-      [uidMap[folder.uid]]: {
+      [sampleReactionUidMap[folder.uid]]: {
         ...sampleSchema.parse({
           ...sampleTemplate,
           ...folder.metadata,
@@ -170,7 +183,7 @@ export const generateExportJson = async (
     if (folder.dtype !== 'reaction') return acc
 
     const reaction = {
-      [uidMap[folder.uid]]: {
+      [sampleReactionUidMap[folder.uid]]: {
         ...reactionSchema.parse({
           ...reactionTemplate,
           ...folder.metadata,
@@ -205,11 +218,11 @@ export const generateExportJson = async (
 
     const dtypeMapping = {
       sample: {
-        containable_id: uidMap[folder.uid],
+        containable_id: sampleReactionUidMap[folder.uid],
         containable_type: 'Sample',
       },
       reaction: {
-        containable_id: uidMap[folder.uid],
+        containable_id: sampleReactionUidMap[folder.uid],
         containable_type: 'Reaction',
       },
     }
@@ -229,7 +242,6 @@ export const generateExportJson = async (
           name: folder.name,
           created_at: currentDate,
           updated_at: currentDate,
-          description: '',
           parent_id: uidMap[folder.parentUid] || null,
         }),
       },
