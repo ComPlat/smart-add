@@ -344,7 +344,7 @@ export const reactionSchema = z.object({
   short_label: nullableString,
   created_by: uuidSchema,
   role: nullableString,
-  origin: z.record(z.unknown()).nullable(), // Assuming `origin` can be any object
+  origin: z.any(),
   rinchi_string: nullableString,
   rinchi_long_key: nullableString,
   rinchi_short_key: nullableString,
