@@ -240,6 +240,7 @@ export const generateExportJson = async (
           containable_type,
           user_id,
           name: folder.name,
+          description: null,
           created_at: currentDate,
           updated_at: currentDate,
           parent_id: uidMap[folder.parentUid] || null,

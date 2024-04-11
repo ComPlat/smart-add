@@ -160,19 +160,15 @@ export const residueSchema = z.object({
 export type Residue = z.infer<typeof residueSchema>
 
 const textObjectSchema = z.object({
-  ops: z.array(
-    z.object({
-      insert: z.string(),
-    }),
-  ),
+  ops: z.array(z.object({ insert: z.string() })).default([{ insert: '\n' }]),
 })
 
 export type TextObject = z.infer<typeof textObjectSchema>
 
 const temperatureObjectSchema = z.object({
-  data: z.array(z.any()),
-  userText: z.string(),
-  valueUnit: z.string(),
+  data: z.array(z.any()).default([]),
+  userText: nullableString,
+  valueUnit: nullableString,
 })
 
 export type TemperatureObject = z.infer<typeof temperatureObjectSchema>
@@ -328,32 +324,32 @@ const arraySchema = z.array(z.union([z.string(), z.number()]))
 export type ArrayType = z.infer<typeof arraySchema>
 
 export const reactionSchema = z.object({
-  name: z.string(),
-  created_at: datetimeSchema.transform((val) => val ?? null),
+  name: nullableString,
+  created_at: datetimeSchema,
   updated_at: datetimeSchema,
   description: textObjectSchema,
-  timestamp_start: z.string(),
-  timestamp_stop: z.string(),
+  timestamp_start: nullableString,
+  timestamp_stop: nullableString,
   observation: textObjectSchema,
   purification: arraySchema,
   dangerous_products: arraySchema,
-  tlc_solvents: z.string(),
-  tlc_description: z.string(),
-  rf_value: z.string(),
+  tlc_solvents: nullableString,
+  tlc_description: nullableString,
+  rf_value: nullableString,
   temperature: temperatureObjectSchema,
-  status: z.string(),
-  reaction_svg_file: z.string(),
-  solvent: z.string(),
-  deleted_at: z.null(),
-  short_label: z.string(),
+  status: nullableString,
+  reaction_svg_file: nullableString,
+  solvent: nullableString,
+  deleted_at: nullableString,
+  short_label: nullableString,
   created_by: uuidSchema,
-  role: z.string(),
-  origin: z.any(),
-  rinchi_string: z.string(),
-  rinchi_long_key: z.string(),
-  rinchi_short_key: z.string(),
-  rinchi_web_key: z.string(),
-  duration: z.string(),
+  role: nullableString,
+  origin: z.record(z.unknown()).nullable(), // Assuming `origin` can be any object
+  rinchi_string: nullableString,
+  rinchi_long_key: nullableString,
+  rinchi_short_key: nullableString,
+  rinchi_web_key: nullableString,
+  duration: nullableString,
 })
 export type Reaction = z.infer<typeof reactionSchema>
 

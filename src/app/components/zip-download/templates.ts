@@ -144,32 +144,48 @@ export const residueTemplate = {
 }
 
 export const reactionTemplate = {
-  name: '',
+  name: null,
   created_at: null,
   updated_at: null,
-  description: { ops: [{ insert: '' }] },
-  timestamp_start: '',
-  timestamp_stop: '',
-  observation: { ops: [{ insert: '' }] },
+  description: {
+    ops: [
+      {
+        insert: '\n',
+      },
+    ],
+  },
+  timestamp_start: null,
+  timestamp_stop: null,
+  observation: {
+    ops: [
+      {
+        insert: '\n',
+      },
+    ],
+  },
   purification: [],
   dangerous_products: [],
-  tlc_solvents: '',
-  tlc_description: '',
-  rf_value: '',
-  temperature: { data: [], userText: '', valueUnit: '' },
-  status: '',
-  reaction_svg_file: '',
-  solvent: '',
+  tlc_solvents: null,
+  tlc_description: null,
+  rf_value: null,
+  temperature: {
+    data: [],
+    userText: null,
+    valueUnit: null,
+  },
+  status: null,
+  reaction_svg_file: null,
+  solvent: null,
   deleted_at: null,
-  short_label: '',
+  short_label: null,
   created_by: null,
-  role: '',
+  role: null,
   origin: {},
-  rinchi_string: '',
-  rinchi_long_key: '',
-  rinchi_short_key: '',
-  rinchi_web_key: '',
-  duration: '',
+  rinchi_string: null,
+  rinchi_long_key: null,
+  rinchi_short_key: null,
+  rinchi_web_key: null,
+  duration: null,
 }
 
 export const collectionsReactionTemplate = {
