@@ -21,7 +21,7 @@ import {
 } from './zodSchemes'
 
 const currentDate = new Date().toISOString()
-const user_id = v4()
+const user_id = null
 
 function generateUidMap(assignedFolders: ExtendedFolder[]) {
   return assignedFolders.reduce((uidMap: Record<string, string>, folder) => {
@@ -241,7 +241,7 @@ export const generateExportJson = async (
           description: null,
           created_at: currentDate,
           updated_at: currentDate,
-          parent_id: uidMap[folder.parentUid] || null,
+          parent_id: null,
         }),
       },
     }
