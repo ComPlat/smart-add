@@ -327,7 +327,7 @@ export const reactionSchema = z.object({
   name: nullableString,
   created_at: datetimeSchema,
   updated_at: datetimeSchema,
-  description: textObjectSchema,
+  description: textObjectSchema.nullable(),
   timestamp_start: nullableString,
   timestamp_stop: nullableString,
   observation: textObjectSchema,

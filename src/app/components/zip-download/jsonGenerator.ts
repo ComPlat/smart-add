@@ -63,7 +63,7 @@ function getAncestry(
     (uid) => uid !== currentFolderUid,
   )
 
-  return filteredPathComponents.join('/')
+  return filteredPathComponents.reverse().join('/')
 }
 
 export const generateExportJson = async (
@@ -153,7 +153,6 @@ export const generateExportJson = async (
           created_at: currentDate,
           updated_at: currentDate,
           user_id,
-          name: folder.name,
           molecule_id: moleculeId,
           // TODO: DUMMY DATA
           molfile:
@@ -191,7 +190,6 @@ export const generateExportJson = async (
           created_at: currentDate,
           updated_at: currentDate,
           user_id,
-          name: folder.name,
         }),
       },
     }
