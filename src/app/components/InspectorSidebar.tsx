@@ -358,6 +358,12 @@ const InspectorSidebar = ({
     }
   }
 
+  const isExtendedFile = (
+    item: ExtendedFile | ExtendedFolder,
+  ): item is ExtendedFile => {
+    return (item as ExtendedFile).file !== undefined
+  }
+
   return (
     <>
       {isOpen && item && (
@@ -391,7 +397,13 @@ const InspectorSidebar = ({
                 />
               </svg>
             </button>
-            <p className="font-bold">{item.name}</p>
+            <p className="font-bold">
+              {item.isFolder
+                ? item.name
+                : isExtendedFile(item)
+                ? item.file.name
+                : ''}
+            </p>
             <div className="flex flex-col gap-4">
               {item.metadata &&
                 Object.entries(item.metadata).map(([key, value]) =>
