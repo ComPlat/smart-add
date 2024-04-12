@@ -213,7 +213,6 @@ export const generateExportJson = async (
 
   // TODO: Containers are not added to the export.json as they cause Reactions to not be importable
   // TODO: Make the import of a Reaction work when Containers are also added to the export.json
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const uidToContainer = processedFolders.reduce((acc, folder) => {
     if (folder.metadata?.container_type === 'structure') return acc
 
@@ -244,7 +243,7 @@ export const generateExportJson = async (
           description: null,
           created_at: currentDate,
           updated_at: currentDate,
-          parent_id: null,
+          parent_id: uidMap[folder.parentUid] || null,
         }),
       },
     }
@@ -277,8 +276,8 @@ export const generateExportJson = async (
     Fingerprint: {},
     Molecule: uidToMolecule,
     MoleculeName: uidToMoleculeName,
-    // Container: uidToContainer,
-    Container: {},
+    Container: uidToContainer,
+    // Container: {},
     Attachment: uidToAttachment,
     Reaction: uidToReaction,
     CollectionsReaction: uidToCollectionsReaction,
