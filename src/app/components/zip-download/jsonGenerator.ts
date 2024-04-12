@@ -46,24 +46,28 @@ function getAncestry(
 ): string {
   if (folder.dtype === 'sample' || folder.dtype === 'reaction') return ''
 
-  const pathComponents = folder.fullPath.split('/')
-  const replacedPathComponents = pathComponents.reduce((acc, component) => {
+  const pathComponents = folder.fullPath.split('/').reverse()
+
+  const matchedUids: string[] = []
+
+  for (const component of pathComponents) {
     const matchingFolder = allFolders.find((f) => f.name === component)
+
     if (matchingFolder && matchingFolder !== folder) {
       const uid = uidMap[matchingFolder.uid]
-      if (uid && !acc.includes(uid)) {
-        acc.push(uid)
+
+      if (uid && !matchedUids.includes(uid)) {
+        matchedUids.push(uid)
       }
     }
-    return acc
-  }, [] as string[])
+
+    if (matchingFolder?.dtype === 'sample') break
+  }
 
   const currentFolderUid = uidMap[folder.uid]
-  const filteredPathComponents = replacedPathComponents.filter(
-    (uid) => uid !== currentFolderUid,
-  )
+  const filteredUids = matchedUids.filter((uid) => uid !== currentFolderUid)
 
-  return filteredPathComponents.reverse().join('/')
+  return filteredUids.join('/')
 }
 
 export const generateExportJson = async (
@@ -211,8 +215,6 @@ export const generateExportJson = async (
     {},
   )
 
-  // TODO: Containers are not added to the export.json as they cause Reactions to not be importable
-  // TODO: Make the import of a Reaction work when Containers are also added to the export.json
   const uidToContainer = processedFolders.reduce((acc, folder) => {
     if (folder.metadata?.container_type === 'structure') return acc
 
@@ -277,7 +279,6 @@ export const generateExportJson = async (
     Molecule: uidToMolecule,
     MoleculeName: uidToMoleculeName,
     Container: uidToContainer,
-    // Container: {},
     Attachment: uidToAttachment,
     Reaction: uidToReaction,
     CollectionsReaction: uidToCollectionsReaction,
