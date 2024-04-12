@@ -243,13 +243,15 @@ const handleCustomRequest = async ({
 
     await Promise.all(promises)
 
+    const extension = file.webkitRelativePath.split('.').slice(-1)[0]
+
     filesDB.files
       .add({
-        extension: file.webkitRelativePath.split('.').slice(-1)[0],
+        extension,
         file,
         fullPath: file.webkitRelativePath,
         isFolder: false,
-        name: file.name,
+        name: `${v4()}${extension && `.${extension}`}`,
         parentUid: file.uid.split('_')[0],
         path: parentPath,
         treeId: targetTreeRoot,

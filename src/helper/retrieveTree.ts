@@ -13,7 +13,7 @@ const convertToFileTree = (
       [file.fullPath]: {
         canMove: true,
         children: [],
-        data: file.name,
+        data: file.file.name,
         index: file.fullPath,
         isFolder: false,
         uid: file.uid,

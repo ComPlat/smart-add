@@ -13,7 +13,7 @@ const ParseXlsx = () => {
     const file: ExtendedFile | undefined = await filesDB.files.get({ fullPath })
     if (!file) return
 
-    const fileAsFile = new File([file.file], file.name, {
+    const fileAsFile = new File([file.file], file.file.name, {
       type: file.file.type,
     })
 

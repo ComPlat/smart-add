@@ -8,8 +8,7 @@ import {
 import { retrieveTree } from '@/helper/retrieveTree'
 import { FileNode } from '@/helper/types'
 import { useLiveQuery } from 'dexie-react-hooks'
-import React from 'react'
-import { ChangeEvent, useEffect, useState } from 'react'
+import React, { ChangeEvent, useEffect, useState } from 'react'
 import { TreeItemIndex } from 'react-complex-tree'
 
 import renameFolder from './context-menu/renameFolder'
