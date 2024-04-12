@@ -284,18 +284,27 @@ export const attachmentSchema = z.object({
   storage: z.string(),
   created_by: uuidSchema,
   created_for: uuidSchema,
-  version: z.number(),
+  version: z.number().nullable(),
   created_at: datetimeSchema,
   updated_at: datetimeSchema,
   content_type: z.string(),
-  bucket: z.string(),
+  bucket: nullableString,
   key: z.string(),
   thumb: z.boolean(),
   folder: nullableString,
   attachable_type: z.string(),
   aasm_state: z.string(),
   filesize: z.number(),
-  attachment_data: z.any(),
+  attachment_data: z.object({
+    id: uuidSchema,
+    metadata: z.object({
+      filename: z.string(),
+      md5: z.string(),
+      mime_type: z.string(),
+      size: z.number(),
+    }),
+    storage: z.string(),
+  }),
 })
 export type Attachment = z.infer<typeof attachmentSchema>
 

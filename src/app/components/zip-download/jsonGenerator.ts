@@ -1,5 +1,6 @@
 /* eslint-disable perfectionist/sort-objects */
 import { ExtendedFile, ExtendedFolder } from '@/database/db'
+import { generateMd5Checksum } from '@/helper/cryptographicTools'
 import { v4 } from 'uuid'
 
 import {
@@ -237,24 +238,50 @@ export const generateExportJson = async (
     return { ...acc, ...container }
   }, {})
 
-  const uidToAttachment = assignedFiles.reduce((acc, file) => {
+  const uidToAttachment = await assignedFiles.reduce(async (acc, file) => {
     const attachmentId = v4()
+    const attachableId = uidMap[file.parentUid] || ''
+    const filename = file.name
+    const identifier = file.uid
+    const fileType = file.file.type
+    const attachableType = 'Container'
+    const checksum = await generateMd5Checksum(file.file)
+    const key = v4()
+    const filesize = file.file.size
+
+    const attachmentData = {
+      id: `2/${identifier}`,
+      metadata: {
+        filename: `${key}.${file.extension}`,
+        md5: checksum,
+        mime_type: fileType,
+        size: filesize,
+      },
+      storage: 'store',
+    }
+
     const attachment = {
       [attachmentId]: {
         ...attachmentSchema.parse({
           ...attachmentTemplate,
           created_at: currentDate,
           updated_at: currentDate,
-          attachable_id: uidMap[file.parentUid] || '',
-          filename: file.name,
-          identifier: file.uid,
-          content_type: file.file.type,
-          attachable_type: 'Container',
+          attachable_id: attachableId,
+          filename,
+          identifier,
+          content_type: fileType,
+          attachable_type: attachableType,
+          checksum,
+          aasm_state: 'non_jcamp',
+          attachment_data: attachmentData,
+          filesize,
+          key,
         }),
       },
     }
-    return { ...acc, ...attachment }
-  }, {})
+
+    return { ...(await acc), ...attachment }
+  }, Promise.resolve({}))
 
   const exportJson = {
     Collection: uidToCollection,
