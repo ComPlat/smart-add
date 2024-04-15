@@ -1,3 +1,4 @@
+import { formatDate } from '@/helper/formatDate'
 import '@this-dot/cypress-indexeddb'
 
 describe('ZIP download', () => {
@@ -5,7 +6,7 @@ describe('ZIP download', () => {
     cy.visit('/').clearIndexedDb('filesDatabase')
   })
 
-  const outputZipName = 'exportZip'
+  const outputZipName = `export_${formatDate()}`
   const zipFileName = 'test-zip.zip'
   const zipFile = `cypress/fixtures/${zipFileName}`
 
