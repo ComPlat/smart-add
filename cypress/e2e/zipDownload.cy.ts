@@ -1,5 +1,6 @@
-import { formatDate } from '@/helper/formatDate'
 import '@this-dot/cypress-indexeddb'
+
+import { formatDate } from '../../src/helper/formatDate'
 
 describe('ZIP download', () => {
   beforeEach(() => {
