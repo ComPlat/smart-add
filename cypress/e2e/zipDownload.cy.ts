@@ -1,15 +1,20 @@
 import '@this-dot/cypress-indexeddb'
 
-import { formatDate } from '../../src/helper/formatDate'
+import { formatDateToTimeStamp } from '../../src/helper/formatDateToTimeStamp'
 
 describe('ZIP download', () => {
   beforeEach(() => {
     cy.visit('/').clearIndexedDb('filesDatabase')
   })
 
-  const outputZipName = `export_${formatDate()}`
+  const mockedDate = new Date(2024, 3, 14, 12, 0, 0)
+  const outputZipName = `export_${formatDateToTimeStamp(mockedDate)}`
   const zipFileName = 'test-zip.zip'
   const zipFile = `cypress/fixtures/${zipFileName}`
+
+  before(() => {
+    cy.clock(mockedDate, ['Date'])
+  })
 
   after(() => {
     cy.exec(`rm -f cypress/downloads/${outputZipName}.zip`)
