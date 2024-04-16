@@ -48,21 +48,30 @@ function getAncestry(
 
   const pathComponents = folder.fullPath.split('/').reverse()
 
-  const matchedUids: string[] = []
+  const { matchedUids } = pathComponents.reduce(
+    (acc, component) => {
+      if (acc.shouldStop) return acc
 
-  for (const component of pathComponents) {
-    const matchingFolder = allFolders.find((f) => f.name === component)
+      const matchingFolder: ExtendedFolder | undefined = allFolders.find(
+        (f) => f.name === component,
+      )
 
-    if (matchingFolder && matchingFolder !== folder) {
-      const uid = uidMap[matchingFolder.uid]
+      if (matchingFolder && matchingFolder !== folder) {
+        const uid = uidMap[matchingFolder.uid]
 
-      if (uid && !matchedUids.includes(uid)) {
-        matchedUids.push(uid)
+        if (uid && !acc.matchedUids.includes(uid)) {
+          acc.matchedUids.push(uid)
+        }
       }
-    }
 
-    if (matchingFolder?.dtype === 'sample') break
-  }
+      if (matchingFolder?.dtype === 'sample') {
+        acc.shouldStop = true
+      }
+
+      return acc
+    },
+    { matchedUids: [] as string[], shouldStop: false },
+  )
 
   const currentFolderUid = uidMap[folder.uid]
   const filteredUids = matchedUids.filter((uid) => uid !== currentFolderUid)
