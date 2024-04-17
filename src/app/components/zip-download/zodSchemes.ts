@@ -171,8 +171,8 @@ export type TextObject = z.infer<typeof textObjectSchema>
 
 const temperatureObjectSchema = z.object({
   data: z.array(z.any()),
-  userText: z.string(),
-  valueUnit: z.string(),
+  userText: nullableString,
+  valueUnit: nullableString,
 })
 
 export type TemperatureObject = z.infer<typeof temperatureObjectSchema>
@@ -328,32 +328,35 @@ const arraySchema = z.array(z.union([z.string(), z.number()]))
 export type ArrayType = z.infer<typeof arraySchema>
 
 export const reactionSchema = z.object({
-  name: z.string(),
-  created_at: datetimeSchema.transform((val) => val ?? null),
+  name: nullableString,
+  created_at: datetimeSchema,
   updated_at: datetimeSchema,
-  description: textObjectSchema,
-  timestamp_start: z.string(),
-  timestamp_stop: z.string(),
-  observation: textObjectSchema,
+  description: textObjectSchema.nullable(),
+  timestamp_start: nullableString,
+  timestamp_stop: nullableString,
+  observation: textObjectSchema.nullable(),
   purification: arraySchema,
   dangerous_products: arraySchema,
-  tlc_solvents: z.string(),
-  tlc_description: z.string(),
-  rf_value: z.string(),
+  tlc_solvents: nullableString,
+  tlc_description: nullableString,
+  rf_value: nullableString,
   temperature: temperatureObjectSchema,
-  status: z.string(),
-  reaction_svg_file: z.string(),
-  solvent: z.string(),
+  status: nullableString,
+  reaction_svg_file: nullableString,
+  solvent: nullableString,
   deleted_at: z.null(),
-  short_label: z.string(),
+  short_label: nullableString,
   created_by: uuidSchema,
-  role: z.string(),
+  role: nullableString,
   origin: z.any(),
-  rinchi_string: z.string(),
-  rinchi_long_key: z.string(),
-  rinchi_short_key: z.string(),
-  rinchi_web_key: z.string(),
-  duration: z.string(),
+  rinchi_string: nullableString,
+  rinchi_long_key: nullableString,
+  rinchi_short_key: nullableString,
+  rinchi_web_key: nullableString,
+  duration: nullableString,
+  rnxo: nullableString,
+  conditions: nullableString,
+  variations: nullableString,
 })
 export type Reaction = z.infer<typeof reactionSchema>
 
