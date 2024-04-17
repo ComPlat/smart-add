@@ -223,6 +223,8 @@ export const generateExportJson = async (
   )
 
   const uidToContainer = processedFolders.reduce((acc, folder) => {
+    // HINT: Do not create containers for container types that are not allowed
+    //        to be in the export.json file
     if (
       folder.metadata?.container_type === 'structure' ||
       folder.metadata?.container_type === 'folder'
