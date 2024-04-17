@@ -127,7 +127,7 @@ export const createReaction = async (
     `${uniqueFolderName}/${sampleName}`,
     sampleName,
     true,
-    '',
+    reactionFolder.uid,
     getMetadata(reactionFolder.uid, sampleName, 'sample', ''),
     'sample',
   )
@@ -135,7 +135,7 @@ export const createReaction = async (
     `${uniqueFolderName}/${sampleName}/analyses`,
     'analyses',
     true,
-    '',
+    sampleFolder.uid,
     getMetadata(sampleFolder.uid, 'analyses', 'analyses', ''),
   )
 

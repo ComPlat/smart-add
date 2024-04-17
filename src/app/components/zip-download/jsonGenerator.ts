@@ -62,12 +62,13 @@ export const generateExportJson = async (
   assignedFiles: ExtendedFile[],
   assignedFolders: ExtendedFolder[],
 ) => {
-  const uniqueFoldersByPath = new Set(
-    assignedFolders.map((folder) => folder.fullPath),
-  )
-  const processedFolders = assignedFolders.filter((folder) =>
-    uniqueFoldersByPath.has(folder.fullPath),
-  )
+  const processedFolders = assignedFolders.reduce((acc, assignedFolder) => {
+    const existingFolder = acc.find(
+      (processedFolder) => processedFolder.fullPath === assignedFolder.fullPath,
+    )
+    if (!existingFolder) acc.push(assignedFolder)
+    return acc
+  }, [] as ExtendedFolder[])
   const uidMap = generateUidMap(processedFolders)
 
   const collectionId = v4()
