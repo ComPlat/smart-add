@@ -251,7 +251,7 @@ const handleCustomRequest = async ({
         file,
         fullPath: file.webkitRelativePath,
         isFolder: false,
-        name: `${v4()}${extension && `.${extension}`}`,
+        name: file.name,
         parentUid: file.uid.split('_')[0],
         path: parentPath,
         treeId: targetTreeRoot,

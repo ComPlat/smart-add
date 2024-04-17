@@ -224,14 +224,12 @@ const Workspace = ({ focusedItem, setFocusedItem }: FocusedItemProps) => {
             (item) => item.data !== 'structure' && item.data !== 'analyses',
           )
         }
-        getItemTitle={(item: TreeItem) =>
-          item.index.toString().split('/').slice(-1)[0]
-        }
         canDragAndDrop
         canDropAt={handleCanDropAt}
         canDropOnFolder
         canReorderItems
         canSearch={false}
+        getItemTitle={(item: TreeItem) => item.data}
         items={tree}
         onCollapseItem={handleOnCollapseItem}
         onDrop={handleOnDrop}
