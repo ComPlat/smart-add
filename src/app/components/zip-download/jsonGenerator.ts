@@ -225,7 +225,7 @@ export const generateExportJson = async (
   const uidToContainer = processedFolders.reduce((acc, folder) => {
     if (
       folder.metadata?.container_type === 'structure' ||
-      folder.metadata?.container_type === null
+      folder.metadata?.container_type === 'folder'
     )
       return acc
 
