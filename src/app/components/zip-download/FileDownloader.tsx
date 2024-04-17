@@ -1,6 +1,7 @@
 'use client'
 
 import { ExtendedFile, filesDB } from '@/database/db'
+import { formatDateToTimeStamp } from '@/helper/formatDateToTimeStamp'
 import { message } from 'antd'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { saveAs } from 'file-saver'
@@ -93,8 +94,10 @@ const FileDownloader = () => {
 
       const blob = await zip.generateAsync({ type: 'blob' })
 
-      saveAs(blob, 'exportZip')
-      message.success('exportZip.zip downloaded successfully')
+      const exportedZipFileName = `export_${formatDateToTimeStamp(new Date())}`
+
+      saveAs(blob, exportedZipFileName)
+      message.success(`${exportedZipFileName} downloaded successfully`)
     } catch (error) {
       console.error(error)
     }
