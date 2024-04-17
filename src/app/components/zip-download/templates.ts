@@ -147,22 +147,10 @@ export const reactionTemplate = {
   name: null,
   created_at: null,
   updated_at: null,
-  description: {
-    ops: [
-      {
-        insert: '\n',
-      },
-    ],
-  },
+  description: null,
   timestamp_start: null,
   timestamp_stop: null,
-  observation: {
-    ops: [
-      {
-        insert: '\n',
-      },
-    ],
-  },
+  observation: null,
   purification: [],
   dangerous_products: [],
   tlc_solvents: null,
@@ -180,12 +168,15 @@ export const reactionTemplate = {
   short_label: null,
   created_by: null,
   role: null,
-  origin: {},
+  origin: null,
   rinchi_string: null,
   rinchi_long_key: null,
   rinchi_short_key: null,
   rinchi_web_key: null,
   duration: null,
+  rnxo: null,
+  conditions: null,
+  variations: null,
 }
 
 export const collectionsReactionTemplate = {

@@ -166,7 +166,7 @@ const textObjectSchema = z.object({
 export type TextObject = z.infer<typeof textObjectSchema>
 
 const temperatureObjectSchema = z.object({
-  data: z.array(z.any()).default([]),
+  data: z.array(z.any()),
   userText: nullableString,
   valueUnit: nullableString,
 })
@@ -330,7 +330,7 @@ export const reactionSchema = z.object({
   description: textObjectSchema.nullable(),
   timestamp_start: nullableString,
   timestamp_stop: nullableString,
-  observation: textObjectSchema,
+  observation: textObjectSchema.nullable(),
   purification: arraySchema,
   dangerous_products: arraySchema,
   tlc_solvents: nullableString,
@@ -340,7 +340,7 @@ export const reactionSchema = z.object({
   status: nullableString,
   reaction_svg_file: nullableString,
   solvent: nullableString,
-  deleted_at: nullableString,
+  deleted_at: z.null(),
   short_label: nullableString,
   created_by: uuidSchema,
   role: nullableString,
@@ -350,6 +350,9 @@ export const reactionSchema = z.object({
   rinchi_short_key: nullableString,
   rinchi_web_key: nullableString,
   duration: nullableString,
+  rnxo: nullableString,
+  conditions: nullableString,
+  variations: nullableString,
 })
 export type Reaction = z.infer<typeof reactionSchema>
 

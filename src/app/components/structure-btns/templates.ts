@@ -128,7 +128,7 @@ export const createReaction = async (
     sampleName,
     true,
     reactionFolder.uid,
-    getMetadata(reactionFolder.uid, sampleName, 'sample'),
+    getMetadata(reactionFolder.uid, sampleName, 'sample', ''),
     'sample',
   )
   const analysesFolder = await createFolder(
@@ -136,7 +136,7 @@ export const createReaction = async (
     'analyses',
     true,
     sampleFolder.uid,
-    getMetadata(sampleFolder.uid, 'analyses', 'analyses'),
+    getMetadata(sampleFolder.uid, 'analyses', 'analyses', ''),
   )
 
   const promises = [
