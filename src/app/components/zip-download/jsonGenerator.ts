@@ -25,15 +25,20 @@ const user_id = null
 
 function generateUidMap(assignedFolders: ExtendedFolder[]) {
   return assignedFolders.reduce((uidMap: Record<string, string>, folder) => {
-    uidMap[folder.uid] = v4()
-    return uidMap
+    return {
+      ...uidMap,
+      [folder.uid]: v4(),
+    }
   }, {})
 }
 
 function generateSampleReactionUidMap(assignedFolders: ExtendedFolder[]) {
   return assignedFolders.reduce((uidMap: Record<string, string>, folder) => {
     if (folder.dtype === 'sample' || folder.dtype === 'reaction') {
-      uidMap[folder.uid] = v4()
+      return {
+        ...uidMap,
+        [folder.uid]: v4(),
+      }
     }
     return uidMap
   }, {})
