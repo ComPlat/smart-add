@@ -23,42 +23,38 @@ const formatLabel = (text: string): string =>
 interface TextInputFieldProps {
   autoFocus?: boolean
   className?: string
-  disabled?: boolean
   id?: string
   name: string
   onChange: React.ChangeEventHandler<HTMLInputElement>
   placeholder?: string
+  readonly: boolean
   value?: string
 }
 
 const TextInputField: React.FC<TextInputFieldProps> = ({
   autoFocus = false,
   className = '',
-  disabled = false,
   id,
   name,
   onChange,
   placeholder = 'Enter text...',
+  readonly = false,
   value = '',
 }) => {
   return (
     <label className="flex flex-col text-sm">
       <p className="font-bold">{formatLabel(name)}</p>
-      {disabled ? (
-        <p className="py-1">{value || 'None'}</p>
-      ) : (
-        <input
-          autoFocus={autoFocus}
-          className={`mt-2 rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
-          disabled={disabled}
-          id={id}
-          name={name}
-          onChange={onChange}
-          placeholder={placeholder}
-          type="text"
-          value={value}
-        />
-      )}
+      <input
+        autoFocus={autoFocus}
+        className={`mt-2 rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+        id={id}
+        name={name}
+        onChange={onChange}
+        placeholder={placeholder}
+        readOnly={readonly}
+        type="text"
+        value={value}
+      />
     </label>
   )
 }
@@ -66,39 +62,35 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
 interface NumberInputFieldProps {
   autoFocus?: boolean
   className?: string
-  disabled?: boolean
   id?: string
   name: string
   onChange: React.ChangeEventHandler<HTMLInputElement>
   placeholder?: string
+  readonly?: boolean
   value?: number
 }
 
 const NumberInputField: React.FC<NumberInputFieldProps> = ({
   autoFocus = false,
   className = '',
-  disabled = false,
   id,
   name,
   onChange,
+  readonly = false,
   value,
 }) => (
   <label className="flex flex-col text-sm">
     <p className="font-bold">{formatLabel(name)}</p>
-    {disabled ? (
-      <p className="py-1">{value}</p>
-    ) : (
-      <input
-        autoFocus={autoFocus}
-        className={`mt-2 rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
-        disabled={disabled}
-        id={id}
-        name={name}
-        onChange={onChange}
-        type="number"
-        value={value || ''}
-      />
-    )}
+    <input
+      autoFocus={autoFocus}
+      className={`mt-2 rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+      id={id}
+      name={name}
+      onChange={onChange}
+      readOnly={readonly}
+      type="number"
+      value={value || ''}
+    />
   </label>
 )
 
@@ -109,6 +101,7 @@ interface DateInputFieldProps {
   name: string
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   raw?: boolean
+  readonly?: boolean
   value?: string
 }
 
@@ -118,19 +111,21 @@ const DateInputField: React.FC<DateInputFieldProps> = ({
   id,
   name,
   onChange,
+  readonly = false,
   value = '',
 }) => {
   const formattedValue = value ? value.slice(0, -1) : ''
 
   return (
     <label className="flex flex-col text-sm">
-      <p className="font-bold">{name}</p>
+      <p className="font-bold">{formatLabel(name)}</p>
       <input
         autoFocus={autoFocus}
         className={`mt-2 rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
         id={id}
         name={name}
         onChange={onChange}
+        readOnly={readonly}
         type="datetime-local"
         value={formattedValue}
       />
@@ -141,28 +136,28 @@ const DateInputField: React.FC<DateInputFieldProps> = ({
 interface CheckboxFieldProps {
   checked: boolean
   className?: string
-  disabled?: boolean
   id?: string
   name: string
   onChange: React.ChangeEventHandler<HTMLInputElement>
+  readonly?: boolean
 }
 
 const CheckboxField: React.FC<CheckboxFieldProps> = ({
   checked = false,
   className = '',
-  disabled = false,
   id,
   name,
   onChange,
+  readonly = false,
 }) => (
   <label className="flex gap-2">
     <input
       checked={checked}
       className={`rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
-      disabled={disabled}
       id={id}
       name={name}
       onChange={onChange}
+      readOnly={readonly}
       type="checkbox"
     />
     <p className="text-sm">{formatLabel(name)}</p>
@@ -174,10 +169,15 @@ function determineInputComponent(
   value: MetadataValue,
   handleInputChange: (e: ChangeEvent<HTMLInputElement>, key: string) => void,
 ) {
-  const disabled =
-    key.toLowerCase().includes('id') ||
-    key.toLowerCase().includes('ancestry') ||
-    key.toLowerCase() === 'name'
+  const readonlyKeys = [
+    'created_at',
+    'updated_at',
+    'deleted_at',
+    'ancestry',
+    'paremt_id',
+    'fingerprint_id',
+  ]
+  const readonly = readonlyKeys.includes(key)
   const inputType = typeof value
 
   // TODO: Add support for array, temperature, and text objects
@@ -196,10 +196,10 @@ function determineInputComponent(
       } else {
         return (
           <TextInputField
-            disabled={disabled}
             key={key}
             name={key}
             onChange={(e) => handleInputChange(e, key)}
+            readonly={readonly}
             value={value as string}
           />
         )
@@ -207,10 +207,10 @@ function determineInputComponent(
     case 'number':
       return (
         <NumberInputField
-          disabled={disabled}
           key={key}
           name={key}
           onChange={(e) => handleInputChange(e, key)}
+          readonly={readonly}
           value={value as number}
         />
       )
@@ -218,19 +218,19 @@ function determineInputComponent(
       return (
         <CheckboxField
           checked={value as boolean}
-          disabled={disabled}
           key={key}
           name={key}
           onChange={(e) => handleInputChange(e, key)}
+          readonly={readonly}
         />
       )
     default:
       return (
         <TextInputField
-          disabled={disabled}
           key={key}
           name={key}
           onChange={(e) => handleInputChange(e, key)}
+          readonly={readonly}
           value=""
         />
       )
