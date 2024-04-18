@@ -35,7 +35,7 @@ export const createFolder = async (
   name: string,
   assignmentTree: boolean = false,
   parentUid: string = '',
-  metadata: Metadata = {},
+  metadata: Metadata = { container_type: 'folder' },
   dtype: string = 'folder',
 ): Promise<ExtendedFolder> => {
   const folder: ExtendedFolder = {

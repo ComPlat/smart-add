@@ -120,7 +120,7 @@ export const createReaction = async (
     baseFolderName,
     true,
     '',
-    getMetadata('', uniqueFolderName, 'reaction', ''),
+    getMetadata('', uniqueFolderName, 'reaction'),
     'reaction',
   )
   const sampleFolder = await createFolder(
@@ -151,7 +151,7 @@ export const createReaction = async (
           'structure',
           '',
         ) as Container,
-        getMetadata(sampleFolder.uid, 'analyses', 'analyses', '') as Container,
+        getMetadata(sampleFolder.uid, 'analyses', 'analyses') as Container,
       ],
     ),
     createSubFolders(
@@ -160,12 +160,7 @@ export const createReaction = async (
       analysesFolder.uid,
       analyses.map(
         (analysis) =>
-          getMetadata(
-            analysesFolder.uid,
-            analysis,
-            'analysis',
-            '',
-          ) as Container,
+          getMetadata(analysesFolder.uid, analysis, 'analysis') as Container,
       ),
     ),
   ]
