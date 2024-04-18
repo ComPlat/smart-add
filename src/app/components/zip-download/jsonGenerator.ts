@@ -93,7 +93,9 @@ function findMatchingFolder(
   allFolders: ExtendedFolder[],
   currentFolder: ExtendedFolder,
 ): ExtendedFolder | undefined {
-  return allFolders.find((f) => f.name === component && f !== currentFolder)
+  return allFolders.find(
+    (folder) => folder.name === component && folder !== currentFolder,
+  )
 }
 
 function updateMatchedUids(
