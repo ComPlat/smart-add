@@ -9,11 +9,9 @@ const ExportFiles = ({
     e: React.MouseEvent<HTMLDivElement, MouseEvent>,
   ) => Promise<void>
 }) => (
-  <div className="flex w-full flex-col" onContextMenu={onContextMenu}>
-    <div className="flex grow flex-col">
-      <div className="flex-1 flex-col bg-white px-2 py-12 shadow-sm">
-        {children}
-      </div>
+  <div className="flex w-full grow flex-col" onContextMenu={onContextMenu}>
+    <div className="relative h-full bg-white px-2 py-12 shadow-sm">
+      {children}
     </div>
   </div>
 )

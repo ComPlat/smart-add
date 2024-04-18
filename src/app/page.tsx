@@ -13,8 +13,8 @@ export default function App() {
   >()
 
   return (
-    <main className="flex bg-gray-100">
-      <div className="flex max-h-screen w-full flex-col">
+    <main className="flex h-screen bg-gray-100">
+      <div className="flex h-full w-full flex-col">
         <Header />
         <Workspace focusedItem={focusedItem} setFocusedItem={setFocusedItem} />
       </div>

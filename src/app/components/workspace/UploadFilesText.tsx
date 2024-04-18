@@ -19,9 +19,11 @@ const HintMessage = () => (
 )
 
 const UploadFilesText = ({ showText }: UploadFilesTextProps) => (
-  <div className="absolute left-1/4 top-1/2 w-1/3 -translate-x-1/2 -translate-y-1/2">
-    <UploadOutlined className="flex justify-center text-8xl text-gray-100" />
-    {showText ? <HintMessage /> : ''}
+  <div className="absolute inset-0 flex items-center justify-center">
+    <div className="flex flex-col p-8">
+      <UploadOutlined className="flex justify-center text-8xl text-gray-100" />
+      {showText && <HintMessage />}
+    </div>
   </div>
 )
 export { UploadFilesText }
