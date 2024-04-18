@@ -78,6 +78,7 @@ function getPathComponentsUids(
 
       if (matchingFolder) {
         updateMatchedUids(matchingFolder, acc.matchedUids, uidMap)
+        // HINT: Stop at the sample level as ancestry does not contain both reaction and sample
         acc.shouldStop = matchingFolder.dtype === 'sample'
       }
 
