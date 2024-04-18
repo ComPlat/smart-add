@@ -45,8 +45,11 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
     <label className="flex flex-col text-sm">
       <p className="font-bold">{formatLabel(name)}</p>
       <input
+        className={`mt-2 rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full 
+        ${
+          readonly ? 'cursor-not-allowed bg-gray-100' : 'bg-white'
+        } ${className}`}
         autoFocus={autoFocus}
-        className={`mt-2 rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
         id={id}
         name={name}
         onChange={onChange}
@@ -136,28 +139,28 @@ const DateInputField: React.FC<DateInputFieldProps> = ({
 interface CheckboxFieldProps {
   checked: boolean
   className?: string
+  disabled?: boolean
   id?: string
   name: string
   onChange: React.ChangeEventHandler<HTMLInputElement>
-  readonly?: boolean
 }
 
 const CheckboxField: React.FC<CheckboxFieldProps> = ({
   checked = false,
   className = '',
+  disabled = false,
   id,
   name,
   onChange,
-  readonly = false,
 }) => (
   <label className="flex gap-2">
     <input
       checked={checked}
       className={`rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+      disabled={disabled}
       id={id}
       name={name}
       onChange={onChange}
-      readOnly={readonly}
       type="checkbox"
     />
     <p className="text-sm">{formatLabel(name)}</p>
@@ -176,6 +179,7 @@ function determineInputComponent(
     'ancestry',
     'paremt_id',
     'fingerprint_id',
+    'decoupled',
   ]
   const readonly = readonlyKeys.includes(key)
   const inputType = typeof value
@@ -190,6 +194,7 @@ function determineInputComponent(
             name={key}
             onChange={(e) => handleInputChange(e, key)}
             raw={false}
+            readonly={readonly}
             value={value as string}
           />
         )
@@ -218,10 +223,10 @@ function determineInputComponent(
       return (
         <CheckboxField
           checked={value as boolean}
+          disabled={readonly}
           key={key}
           name={key}
           onChange={(e) => handleInputChange(e, key)}
-          readonly={readonly}
         />
       )
     default:
