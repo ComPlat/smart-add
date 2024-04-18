@@ -10,7 +10,7 @@ const ExportFiles = ({
   ) => Promise<void>
 }) => (
   <div className="flex w-full grow flex-col" onContextMenu={onContextMenu}>
-    <div className="relative h-full overflow-y-scroll bg-white px-2 py-12 shadow-sm">
+    <div className="relative h-full bg-white px-2 py-12 shadow-sm">
       {children}
     </div>
   </div>
