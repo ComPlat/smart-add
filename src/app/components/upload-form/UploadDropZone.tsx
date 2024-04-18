@@ -308,23 +308,26 @@ const UploadDropZone = ({ children }: UploadDropZoneProps) => {
 
   // HINT: Progress will be moved to notifications
   return (
-    <div className={styles['upload-wrapper']}>
-      <Upload.Dragger
-        {...uploadProps}
-        style={{
-          background: 'none',
-          backgroundColor: 'none',
-          border: 'none',
-          borderRadius: 'none',
-        }}
-        fileList={[]}
-        onDrop={resetUploadState}
-        openFileDialogOnClick={false}
-      >
-        <Progress percent={progress} />
+    <div className="h-full w-full">
+      <div className={styles['upload-wrapper']}>
+        <Upload.Dragger
+          {...uploadProps}
+          style={{
+            background: 'none',
+            backgroundColor: 'none',
+            border: 'none',
+            borderRadius: 'none',
+            height: '100%',
+          }}
+          fileList={[]}
+          onDrop={resetUploadState}
+          openFileDialogOnClick={false}
+        >
+          <Progress percent={progress} />
 
-        {children}
-      </Upload.Dragger>
+          {children}
+        </Upload.Dragger>
+      </div>
     </div>
   )
 }

@@ -238,7 +238,7 @@ const Workspace = ({ focusedItem, setFocusedItem }: FocusedItemProps) => {
         onSelectItems={handleOnSelectItem}
         viewState={viewState}
       >
-        <div className="flex w-full flex-row justify-between gap-2 overflow-hidden">
+        <div className="flex h-full w-full flex-row justify-between gap-2 overflow-hidden">
           <UploadedFiles onContextMenu={handleFileTreeContextMenu}>
             <UploadFilesText showText={db.inputLength === 0} />
             <UploadDropZone>
@@ -252,7 +252,10 @@ const Workspace = ({ focusedItem, setFocusedItem }: FocusedItemProps) => {
                   </ul>
                 )}
                 renderTreeContainer={({ children, containerProps }) => (
-                  <div className="h-[85vh] overflow-y-auto" {...containerProps}>
+                  <div
+                    className="h-auto min-h-full overflow-y-auto"
+                    {...containerProps}
+                  >
                     {children}
                   </div>
                 )}
@@ -276,7 +279,10 @@ const Workspace = ({ focusedItem, setFocusedItem }: FocusedItemProps) => {
                 </ul>
               )}
               renderTreeContainer={({ children, containerProps }) => (
-                <div className="h-[85vh] overflow-y-auto" {...containerProps}>
+                <div
+                  className="h-auto min-h-full overflow-y-auto"
+                  {...containerProps}
+                >
                   {children}
                 </div>
               )}

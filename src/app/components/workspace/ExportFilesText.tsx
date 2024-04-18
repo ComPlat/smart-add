@@ -19,9 +19,11 @@ const HintMessage = () => (
 )
 
 const ExportFilesText = ({ showText }: ExportFilesTextProps) => (
-  <div className="absolute left-3/4 top-1/2 w-1/3 -translate-x-1/2 -translate-y-1/2">
-    <DownloadOutlined className="flex justify-center text-8xl text-gray-100" />
-    {showText ? <HintMessage /> : ''}
+  <div className="absolute inset-0 flex items-center justify-center">
+    <div className="flex flex-col p-8">
+      <DownloadOutlined className="flex justify-center text-8xl text-gray-100" />
+      {showText && <HintMessage />}
+    </div>
   </div>
 )
 export { ExportFilesText }

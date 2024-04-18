@@ -22,11 +22,25 @@ import {
 } from './zodSchemes'
 
 const currentDate = new Date().toISOString()
-const user_id = v4()
+const user_id = null
 
 function generateUidMap(assignedFolders: ExtendedFolder[]) {
   return assignedFolders.reduce((uidMap: Record<string, string>, folder) => {
-    uidMap[folder.uid] = v4()
+    return {
+      ...uidMap,
+      [folder.uid]: v4(),
+    }
+  }, {})
+}
+
+function generateSampleReactionUidMap(assignedFolders: ExtendedFolder[]) {
+  return assignedFolders.reduce((uidMap: Record<string, string>, folder) => {
+    if (folder.dtype === 'sample' || folder.dtype === 'reaction') {
+      return {
+        ...uidMap,
+        [folder.uid]: v4(),
+      }
+    }
     return uidMap
   }, {})
 }
@@ -38,24 +52,67 @@ function getAncestry(
 ): string {
   if (folder.dtype === 'sample' || folder.dtype === 'reaction') return ''
 
-  const pathComponents = folder.fullPath.split('/')
-  const replacedPathComponents = pathComponents.reduce((acc, component) => {
-    const matchingFolder = allFolders.find((f) => f.name === component)
-    if (matchingFolder && matchingFolder !== folder) {
-      const uid = uidMap[matchingFolder.uid]
-      if (uid && !acc.includes(uid)) {
-        acc.push(uid)
-      }
-    }
-    return acc
-  }, [] as string[])
-
-  const currentFolderUid = uidMap[folder.uid]
-  const filteredPathComponents = replacedPathComponents.filter(
-    (uid) => uid !== currentFolderUid,
+  const pathComponents = folder.fullPath.split('/').reverse()
+  const { matchedUids } = getPathComponentsUids(
+    pathComponents,
+    folder,
+    allFolders,
+    uidMap,
   )
 
-  return filteredPathComponents.join('/')
+  const currentFolderUid = uidMap[folder.uid]
+  const filteredUids = matchedUids.filter((uid) => uid !== currentFolderUid)
+
+  return filteredUids.join('/')
+}
+
+function getPathComponentsUids(
+  pathComponents: string[],
+  currentFolder: ExtendedFolder,
+  allFolders: ExtendedFolder[],
+  uidMap: Record<string, string>,
+) {
+  return pathComponents.reduce(
+    (acc, component) => {
+      if (acc.shouldStop) return acc
+
+      const matchingFolder = findMatchingFolder(
+        component,
+        allFolders,
+        currentFolder,
+      )
+
+      if (matchingFolder) {
+        updateMatchedUids(matchingFolder, acc.matchedUids, uidMap)
+        // HINT: Stop at the sample level as ancestry does not contain both reaction and sample
+        acc.shouldStop = matchingFolder.dtype === 'sample'
+      }
+
+      return acc
+    },
+    { matchedUids: [] as string[], shouldStop: false },
+  )
+}
+
+function findMatchingFolder(
+  component: string,
+  allFolders: ExtendedFolder[],
+  currentFolder: ExtendedFolder,
+): ExtendedFolder | undefined {
+  return allFolders.find(
+    (folder) => folder.name === component && folder !== currentFolder,
+  )
+}
+
+function updateMatchedUids(
+  folder: ExtendedFolder,
+  matchedUids: string[],
+  uidMap: Record<string, string>,
+) {
+  const uid = uidMap[folder.uid]
+  if (uid && !matchedUids.includes(uid)) {
+    matchedUids.push(uid)
+  }
 }
 
 export const generateExportJson = async (
@@ -70,6 +127,7 @@ export const generateExportJson = async (
     return acc
   }, [] as ExtendedFolder[])
   const uidMap = generateUidMap(processedFolders)
+  const sampleReactionUidMap = generateSampleReactionUidMap(processedFolders)
 
   const collectionId = v4()
   const uidToCollection = {
@@ -134,7 +192,7 @@ export const generateExportJson = async (
     if (folder.dtype !== 'sample') return acc
 
     const sample = {
-      [uidMap[folder.uid]]: {
+      [sampleReactionUidMap[folder.uid]]: {
         ...sampleSchema.parse({
           ...sampleTemplate,
           ...folder.metadata,
@@ -142,7 +200,6 @@ export const generateExportJson = async (
           created_at: currentDate,
           updated_at: currentDate,
           user_id,
-          name: folder.name,
           molecule_id: moleculeId,
           // TODO: DUMMY DATA
           molfile:
@@ -172,7 +229,7 @@ export const generateExportJson = async (
     if (folder.dtype !== 'reaction') return acc
 
     const reaction = {
-      [uidMap[folder.uid]]: {
+      [sampleReactionUidMap[folder.uid]]: {
         ...reactionSchema.parse({
           ...reactionTemplate,
           ...folder.metadata,
@@ -180,7 +237,6 @@ export const generateExportJson = async (
           created_at: currentDate,
           updated_at: currentDate,
           user_id,
-          name: folder.name,
         }),
       },
     }
@@ -203,15 +259,21 @@ export const generateExportJson = async (
   )
 
   const uidToContainer = processedFolders.reduce((acc, folder) => {
-    if (folder.metadata?.container_type === 'structure') return acc
+    // HINT: Do not create containers for container types that are not allowed
+    //        to be in the export.json file
+    if (
+      folder.metadata?.container_type === 'structure' ||
+      folder.metadata?.container_type === 'folder'
+    )
+      return acc
 
     const dtypeMapping = {
       sample: {
-        containable_id: uidMap[folder.uid],
+        containable_id: sampleReactionUidMap[folder.uid],
         containable_type: 'Sample',
       },
       reaction: {
-        containable_id: uidMap[folder.uid],
+        containable_id: sampleReactionUidMap[folder.uid],
         containable_type: 'Reaction',
       },
     }
@@ -229,9 +291,9 @@ export const generateExportJson = async (
           containable_type,
           user_id,
           name: folder.name,
+          description: null,
           created_at: currentDate,
           updated_at: currentDate,
-          description: '',
           parent_id: uidMap[folder.parentUid] || null,
         }),
       },

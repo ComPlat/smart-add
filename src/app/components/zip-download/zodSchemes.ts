@@ -160,11 +160,7 @@ export const residueSchema = z.object({
 export type Residue = z.infer<typeof residueSchema>
 
 const textObjectSchema = z.object({
-  ops: z.array(
-    z.object({
-      insert: z.string(),
-    }),
-  ),
+  ops: z.array(z.object({ insert: z.string() })).default([{ insert: '\n' }]),
 })
 
 export type TextObject = z.infer<typeof textObjectSchema>
