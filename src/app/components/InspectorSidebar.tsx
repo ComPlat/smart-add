@@ -7,6 +7,7 @@ import {
 } from '@/database/db'
 import { retrieveTree } from '@/helper/retrieveTree'
 import { FileNode } from '@/helper/types'
+import { isReadonly } from '@/helper/utils'
 import { useLiveQuery } from 'dexie-react-hooks'
 import React, { ChangeEvent, useEffect, useState } from 'react'
 import { TreeItemIndex } from 'react-complex-tree'
@@ -23,42 +24,43 @@ const formatLabel = (text: string): string =>
 interface TextInputFieldProps {
   autoFocus?: boolean
   className?: string
-  disabled?: boolean
   id?: string
   name: string
   onChange: React.ChangeEventHandler<HTMLInputElement>
   placeholder?: string
+  readonly: boolean
   value?: string
 }
 
 const TextInputField: React.FC<TextInputFieldProps> = ({
   autoFocus = false,
   className = '',
-  disabled = false,
   id,
   name,
   onChange,
   placeholder = 'Enter text...',
+  readonly = false,
   value = '',
 }) => {
   return (
     <label className="flex flex-col text-sm">
       <p className="font-bold">{formatLabel(name)}</p>
-      {disabled ? (
-        <p className="py-1">{value || 'None'}</p>
-      ) : (
-        <input
-          autoFocus={autoFocus}
-          className={`mt-2 rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
-          disabled={disabled}
-          id={id}
-          name={name}
-          onChange={onChange}
-          placeholder={placeholder}
-          type="text"
-          value={value}
-        />
-      )}
+      <input
+        className={`mt-2 rounded border px-2 py-1 outline-gray-200 focus:border-kit-primary-full 
+        ${
+          readonly
+            ? 'cursor-not-allowed bg-gray-100 hover:border-inherit'
+            : 'bg-white hover:border-kit-primary-full'
+        } ${className}`}
+        autoFocus={autoFocus}
+        id={id}
+        name={name}
+        onChange={onChange}
+        placeholder={placeholder}
+        readOnly={readonly}
+        type="text"
+        value={value}
+      />
     </label>
   )
 }
@@ -66,39 +68,40 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
 interface NumberInputFieldProps {
   autoFocus?: boolean
   className?: string
-  disabled?: boolean
   id?: string
   name: string
   onChange: React.ChangeEventHandler<HTMLInputElement>
   placeholder?: string
+  readonly?: boolean
   value?: number
 }
 
 const NumberInputField: React.FC<NumberInputFieldProps> = ({
   autoFocus = false,
   className = '',
-  disabled = false,
   id,
   name,
   onChange,
+  readonly = false,
   value,
 }) => (
   <label className="flex flex-col text-sm">
     <p className="font-bold">{formatLabel(name)}</p>
-    {disabled ? (
-      <p className="py-1">{value}</p>
-    ) : (
-      <input
-        autoFocus={autoFocus}
-        className={`mt-2 rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
-        disabled={disabled}
-        id={id}
-        name={name}
-        onChange={onChange}
-        type="number"
-        value={value || ''}
-      />
-    )}
+    <input
+      className={`mt-2 rounded border px-2 py-1 outline-gray-200 focus:border-kit-primary-full 
+      ${
+        readonly
+          ? 'cursor-not-allowed bg-gray-100 hover:border-inherit'
+          : 'bg-white hover:border-kit-primary-full'
+      } ${className}`}
+      autoFocus={autoFocus}
+      id={id}
+      name={name}
+      onChange={onChange}
+      readOnly={readonly}
+      type="number"
+      value={value || ''}
+    />
   </label>
 )
 
@@ -109,6 +112,7 @@ interface DateInputFieldProps {
   name: string
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   raw?: boolean
+  readonly?: boolean
   value?: string
 }
 
@@ -118,19 +122,26 @@ const DateInputField: React.FC<DateInputFieldProps> = ({
   id,
   name,
   onChange,
+  readonly = false,
   value = '',
 }) => {
   const formattedValue = value ? value.slice(0, -1) : ''
 
   return (
     <label className="flex flex-col text-sm">
-      <p className="font-bold">{name}</p>
+      <p className="font-bold">{formatLabel(name)}</p>
       <input
+        className={`mt-2 rounded border px-2 py-1 outline-gray-200 focus:border-kit-primary-full 
+        ${
+          readonly
+            ? 'cursor-not-allowed bg-gray-100 hover:border-inherit'
+            : 'bg-white hover:border-kit-primary-full'
+        } ${className}`}
         autoFocus={autoFocus}
-        className={`mt-2 rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
         id={id}
         name={name}
         onChange={onChange}
+        readOnly={readonly}
         type="datetime-local"
         value={formattedValue}
       />
@@ -174,10 +185,7 @@ function determineInputComponent(
   value: MetadataValue,
   handleInputChange: (e: ChangeEvent<HTMLInputElement>, key: string) => void,
 ) {
-  const disabled =
-    key.toLowerCase().includes('id') ||
-    key.toLowerCase().includes('ancestry') ||
-    key.toLowerCase() === 'name'
+  const readonly = isReadonly(key)
   const inputType = typeof value
 
   // TODO: Add support for array, temperature, and text objects
@@ -190,16 +198,17 @@ function determineInputComponent(
             name={key}
             onChange={(e) => handleInputChange(e, key)}
             raw={false}
+            readonly={readonly}
             value={value as string}
           />
         )
       } else {
         return (
           <TextInputField
-            disabled={disabled}
             key={key}
             name={key}
             onChange={(e) => handleInputChange(e, key)}
+            readonly={readonly}
             value={value as string}
           />
         )
@@ -207,10 +216,10 @@ function determineInputComponent(
     case 'number':
       return (
         <NumberInputField
-          disabled={disabled}
           key={key}
           name={key}
           onChange={(e) => handleInputChange(e, key)}
+          readonly={readonly}
           value={value as number}
         />
       )
@@ -218,7 +227,7 @@ function determineInputComponent(
       return (
         <CheckboxField
           checked={value as boolean}
-          disabled={disabled}
+          disabled={readonly}
           key={key}
           name={key}
           onChange={(e) => handleInputChange(e, key)}
@@ -227,10 +236,10 @@ function determineInputComponent(
     default:
       return (
         <TextInputField
-          disabled={disabled}
           key={key}
           name={key}
           onChange={(e) => handleInputChange(e, key)}
+          readonly={readonly}
           value=""
         />
       )
