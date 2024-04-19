@@ -45,9 +45,11 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
     <label className="flex flex-col text-sm">
       <p className="font-bold">{formatLabel(name)}</p>
       <input
-        className={`mt-2 rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full 
+        className={`mt-2 rounded border px-2 py-1 outline-gray-200 focus:border-kit-primary-full 
         ${
-          readonly ? 'cursor-not-allowed bg-gray-100' : 'bg-white'
+          readonly
+            ? 'cursor-not-allowed bg-gray-100 hover:border-inherit'
+            : 'bg-white hover:border-kit-primary-full'
         } ${className}`}
         autoFocus={autoFocus}
         id={id}
@@ -85,8 +87,13 @@ const NumberInputField: React.FC<NumberInputFieldProps> = ({
   <label className="flex flex-col text-sm">
     <p className="font-bold">{formatLabel(name)}</p>
     <input
+      className={`mt-2 rounded border px-2 py-1 outline-gray-200 focus:border-kit-primary-full 
+      ${
+        readonly
+          ? 'cursor-not-allowed bg-gray-100 hover:border-inherit'
+          : 'bg-white hover:border-kit-primary-full'
+      } ${className}`}
       autoFocus={autoFocus}
-      className={`mt-2 rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
       id={id}
       name={name}
       onChange={onChange}
@@ -123,8 +130,13 @@ const DateInputField: React.FC<DateInputFieldProps> = ({
     <label className="flex flex-col text-sm">
       <p className="font-bold">{formatLabel(name)}</p>
       <input
+        className={`mt-2 rounded border px-2 py-1 outline-gray-200 focus:border-kit-primary-full 
+        ${
+          readonly
+            ? 'cursor-not-allowed bg-gray-100 hover:border-inherit'
+            : 'bg-white hover:border-kit-primary-full'
+        } ${className}`}
         autoFocus={autoFocus}
-        className={`mt-2 rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
         id={id}
         name={name}
         onChange={onChange}
