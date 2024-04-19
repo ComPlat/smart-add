@@ -167,21 +167,26 @@ const CheckboxField: React.FC<CheckboxFieldProps> = ({
   </label>
 )
 
-function determineInputComponent(
-  key: string,
-  value: MetadataValue,
-  handleInputChange: (e: ChangeEvent<HTMLInputElement>, key: string) => void,
-) {
+function isReadonly(key: string): boolean {
   const readonlyKeys = [
     'created_at',
     'updated_at',
     'deleted_at',
     'ancestry',
-    'paremt_id',
+    'parent_id',
     'fingerprint_id',
     'decoupled',
+    'name',
   ]
-  const readonly = readonlyKeys.includes(key)
+  return readonlyKeys.includes(key)
+}
+
+function determineInputComponent(
+  key: string,
+  value: MetadataValue,
+  handleInputChange: (e: ChangeEvent<HTMLInputElement>, key: string) => void,
+) {
+  const readonly = isReadonly(key)
   const inputType = typeof value
 
   // TODO: Add support for array, temperature, and text objects
