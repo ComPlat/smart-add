@@ -10,7 +10,7 @@ export const getTotalLength = (
   return fileFilter.length + folderFilter.length
 }
 
-const readonlyKeys = [
+const readonlyKeys = Object.freeze([
   'created_at',
   'updated_at',
   'deleted_at',
@@ -19,7 +19,6 @@ const readonlyKeys = [
   'fingerprint_id',
   'decoupled',
   'name',
-] as const
+])
 
-export const isReadonly = (key: string): boolean =>
-  (readonlyKeys as ReadonlyArray<string>).includes(key)
+export const isReadonly = (key: string): boolean => readonlyKeys.includes(key)
