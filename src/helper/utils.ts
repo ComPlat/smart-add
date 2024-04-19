@@ -10,7 +10,7 @@ export const getTotalLength = (
   return fileFilter.length + folderFilter.length
 }
 
-const readonlyKeys: string[] = [
+const readonlyKeys = [
   'created_at',
   'updated_at',
   'deleted_at',
@@ -21,4 +21,5 @@ const readonlyKeys: string[] = [
   'name',
 ] as const
 
-export const isReadonly = (key: string): boolean => readonlyKeys.includes(key)
+export const isReadonly = (key: string): boolean =>
+  (readonlyKeys as ReadonlyArray<string>).includes(key)
