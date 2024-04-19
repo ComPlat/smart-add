@@ -266,6 +266,13 @@ export const containerTemplate = {
   parent_id: null,
 }
 
+export const datasetTemplate = {
+  ...containerTemplate,
+  container_type: 'dataset',
+  description: '',
+  name: 'new',
+}
+
 export const attachmentTemplate = {
   attachable_id: '',
   filename: '',

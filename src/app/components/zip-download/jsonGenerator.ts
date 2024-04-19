@@ -9,10 +9,12 @@ import {
   collectionsReactionTemplate,
   collectionsSampleTemplate,
   containerTemplate,
+  datasetTemplate,
   reactionTemplate,
   sampleTemplate,
 } from './templates'
 import {
+  Container,
   attachmentSchema,
   containerSchema,
   moleculeNameSchema,
@@ -258,64 +260,101 @@ export const generateExportJson = async (
     {},
   )
 
-  const uidToContainer = processedFolders.reduce((acc, folder) => {
-    // HINT: Do not create containers for container types that are not allowed
-    //        to be in the export.json file
-    if (
-      folder.metadata?.container_type === 'structure' ||
-      folder.metadata?.container_type === 'folder'
-    )
-      return acc
+  const uidToContainer = (() => {
+    const containers: Record<string, Container> = {}
 
-    const dtypeMapping = {
-      sample: {
-        containable_id: sampleReactionUidMap[folder.uid],
-        containable_type: 'Sample',
-      },
-      reaction: {
-        containable_id: sampleReactionUidMap[folder.uid],
-        containable_type: 'Reaction',
-      },
+    for (const folder of processedFolders) {
+      // HINT: Do not create containers for container types that are not allowed
+      //        to be in the export.json file
+      if (
+        folder.metadata?.container_type === 'structure' ||
+        folder.metadata?.container_type === 'folder'
+      )
+        continue
+
+      const dtypeMapping = {
+        sample: {
+          containable_id: sampleReactionUidMap[folder.uid],
+          containable_type: 'Sample',
+        },
+        reaction: {
+          containable_id: sampleReactionUidMap[folder.uid],
+          containable_type: 'Reaction',
+        },
+      }
+
+      const { containable_id = null, containable_type = null } =
+        dtypeMapping[folder.dtype as keyof typeof dtypeMapping] || {}
+
+      const dataset = (folder: ExtendedFolder) => {
+        const key = v4()
+
+        return assignedFiles
+          .filter((file) => file.parentUid === folder.uid)
+          .map((file) => {
+            console.log()
+
+            return {
+              [key]: {
+                ...containerSchema.parse({
+                  ...datasetTemplate,
+                  ...file.metadata,
+                  ancestry: `${uidMap[file.parentUid]}/${getAncestry(
+                    folder,
+                    assignedFolders,
+                    uidMap,
+                  )}`,
+                  user_id,
+                  created_at: currentDate,
+                  updated_at: currentDate,
+                  parent_id: uidMap[file.parentUid],
+                }),
+              },
+            }
+          })
+      }
+
+      const container = {
+        [uidMap[folder.uid]]: {
+          ...containerSchema.parse({
+            ...containerTemplate,
+            ...folder.metadata,
+            ancestry: getAncestry(folder, assignedFolders, uidMap),
+            containable_id,
+            containable_type,
+            user_id,
+            name: folder.name,
+            description: null,
+            created_at: currentDate,
+            updated_at: currentDate,
+            parent_id: uidMap[folder.parentUid] || null,
+          }),
+        },
+      }
+
+      Object.assign(containers, container, ...dataset(folder))
     }
 
-    const { containable_id = null, containable_type = null } =
-      dtypeMapping[folder.dtype as keyof typeof dtypeMapping] || {}
+    return containers
+  })()
 
-    const container = {
-      [uidMap[folder.uid]]: {
-        ...containerSchema.parse({
-          ...containerTemplate,
-          ...folder.metadata,
-          ancestry: getAncestry(folder, assignedFolders, uidMap),
-          containable_id,
-          containable_type,
-          user_id,
-          name: folder.name,
-          description: null,
-          created_at: currentDate,
-          updated_at: currentDate,
-          parent_id: uidMap[folder.parentUid] || null,
-        }),
-      },
-    }
-    return { ...acc, ...container }
-  }, {})
+  console.log(uidToContainer)
 
   const uidToAttachment = await assignedFiles.reduce(async (acc, file) => {
     const attachmentId = v4()
     const attachableId = uidMap[file.parentUid] || ''
-    const filename = file.name
+    const filename = file.file.name
     const identifier = file.uid
     const fileType = file.file.type
     const attachableType = 'Container'
     const checksum = await generateMd5Checksum(file.file)
-    const key = v4()
+    const key = file.name.split('.')[0]
     const filesize = file.file.size
 
     const attachmentData = {
       id: `2/${identifier}`,
       metadata: {
-        filename: `${key}.${file.extension}`,
+        filename: file.name,
         md5: checksum,
         mime_type: fileType,
         size: filesize,
@@ -345,6 +384,8 @@ export const generateExportJson = async (
 
     return { ...(await acc), ...attachment }
   }, Promise.resolve({}))
+
+  console.log(uidToAttachment)
 
   const exportJson = {
     Collection: uidToCollection,

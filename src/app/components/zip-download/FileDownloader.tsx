@@ -43,34 +43,54 @@ const FileDownloader = () => {
     return uniqueAssignedFiles
   }
 
-  const constructTree = (files: ExtendedFile[]): FileTree =>
-    files.reduce((fileTree, file) => {
-      const pathComponents: string[] = file.fullPath.split('/')
-      pathComponents.reduce(
-        (level: FileTree, component: string, index: number) => {
-          if (!level[component]) {
-            level[component] = {}
-          }
-          if (index === pathComponents.length - 1) {
-            const uniqueName = file.name
-            level[uniqueName] = file.file
-          }
-          return level[component] as FileTree
-        },
-        fileTree,
-      )
+  const constructTree = (files: ExtendedFile[]): FileTree => {
+    const tree: FileTree = {}
 
-      return fileTree
-    }, {} as FileTree)
+    for (const file of files) {
+      const components = file.fullPath.split('/')
+      let level = tree
+
+      for (let i = 0; i < components.length - 1; i++) {
+        const component = components[i]
+        if (!level[component]) {
+          level[component] = {}
+        }
+        level = level[component] as FileTree
+      }
+
+      const uniqueName = file.name
+      level[uniqueName] = file.file
+    }
+
+    return tree
+  }
+
+  // files.reduce((fileTree, file) => {
+  //   const pathComponents: string[] = file.fullPath.split('/')
+  //   pathComponents.reduce(
+  //     (level: FileTree, component: string, index: number) => {
+  //       const uniqueName = file.name
+
+  //       if (!level[component]) {
+  //         level[component] = {}
+  //       }
+  //       if (index === pathComponents.length - 1) {
+  //         level[uniqueName] = file.file
+  //       }
+  //       return level[component] as FileTree
+  //     },
+  //     fileTree,
+  //   )
+
+  //   return fileTree
+  // }, {} as FileTree)
 
   const handleClick = async () => {
     try {
       const zip = new JSZip()
-      const fileTree = constructTree(
-        transformAssignedFilesToHaveUniqueNames(assignedFiles),
-      )
-
-      console.log(fileTree)
+      const transformedAssignedFiles =
+        transformAssignedFilesToHaveUniqueNames(assignedFiles)
+      const fileTree = constructTree(transformedAssignedFiles)
 
       const generatedFilePath = (
         fileTree: FileTree,
@@ -96,12 +116,6 @@ const FileDownloader = () => {
       const addFilesToZip = async (tree: FileTree, parentZip: JSZip = zip) => {
         await Promise.all(
           Object.entries(tree).map(async ([name, value]) => {
-            const splitName = name.split('.')
-            const extension = splitName.slice(-1)[0]
-            const newFilename = `${v4()}${
-              extension && splitName.length > 1 ? `.${extension}` : ''
-            }`
-
             const newPath = `attachments/${name}`
 
             if (name.endsWith('.zip') && typeof value === 'object') {
@@ -121,9 +135,6 @@ const FileDownloader = () => {
       }
 
       await addFilesToZip(fileTree)
-
-      const transformedAssignedFiles =
-        transformAssignedFilesToHaveUniqueNames(assignedFiles)
 
       const exportJsonData = await generateExportJson(
         transformedAssignedFiles,
