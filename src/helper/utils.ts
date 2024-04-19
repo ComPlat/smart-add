@@ -9,3 +9,16 @@ export const getTotalLength = (
   const folderFilter = folders.filter((folder) => folder.treeId === treeRoot)
   return fileFilter.length + folderFilter.length
 }
+
+const readonlyKeys: string[] = [
+  'created_at',
+  'updated_at',
+  'deleted_at',
+  'ancestry',
+  'parent_id',
+  'fingerprint_id',
+  'decoupled',
+  'name',
+] as const
+
+export const isReadonly = (key: string): boolean => readonlyKeys.includes(key)

@@ -7,6 +7,7 @@ import {
 } from '@/database/db'
 import { retrieveTree } from '@/helper/retrieveTree'
 import { FileNode } from '@/helper/types'
+import { isReadonly } from '@/helper/utils'
 import { useLiveQuery } from 'dexie-react-hooks'
 import React, { ChangeEvent, useEffect, useState } from 'react'
 import { TreeItemIndex } from 'react-complex-tree'
@@ -178,20 +179,6 @@ const CheckboxField: React.FC<CheckboxFieldProps> = ({
     <p className="text-sm">{formatLabel(name)}</p>
   </label>
 )
-
-function isReadonly(key: string): boolean {
-  const readonlyKeys = [
-    'created_at',
-    'updated_at',
-    'deleted_at',
-    'ancestry',
-    'parent_id',
-    'fingerprint_id',
-    'decoupled',
-    'name',
-  ]
-  return readonlyKeys.includes(key)
-}
 
 function determineInputComponent(
   key: string,
