@@ -341,8 +341,17 @@ export const generateExportJson = async (
   console.log(uidToContainer)
 
   const uidToAttachment = await assignedFiles.reduce(async (acc, file) => {
+    const attachableId =
+      Object.entries(uidToContainer).find(
+        ([, container]) =>
+          container.parent_id === uidMap[file.parentUid] &&
+          container.container_type === 'dataset',
+      )?.[0] || ''
+
+    console.log('attachableId: ', attachableId)
+
     const attachmentId = v4()
-    const attachableId = uidMap[file.parentUid] || ''
+    // const attachableId = uidMap[file.parentUid] || ''
     const filename = file.file.name
     const identifier = file.uid
     const fileType = file.file.type
