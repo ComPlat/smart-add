@@ -287,12 +287,10 @@ export const generateExportJson = async (
         dtypeMapping[folder.dtype as keyof typeof dtypeMapping] || {}
 
       const dataset = (folder: ExtendedFolder) => {
-        const key = v4()
-
         return assignedFiles
           .filter((file) => file.parentUid === folder.uid)
           .map((file) => {
-            console.log()
+            const key = v4()
 
             return {
               [key]: {
@@ -338,8 +336,6 @@ export const generateExportJson = async (
     return containers
   })()
 
-  console.log(uidToContainer)
-
   const uidToAttachment = await assignedFiles.reduce(async (acc, file) => {
     const attachableId =
       Object.entries(uidToContainer).find(
@@ -347,8 +343,6 @@ export const generateExportJson = async (
           container.parent_id === uidMap[file.parentUid] &&
           container.container_type === 'dataset',
       )?.[0] || ''
-
-    console.log('attachableId: ', attachableId)
 
     const attachmentId = v4()
     // const attachableId = uidMap[file.parentUid] || ''
@@ -393,8 +387,6 @@ export const generateExportJson = async (
 
     return { ...(await acc), ...attachment }
   }, Promise.resolve({}))
-
-  console.log(uidToAttachment)
 
   const exportJson = {
     Collection: uidToCollection,

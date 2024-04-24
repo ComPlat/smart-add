@@ -271,6 +271,10 @@ export const datasetTemplate = {
   container_type: 'dataset',
   description: '',
   name: 'new',
+  extended_metadata: {
+    report: 'true',
+  },
+  plain_text_content: null,
 }
 
 export const attachmentTemplate = {
