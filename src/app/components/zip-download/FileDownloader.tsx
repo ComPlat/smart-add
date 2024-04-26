@@ -65,53 +65,12 @@ const FileDownloader = () => {
     return tree
   }
 
-  // files.reduce((fileTree, file) => {
-  //   const pathComponents: string[] = file.fullPath.split('/')
-  //   pathComponents.reduce(
-  //     (level: FileTree, component: string, index: number) => {
-  //       const uniqueName = file.name
-
-  //       if (!level[component]) {
-  //         level[component] = {}
-  //       }
-  //       if (index === pathComponents.length - 1) {
-  //         level[uniqueName] = file.file
-  //       }
-  //       return level[component] as FileTree
-  //     },
-  //     fileTree,
-  //   )
-
-  //   return fileTree
-  // }, {} as FileTree)
-
   const handleClick = async () => {
     try {
       const zip = new JSZip()
       const transformedAssignedFiles =
         transformAssignedFilesToHaveUniqueNames(assignedFiles)
       const fileTree = constructTree(transformedAssignedFiles)
-
-      const generatedFilePath = (
-        fileTree: FileTree,
-        path: string[] = [],
-      ): string[] => {
-        return Object.keys(fileTree)
-          .map((key) => {
-            if (typeof fileTree[key] === 'object') {
-              const newPath = [...path, key]
-              const deeperPath = generatedFilePath(
-                fileTree[key] as FileTree,
-                newPath,
-              )
-              if (deeperPath.length > 0) {
-                return deeperPath
-              }
-            }
-            return path
-          })
-          .flat()
-      }
 
       const addFilesToZip = async (tree: FileTree, parentZip: JSZip = zip) => {
         await Promise.all(
