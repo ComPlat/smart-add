@@ -44,25 +44,19 @@ const FileDownloader = () => {
   }
 
   const constructTree = (files: ExtendedFile[]): FileTree => {
-    const tree: FileTree = {}
-
-    for (const file of files) {
+    return files.reduce((previousTree: FileTree, file: ExtendedFile) => {
       const components = file.fullPath.split('/')
-      let level = tree
 
-      for (let i = 0; i < components.length - 1; i++) {
-        const component = components[i]
-        if (!level[component]) {
-          level[component] = {}
-        }
-        level = level[component] as FileTree
-      }
+      const componentsTree = components.reduce((previousTree, component) => {
+        const value = previousTree[component] ? previousTree[component] : {}
+        const componentTreeEntry = { [component]: value }
+        return Object.assign(previousTree, componentTreeEntry)
+      }, {} as FileTree)
 
-      const uniqueName = file.name
-      level[uniqueName] = file.file
-    }
+      const fileTree = { [file.name]: file.file }
 
-    return tree
+      return Object.assign(previousTree, componentsTree, fileTree)
+    }, {} as FileTree)
   }
 
   const handleClick = async () => {
