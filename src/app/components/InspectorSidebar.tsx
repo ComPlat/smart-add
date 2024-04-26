@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   ExtendedFile,
   ExtendedFolder,
@@ -11,9 +12,21 @@ import { isReadonly } from '@/helper/utils'
 import { useLiveQuery } from 'dexie-react-hooks'
 import React, { ChangeEvent, useEffect, useState } from 'react'
 import { TreeItemIndex } from 'react-complex-tree'
+import {
+  ZodAny,
+  ZodArray,
+  ZodBoolean,
+  ZodEnum,
+  ZodNull,
+  ZodNullable,
+  ZodNumber,
+  ZodObject,
+  ZodOptional,
+  ZodString,
+} from 'zod'
 
 import renameFolder from './context-menu/renameFolder'
-import { datetimeSchema } from './zip-download/zodSchemes'
+import { datetimeSchema, determineSchema } from './zip-download/zodSchemes'
 
 const formatLabel = (text: string): string =>
   text
@@ -98,6 +111,7 @@ const NumberInputField: React.FC<NumberInputFieldProps> = ({
       id={id}
       name={name}
       onChange={onChange}
+      placeholder="Enter number..."
       readOnly={readonly}
       type="number"
       value={value || ''}
@@ -180,16 +194,73 @@ const CheckboxField: React.FC<CheckboxFieldProps> = ({
   </label>
 )
 
+function identifyType(
+  schema: ZodObject<any>,
+  key: string,
+): [
+  (
+    | 'array'
+    | 'boolean'
+    | 'enum'
+    | 'null'
+    | 'number'
+    | 'object'
+    | 'string'
+    | 'unknown'
+  ),
+  boolean,
+] {
+  if (
+    schema.shape[key] instanceof ZodOptional ||
+    schema.shape[key] instanceof ZodNullable
+  ) {
+    return [identifyTypeName(schema.shape[key].unwrap()), true]
+  } else {
+    return [identifyTypeName(schema.shape[key]), false]
+  }
+}
+
+function identifyTypeName(
+  type: any,
+):
+  | 'array'
+  | 'boolean'
+  | 'enum'
+  | 'null'
+  | 'number'
+  | 'object'
+  | 'string'
+  | 'unknown' {
+  if (type instanceof ZodString) {
+    return 'string'
+  } else if (type instanceof ZodNumber) {
+    return 'number'
+  } else if (type instanceof ZodBoolean) {
+    return 'boolean'
+  } else if (type instanceof ZodNull) {
+    return 'null'
+  } else if (type instanceof ZodAny) {
+    return 'object'
+  } else if (type instanceof ZodEnum) {
+    return 'enum'
+  } else if (type instanceof ZodArray) {
+    return 'array'
+  } else {
+    return 'unknown'
+  }
+}
+
 function determineInputComponent(
   key: string,
   value: MetadataValue,
   handleInputChange: (e: ChangeEvent<HTMLInputElement>, key: string) => void,
+  schema?: ZodObject<any>,
 ) {
+  if (!schema) return
+  const [type] = identifyType(schema, key)
   const readonly = isReadonly(key)
-  const inputType = typeof value
 
-  // TODO: Add support for array, temperature, and text objects
-  switch (inputType) {
+  switch (type) {
     case 'string':
       if (datetimeSchema.safeParse(value).success) {
         return (
@@ -199,7 +270,7 @@ function determineInputComponent(
             onChange={(e) => handleInputChange(e, key)}
             raw={false}
             readonly={readonly}
-            value={value as string}
+            value={(value as string) || ''}
           />
         )
       } else {
@@ -209,7 +280,7 @@ function determineInputComponent(
             name={key}
             onChange={(e) => handleInputChange(e, key)}
             readonly={readonly}
-            value={value as string}
+            value={(value as string) || ''}
           />
         )
       }
@@ -226,13 +297,47 @@ function determineInputComponent(
     case 'boolean':
       return (
         <CheckboxField
-          checked={value as boolean}
+          checked={(value as boolean) || false}
           disabled={readonly}
           key={key}
           name={key}
           onChange={(e) => handleInputChange(e, key)}
         />
       )
+    // TODO: Implement enum and object input components
+    //        array, temperature, and text objects
+    case 'enum':
+      return (
+        <TextInputField
+          key={key}
+          name={key}
+          onChange={(e) => handleInputChange(e, key)}
+          readonly={readonly}
+          value={'TODO: Enum/Select'}
+        />
+      )
+    case 'object':
+      return (
+        <TextInputField
+          key={key}
+          name={key}
+          onChange={(e) => handleInputChange(e, key)}
+          readonly={readonly}
+          value={'TODO: Object'}
+        />
+      )
+    case 'array':
+      return (
+        <TextInputField
+          key={key}
+          name={key}
+          onChange={(e) => handleInputChange(e, key)}
+          readonly={readonly}
+          value={'TODO: Array'}
+        />
+      )
+    case 'null':
+      return
     default:
       return (
         <TextInputField
@@ -240,7 +345,7 @@ function determineInputComponent(
           name={key}
           onChange={(e) => handleInputChange(e, key)}
           readonly={readonly}
-          value=""
+          value={`Unknown type: ${type}`}
         />
       )
   }
@@ -404,7 +509,12 @@ const InspectorSidebar = ({
             <div className="flex flex-col gap-6">
               {item.metadata &&
                 Object.entries(item.metadata).map(([key, value]) =>
-                  determineInputComponent(key, value, handleInputChange),
+                  determineInputComponent(
+                    key,
+                    value,
+                    handleInputChange,
+                    item.metadata ? determineSchema(item.metadata) : undefined,
+                  ),
                 )}
             </div>
           </div>

@@ -1,8 +1,10 @@
 /* eslint-disable perfectionist/sort-objects */
-import { z } from 'zod'
+import { Metadata } from '@/database/db'
+import { ZodObject, z } from 'zod'
 
 const uuidSchema = z.string().nullable()
 const nullableString = z.string().nullable()
+const nullableNumber = z.number().nullable()
 
 export const datetimeSchema = z.string().datetime()
 export type DateTime = z.infer<typeof datetimeSchema>
@@ -11,7 +13,7 @@ export const reactionSampleSchema = z.object({
   reaction_id: uuidSchema,
   sample_id: uuidSchema,
   reference: z.boolean(),
-  equivalent: z.number().nullable(),
+  equivalent: nullableNumber,
   position: z.number(),
   waste: z.boolean(),
   coefficient: z.number(),
@@ -25,13 +27,13 @@ export const collectionSchema = z.object({
   label: z.string(),
   shared_by_id: uuidSchema,
   is_shared: z.boolean().nullable(),
-  permission_level: z.number().nullable(),
+  permission_level: nullableNumber,
   sample_detail_level: z.number(),
   reaction_detail_level: z.number(),
   wellplate_detail_level: z.number(),
   created_at: datetimeSchema,
   updated_at: datetimeSchema,
-  position: z.number().nullable(),
+  position: nullableNumber,
   screen_detail_level: z.number(),
   is_locked: z.boolean(),
   deleted_at: z.null(),
@@ -43,35 +45,35 @@ export type Collection = z.infer<typeof collectionSchema>
 
 export const sampleSchema = z.object({
   name: nullableString,
-  target_amount_value: z.number().nullable(),
+  target_amount_value: nullableNumber,
   target_amount_unit: z.string().nullable(),
   created_at: datetimeSchema,
   updated_at: datetimeSchema,
   description: nullableString,
-  molecule_id: uuidSchema.nullable(),
+  molecule_id: uuidSchema,
   molfile: z.string(),
-  purity: z.number().nullable(),
+  purity: nullableNumber,
   deprecated_solvent: nullableString,
   impurities: nullableString,
   location: nullableString,
   is_top_secret: z.boolean(),
   ancestry: z.string().nullable(),
   external_label: nullableString,
-  created_by: uuidSchema.nullable(),
+  created_by: uuidSchema,
   short_label: nullableString,
-  real_amount_value: z.number().nullable(),
+  real_amount_value: nullableNumber,
   real_amount_unit: nullableString,
   imported_readout: nullableString,
   deleted_at: z.null(),
   sample_svg_file: nullableString,
   user_id: uuidSchema,
   identifier: nullableString,
-  density: z.number().nullable(),
-  melting_point: z.union([z.number(), z.string()]).nullable(),
-  boiling_point: z.union([z.number(), z.string()]).nullable(),
+  density: nullableNumber,
+  melting_point: nullableString,
+  boiling_point: nullableString,
   fingerprint_id: uuidSchema,
   xref: z.any().nullable(),
-  molarity_value: z.number().nullable(),
+  molarity_value: nullableNumber,
   molarity_unit: nullableString,
   molecule_name_id: uuidSchema,
   molfile_version: nullableString,
@@ -79,7 +81,7 @@ export const sampleSchema = z.object({
   mol_rdkit: nullableString,
   metrics: nullableString,
   decoupled: z.boolean(),
-  molecular_mass: z.number().nullable(),
+  molecular_mass: nullableNumber,
   sum_formula: nullableString,
   solvent: nullableString,
 })
@@ -122,8 +124,8 @@ export const moleculeSchema = z.object({
   density: z.number(),
   molecular_weight: z.number(),
   molfile: z.string(),
-  melting_point: z.number().nullable(),
-  boiling_point: z.number().nullable(),
+  melting_point: nullableNumber,
+  boiling_point: nullableNumber,
   sum_formular: z.string(),
   names: z.array(z.string()),
   iupac_name: z.string(),
@@ -142,7 +144,7 @@ export type Molecule = z.infer<typeof moleculeSchema>
 export const moleculeNameSchema = z.object({
   molecule_id: uuidSchema,
   user_id: uuidSchema,
-  description: z.string(),
+  description: nullableString,
   name: z.string(),
   deleted_at: z.null(),
   created_at: datetimeSchema,
@@ -183,7 +185,7 @@ export type CollectionsReaction = z.infer<typeof collectionsReactionSchema>
 export const wellplateSchema = z.object({
   name: z.string(),
   size: z.number(),
-  description: textObjectSchema,
+  description: nullableString,
   created_at: datetimeSchema,
   updated_at: datetimeSchema,
   deleted_at: z.null(),
@@ -211,7 +213,7 @@ export const wellSchema = z.object({
 export type Well = z.infer<typeof wellSchema>
 
 export const screenSchema = z.object({
-  description: textObjectSchema,
+  description: nullableString,
   name: z.string(),
   result: z.string(),
   collaborator: z.string(),
@@ -239,7 +241,7 @@ export type ScreensWellplate = z.infer<typeof screensWellplateSchema>
 
 export const researchPlanSchema = z.object({
   name: z.string(),
-  description: textObjectSchema,
+  description: nullableString,
   sdf_file: z.string(),
   svg_file: z.string(),
   created_by: uuidSchema,
@@ -327,10 +329,10 @@ export const reactionSchema = z.object({
   name: nullableString,
   created_at: datetimeSchema,
   updated_at: datetimeSchema,
-  description: textObjectSchema.nullable(),
+  description: nullableString,
   timestamp_start: nullableString,
   timestamp_stop: nullableString,
-  observation: textObjectSchema.nullable(),
+  observation: nullableString,
   purification: arraySchema,
   dangerous_products: arraySchema,
   tlc_solvents: nullableString,
@@ -419,3 +421,51 @@ export const sampleAnalysesTableSchema = z.object({
 export type SampleAnalysesWorksheetTable = z.infer<
   typeof sampleAnalysesTableSchema
 >
+
+export const allSchemas = [
+  uuidSchema,
+  nullableString,
+  datetimeSchema,
+  reactionSampleSchema,
+  collectionSchema,
+  sampleSchema,
+  collectionsSampleSchema,
+  fingerprintSchema,
+  moleculeSchema,
+  moleculeNameSchema,
+  residueSchema,
+  nullableString,
+  temperatureObjectSchema,
+  collectionsReactionSchema,
+  wellplateSchema,
+  collectionsWellplateSchema,
+  wellSchema,
+  screenSchema,
+  collectionsScreenSchema,
+  screensWellplateSchema,
+  researchPlanSchema,
+  collectionsResearchPlanSchema,
+  containerSchema,
+  attachmentSchema,
+  literalSchema,
+  literatureSchema,
+  arraySchema,
+  reactionSchema,
+  reactionsWorksheetTableSchema,
+  sampleWorksheetTableSchema,
+  sampleAnalysesTableSchema,
+]
+
+export const determineSchema = (
+  metadata: Metadata,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): ZodObject<any> | undefined => {
+  for (let i = 0; i < allSchemas.length; ++i) {
+    const schema = allSchemas[i]
+    try {
+      schema.parse(metadata)
+      if (!(schema instanceof ZodObject)) return
+      return schema
+    } catch (e) {}
+  }
+}
