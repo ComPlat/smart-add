@@ -243,9 +243,11 @@ const handleCustomRequest = async ({
 
     await Promise.all(promises)
 
+    const extension = file.webkitRelativePath.split('.').slice(-1)[0]
+
     filesDB.files
       .add({
-        extension: file.webkitRelativePath.split('.').slice(-1)[0],
+        extension,
         file,
         fullPath: file.webkitRelativePath,
         isFolder: false,
