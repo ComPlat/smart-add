@@ -3,21 +3,19 @@ import { ExtendedFile, ExtendedFolder } from '@/database/db'
 import { generateMd5Checksum } from '@/helper/cryptographicTools'
 import { v4 } from 'uuid'
 
+import { Ancestry } from './Ancestry'
+import { Container } from './container'
 import {
   attachmentTemplate,
   collectionTemplate,
   collectionsReactionTemplate,
   collectionsSampleTemplate,
-  containerTemplate,
-  datasetTemplate,
   moleculeTemplate,
   reactionTemplate,
   sampleTemplate,
 } from './templates'
 import {
-  Container,
   attachmentSchema,
-  containerSchema,
   moleculeNameSchema,
   moleculeSchema,
   reactionSchema,
@@ -46,76 +44,6 @@ function generateSampleReactionUidMap(assignedFolders: ExtendedFolder[]) {
     }
     return uidMap
   }, {})
-}
-
-function getAncestry(
-  folder: ExtendedFolder,
-  allFolders: ExtendedFolder[],
-  uidMap: Record<string, string>,
-): string {
-  if (folder.dtype === 'sample' || folder.dtype === 'reaction') return ''
-
-  const pathComponents = folder.fullPath.split('/').reverse()
-  const { matchedUids } = getPathComponentsUids(
-    pathComponents,
-    folder,
-    allFolders,
-    uidMap,
-  )
-
-  const currentFolderUid = uidMap[folder.uid]
-  const filteredUids = matchedUids.filter((uid) => uid !== currentFolderUid)
-
-  return filteredUids.join('/')
-}
-
-function getPathComponentsUids(
-  pathComponents: string[],
-  currentFolder: ExtendedFolder,
-  allFolders: ExtendedFolder[],
-  uidMap: Record<string, string>,
-) {
-  return pathComponents.reduce(
-    (acc, component) => {
-      if (acc.shouldStop) return acc
-
-      const matchingFolder = findMatchingFolder(
-        component,
-        allFolders,
-        currentFolder,
-      )
-
-      if (matchingFolder) {
-        updateMatchedUids(matchingFolder, acc.matchedUids, uidMap)
-        // HINT: Stop at the sample level as ancestry does not contain both reaction and sample
-        acc.shouldStop = matchingFolder.dtype === 'sample'
-      }
-
-      return acc
-    },
-    { matchedUids: [] as string[], shouldStop: false },
-  )
-}
-
-function findMatchingFolder(
-  component: string,
-  allFolders: ExtendedFolder[],
-  currentFolder: ExtendedFolder,
-): ExtendedFolder | undefined {
-  return allFolders.find(
-    (folder) => folder.name === component && folder !== currentFolder,
-  )
-}
-
-function updateMatchedUids(
-  folder: ExtendedFolder,
-  matchedUids: string[],
-  uidMap: Record<string, string>,
-) {
-  const uid = uidMap[folder.uid]
-  if (uid && !matchedUids.includes(uid)) {
-    matchedUids.push(uid)
-  }
 }
 
 export const generateExportJson = async (
@@ -180,7 +108,7 @@ export const generateExportJson = async (
         ...sampleSchema.parse({
           ...sampleTemplate,
           ...folder.metadata,
-          ancestry: getAncestry(folder, assignedFolders, uidMap),
+          ancestry: Ancestry(folder, assignedFolders, uidMap),
           created_at: currentDate,
           updated_at: currentDate,
           molecule_id: moleculeId,
@@ -215,7 +143,7 @@ export const generateExportJson = async (
         ...reactionSchema.parse({
           ...reactionTemplate,
           ...folder.metadata,
-          ancestry: getAncestry(folder, assignedFolders, uidMap),
+          ancestry: Ancestry(folder, assignedFolders, uidMap),
           created_at: currentDate,
           updated_at: currentDate,
           user_id,
@@ -240,96 +168,19 @@ export const generateExportJson = async (
     {},
   )
 
-  const uidToContainer = (() => {
-    const containers: Record<string, Container> = {}
-
-    for (const folder of processedFolders) {
-      // HINT: Do not create containers for container types that are not allowed
-      //        to be in the export.json file
-      if (
-        folder.metadata?.container_type === 'structure' ||
-        folder.metadata?.container_type === 'folder'
-      )
-        continue
-
-      const dtypeMapping = {
-        sample: {
-          containable_id: sampleReactionUidMap[folder.uid],
-          containable_type: 'Sample',
-        },
-        reaction: {
-          containable_id: sampleReactionUidMap[folder.uid],
-          containable_type: 'Reaction',
-        },
-      }
-
-      const { containable_id = null, containable_type = null } =
-        dtypeMapping[folder.dtype as keyof typeof dtypeMapping] || {}
-
-      const dataset = (folder: ExtendedFolder) => {
-        return assignedFiles
-          .filter((file) => file.parentUid === folder.uid)
-          .map((file) => {
-            const key = v4()
-
-            return {
-              [key]: {
-                ...containerSchema.parse({
-                  ...datasetTemplate,
-                  ...file.metadata,
-                  ancestry: `${uidMap[file.parentUid]}/${getAncestry(
-                    folder,
-                    assignedFolders,
-                    uidMap,
-                  )}`,
-                  user_id,
-                  created_at: currentDate,
-                  updated_at: currentDate,
-                  parent_id: uidMap[file.parentUid],
-                }),
-              },
-            }
-          })
-      }
-
-      const container = () => {
-        const isAnalysis = folder.metadata?.container_type === 'analysis'
-
-        return {
-          [uidMap[folder.uid]]: {
-            ...containerSchema.parse({
-              ...containerTemplate,
-              ...folder.metadata,
-              ancestry: getAncestry(folder, assignedFolders, uidMap),
-              containable_id,
-              containable_type,
-              user_id,
-              name: folder.name,
-              description: null,
-              created_at: currentDate,
-              updated_at: currentDate,
-              parent_id: uidMap[folder.parentUid] || null,
-              extended_metadata: isAnalysis
-                ? {
-                    content: '{"ops":[{"insert":"\\n"}]}',
-                    index: '0',
-                    report: 'true',
-                  }
-                : {},
-            }),
-          },
-        }
-      }
-
-      Object.assign(containers, container(), ...dataset(folder))
-    }
-
-    return containers
-  })()
+  const container = Container({
+    assignedFiles,
+    assignedFolders,
+    currentDate,
+    processedFolders,
+    sampleReactionUidMap,
+    uidMap,
+    user_id,
+  })
 
   const uidToAttachment = await assignedFiles.reduce(async (acc, file) => {
     const attachableId =
-      Object.entries(uidToContainer).find(
+      Object.entries(Container).find(
         ([, container]) =>
           container.parent_id === uidMap[file.parentUid] &&
           container.container_type === 'dataset',
@@ -389,7 +240,7 @@ export const generateExportJson = async (
     Fingerprint: {},
     Molecule: uidToMolecule,
     MoleculeName: uidToMoleculeName,
-    Container: uidToContainer,
+    Container: container,
     Attachment: uidToAttachment,
     Reaction: uidToReaction,
     CollectionsReaction: uidToCollectionsReaction,
