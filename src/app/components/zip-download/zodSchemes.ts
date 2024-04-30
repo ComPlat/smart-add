@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable perfectionist/sort-objects */
 import { Metadata } from '@/database/db'
 import { ZodObject, z } from 'zod'
@@ -458,7 +459,6 @@ export const allSchemas = [
 
 export const determineSchema = (
   metadata: Metadata,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): ZodObject<any> | undefined => {
   for (let i = 0; i < allSchemas.length; ++i) {
     const schema = allSchemas[i]
