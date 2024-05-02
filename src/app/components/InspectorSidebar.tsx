@@ -175,7 +175,7 @@ const InspectorSidebar = ({
       case 'checkbox':
         return target.checked
       case 'number':
-        return target.valueAsNumber
+        return target.value === '' ? 0 : Number(target.value)
       default:
         return target.value
     }

@@ -10,6 +10,21 @@ const nullableNumber = z.number().nullable()
 export const datetimeSchema = z.string().datetime()
 export type DateTime = z.infer<typeof datetimeSchema>
 
+const temperatureObjectSchema = z.object({
+  data: z.array(z.any()),
+  userText: nullableString,
+  valueUnit: nullableString,
+})
+export type TemperatureObject = z.infer<typeof temperatureObjectSchema>
+
+const textObjectSchema = z.object({
+  ops: z.array(z.object({ insert: z.string() })).default([{ insert: '\n' }]),
+})
+export type TextObject = z.infer<typeof textObjectSchema>
+
+const arraySchema = z.array(z.union([z.string(), z.number()]))
+export type ArrayType = z.infer<typeof arraySchema>
+
 export const reactionSampleSchema = z.object({
   reaction_id: uuidSchema,
   sample_id: uuidSchema,
@@ -162,20 +177,6 @@ export const residueSchema = z.object({
   updated_at: datetimeSchema,
 })
 export type Residue = z.infer<typeof residueSchema>
-
-const textObjectSchema = z.object({
-  ops: z.array(z.object({ insert: z.string() })).default([{ insert: '\n' }]),
-})
-
-export type TextObject = z.infer<typeof textObjectSchema>
-
-const temperatureObjectSchema = z.object({
-  data: z.array(z.any()),
-  userText: nullableString,
-  valueUnit: nullableString,
-})
-
-export type TemperatureObject = z.infer<typeof temperatureObjectSchema>
 
 export const collectionsReactionSchema = z.object({
   collection_id: uuidSchema,
@@ -333,10 +334,6 @@ export const literatureSchema = z.object({
   doi: z.string(),
 })
 export type Literature = z.infer<typeof literatureSchema>
-
-const arraySchema = z.array(z.union([z.string(), z.number()]))
-
-export type ArrayType = z.infer<typeof arraySchema>
 
 export const reactionSchema = z.object({
   name: nullableString,
