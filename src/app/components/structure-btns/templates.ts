@@ -180,11 +180,24 @@ export const createAnalysis = async (
   )
   const analysisName = 'analysis'
 
-  return await createFolder(
+  const analysisFolder = await createFolder(
     `${fullPath}/${uniqueFolderName}`,
     uniqueFolderName,
     true,
     '',
     getMetadata('', uniqueFolderName, analysisName, '') as Container,
+    'analysis',
   )
+
+  const datasets = ['dataset_1', 'dataset_2']
+
+  const promises = [
+    await createSubFolders(
+      `${fullPath}/${uniqueFolderName}`,
+      datasets,
+      analysisFolder.uid,
+    ),
+  ]
+
+  return Promise.all(promises)
 }

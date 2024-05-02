@@ -41,8 +41,10 @@ export type ExtendedFile = {
   uid: string
 }
 
+export type Datatype = 'analysis' | 'dataset' | 'folder' | 'reaction' | 'sample'
+
 export type ExtendedFolder = {
-  dtype: string
+  dtype: Datatype
   fullPath: string
   id?: number
   isFolder: boolean

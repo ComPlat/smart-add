@@ -1,5 +1,4 @@
-import { ExtendedFolder, filesDB } from '@/database/db'
-import { Metadata } from '@/database/db'
+import { Datatype, ExtendedFolder, Metadata, filesDB } from '@/database/db'
 import { FileNode } from '@/helper/types'
 import { v4 } from 'uuid'
 
@@ -36,7 +35,7 @@ export const createFolder = async (
   assignmentTree: boolean = false,
   parentUid: string = '',
   metadata: Metadata = { container_type: 'folder' },
-  dtype: string = 'folder',
+  dtype: Datatype = 'folder',
 ): Promise<ExtendedFolder> => {
   const folder: ExtendedFolder = {
     dtype,
@@ -58,7 +57,7 @@ export const createSubFolders = async (
   names: string[],
   parentUid: string,
   metadatas: Metadata[] = [],
-  dtypes: string[] = Array(names.length).fill('folder'),
+  dtypes: Datatype[] = Array(names.length).fill('folder'),
 ) => {
   return await Promise.all(
     names.map((name, index) =>
