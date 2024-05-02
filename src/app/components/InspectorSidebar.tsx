@@ -243,6 +243,9 @@ const InspectorSidebar = ({
     }
   }
 
+  const getItemName = (item: ExtendedFile | ExtendedFolder) =>
+    (item as ExtendedFile).file?.name ?? item.name ?? ''
+
   return (
     <>
       {isOpen && item && (
@@ -276,8 +279,8 @@ const InspectorSidebar = ({
                 />
               </svg>
             </button>
-            <p className="truncate font-bold">{item.name}</p>
-            <div className="flex flex-col gap-6">
+            <p className="font-bold">{getItemName(item)}</p>
+            <div className="flex flex-col gap-4">
               {item.metadata &&
                 Object.entries(item.metadata).map(([key, value]) =>
                   determineInputComponent(
