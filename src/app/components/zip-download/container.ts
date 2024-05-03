@@ -73,7 +73,6 @@ interface ContainerParams {
 }
 
 export const Container = ({
-  // assignedFiles,
   assignedFolders,
   currentDate,
   processedFolders,

@@ -209,6 +209,7 @@ export const createAnalysis = async (
   baseFolderName: string,
   fullPath: string,
   tree: Record<string, FileNode>,
+  parentUid: string,
 ) => {
   const uniqueFolderName = getUniqueFolderName(
     baseFolderName,
@@ -220,8 +221,8 @@ export const createAnalysis = async (
     `${fullPath}/${uniqueFolderName}`,
     uniqueFolderName,
     true,
-    '',
-    getMetadata('', uniqueFolderName, 'analysis', '') as Container,
+    parentUid,
+    getMetadata(parentUid, uniqueFolderName, 'analysis', '') as Container,
     'analysis',
   )
 
@@ -243,6 +244,7 @@ export const createDataset = async (
   baseFolderName: string,
   fullPath: string,
   tree: Record<string, FileNode>,
+  parentUid: string,
 ) => {
   const uniqueFolderName = getUniqueFolderName(
     baseFolderName,
@@ -254,10 +256,12 @@ export const createDataset = async (
     `${fullPath}/${uniqueFolderName}`,
     uniqueFolderName,
     true,
-    '',
-    getMetadata('', uniqueFolderName, 'dataset', '') as Container,
+    parentUid,
+    getMetadata(parentUid, uniqueFolderName, 'dataset', '') as Container,
     'dataset',
   )
+
+  console.log('datasetFolder', datasetFolder)
 
   return datasetFolder
 }

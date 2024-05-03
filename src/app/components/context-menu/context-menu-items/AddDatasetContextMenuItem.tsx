@@ -30,7 +30,7 @@ const AddDatasetContextMenuItem: FC<AddDatasetProps> = ({
   useOnClickOutside(popupRef, () => showInput && setShowInput(false))
 
   const handleAddDataset = async () => {
-    if (item) createDataset(folderName, item.fullPath, tree)
+    if (item) createDataset(folderName, item.fullPath, tree, item.uid)
 
     setFolderName(baseName)
     setShowInput(false)

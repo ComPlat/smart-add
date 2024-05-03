@@ -81,12 +81,11 @@ const CreateStructureContextMenu = ({
 
 const ContextMenu = ({ closeContextMenu, targetItem, tree }: ContextMenu) => {
   const isFolder = targetItem?.isFolder
-  const isAnalysesFolder =
-    isFolder && targetItem?.metadata?.container_type === 'analyses'
-  const isAnalysisFolder =
-    isFolder && targetItem?.metadata?.container_type === 'analysis'
-  const isStructureFolder =
-    isFolder && targetItem?.metadata?.container_type === 'structure'
+  const containerType = targetItem?.metadata?.container_type
+
+  const isAnalysesFolder = isFolder && containerType === 'analyses'
+  const isAnalysisFolder = isFolder && containerType === 'analysis'
+  const isStructureFolder = isFolder && containerType === 'structure'
 
   if (!targetItem) {
     return (

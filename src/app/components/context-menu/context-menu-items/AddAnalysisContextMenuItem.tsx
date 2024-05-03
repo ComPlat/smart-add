@@ -30,7 +30,7 @@ const AddAnalysisContextMenuItem: FC<AddAnalysisProps> = ({
   useOnClickOutside(popupRef, () => showInput && setShowInput(false))
 
   const handleAddAnalysis = async () => {
-    if (item) createAnalysis(folderName, item.fullPath, tree)
+    if (item) createAnalysis(folderName, item.fullPath, tree, item.uid)
 
     setFolderName(baseName)
     setShowInput(false)
