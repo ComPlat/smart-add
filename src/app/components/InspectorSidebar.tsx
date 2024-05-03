@@ -180,6 +180,30 @@ const CheckboxField: React.FC<CheckboxFieldProps> = ({
   </label>
 )
 
+interface DropDownMenuProps {
+  className?: string
+}
+const DropDownMenu = ({ className }: DropDownMenuProps) => (
+  <label className="flex flex-col text-sm">
+    <p className="font-bold">{formatLabel('Reaction Scheme Type')}</p>
+    <select
+      className={`mt-2 rounded border px-2 py-1 outline-gray-200 focus:border-kit-primary-full
+${'bg-white hover:border-kit-primary-full'} ${className}`}
+      id="reaction_scheme_type"
+      name="reaction_scheme_type"
+    >
+      <optgroup label="No type">
+        <option value="none">none</option>
+      </optgroup>
+      <optgroup label="Reaction Scheme Types">
+        <option value="starting_material">Starting material</option>
+        <option value="reactant">Reactant</option>
+        <option value="product">Product</option>
+      </optgroup>
+    </select>
+  </label>
+)
+
 function determineInputComponent(
   key: string,
   value: MetadataValue,
@@ -404,6 +428,9 @@ const InspectorSidebar = ({
               </svg>
             </button>
             <p className="font-bold">{getItemName(item)}</p>
+            {(item as ExtendedFolder).dtype === 'sample' && item.parentUid && (
+              <DropDownMenu />
+            )}
             <div className="flex flex-col gap-4">
               {item.metadata &&
                 Object.entries(item.metadata).map(([key, value]) =>
