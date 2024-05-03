@@ -45,7 +45,7 @@ export type Collection = z.infer<typeof collectionSchema>
 export const sampleSchema = z.object({
   name: nullableString,
   target_amount_value: nullableNumber,
-  target_amount_unit: z.string().nullable(),
+  target_amount_unit: nullableString,
   created_at: datetimeSchema,
   updated_at: datetimeSchema,
   description: nullableString,
@@ -56,7 +56,7 @@ export const sampleSchema = z.object({
   impurities: nullableString,
   location: nullableString,
   is_top_secret: z.boolean(),
-  ancestry: z.string().nullable(),
+  ancestry: nullableString,
   external_label: nullableString,
   created_by: uuidSchema.nullable(),
   short_label: nullableString,
