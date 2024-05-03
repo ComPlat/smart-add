@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   ExtendedFile,
   ExtendedFolder,
@@ -12,7 +11,7 @@ import { identifyType, isReadonly } from '@/helper/utils'
 import { useLiveQuery } from 'dexie-react-hooks'
 import React, { ChangeEvent, useEffect, useState } from 'react'
 import { TreeItemIndex } from 'react-complex-tree'
-import { ZodObject } from 'zod'
+import { ZodObject, ZodRawShape } from 'zod'
 
 import renameFolder from './context-menu/renameFolder'
 import ArrayInputField from './input-components/ArrayInputField'
@@ -22,11 +21,11 @@ import NumberInputField from './input-components/NumberInputField'
 import TextInputField from './input-components/TextInputField'
 import { datetimeSchema, determineSchema } from './zip-download/zodSchemes'
 
-function determineInputComponent(
+function determineInputComponent<T extends ZodRawShape>(
   key: string,
   value: MetadataValue,
   handleInputChange: (e: ChangeEvent<HTMLInputElement>, key: string) => void,
-  schema?: ZodObject<any>,
+  schema?: ZodObject<T>,
 ) {
   if (!schema) return
   const [type] = identifyType(schema, key)
@@ -102,6 +101,7 @@ function determineInputComponent(
       return (
         <ArrayInputField
           onChange={(newValues) =>
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             handleInputChange({ target: { value: newValues } } as any, key)
           }
           key={key}
