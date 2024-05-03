@@ -9,6 +9,7 @@ import {
   ZodNumber,
   ZodObject,
   ZodOptional,
+  ZodRawShape,
   ZodString,
 } from 'zod'
 
@@ -41,9 +42,8 @@ export const formatLabel = (text: string): string =>
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ')
 
-export function identifyType(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  schema: ZodObject<any>,
+export function identifyType<T extends ZodRawShape>(
+  schema: ZodObject<T>,
   key: string,
 ): [
   (
@@ -68,9 +68,17 @@ export function identifyType(
   }
 }
 
+type ZodType =
+  | ZodAny
+  | ZodArray<ZodString>
+  | ZodBoolean
+  | ZodEnum<[string, ...string[]]>
+  | ZodNull
+  | ZodNumber
+  | ZodString
+
 export function identifyTypeName(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  type: any,
+  type: ZodType,
 ):
   | 'array'
   | 'boolean'

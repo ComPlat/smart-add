@@ -28,6 +28,7 @@ function determineInputComponent<T extends ZodRawShape>(
   schema?: ZodObject<T>,
 ) {
   if (!schema) return
+
   const [type] = identifyType(schema, key)
   const readonly = isReadonly(key)
 

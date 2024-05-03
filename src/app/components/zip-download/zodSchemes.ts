@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable perfectionist/sort-objects */
 import { Metadata } from '@/database/db'
-import { ZodObject, z } from 'zod'
+import { ZodObject, ZodRawShape, z } from 'zod'
 
 const uuidSchema = z.string().nullable()
 const nullableString = z.string().nullable()
@@ -466,15 +465,15 @@ export const allSchemas = [
   sampleAnalysesTableSchema,
 ]
 
-export const determineSchema = (
+export const determineSchema = <T extends ZodRawShape>(
   metadata: Metadata,
-): ZodObject<any> | undefined => {
+): ZodObject<T> | undefined => {
   for (let i = 0; i < allSchemas.length; ++i) {
     const schema = allSchemas[i]
     try {
       schema.parse(metadata)
       if (!(schema instanceof ZodObject)) return
-      return schema
+      return schema as unknown as ZodObject<T>
     } catch (e) {}
   }
 }
