@@ -9,6 +9,7 @@ import {
   ZodNumber,
   ZodObject,
   ZodOptional,
+  ZodRawShape,
   ZodString,
 } from 'zod'
 
@@ -41,10 +42,9 @@ export const formatLabel = (text: string): string =>
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ')
 
-export function identifyType(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  schema: ZodObject<any>,
-  key: string,
+export function identifyType<T extends ZodRawShape>(
+  schema: ZodObject<T>,
+  key: keyof T,
 ): [
   (
     | 'array'
@@ -58,13 +58,11 @@ export function identifyType(
   ),
   boolean,
 ] {
-  if (
-    schema.shape[key] instanceof ZodOptional ||
-    schema.shape[key] instanceof ZodNullable
-  ) {
-    return [identifyTypeName(schema.shape[key].unwrap()), true]
+  const field = schema.shape[key]
+  if (field instanceof ZodOptional || field instanceof ZodNullable) {
+    return [identifyTypeName(field.unwrap()), true]
   } else {
-    return [identifyTypeName(schema.shape[key]), false]
+    return [identifyTypeName(field), false]
   }
 }
 
