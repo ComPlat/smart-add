@@ -83,7 +83,7 @@ function determineInputComponent<T extends ZodRawShape>(
           key={key}
           name={key}
           onChange={(e) => handleInputChange(e, key)}
-          readonly={readonly}
+          readonly={true}
           value={'TODO: Enum/Select'}
         />
       )
@@ -93,7 +93,7 @@ function determineInputComponent<T extends ZodRawShape>(
           key={key}
           name={key}
           onChange={(e) => handleInputChange(e, key)}
-          readonly={readonly}
+          readonly={true}
           value={'TODO: Object'}
         />
       )
@@ -118,7 +118,7 @@ function determineInputComponent<T extends ZodRawShape>(
           key={key}
           name={key}
           onChange={(e) => handleInputChange(e, key)}
-          readonly={readonly}
+          readonly={true}
           value={`Unknown type: ${type}`}
         />
       )
