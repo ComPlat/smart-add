@@ -182,8 +182,6 @@ export const generateExportJson = async (
     uidMap,
   })
 
-  console.log('attachments_export', attachments)
-
   const exportJson = {
     Collection: uidToCollection,
     Sample: uidToSample,

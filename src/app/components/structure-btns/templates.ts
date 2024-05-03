@@ -238,3 +238,26 @@ export const createAnalysis = async (
 
   return Promise.all(datasetFolders)
 }
+
+export const createDataset = async (
+  baseFolderName: string,
+  fullPath: string,
+  tree: Record<string, FileNode>,
+) => {
+  const uniqueFolderName = getUniqueFolderName(
+    baseFolderName,
+    tree,
+    baseFolderName,
+  )
+
+  const datasetFolder = await createFolder(
+    `${fullPath}/${uniqueFolderName}`,
+    uniqueFolderName,
+    true,
+    '',
+    getMetadata('', uniqueFolderName, 'dataset', '') as Container,
+    'dataset',
+  )
+
+  return datasetFolder
+}
