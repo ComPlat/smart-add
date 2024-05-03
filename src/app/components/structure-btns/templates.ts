@@ -9,8 +9,6 @@ import {
   getUniqueFolderName,
 } from './folderUtils'
 
-// TODO: Refactor file to remove duplicated code, side effects and
-// TODO: make sure that the creation of the structure returns the right object
 const getMetadata = (
   parent_id: string,
   name: string,
