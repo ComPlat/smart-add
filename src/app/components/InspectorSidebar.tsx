@@ -15,6 +15,7 @@ import { TreeItemIndex } from 'react-complex-tree'
 import { ZodObject } from 'zod'
 
 import renameFolder from './context-menu/renameFolder'
+import ArrayInputField from './input-components/ArrayInputField'
 import CheckboxField from './input-components/CheckboxField'
 import DateInputField from './input-components/DateInputField'
 import NumberInputField from './input-components/NumberInputField'
@@ -76,7 +77,7 @@ function determineInputComponent(
         />
       )
     // TODO: Implement enum and object input components
-    //        array, temperature, and text objects
+    //        temperature, and text objects
     case 'enum':
       return (
         <TextInputField
@@ -99,12 +100,14 @@ function determineInputComponent(
       )
     case 'array':
       return (
-        <TextInputField
+        <ArrayInputField
+          onChange={(newValues) =>
+            handleInputChange({ target: { value: newValues } } as any, key)
+          }
           key={key}
           name={key}
-          onChange={(e) => handleInputChange(e, key)}
           readonly={readonly}
-          value={'TODO: Array'}
+          values={(value as string[]) || []}
         />
       )
     case 'null':
