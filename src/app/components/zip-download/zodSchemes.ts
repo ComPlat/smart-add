@@ -468,12 +468,10 @@ export const allSchemas = [
 export const determineSchema = <T extends ZodRawShape>(
   metadata: Metadata,
 ): ZodObject<T> | undefined => {
-  for (let i = 0; i < allSchemas.length; ++i) {
-    const schema = allSchemas[i]
-    try {
-      schema.parse(metadata)
-      if (!(schema instanceof ZodObject)) return
-      return schema as unknown as ZodObject<T>
-    } catch (e) {}
-  }
+  const schema = allSchemas.find((schema) => {
+    const result = schema.safeParse(metadata)
+    return result.success && schema instanceof ZodObject
+  }) as ZodObject<T> | undefined
+
+  return schema
 }
