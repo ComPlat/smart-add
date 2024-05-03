@@ -89,12 +89,14 @@ export const createSample = async (
     true,
     sampleFolder.uid,
     getMetadata(sampleFolder.uid, 'analyses', 'analyses'),
+    'analyses',
   )
   const structureFolder = await createSubFolders(
     uniqueFolderName,
     ['structure'],
     sampleFolder.uid,
     [getMetadata(sampleFolder.uid, 'structure', 'structure', '')],
+    Array(datasets.length).fill('structure'),
   )
   const analysisFolders = await createSubFolders(
     `${uniqueFolderName}/analyses`,
@@ -104,6 +106,7 @@ export const createSample = async (
       (analysis) =>
         getMetadata(analysesFolder.uid, analysis, 'analysis', '') as Container,
     ),
+    Array(analyses.length).fill('analysis'),
   )
 
   const datasetFoldersPromises = analysisFolders.map(async (folder) => {
@@ -157,6 +160,7 @@ export const createReaction = async (
     true,
     sampleFolder.uid,
     getMetadata(sampleFolder.uid, 'analyses', 'analyses', ''),
+    'analyses',
   )
 
   const analysisFolders = await createSubFolders(
@@ -167,6 +171,7 @@ export const createReaction = async (
       (analysis) =>
         getMetadata(analysesFolder.uid, analysis, 'analysis', '') as Container,
     ),
+    Array(analyses.length).fill('analysis'),
   )
 
   const datasetFoldersPromises = analysisFolders.map(async (folder) => {
@@ -196,6 +201,7 @@ export const createReaction = async (
         ) as Container,
         getMetadata(sampleFolder.uid, 'analyses', 'analyses') as Container,
       ],
+      ['structure', 'analyses'],
     ),
     datasetFolders,
   ]

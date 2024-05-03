@@ -41,7 +41,14 @@ export type ExtendedFile = {
   uid: string
 }
 
-export type Datatype = 'analysis' | 'dataset' | 'folder' | 'reaction' | 'sample'
+export type Datatype =
+  | 'analyses'
+  | 'analysis'
+  | 'dataset'
+  | 'folder'
+  | 'reaction'
+  | 'sample'
+  | 'structure'
 
 export type ExtendedFolder = {
   dtype: Datatype
