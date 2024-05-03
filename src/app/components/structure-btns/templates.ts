@@ -259,7 +259,5 @@ export const createDataset = async (
     'dataset',
   )
 
-  console.log('datasetFolder', datasetFolder)
-
   return datasetFolder
 }
