@@ -2,6 +2,7 @@ import { FileNode } from '@/helper/types'
 
 import { reactionTemplate, sampleTemplate } from '../zip-download/templates'
 import { Container, Reaction, Sample } from '../zip-download/zodSchemes'
+import { datasetTemplate } from './../zip-download/templates'
 import {
   createFolder,
   createSubFolders,
@@ -48,12 +49,21 @@ const getMetadata = (
         parent_id,
         updated_at: currentDate,
       } as Container
+    case 'dataset':
+      return {
+        ...datasetTemplate,
+        ancestry: parent_id,
+        created_at: currentDate,
+        name,
+        updated_at: currentDate,
+      } as Container
     default:
       throw new Error(`Invalid type: ${type}`)
   }
 }
 
 const analyses = ['analysis_1', 'analysis_2']
+const datasets = ['dataset_1', 'dataset_2']
 
 export const createSample = async (
   baseFolderName: string,
@@ -79,27 +89,40 @@ export const createSample = async (
     true,
     sampleFolder.uid,
     getMetadata(sampleFolder.uid, 'analyses', 'analyses'),
+    'analyses',
+  )
+  const structureFolder = await createSubFolders(
+    uniqueFolderName,
+    ['structure'],
+    sampleFolder.uid,
+    [getMetadata(sampleFolder.uid, 'structure', 'structure', '')],
+    Array(datasets.length).fill('structure'),
+  )
+  const analysisFolders = await createSubFolders(
+    `${uniqueFolderName}/analyses`,
+    analyses,
+    analysesFolder.uid,
+    analyses.map(
+      (analysis) =>
+        getMetadata(analysesFolder.uid, analysis, 'analysis', '') as Container,
+    ),
+    Array(analyses.length).fill('analysis'),
   )
 
-  const promises = [
-    createSubFolders(uniqueFolderName, ['structure'], sampleFolder.uid, [
-      getMetadata(sampleFolder.uid, 'structure', 'structure', ''),
-    ]),
-    createSubFolders(
-      `${uniqueFolderName}/analyses`,
-      analyses,
-      analysesFolder.uid,
-      analyses.map(
-        (analysis) =>
-          getMetadata(
-            analysesFolder.uid,
-            analysis,
-            'analysis',
-            '',
-          ) as Container,
+  const datasetFoldersPromises = analysisFolders.map(async (folder) => {
+    return await createSubFolders(
+      `${folder.fullPath}`,
+      datasets,
+      folder.uid,
+      datasets.map(
+        (dataset) => getMetadata(folder.uid, dataset, 'dataset') as Container,
       ),
-    ),
-  ]
+      Array(datasets.length).fill('dataset'),
+    )
+  })
+  const datasetFolders = await Promise.all(datasetFoldersPromises)
+
+  const promises = [structureFolder, analysisFolders, datasetFolders]
 
   return Promise.all(promises)
 }
@@ -137,7 +160,32 @@ export const createReaction = async (
     true,
     sampleFolder.uid,
     getMetadata(sampleFolder.uid, 'analyses', 'analyses', ''),
+    'analyses',
   )
+
+  const analysisFolders = await createSubFolders(
+    `${uniqueFolderName}/${sampleName}/analyses`,
+    analyses,
+    analysesFolder.uid,
+    analyses.map(
+      (analysis) =>
+        getMetadata(analysesFolder.uid, analysis, 'analysis', '') as Container,
+    ),
+    Array(analyses.length).fill('analysis'),
+  )
+
+  const datasetFoldersPromises = analysisFolders.map(async (folder) => {
+    return await createSubFolders(
+      `${folder.fullPath}`,
+      datasets,
+      folder.uid,
+      datasets.map(
+        (dataset) => getMetadata(folder.uid, dataset, 'dataset') as Container,
+      ),
+      Array(datasets.length).fill('dataset'),
+    )
+  })
+  const datasetFolders = await Promise.all(datasetFoldersPromises)
 
   const promises = [
     createSubFolders(
@@ -153,16 +201,9 @@ export const createReaction = async (
         ) as Container,
         getMetadata(sampleFolder.uid, 'analyses', 'analyses') as Container,
       ],
+      ['structure', 'analyses'],
     ),
-    createSubFolders(
-      `${uniqueFolderName}/${sampleName}/analyses`,
-      analyses,
-      analysesFolder.uid,
-      analyses.map(
-        (analysis) =>
-          getMetadata(analysesFolder.uid, analysis, 'analysis') as Container,
-      ),
-    ),
+    datasetFolders,
   ]
 
   return Promise.all(promises)
@@ -172,19 +213,57 @@ export const createAnalysis = async (
   baseFolderName: string,
   fullPath: string,
   tree: Record<string, FileNode>,
+  parentUid: string,
 ) => {
   const uniqueFolderName = getUniqueFolderName(
     baseFolderName,
     tree,
     baseFolderName,
   )
-  const analysisName = 'analysis'
 
-  return await createFolder(
+  const analysisFolder = await createFolder(
     `${fullPath}/${uniqueFolderName}`,
     uniqueFolderName,
     true,
-    '',
-    getMetadata('', uniqueFolderName, analysisName, '') as Container,
+    parentUid,
+    getMetadata(parentUid, uniqueFolderName, 'analysis', '') as Container,
+    'analysis',
   )
+
+  const datasetFolders = await createSubFolders(
+    `${fullPath}/${uniqueFolderName}`,
+    datasets,
+    analysisFolder.uid,
+    datasets.map(
+      (dataset) =>
+        getMetadata(analysisFolder.uid, dataset, 'dataset') as Container,
+    ),
+    Array(datasets.length).fill('dataset'),
+  )
+
+  return Promise.all(datasetFolders)
+}
+
+export const createDataset = async (
+  baseFolderName: string,
+  fullPath: string,
+  tree: Record<string, FileNode>,
+  parentUid: string,
+) => {
+  const uniqueFolderName = getUniqueFolderName(
+    baseFolderName,
+    tree,
+    baseFolderName,
+  )
+
+  const datasetFolder = await createFolder(
+    `${fullPath}/${uniqueFolderName}`,
+    uniqueFolderName,
+    true,
+    parentUid,
+    getMetadata(parentUid, uniqueFolderName, 'dataset', '') as Container,
+    'dataset',
+  )
+
+  return datasetFolder
 }

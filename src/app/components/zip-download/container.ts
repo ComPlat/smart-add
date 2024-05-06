@@ -1,52 +1,9 @@
-import { ExtendedFile, ExtendedFolder } from '@/database/db'
-import { v4 } from 'uuid'
+import { ExtendedFolder } from '@/database/db'
 
 import { Ancestry } from './Ancestry'
-import { containerTemplate, datasetTemplate } from './templates'
+import { containerTemplate } from './templates'
 import { Container as ContainerSchemaType, containerSchema } from './zodSchemes'
 
-interface DatasetParams {
-  assignedFiles: ExtendedFile[]
-  assignedFolders: ExtendedFolder[]
-  currentDate: string
-  folder: ExtendedFolder
-  sampleReactionUidMap: Record<string, string>
-  uidMap: Record<string, string>
-  user_id: null | string
-}
-
-const Dataset = ({
-  assignedFiles,
-  assignedFolders,
-  currentDate,
-  folder,
-  uidMap,
-  user_id,
-}: DatasetParams) => {
-  return assignedFiles
-    .filter((file) => file.parentUid === folder.uid)
-    .map((file) => {
-      const key = v4()
-
-      return {
-        [key]: {
-          ...containerSchema.parse({
-            ...datasetTemplate,
-            ...file.metadata,
-            ancestry: `${uidMap[file.parentUid]}/${Ancestry(
-              folder,
-              assignedFolders,
-              uidMap,
-            )}`,
-            created_at: currentDate,
-            parent_id: uidMap[file.parentUid],
-            updated_at: currentDate,
-            user_id,
-          }),
-        },
-      }
-    })
-}
 interface SubContainerParams {
   assignedFolders: ExtendedFolder[]
   currentDate: string
@@ -107,7 +64,6 @@ const SubContainer = ({
 }
 
 interface ContainerParams {
-  assignedFiles: ExtendedFile[]
   assignedFolders: ExtendedFolder[]
   currentDate: string
   processedFolders: ExtendedFolder[]
@@ -117,7 +73,6 @@ interface ContainerParams {
 }
 
 export const Container = ({
-  assignedFiles,
   assignedFolders,
   currentDate,
   processedFolders,
@@ -142,16 +97,11 @@ export const Container = ({
       user_id,
     })
 
-    const dataset = Dataset({
-      assignedFiles,
-      assignedFolders,
-      currentDate,
-      folder,
-      sampleReactionUidMap,
-      uidMap,
-      user_id,
-    })
+    const container = {
+      ...previousContainer,
+      ...subContainer,
+    }
 
-    return { ...previousContainer, ...subContainer, ...dataset }
+    return container
   }, {} as ContainerSchemaType)
 }

@@ -7,6 +7,7 @@ import { FC, useRef } from 'react'
 import ContextMenuContainer from './ContextMenuItem'
 import DefaultContextMenu from './DefaultContextMenu'
 import AddAnalysisContextMenuItem from './context-menu-items/AddAnalysisContextMenuItem'
+import AddDatasetContextMenuItem from './context-menu-items/AddDatasetContextMenuItem'
 import AddReactionContextMenuItem from './context-menu-items/AddReactionContextMenuItem'
 import AddSampleContextMenuItem from './context-menu-items/AddSampleContextMenuItem'
 
@@ -18,7 +19,7 @@ type ContextMenu = {
   tree: Record<string, FileNode>
 }
 
-const ClickOnAnalysisContextMenu = ({
+const ClickOnAnalysesContextMenu = ({
   closeContextMenu,
   targetItem,
   tree,
@@ -29,6 +30,29 @@ const ClickOnAnalysisContextMenu = ({
 }) => (
   <>
     <AddAnalysisContextMenuItem
+      close={closeContextMenu}
+      item={targetItem}
+      tree={tree}
+    />
+    <DefaultContextMenu
+      closeContextMenu={closeContextMenu}
+      targetItem={targetItem}
+      tree={tree}
+    />
+  </>
+)
+
+const ClickOnAnalysisContextMenu = ({
+  closeContextMenu,
+  targetItem,
+  tree,
+}: {
+  closeContextMenu: () => void
+  targetItem: ExtendedFile | ExtendedFolder
+  tree: Record<string, FileNode>
+}) => (
+  <>
+    <AddDatasetContextMenuItem
       close={closeContextMenu}
       item={targetItem}
       tree={tree}
@@ -56,10 +80,12 @@ const CreateStructureContextMenu = ({
 )
 
 const ContextMenu = ({ closeContextMenu, targetItem, tree }: ContextMenu) => {
-  const isAnalysesFolder =
-    targetItem?.fullPath.includes('analyses') &&
-    !targetItem?.fullPath.includes('analysis')
-  const isStructureFolder = targetItem?.fullPath.includes('structure')
+  const isFolder = targetItem?.isFolder
+  const containerType = targetItem?.metadata?.container_type
+
+  const isAnalysesFolder = isFolder && containerType === 'analyses'
+  const isAnalysisFolder = isFolder && containerType === 'analysis'
+  const isStructureFolder = isFolder && containerType === 'structure'
 
   if (!targetItem) {
     return (
@@ -72,6 +98,16 @@ const ContextMenu = ({ closeContextMenu, targetItem, tree }: ContextMenu) => {
 
   if (isAnalysesFolder) {
     return (
+      <ClickOnAnalysesContextMenu
+        closeContextMenu={closeContextMenu}
+        targetItem={targetItem}
+        tree={tree}
+      />
+    )
+  }
+
+  if (isAnalysisFolder) {
+    return (
       <ClickOnAnalysisContextMenu
         closeContextMenu={closeContextMenu}
         targetItem={targetItem}
@@ -80,7 +116,7 @@ const ContextMenu = ({ closeContextMenu, targetItem, tree }: ContextMenu) => {
     )
   }
 
-  if (!isAnalysesFolder && !isStructureFolder) {
+  if (!isAnalysesFolder && !isAnalysisFolder && !isStructureFolder) {
     return (
       <DefaultContextMenu
         closeContextMenu={closeContextMenu}

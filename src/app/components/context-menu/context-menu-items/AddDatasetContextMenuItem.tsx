@@ -4,23 +4,23 @@ import { useOnClickOutside } from '@/hooks/useOnClickOutside'
 import { FC, useRef, useState } from 'react'
 import { FaPlus } from 'react-icons/fa'
 
-import { createAnalysis } from '../../structure-btns/templates'
+import { createDataset } from '../../structure-btns/templates'
 import Modal from './Modal'
 
-interface AddAnalysisProps {
+interface AddDatasetProps {
   className?: string
   close: () => void
   item: ExtendedFile | ExtendedFolder | undefined
   tree: Record<string, FileNode>
 }
 
-const AddAnalysisContextMenuItem: FC<AddAnalysisProps> = ({
+const AddDatasetContextMenuItem: FC<AddDatasetProps> = ({
   className,
   close,
   item,
   tree,
 }) => {
-  const baseName = 'analysis'
+  const baseName = 'dataset'
 
   const popupRef = useRef(null)
 
@@ -29,8 +29,8 @@ const AddAnalysisContextMenuItem: FC<AddAnalysisProps> = ({
 
   useOnClickOutside(popupRef, () => showInput && setShowInput(false))
 
-  const handleAddAnalysis = async () => {
-    if (item) createAnalysis(folderName, item.fullPath, tree, item.uid)
+  const handleAddDataset = async () => {
+    if (item) createDataset(folderName, item.fullPath, tree, item.uid)
 
     setFolderName(baseName)
     setShowInput(false)
@@ -44,7 +44,7 @@ const AddAnalysisContextMenuItem: FC<AddAnalysisProps> = ({
   }
 
   const handleKeyPress = (e: { key: string }) =>
-    e.key === 'Enter' && folderName.length > 0 && handleAddAnalysis()
+    e.key === 'Enter' && folderName.length > 0 && handleAddDataset()
 
   return (
     <li
@@ -54,14 +54,14 @@ const AddAnalysisContextMenuItem: FC<AddAnalysisProps> = ({
       <div className="flex items-center space-x-2">
         <span className="flex items-center space-x-2">
           <FaPlus />
-          <span>Add Analysis</span>
+          <span>Add Dataset</span>
         </span>
         {showInput && (
           <Modal
             folderName={folderName}
             handleCancel={handleCancel}
             handleKeyPress={handleKeyPress}
-            handleOk={handleAddAnalysis}
+            handleOk={handleAddDataset}
             onChange={(e) => setFolderName(e.target.value)}
             popupRef={popupRef}
           />
@@ -71,4 +71,4 @@ const AddAnalysisContextMenuItem: FC<AddAnalysisProps> = ({
   )
 }
 
-export default AddAnalysisContextMenuItem
+export default AddDatasetContextMenuItem
