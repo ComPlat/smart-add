@@ -431,7 +431,7 @@ export type SampleAnalysesWorksheetTable = z.infer<
   typeof sampleAnalysesTableSchema
 >
 
-export const allSchemas = [
+const allSchemas = [
   uuidSchema,
   nullableString,
   datetimeSchema,
