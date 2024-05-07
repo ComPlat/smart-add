@@ -25,6 +25,7 @@ function determineInputComponent<T extends ZodRawShape>(
   key: string,
   value: MetadataValue,
   handleInputChange: (e: ChangeEvent<HTMLInputElement>, key: string) => void,
+  handleArrayChange: (newValues: string[], key: string) => Promise<void>,
   schema?: ZodObject<T>,
 ) {
   if (!schema) return
@@ -101,12 +102,9 @@ function determineInputComponent<T extends ZodRawShape>(
     case 'array':
       return (
         <ArrayInputField
-          onChange={(newValues) =>
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            handleInputChange({ target: { value: newValues } } as any, key)
-          }
           key={key}
           name={key}
+          onChange={(newValues) => handleArrayChange(newValues, key)}
           readonly={readonly}
           values={(value as string[]) || []}
         />
@@ -185,18 +183,10 @@ const InspectorSidebar = ({
     }
   }
 
-  const handleInputChange = async (
-    e: ChangeEvent<HTMLInputElement>,
+  const updateMetadata = async (
     key: string,
+    newValue: boolean | number | string | string[] | undefined,
   ) => {
-    const target = e.target
-    let newValue = extractValue(target)
-
-    if (typeof newValue === 'string') {
-      const parsedDate = new Date(newValue)
-      if (!isNaN(parsedDate.getTime())) newValue += 'Z'
-    }
-
     if (!item || !item.fullPath) return
 
     const fullPath = item.fullPath
@@ -209,7 +199,6 @@ const InspectorSidebar = ({
           if (!dbItem) return
 
           let updatedMetadata = { ...dbItem.metadata, [key]: newValue }
-
           let updatedName = item.name
           if (key === 'name') {
             updatedName = newValue as string
@@ -229,22 +218,40 @@ const InspectorSidebar = ({
           })
 
           renameFolder(item as ExtendedFolder, tree, updatedName)
-          item.name !== updatedName && handleClose()
+          if (item.name !== updatedName) handleClose()
 
-          setItem((prevItem) => {
-            if (!prevItem) return null
-
-            return {
-              ...prevItem,
-              metadata: updatedMetadata,
-              name: updatedName,
-            } as ExtendedFile | ExtendedFolder
-          })
+          setItem(
+            (prevItem) =>
+              ({
+                ...prevItem,
+                metadata: updatedMetadata,
+                name: updatedName,
+              }) as ExtendedFile | ExtendedFolder,
+          )
         },
       )
     } catch (error) {
       console.error('Failed to update item in Dexie DB', error)
     }
+  }
+
+  const handleInputChange = async (
+    e: ChangeEvent<HTMLInputElement>,
+    key: string,
+  ) => {
+    const target = e.target
+    let newValue = extractValue(target)
+
+    if (typeof newValue === 'string') {
+      const parsedDate = new Date(newValue)
+      if (!isNaN(parsedDate.getTime())) newValue += 'Z'
+    }
+
+    await updateMetadata(key, newValue)
+  }
+
+  const handleArrayChange = async (newValues: string[], key: string) => {
+    await updateMetadata(key, newValues)
   }
 
   const getItemName = (item: ExtendedFile | ExtendedFolder) =>
@@ -291,6 +298,7 @@ const InspectorSidebar = ({
                     key,
                     value,
                     handleInputChange,
+                    handleArrayChange,
                     item.metadata ? determineSchema(item.metadata) : undefined,
                   ),
                 )}
