@@ -293,9 +293,7 @@ const InspectorSidebar = ({
             </button>
             <p className="font-bold">{getItemName(item)}</p>
             {(item as ExtendedFolder).dtype === 'sample' && item.parentUid && (
-              <>
-                <ReactionSchemeDropDownMenu item={item as ExtendedFolder} />
-              </>
+              <ReactionSchemeDropDownMenu item={item as ExtendedFolder} />
             )}
             <div className="flex flex-col gap-4">
               {item.metadata &&

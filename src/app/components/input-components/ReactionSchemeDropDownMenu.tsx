@@ -1,6 +1,6 @@
 import { ExtendedFolder, ReactionSchemeType, filesDB } from '@/database/db'
 import { formatLabel } from '@/helper/utils'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export type ReactionSchemeDropDownMenuProps = {
   item: ExtendedFolder
@@ -11,22 +11,38 @@ const ReactionSchemeDropDownMenu = ({
 }: ReactionSchemeDropDownMenuProps) => {
   const [schemeType, setSchemeType] = useState<ReactionSchemeType>('none')
 
-  const handleOnChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    if (!item || !item.fullPath) return
+  useEffect(() => {
+    if (!item) return
 
     const fullPath = item.fullPath
 
-    setSchemeType(e.target.value as ReactionSchemeType)
+    const loadSchemeType = async () => {
+      try {
+        const dbItem = await filesDB.folders.get({ fullPath })
+        if (!dbItem) return
 
-    item.reactionSchemeType = schemeType
+        setSchemeType(dbItem.reactionSchemeType)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    loadSchemeType()
+  }, [item])
+
+  const handleOnChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (!item) return
+    const fullPath = item.fullPath
+    const value = e.target.value as ReactionSchemeType
 
     try {
       const dbItem = await filesDB.folders.get({ fullPath })
-      if (!dbItem) return
 
+      if (!dbItem) return
       await filesDB.folders.where({ fullPath }).modify({
-        reactionSchemeType: schemeType,
+        reactionSchemeType: value,
       })
+      setSchemeType(value)
     } catch (error) {
       console.error(error)
     }
@@ -40,16 +56,15 @@ const ReactionSchemeDropDownMenu = ({
         hover:border-kit-primary-full focus:border-kit-primary-full"
         name="reaction-scheme-type"
         onChange={handleOnChange}
+        value={schemeType}
       >
-        <option value={schemeType}>None</option>
+        <option value="none">None</option>
         <optgroup label="Reaction scheme type">
           <option value="starting-material">Starting material</option>
           <option value="reactant">Reactant</option>
           <option value="product">Product</option>
         </optgroup>
       </select>
-
-      {JSON.stringify(item, null, 2)}
     </label>
   )
 }
