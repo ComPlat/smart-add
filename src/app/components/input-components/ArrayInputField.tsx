@@ -82,7 +82,8 @@ const ArrayInputField: React.FC<ArrayInputFieldProps> = ({
             </datalist>
           )}
           <button
-            className="rounded bg-red-500 px-2 py-1 text-sm text-white hover:bg-red-700"
+            className="rounded bg-red-600 px-2 py-1 text-sm text-white duration-150 
+            hover:bg-red-400"
             onClick={() => handleRemoveItem(index)}
           >
             Remove
@@ -90,7 +91,7 @@ const ArrayInputField: React.FC<ArrayInputFieldProps> = ({
         </div>
       ))}
       <button
-        className="mt-2 rounded bg-blue-500 px-2 py-1 text-sm text-white hover:bg-blue-700"
+        className="mt-2 rounded bg-kit-primary-full px-2 py-1 text-sm text-white duration-150 hover:bg-kit-primary-full/90"
         onClick={handleAddItem}
       >
         Add Item
