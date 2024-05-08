@@ -50,6 +50,12 @@ export type Datatype =
   | 'sample'
   | 'structure'
 
+export type ReactionSchemeType =
+  | 'none'
+  | 'product'
+  | 'reactant'
+  | 'starting-material'
+
 export type ExtendedFolder = {
   dtype: Datatype
   fullPath: string
@@ -58,6 +64,7 @@ export type ExtendedFolder = {
   metadata?: Metadata
   name: string
   parentUid: string
+  reactionSchemeType: ReactionSchemeType
   treeId: string
   uid: string
 }
@@ -70,7 +77,8 @@ export class FilesDBCreator extends Dexie {
     super('filesDatabase')
     this.version(1).stores({
       files: '++id, fullPath, name, uid, extension, parentUid, treeId',
-      folders: '++id, fullPath, name, uid, parentUid, treeId, dtype',
+      folders:
+        '++id, fullPath, name, uid, parentUid, treeId, dtype, reactionSchemeType',
     })
   }
 }

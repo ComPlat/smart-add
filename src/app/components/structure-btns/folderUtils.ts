@@ -1,4 +1,10 @@
-import { Datatype, ExtendedFolder, Metadata, filesDB } from '@/database/db'
+import {
+  Datatype,
+  ExtendedFolder,
+  Metadata,
+  ReactionSchemeType,
+  filesDB,
+} from '@/database/db'
 import { FileNode } from '@/helper/types'
 import { v4 } from 'uuid'
 
@@ -36,6 +42,7 @@ export const createFolder = async (
   parentUid: string = '',
   metadata: Metadata = { container_type: 'folder' },
   dtype: Datatype = 'folder',
+  reactionSchemeType: ReactionSchemeType = 'none',
 ): Promise<ExtendedFolder> => {
   const folder: ExtendedFolder = {
     dtype,
@@ -44,6 +51,7 @@ export const createFolder = async (
     metadata,
     name,
     parentUid,
+    reactionSchemeType,
     treeId: assignmentTree ? 'assignmentTreeRoot' : 'inputTreeRoot',
     uid: v4(),
   }
@@ -58,6 +66,7 @@ export const createSubFolders = async (
   parentUid: string,
   metadatas: Metadata[] = [],
   dtypes: Datatype[] = Array(names.length).fill('folder'),
+  reactionSchemeTypes: ReactionSchemeType[] = Array(names.length).fill('none'),
 ) => {
   return await Promise.all(
     names.map((name, index) =>
@@ -68,6 +77,7 @@ export const createSubFolders = async (
         parentUid,
         metadatas[index],
         dtypes[index],
+        reactionSchemeTypes[index],
       ),
     ),
   )

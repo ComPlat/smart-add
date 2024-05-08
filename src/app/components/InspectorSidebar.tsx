@@ -17,8 +17,8 @@ import renameFolder from './context-menu/renameFolder'
 import ArrayInputField from './input-components/ArrayInputField'
 import CheckboxField from './input-components/CheckboxField'
 import DateInputField from './input-components/DateInputField'
-import DropDownMenu from './input-components/DropDownMenu'
 import NumberInputField from './input-components/NumberInputField'
+import ReactionSchemeDropDownMenu from './input-components/ReactionSchemeDropDownMenu'
 import TextInputField from './input-components/TextInputField'
 import { datetimeSchema, determineSchema } from './zip-download/zodSchemes'
 
@@ -294,8 +294,7 @@ const InspectorSidebar = ({
             <p className="font-bold">{getItemName(item)}</p>
             {(item as ExtendedFolder).dtype === 'sample' && item.parentUid && (
               <>
-                <p>{JSON.stringify(item, null, 2)}</p>
-                <DropDownMenu />
+                <ReactionSchemeDropDownMenu item={item as ExtendedFolder} />
               </>
             )}
             <div className="flex flex-col gap-4">
