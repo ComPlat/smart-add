@@ -171,27 +171,29 @@ export const generateExportJson = async (
 
   const uidToReactionsSolventSample = processedFolders.reduce(
     (acc, folder) => {
-      if (folder.dtype === 'reaction') {
-        const reactionId = sampleReactionUidMap[folder.uid]
-        const childSamples = processedFolders.filter(
-          (sampleFolder) =>
-            sampleFolder.fullPath.startsWith(folder.fullPath + '/') &&
-            sampleFolder.dtype === 'sample',
-        )
+      if (folder.dtype !== 'reaction') return acc
 
-        childSamples.forEach((sampleFolder) => {
-          const reactionsSolventSampleId = v4()
-          acc[reactionsSolventSampleId] = {
-            ...reactionsSolventSampleSchema.parse({
-              ...reactionsSolventSampleTemplate,
-              reaction_id: reactionId,
-              sample_id: sampleReactionUidMap[sampleFolder.uid],
-              created_at: currentDate,
-              updated_at: currentDate,
-            }),
-          }
-        })
-      }
+      const reactionId = sampleReactionUidMap[folder.uid]
+      const childSamples = processedFolders.filter(
+        (sampleFolder) =>
+          sampleFolder.fullPath.startsWith(folder.fullPath + '/') &&
+          sampleFolder.dtype === 'sample',
+      )
+
+      childSamples.forEach((sampleFolder) => {
+        const reactionsSolventSampleId = v4()
+        const newReactionSolventSample = {
+          ...reactionsSolventSampleSchema.parse({
+            ...reactionsSolventSampleTemplate,
+            reaction_id: reactionId,
+            sample_id: sampleReactionUidMap[sampleFolder.uid],
+            created_at: currentDate,
+            updated_at: currentDate,
+          }),
+        }
+        acc[reactionsSolventSampleId] = newReactionSolventSample
+      })
+
       return acc
     },
     {} as Record<string, ReactionsSolventSample>,
