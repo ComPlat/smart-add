@@ -11,12 +11,15 @@ import {
   collectionsSampleTemplate,
   moleculeTemplate,
   reactionTemplate,
+  reactionsSolventSampleTemplate,
   sampleTemplate,
 } from './templates'
 import {
+  ReactionsSolventSample,
   moleculeNameSchema,
   moleculeSchema,
   reactionSchema,
+  reactionsSolventSampleSchema,
   sampleSchema,
 } from './zodSchemes'
 
@@ -166,6 +169,34 @@ export const generateExportJson = async (
     {},
   )
 
+  const uidToReactionsSolventSample = processedFolders.reduce(
+    (acc, folder) => {
+      if (folder.dtype === 'reaction') {
+        const reactionId = sampleReactionUidMap[folder.uid]
+        const childSamples = processedFolders.filter(
+          (sampleFolder) =>
+            sampleFolder.fullPath.startsWith(folder.fullPath + '/') &&
+            sampleFolder.dtype === 'sample',
+        )
+
+        childSamples.forEach((sampleFolder) => {
+          const reactionsSolventSampleId = v4()
+          acc[reactionsSolventSampleId] = {
+            ...reactionsSolventSampleSchema.parse({
+              ...reactionsSolventSampleTemplate,
+              reaction_id: reactionId,
+              sample_id: sampleReactionUidMap[sampleFolder.uid],
+              created_at: currentDate,
+              updated_at: currentDate,
+            }),
+          }
+        })
+      }
+      return acc
+    },
+    {} as Record<string, ReactionsSolventSample>,
+  )
+
   const container = Container({
     assignedFolders,
     currentDate,
@@ -193,6 +224,7 @@ export const generateExportJson = async (
     Attachment: attachments,
     Reaction: uidToReaction,
     CollectionsReaction: uidToCollectionsReaction,
+    ReactionsSolventSample: uidToReactionsSolventSample,
   }
 
   return exportJson

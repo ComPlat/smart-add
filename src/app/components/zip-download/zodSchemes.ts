@@ -431,6 +431,21 @@ export type SampleAnalysesWorksheetTable = z.infer<
   typeof sampleAnalysesTableSchema
 >
 
+export const reactionsSolventSampleSchema = z.object({
+  reaction_id: uuidSchema,
+  sample_id: uuidSchema,
+  reference: z.boolean(),
+  equivalent: nullableNumber,
+  position: z.number(),
+  waste: z.boolean(),
+  coefficient: z.number(),
+  deleted_at: z.null(),
+  show_label: z.boolean(),
+})
+export type ReactionsSolventSample = z.infer<
+  typeof reactionsSolventSampleSchema
+>
+
 const allSchemas = [
   uuidSchema,
   nullableString,

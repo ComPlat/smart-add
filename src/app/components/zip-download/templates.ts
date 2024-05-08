@@ -325,3 +325,15 @@ export const literatureTemplate = {
   },
   doi: '',
 }
+
+export const reactionsSolventSampleTemplate = {
+  reaction_id: null,
+  sample_id: null,
+  reference: false,
+  equivalent: null,
+  position: 0,
+  waste: false,
+  coefficient: 0,
+  deleted_at: null,
+  show_label: false,
+}
