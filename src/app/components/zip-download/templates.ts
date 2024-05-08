@@ -1,3 +1,5 @@
+import { Sample } from './zodSchemes'
+
 /* eslint-disable perfectionist/sort-objects */
 export const reactionSampleTemplate = {
   reaction_id: null,
@@ -31,12 +33,12 @@ export const collectionTemplate = {
   element_detail_level: 0,
 }
 
-export const sampleTemplate = {
+export const sampleTemplate: Sample = {
   name: null,
   target_amount_value: null,
   target_amount_unit: null,
-  created_at: null,
-  updated_at: null,
+  created_at: '',
+  updated_at: '',
   description: null,
   molecule_id: null,
   molfile: null,
@@ -189,7 +191,7 @@ export const collectionsReactionTemplate = {
 export const wellplateTemplate = {
   name: '',
   size: 0,
-  description: { ops: [] },
+  description: null,
   created_at: null,
   updated_at: null,
   deleted_at: null,
@@ -214,7 +216,7 @@ export const wellTemplate = {
 }
 
 export const screenTemplate = {
-  description: { ops: [] },
+  description: null,
   name: '',
   result: '',
   collaborator: '',
@@ -239,7 +241,7 @@ export const screensWellplateTemplate = {
 
 export const researchPlanTemplate = {
   name: '',
-  description: { ops: [] },
+  description: null,
   sdf_file: '',
   svg_file: '',
   created_by: null,

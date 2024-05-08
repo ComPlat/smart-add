@@ -1,5 +1,6 @@
 /* eslint-disable perfectionist/sort-objects */
-import { z } from 'zod'
+import { Metadata } from '@/database/db'
+import { ZodObject, ZodRawShape, z } from 'zod'
 
 const uuidSchema = z.string().nullable()
 const nullableString = z.string().nullable()
@@ -7,6 +8,21 @@ const nullableNumber = z.number().nullable()
 
 export const datetimeSchema = z.string().datetime()
 export type DateTime = z.infer<typeof datetimeSchema>
+
+const temperatureObjectSchema = z.object({
+  data: z.array(z.any()),
+  userText: nullableString,
+  valueUnit: nullableString,
+})
+export type TemperatureObject = z.infer<typeof temperatureObjectSchema>
+
+const textObjectSchema = z.object({
+  ops: z.array(z.object({ insert: z.string() })).default([{ insert: '\n' }]),
+})
+export type TextObject = z.infer<typeof textObjectSchema>
+
+const arraySchema = z.array(z.union([z.string(), z.number()]))
+export type ArrayType = z.infer<typeof arraySchema>
 
 export const reactionSampleSchema = z.object({
   reaction_id: uuidSchema,
@@ -49,16 +65,17 @@ export const sampleSchema = z.object({
   created_at: datetimeSchema,
   updated_at: datetimeSchema,
   description: nullableString,
-  molecule_id: uuidSchema.nullable(),
+  molecule_id: uuidSchema,
   molfile: nullableString,
   purity: nullableNumber,
   deprecated_solvent: nullableString,
+  dry_solvent: z.boolean(),
   impurities: nullableString,
   location: nullableString,
   is_top_secret: z.boolean(),
   ancestry: nullableString,
   external_label: nullableString,
-  created_by: uuidSchema.nullable(),
+  created_by: uuidSchema,
   short_label: nullableString,
   real_amount_value: nullableNumber,
   real_amount_unit: nullableString,
@@ -68,8 +85,8 @@ export const sampleSchema = z.object({
   user_id: uuidSchema,
   identifier: nullableString,
   density: nullableNumber,
-  melting_point: z.union([z.number(), z.string()]).nullable(),
-  boiling_point: z.union([z.number(), z.string()]).nullable(),
+  melting_point: nullableString,
+  boiling_point: nullableString,
   fingerprint_id: uuidSchema,
   xref: z.any().nullable(),
   molarity_value: nullableNumber,
@@ -143,7 +160,7 @@ export type Molecule = z.infer<typeof moleculeSchema>
 export const moleculeNameSchema = z.object({
   molecule_id: uuidSchema,
   user_id: uuidSchema,
-  description: z.string(),
+  description: nullableString,
   name: z.string(),
   deleted_at: z.null(),
   created_at: datetimeSchema,
@@ -160,20 +177,6 @@ export const residueSchema = z.object({
 })
 export type Residue = z.infer<typeof residueSchema>
 
-const textObjectSchema = z.object({
-  ops: z.array(z.object({ insert: z.string() })).default([{ insert: '\n' }]),
-})
-
-export type TextObject = z.infer<typeof textObjectSchema>
-
-const temperatureObjectSchema = z.object({
-  data: z.array(z.any()),
-  userText: nullableString,
-  valueUnit: nullableString,
-})
-
-export type TemperatureObject = z.infer<typeof temperatureObjectSchema>
-
 export const collectionsReactionSchema = z.object({
   collection_id: uuidSchema,
   reaction_id: uuidSchema,
@@ -184,7 +187,7 @@ export type CollectionsReaction = z.infer<typeof collectionsReactionSchema>
 export const wellplateSchema = z.object({
   name: z.string(),
   size: z.number(),
-  description: textObjectSchema,
+  description: nullableString,
   created_at: datetimeSchema,
   updated_at: datetimeSchema,
   deleted_at: z.null(),
@@ -212,7 +215,7 @@ export const wellSchema = z.object({
 export type Well = z.infer<typeof wellSchema>
 
 export const screenSchema = z.object({
-  description: textObjectSchema,
+  description: nullableString,
   name: z.string(),
   result: z.string(),
   collaborator: z.string(),
@@ -240,7 +243,7 @@ export type ScreensWellplate = z.infer<typeof screensWellplateSchema>
 
 export const researchPlanSchema = z.object({
   name: z.string(),
-  description: textObjectSchema,
+  description: nullableString,
   sdf_file: z.string(),
   svg_file: z.string(),
   created_by: uuidSchema,
@@ -331,18 +334,14 @@ export const literatureSchema = z.object({
 })
 export type Literature = z.infer<typeof literatureSchema>
 
-const arraySchema = z.array(z.union([z.string(), z.number()]))
-
-export type ArrayType = z.infer<typeof arraySchema>
-
 export const reactionSchema = z.object({
   name: nullableString,
   created_at: datetimeSchema,
   updated_at: datetimeSchema,
-  description: textObjectSchema.nullable(),
+  description: nullableString,
   timestamp_start: nullableString,
   timestamp_stop: nullableString,
-  observation: textObjectSchema.nullable(),
+  observation: nullableString,
   purification: arraySchema,
   dangerous_products: arraySchema,
   tlc_solvents: nullableString,
@@ -431,3 +430,48 @@ export const sampleAnalysesTableSchema = z.object({
 export type SampleAnalysesWorksheetTable = z.infer<
   typeof sampleAnalysesTableSchema
 >
+
+const allSchemas = [
+  uuidSchema,
+  nullableString,
+  datetimeSchema,
+  reactionSampleSchema,
+  collectionSchema,
+  sampleSchema,
+  collectionsSampleSchema,
+  fingerprintSchema,
+  moleculeSchema,
+  moleculeNameSchema,
+  residueSchema,
+  nullableString,
+  temperatureObjectSchema,
+  collectionsReactionSchema,
+  wellplateSchema,
+  collectionsWellplateSchema,
+  wellSchema,
+  screenSchema,
+  collectionsScreenSchema,
+  screensWellplateSchema,
+  researchPlanSchema,
+  collectionsResearchPlanSchema,
+  containerSchema,
+  attachmentSchema,
+  literalSchema,
+  literatureSchema,
+  arraySchema,
+  reactionSchema,
+  reactionsWorksheetTableSchema,
+  sampleWorksheetTableSchema,
+  sampleAnalysesTableSchema,
+]
+
+export const determineSchema = <T extends ZodRawShape>(
+  metadata: Metadata,
+): ZodObject<T> | undefined => {
+  const schema = allSchemas.find((schema) => {
+    const result = schema.safeParse(metadata)
+    return result.success && schema instanceof ZodObject
+  }) as ZodObject<T> | undefined
+
+  return schema
+}

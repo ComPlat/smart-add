@@ -21,7 +21,6 @@ const getMetadata = (
     case 'sample':
       return {
         ...sampleTemplate,
-        ancestry: parent_id,
         created_at: currentDate,
         name,
         updated_at: currentDate,
@@ -29,7 +28,6 @@ const getMetadata = (
     case 'reaction':
       return {
         ...reactionTemplate,
-        ancestry: parent_id,
         created_at: currentDate,
         name,
         updated_at: currentDate,
