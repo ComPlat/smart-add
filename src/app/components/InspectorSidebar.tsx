@@ -7,213 +7,34 @@ import {
 } from '@/database/db'
 import { retrieveTree } from '@/helper/retrieveTree'
 import { FileNode } from '@/helper/types'
-import { isReadonly } from '@/helper/utils'
+import { identifyType, isReadonly } from '@/helper/utils'
 import { useLiveQuery } from 'dexie-react-hooks'
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { TreeItemIndex } from 'react-complex-tree'
+import { ZodObject, ZodRawShape } from 'zod'
 
 import renameFolder from './context-menu/renameFolder'
-import { datetimeSchema } from './zip-download/zodSchemes'
+import ArrayInputField from './input-components/ArrayInputField'
+import CheckboxField from './input-components/CheckboxField'
+import DateInputField from './input-components/DateInputField'
+import DropDownMenu from './input-components/DropDownMenu'
+import NumberInputField from './input-components/NumberInputField'
+import TextInputField from './input-components/TextInputField'
+import { datetimeSchema, determineSchema } from './zip-download/zodSchemes'
 
-const formatLabel = (text: string): string =>
-  text
-    .split('_')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
-
-interface TextInputFieldProps {
-  autoFocus?: boolean
-  className?: string
-  id?: string
-  name: string
-  onChange: React.ChangeEventHandler<HTMLInputElement>
-  placeholder?: string
-  readonly: boolean
-  value?: string
-}
-
-const TextInputField: React.FC<TextInputFieldProps> = ({
-  autoFocus = false,
-  className = '',
-  id,
-  name,
-  onChange,
-  placeholder = 'Enter text...',
-  readonly = false,
-  value = '',
-}) => {
-  return (
-    <label className="flex flex-col text-sm">
-      <p className="font-bold">{formatLabel(name)}</p>
-      <input
-        className={`mt-2 rounded border px-2 py-1 outline-gray-200 focus:border-kit-primary-full
-        ${
-          readonly
-            ? 'cursor-not-allowed bg-gray-100 hover:border-inherit'
-            : 'bg-white hover:border-kit-primary-full'
-        } ${className}`}
-        autoFocus={autoFocus}
-        id={id}
-        name={name}
-        onChange={onChange}
-        placeholder={placeholder}
-        readOnly={readonly}
-        type="text"
-        value={value}
-      />
-    </label>
-  )
-}
-
-interface NumberInputFieldProps {
-  autoFocus?: boolean
-  className?: string
-  id?: string
-  name: string
-  onChange: React.ChangeEventHandler<HTMLInputElement>
-  placeholder?: string
-  readonly?: boolean
-  value?: number
-}
-
-const NumberInputField: React.FC<NumberInputFieldProps> = ({
-  autoFocus = false,
-  className = '',
-  id,
-  name,
-  onChange,
-  readonly = false,
-  value,
-}) => (
-  <label className="flex flex-col text-sm">
-    <p className="font-bold">{formatLabel(name)}</p>
-    <input
-      className={`mt-2 rounded border px-2 py-1 outline-gray-200 focus:border-kit-primary-full
-      ${
-        readonly
-          ? 'cursor-not-allowed bg-gray-100 hover:border-inherit'
-          : 'bg-white hover:border-kit-primary-full'
-      } ${className}`}
-      autoFocus={autoFocus}
-      id={id}
-      name={name}
-      onChange={onChange}
-      readOnly={readonly}
-      type="number"
-      value={value || ''}
-    />
-  </label>
-)
-
-interface DateInputFieldProps {
-  autoFocus?: boolean
-  className?: string
-  id?: string
-  name: string
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  raw?: boolean
-  readonly?: boolean
-  value?: string
-}
-
-const DateInputField: React.FC<DateInputFieldProps> = ({
-  autoFocus = false,
-  className = '',
-  id,
-  name,
-  onChange,
-  readonly = false,
-  value = '',
-}) => {
-  const formattedValue = value ? value.slice(0, -1) : ''
-
-  return (
-    <label className="flex flex-col text-sm">
-      <p className="font-bold">{formatLabel(name)}</p>
-      <input
-        className={`mt-2 rounded border px-2 py-1 outline-gray-200 focus:border-kit-primary-full
-        ${
-          readonly
-            ? 'cursor-not-allowed bg-gray-100 hover:border-inherit'
-            : 'bg-white hover:border-kit-primary-full'
-        } ${className}`}
-        autoFocus={autoFocus}
-        id={id}
-        name={name}
-        onChange={onChange}
-        readOnly={readonly}
-        type="datetime-local"
-        value={formattedValue}
-      />
-    </label>
-  )
-}
-
-interface CheckboxFieldProps {
-  checked: boolean
-  className?: string
-  disabled?: boolean
-  id?: string
-  name: string
-  onChange: React.ChangeEventHandler<HTMLInputElement>
-}
-
-const CheckboxField: React.FC<CheckboxFieldProps> = ({
-  checked = false,
-  className = '',
-  disabled = false,
-  id,
-  name,
-  onChange,
-}) => (
-  <label className="flex gap-2">
-    <input
-      checked={checked}
-      className={`rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
-      disabled={disabled}
-      id={id}
-      name={name}
-      onChange={onChange}
-      type="checkbox"
-    />
-    <p className="text-sm">{formatLabel(name)}</p>
-  </label>
-)
-
-interface DropDownMenuProps {
-  className?: string
-}
-const DropDownMenu = ({ className }: DropDownMenuProps) => (
-  <label className="flex flex-col text-sm">
-    <p className="font-bold">{formatLabel('Reaction Scheme Type')}</p>
-    <select
-      className={`mt-2 rounded border px-2 py-1 outline-gray-200 focus:border-kit-primary-full
-${'bg-white hover:border-kit-primary-full'} ${className}`}
-      id="reaction_scheme_type"
-      name="reaction_scheme_type"
-    >
-      <optgroup label="No type">
-        <option value="none">none</option>
-      </optgroup>
-      <optgroup label="Reaction Scheme Types">
-        <option value="starting_material">Starting material</option>
-        <option value="reactant">Reactant</option>
-        <option value="product">Product</option>
-      </optgroup>
-    </select>
-  </label>
-)
-
-function determineInputComponent(
+function determineInputComponent<T extends ZodRawShape>(
   key: string,
   value: MetadataValue,
   handleInputChange: (e: ChangeEvent<HTMLInputElement>, key: string) => void,
+  handleArrayChange: (newValues: string[], key: string) => Promise<void>,
+  schema?: ZodObject<T>,
 ) {
-  const readonly = isReadonly(key)
-  const inputType = typeof value
+  if (!schema) return
 
-  // TODO: Add support for array, temperature, and text objects
-  switch (inputType) {
+  const [type] = identifyType(schema, key)
+  const readonly = isReadonly(key)
+
+  switch (type) {
     case 'string':
       if (datetimeSchema.safeParse(value).success) {
         return (
@@ -223,7 +44,7 @@ function determineInputComponent(
             onChange={(e) => handleInputChange(e, key)}
             raw={false}
             readonly={readonly}
-            value={value as string}
+            value={(value as string) || ''}
           />
         )
       } else {
@@ -233,7 +54,7 @@ function determineInputComponent(
             name={key}
             onChange={(e) => handleInputChange(e, key)}
             readonly={readonly}
-            value={value as string}
+            value={(value as string) || ''}
           />
         )
       }
@@ -250,21 +71,55 @@ function determineInputComponent(
     case 'boolean':
       return (
         <CheckboxField
-          checked={value as boolean}
+          checked={(value as boolean) || false}
           disabled={readonly}
           key={key}
           name={key}
           onChange={(e) => handleInputChange(e, key)}
         />
       )
+    // TODO: Implement enum and object input components
+    //        temperature, and text objects
+    case 'enum':
+      return (
+        <TextInputField
+          key={key}
+          name={key}
+          onChange={(e) => handleInputChange(e, key)}
+          readonly={true}
+          value={'TODO: Enum/Select'}
+        />
+      )
+    case 'object':
+      return (
+        <TextInputField
+          key={key}
+          name={key}
+          onChange={(e) => handleInputChange(e, key)}
+          readonly={true}
+          value={'TODO: Object'}
+        />
+      )
+    case 'array':
+      return (
+        <ArrayInputField
+          key={key}
+          name={key}
+          onChange={(newValues) => handleArrayChange(newValues, key)}
+          readonly={readonly}
+          values={(value as string[]) || []}
+        />
+      )
+    case 'null':
+      return
     default:
       return (
         <TextInputField
           key={key}
           name={key}
           onChange={(e) => handleInputChange(e, key)}
-          readonly={readonly}
-          value=""
+          readonly={true}
+          value={`Unknown type: ${type}`}
         />
       )
   }
@@ -323,24 +178,16 @@ const InspectorSidebar = ({
       case 'checkbox':
         return target.checked
       case 'number':
-        return target.valueAsNumber
+        return Number(target.value)
       default:
         return target.value
     }
   }
 
-  const handleInputChange = async (
-    e: ChangeEvent<HTMLInputElement>,
+  const updateMetadata = async (
     key: string,
+    newValue: boolean | number | string | string[] | undefined,
   ) => {
-    const target = e.target
-    let newValue = extractValue(target)
-
-    if (typeof newValue === 'string') {
-      const parsedDate = new Date(newValue)
-      if (!isNaN(parsedDate.getTime())) newValue += 'Z'
-    }
-
     if (!item || !item.fullPath) return
 
     const fullPath = item.fullPath
@@ -353,7 +200,6 @@ const InspectorSidebar = ({
           if (!dbItem) return
 
           let updatedMetadata = { ...dbItem.metadata, [key]: newValue }
-
           let updatedName = item.name
           if (key === 'name') {
             updatedName = newValue as string
@@ -373,22 +219,40 @@ const InspectorSidebar = ({
           })
 
           renameFolder(item as ExtendedFolder, tree, updatedName)
-          item.name !== updatedName && handleClose()
+          if (item.name !== updatedName) handleClose()
 
-          setItem((prevItem) => {
-            if (!prevItem) return null
-
-            return {
-              ...prevItem,
-              metadata: updatedMetadata,
-              name: updatedName,
-            } as ExtendedFile | ExtendedFolder
-          })
+          setItem(
+            (prevItem) =>
+              ({
+                ...prevItem,
+                metadata: updatedMetadata,
+                name: updatedName,
+              }) as ExtendedFile | ExtendedFolder,
+          )
         },
       )
     } catch (error) {
       console.error('Failed to update item in Dexie DB', error)
     }
+  }
+
+  const handleInputChange = async (
+    e: ChangeEvent<HTMLInputElement>,
+    key: string,
+  ) => {
+    const target = e.target
+    let newValue = extractValue(target)
+
+    if (typeof newValue === 'string') {
+      const parsedDate = new Date(newValue)
+      if (!isNaN(parsedDate.getTime())) newValue += 'Z'
+    }
+
+    await updateMetadata(key, newValue)
+  }
+
+  const handleArrayChange = async (newValues: string[], key: string) => {
+    await updateMetadata(key, newValues)
   }
 
   const getItemName = (item: ExtendedFile | ExtendedFolder) =>
@@ -429,12 +293,21 @@ const InspectorSidebar = ({
             </button>
             <p className="font-bold">{getItemName(item)}</p>
             {(item as ExtendedFolder).dtype === 'sample' && item.parentUid && (
-              <DropDownMenu />
+              <>
+                <p>{JSON.stringify(item, null, 2)}</p>
+                <DropDownMenu />
+              </>
             )}
             <div className="flex flex-col gap-4">
               {item.metadata &&
                 Object.entries(item.metadata).map(([key, value]) =>
-                  determineInputComponent(key, value, handleInputChange),
+                  determineInputComponent(
+                    key,
+                    value,
+                    handleInputChange,
+                    handleArrayChange,
+                    item.metadata ? determineSchema(item.metadata) : undefined,
+                  ),
                 )}
             </div>
           </div>

@@ -1,12 +1,11 @@
 /* eslint-disable perfectionist/sort-objects */
 import { ExtendedFile, ExtendedFolder } from '@/database/db'
-import { generateMd5Checksum } from '@/helper/cryptographicTools'
 import { v4 } from 'uuid'
 
 import { Ancestry } from './Ancestry'
+import { Attachment } from './attachment'
 import { Container } from './container'
 import {
-  attachmentTemplate,
   collectionTemplate,
   collectionsReactionTemplate,
   collectionsSampleTemplate,
@@ -15,8 +14,6 @@ import {
   sampleTemplate,
 } from './templates'
 import {
-  Attachment,
-  attachmentSchema,
   moleculeNameSchema,
   moleculeSchema,
   reactionSchema,
@@ -170,7 +167,6 @@ export const generateExportJson = async (
   )
 
   const container = Container({
-    assignedFiles,
     assignedFolders,
     currentDate,
     processedFolders,
@@ -179,63 +175,12 @@ export const generateExportJson = async (
     user_id,
   })
 
-  const uidToAttachment = await assignedFiles.reduce(
-    async (previousAttachment, file) => {
-      const attachableId =
-        Object.entries(Container).find(
-          ([, container]) =>
-            container.parent_id === uidMap[file.parentUid] &&
-            container.container_type === 'dataset',
-        )?.[0] || ''
-
-      const attachmentId = v4()
-      const filename = file.file.name
-      const identifier = file.name.split('.')[0]
-      const fileType = file.file.type
-      const attachableType = 'Container'
-      const checksum = await generateMd5Checksum(file.file)
-      const key = file.uid
-      const filesize = file.file.size
-
-      const attachmentData = {
-        id: `2/${identifier}`,
-        metadata: {
-          filename: `${key}${file.extension && `.${file.extension}`}`,
-          md5: checksum,
-          mime_type: fileType,
-          size: filesize,
-        },
-        storage: 'store',
-      }
-
-      const attachment = {
-        [attachmentId]: {
-          ...attachmentSchema.parse({
-            ...attachmentTemplate,
-            created_at: currentDate,
-            updated_at: currentDate,
-            attachable_id: attachableId,
-            filename,
-            identifier,
-            content_type: fileType,
-            attachable_type: attachableType,
-            checksum,
-            aasm_state: 'non_jcamp',
-            attachment_data: attachmentData,
-            filesize,
-            key,
-            con_state: 9,
-            edit_state: 0,
-            created_by: '345c87e6-88a0-440a-a9c8-dcc78cc3f85b',
-            created_for: '345c87e6-88a0-440a-a9c8-dcc78cc3f85b',
-          }),
-        },
-      }
-
-      return { ...previousAttachment, ...attachment }
-    },
-    {} as Promise<Attachment>,
-  )
+  const attachments = await Attachment({
+    assignedFiles,
+    container,
+    currentDate,
+    uidMap,
+  })
 
   const exportJson = {
     Collection: uidToCollection,
@@ -245,7 +190,7 @@ export const generateExportJson = async (
     Molecule: uidToMolecule,
     MoleculeName: uidToMoleculeName,
     Container: container,
-    Attachment: uidToAttachment,
+    Attachment: attachments,
     Reaction: uidToReaction,
     CollectionsReaction: uidToCollectionsReaction,
   }
