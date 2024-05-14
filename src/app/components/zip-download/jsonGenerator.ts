@@ -5,21 +5,19 @@ import { v4 } from 'uuid'
 import { Ancestry } from './Ancestry'
 import { Attachment } from './attachment'
 import { Container } from './container'
+import { createUidToReactionsSolventSample } from './reactionsSolventSample'
 import {
   collectionTemplate,
   collectionsReactionTemplate,
   collectionsSampleTemplate,
   moleculeTemplate,
   reactionTemplate,
-  reactionsSolventSampleTemplate,
   sampleTemplate,
 } from './templates'
 import {
-  ReactionsSolventSample,
   moleculeNameSchema,
   moleculeSchema,
   reactionSchema,
-  reactionsSolventSampleSchema,
   sampleSchema,
 } from './zodSchemes'
 
@@ -169,39 +167,11 @@ export const generateExportJson = async (
     {},
   )
 
-  const uidToReactionsSolventSample = processedFolders.reduce(
-    (acc, folder) => {
-      if (folder.dtype !== 'reaction') return acc
-
-      const reactionId = sampleReactionUidMap[folder.uid]
-      const childSamples = processedFolders.filter(
-        (sampleFolder) =>
-          sampleFolder.fullPath.startsWith(folder.fullPath + '/') &&
-          sampleFolder.dtype === 'sample',
-      )
-
-      const childSampleResults = childSamples.reduce(
-        (innerAcc, sampleFolder) => {
-          const reactionsSolventSampleId = v4()
-          const newReactionSolventSample = {
-            ...reactionsSolventSampleSchema.parse({
-              ...reactionsSolventSampleTemplate,
-              reaction_id: reactionId,
-              sample_id: sampleReactionUidMap[sampleFolder.uid],
-              created_at: currentDate,
-              updated_at: currentDate,
-            }),
-          }
-          innerAcc[reactionsSolventSampleId] = newReactionSolventSample
-          return innerAcc
-        },
-        acc,
-      )
-
-      return childSampleResults
-    },
-    {} as Record<string, ReactionsSolventSample>,
-  )
+  const uidToReactionsSolventSample = createUidToReactionsSolventSample({
+    processedFolders: processedFolders,
+    sampleReactionUidMap: sampleReactionUidMap,
+    currentDate: currentDate,
+  })
 
   const container = Container({
     assignedFolders,
