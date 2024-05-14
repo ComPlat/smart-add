@@ -180,21 +180,25 @@ export const generateExportJson = async (
           sampleFolder.dtype === 'sample',
       )
 
-      childSamples.forEach((sampleFolder) => {
-        const reactionsSolventSampleId = v4()
-        const newReactionSolventSample = {
-          ...reactionsSolventSampleSchema.parse({
-            ...reactionsSolventSampleTemplate,
-            reaction_id: reactionId,
-            sample_id: sampleReactionUidMap[sampleFolder.uid],
-            created_at: currentDate,
-            updated_at: currentDate,
-          }),
-        }
-        acc[reactionsSolventSampleId] = newReactionSolventSample
-      })
+      const childSampleResults = childSamples.reduce(
+        (innerAcc, sampleFolder) => {
+          const reactionsSolventSampleId = v4()
+          const newReactionSolventSample = {
+            ...reactionsSolventSampleSchema.parse({
+              ...reactionsSolventSampleTemplate,
+              reaction_id: reactionId,
+              sample_id: sampleReactionUidMap[sampleFolder.uid],
+              created_at: currentDate,
+              updated_at: currentDate,
+            }),
+          }
+          innerAcc[reactionsSolventSampleId] = newReactionSolventSample
+          return innerAcc
+        },
+        acc,
+      )
 
-      return acc
+      return childSampleResults
     },
     {} as Record<string, ReactionsSolventSample>,
   )
