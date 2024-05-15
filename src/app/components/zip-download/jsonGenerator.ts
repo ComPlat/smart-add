@@ -5,6 +5,7 @@ import { v4 } from 'uuid'
 import { Ancestry } from './Ancestry'
 import { Attachment } from './attachment'
 import { Container } from './container'
+import { UidToReactionsSolventSample } from './reactionsSolventSample'
 import {
   collectionTemplate,
   collectionsReactionTemplate,
@@ -166,6 +167,12 @@ export const generateExportJson = async (
     {},
   )
 
+  const uidToReactionsSolventSample = UidToReactionsSolventSample({
+    processedFolders: processedFolders,
+    sampleReactionUidMap: sampleReactionUidMap,
+    currentDate: currentDate,
+  })
+
   const container = Container({
     assignedFolders,
     currentDate,
@@ -193,6 +200,7 @@ export const generateExportJson = async (
     Attachment: attachments,
     Reaction: uidToReaction,
     CollectionsReaction: uidToCollectionsReaction,
+    ReactionsSolventSample: uidToReactionsSolventSample,
   }
 
   return exportJson
