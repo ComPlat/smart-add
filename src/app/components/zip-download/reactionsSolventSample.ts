@@ -19,8 +19,8 @@ export const UidToReactionsSolventSample = ({
   sampleReactionUidMap,
 }: ReactionsSolventSampleParams): Record<string, ReactionsSolventSample> => {
   return processedFolders.reduce(
-    (acc, folder) => {
-      if (folder.dtype !== 'reaction') return acc
+    (uidToReactionsSolventSample, folder) => {
+      if (folder.dtype !== 'reaction') return uidToReactionsSolventSample
 
       const reactionId = sampleReactionUidMap[folder.uid]
       const childSamples = processedFolders.filter(
@@ -29,20 +29,24 @@ export const UidToReactionsSolventSample = ({
           sampleFolder.dtype === 'sample',
       )
 
-      return childSamples.reduce((innerAcc, sampleFolder) => {
-        const reactionsSolventSampleId = v4()
-        const newReactionSolventSample = {
-          ...reactionsSolventSampleSchema.parse({
-            ...reactionsSolventSampleTemplate,
-            created_at: currentDate,
-            reaction_id: reactionId,
-            sample_id: sampleReactionUidMap[sampleFolder.uid],
-            updated_at: currentDate,
-          }),
-        }
-        innerAcc[reactionsSolventSampleId] = newReactionSolventSample
-        return innerAcc
-      }, acc)
+      return childSamples.reduce(
+        (innerUidToReactionsSolventSample, sampleFolder) => {
+          const reactionsSolventSampleId = v4()
+          const newReactionSolventSample = {
+            ...reactionsSolventSampleSchema.parse({
+              ...reactionsSolventSampleTemplate,
+              created_at: currentDate,
+              reaction_id: reactionId,
+              sample_id: sampleReactionUidMap[sampleFolder.uid],
+              updated_at: currentDate,
+            }),
+          }
+          innerUidToReactionsSolventSample[reactionsSolventSampleId] =
+            newReactionSolventSample
+          return innerUidToReactionsSolventSample
+        },
+        uidToReactionsSolventSample,
+      )
     },
     {} as Record<string, ReactionsSolventSample>,
   )
