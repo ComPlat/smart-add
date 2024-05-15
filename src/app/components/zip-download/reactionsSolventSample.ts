@@ -13,7 +13,7 @@ interface ReactionsSolventSampleParams {
   sampleReactionUidMap: Record<string, string>
 }
 
-export const createUidToReactionsSolventSample = ({
+export const UidToReactionsSolventSample = ({
   currentDate,
   processedFolders,
   sampleReactionUidMap,
