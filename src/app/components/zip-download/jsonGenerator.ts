@@ -5,6 +5,9 @@ import { v4 } from 'uuid'
 import { Ancestry } from './Ancestry'
 import { Attachment } from './attachment'
 import { Container } from './container'
+import { ReactionsProductSample } from './reaction-scheme-types/reactionProductSample'
+import { ReactionsReactantSample } from './reaction-scheme-types/reactionReactantSample'
+import { ReactionsStartingMaterialSample } from './reaction-scheme-types/reactionStartingMaterialSample'
 import {
   collectionTemplate,
   collectionsReactionTemplate,
@@ -182,6 +185,17 @@ export const generateExportJson = async (
     uidMap,
   })
 
+  const startingMaterials = ReactionsStartingMaterialSample({
+    assignedFolders,
+    uidMap,
+  })
+
+  const reactants = ReactionsReactantSample({ assignedFolders, uidMap })
+
+  const products = ReactionsProductSample({ assignedFolders, uidMap })
+
+  console.log(startingMaterials)
+
   const exportJson = {
     Collection: uidToCollection,
     Sample: uidToSample,
@@ -193,6 +207,9 @@ export const generateExportJson = async (
     Attachment: attachments,
     Reaction: uidToReaction,
     CollectionsReaction: uidToCollectionsReaction,
+    ReactionsStartingMaterialSample: startingMaterials,
+    ReactionsReactantSample: reactants,
+    ReactionsProductSample: products,
   }
 
   return exportJson

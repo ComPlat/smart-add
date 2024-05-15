@@ -32,6 +32,7 @@ const ReactionSchemeDropDownMenu = ({
 
   const handleOnChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (!item) return
+
     const fullPath = item.fullPath
     const value = e.target.value as ReactionSchemeType
 
