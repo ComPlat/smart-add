@@ -18,14 +18,17 @@ export const ReactionsStartingMaterialSample = ({
 }: ReactionsStartingMaterialSampleParams) => {
   const allowedFolders = assignedFolders.filter(
     (folder) =>
-      folder.parentUid && folder.reactionSchemeType === 'starting-material',
+      folder.parentUid && folder.reactionSchemeType === 'startingMaterial',
   )
 
-  return allowedFolders.reduce((acc, folder) => {
+  return allowedFolders.reduce((acc, folder, index) => {
     const startingMaterial = {
       [v4()]: reactionSchemeSchema.parse({
         ...reactionSchemeTemplate,
+        equivalent: index === 0 ? 1 : 0,
+        position: index,
         reaction_id: uidMap[folder.parentUid] || null,
+        reference: index === 0 ? true : false,
         sample_id: uidMap[folder.uid] || null,
       }),
     }

@@ -194,8 +194,6 @@ export const generateExportJson = async (
 
   const products = ReactionsProductSample({ assignedFolders, uidMap })
 
-  console.log(startingMaterials)
-
   const exportJson = {
     Collection: uidToCollection,
     Sample: uidToSample,

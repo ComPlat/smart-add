@@ -20,10 +20,11 @@ export const ReactionsReactantSample = ({
     (folder) => folder.parentUid && folder.reactionSchemeType === 'product',
   )
 
-  return allowedFolders.reduce((acc, folder) => {
+  return allowedFolders.reduce((acc, folder, index) => {
     const reactant = {
       [v4()]: reactionSchemeSchema.parse({
         ...reactionSchemeTemplate,
+        position: index,
         reaction_id: uidMap[folder.parentUid] || null,
         sample_id: uidMap[folder.uid] || null,
       }),

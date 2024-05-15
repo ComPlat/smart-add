@@ -435,7 +435,7 @@ export const reactionSchemeSchema = z.object({
   reaction_id: nullableString,
   sample_id: nullableString,
   reference: z.boolean(),
-  equivalent: nullableString,
+  equivalent: nullableNumber,
   position: nullableNumber,
   deleted_at: z.null(),
   waste: z.boolean(),

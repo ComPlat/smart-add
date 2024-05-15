@@ -61,7 +61,7 @@ const ReactionSchemeDropDownMenu = ({
       >
         <option value="none">None</option>
         <optgroup label="Reaction scheme type">
-          <option value="starting-material">Starting material</option>
+          <option value="startingMaterial">Starting material</option>
           <option value="reactant">Reactant</option>
           <option value="product">Product</option>
         </optgroup>
