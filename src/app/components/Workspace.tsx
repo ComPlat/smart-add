@@ -252,10 +252,7 @@ const Workspace = ({ focusedItem, setFocusedItem }: FocusedItemProps) => {
                   </ul>
                 )}
                 renderTreeContainer={({ children, containerProps }) => (
-                  <div
-                    className="h-auto min-h-full overflow-y-auto"
-                    {...containerProps}
-                  >
+                  <div className="h-auto min-h-full" {...containerProps}>
                     {children}
                   </div>
                 )}
@@ -279,10 +276,7 @@ const Workspace = ({ focusedItem, setFocusedItem }: FocusedItemProps) => {
                 </ul>
               )}
               renderTreeContainer={({ children, containerProps }) => (
-                <div
-                  className="h-auto min-h-full overflow-y-auto"
-                  {...containerProps}
-                >
+                <div className="h-auto min-h-full" {...containerProps}>
                   {children}
                 </div>
               )}
