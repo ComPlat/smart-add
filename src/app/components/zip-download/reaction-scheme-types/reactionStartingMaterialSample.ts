@@ -11,14 +11,10 @@ export const ReactionsStartingMaterialSample = ({
   assignedFolders,
   sampleReactionUidMap,
 }: ReactionSchemeProps) => {
-  console.log(assignedFolders)
-
   const allowedFolders = assignedFolders.filter(
     (folder) =>
       folder.parentUid && folder.reactionSchemeType === 'startingMaterial',
   )
-
-  console.log(allowedFolders)
 
   return allowedFolders.reduce((acc, folder, index) => {
     const startingMaterial = {
