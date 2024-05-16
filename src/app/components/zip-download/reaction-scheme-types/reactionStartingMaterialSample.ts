@@ -1,4 +1,4 @@
-import { ExtendedFolder } from '@/database/db'
+import { ReactionSchemeProps } from '@/types/ReactionSchemeProps'
 import { v4 } from 'uuid'
 
 import { reactionSchemeTemplate } from '../templates'
@@ -7,19 +7,18 @@ import {
   reactionSchemeSchema,
 } from '../zodSchemes'
 
-type ReactionsStartingMaterialSampleParams = {
-  assignedFolders: ExtendedFolder[]
-  uidMap: Record<string, string>
-}
-
 export const ReactionsStartingMaterialSample = ({
   assignedFolders,
-  uidMap,
-}: ReactionsStartingMaterialSampleParams) => {
+  sampleReactionUidMap,
+}: ReactionSchemeProps) => {
+  console.log(assignedFolders)
+
   const allowedFolders = assignedFolders.filter(
     (folder) =>
       folder.parentUid && folder.reactionSchemeType === 'startingMaterial',
   )
+
+  console.log(allowedFolders)
 
   return allowedFolders.reduce((acc, folder, index) => {
     const startingMaterial = {
@@ -27,9 +26,9 @@ export const ReactionsStartingMaterialSample = ({
         ...reactionSchemeTemplate,
         equivalent: index === 0 ? 1 : 0,
         position: index,
-        reaction_id: uidMap[folder.parentUid] || null,
+        reaction_id: sampleReactionUidMap[folder.parentUid] || null,
         reference: index === 0 ? true : false,
-        sample_id: uidMap[folder.uid] || null,
+        sample_id: sampleReactionUidMap[folder.uid] || null,
       }),
     }
 

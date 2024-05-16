@@ -8,6 +8,7 @@ import { Container } from './container'
 import { ReactionsProductSample } from './reaction-scheme-types/reactionProductSample'
 import { ReactionsReactantSample } from './reaction-scheme-types/reactionReactantSample'
 import { ReactionsStartingMaterialSample } from './reaction-scheme-types/reactionStartingMaterialSample'
+import { ReactionsSolventSample } from './reaction-scheme-types/reactionsSolventSample'
 import {
   collectionTemplate,
   collectionsReactionTemplate,
@@ -169,6 +170,11 @@ export const generateExportJson = async (
     {},
   )
 
+  const solvents = ReactionsSolventSample({
+    processedFolders,
+    sampleReactionUidMap,
+  })
+
   const container = Container({
     assignedFolders,
     currentDate,
@@ -187,12 +193,18 @@ export const generateExportJson = async (
 
   const startingMaterials = ReactionsStartingMaterialSample({
     assignedFolders,
-    uidMap,
+    sampleReactionUidMap,
   })
 
-  const reactants = ReactionsReactantSample({ assignedFolders, uidMap })
+  const reactants = ReactionsReactantSample({
+    assignedFolders,
+    sampleReactionUidMap,
+  })
 
-  const products = ReactionsProductSample({ assignedFolders, uidMap })
+  const products = ReactionsProductSample({
+    assignedFolders,
+    sampleReactionUidMap,
+  })
 
   const exportJson = {
     Collection: uidToCollection,
@@ -208,6 +220,7 @@ export const generateExportJson = async (
     ReactionsStartingMaterialSample: startingMaterials,
     ReactionsReactantSample: reactants,
     ReactionsProductSample: products,
+    ReactionsSolventSample: solvents,
   }
 
   return exportJson
