@@ -1,23 +1,21 @@
 import { ExtendedFolder } from '@/database/db'
 import { v4 } from 'uuid'
 
-import { reactionsSolventSampleTemplate } from './templates'
+import { reactionSchemeTemplate } from '../templates'
 import {
-  ReactionsSolventSample,
-  reactionsSolventSampleSchema,
-} from './zodSchemes'
+  ReactionScheme as ReactionSchemeType,
+  reactionSchemeSchema,
+} from '../zodSchemes'
 
 interface ReactionsSolventSampleParams {
-  currentDate: string
   processedFolders: ExtendedFolder[]
   sampleReactionUidMap: Record<string, string>
 }
 
-export const UidToReactionsSolventSample = ({
-  currentDate,
+export const ReactionsSolventSample = ({
   processedFolders,
   sampleReactionUidMap,
-}: ReactionsSolventSampleParams): Record<string, ReactionsSolventSample> => {
+}: ReactionsSolventSampleParams): Record<string, ReactionSchemeType> => {
   return processedFolders.reduce(
     (uidToReactionsSolventSample, folder) => {
       if (folder.dtype !== 'reaction') return uidToReactionsSolventSample
@@ -33,12 +31,10 @@ export const UidToReactionsSolventSample = ({
         (innerUidToReactionsSolventSample, sampleFolder) => {
           const reactionsSolventSampleId = v4()
           const newReactionSolventSample = {
-            ...reactionsSolventSampleSchema.parse({
-              ...reactionsSolventSampleTemplate,
-              created_at: currentDate,
+            ...reactionSchemeSchema.parse({
+              ...reactionSchemeTemplate,
               reaction_id: reactionId,
               sample_id: sampleReactionUidMap[sampleFolder.uid],
-              updated_at: currentDate,
             }),
           }
           innerUidToReactionsSolventSample[reactionsSolventSampleId] =
@@ -48,6 +44,6 @@ export const UidToReactionsSolventSample = ({
         uidToReactionsSolventSample,
       )
     },
-    {} as Record<string, ReactionsSolventSample>,
+    {} as Record<string, ReactionSchemeType>,
   )
 }

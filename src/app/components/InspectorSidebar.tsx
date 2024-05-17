@@ -9,7 +9,7 @@ import { retrieveTree } from '@/helper/retrieveTree'
 import { FileNode } from '@/helper/types'
 import { identifyType, isReadonly } from '@/helper/utils'
 import { useLiveQuery } from 'dexie-react-hooks'
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { TreeItemIndex } from 'react-complex-tree'
 import { ZodObject, ZodRawShape } from 'zod'
 
@@ -18,6 +18,7 @@ import ArrayInputField from './input-components/ArrayInputField'
 import CheckboxField from './input-components/CheckboxField'
 import DateInputField from './input-components/DateInputField'
 import NumberInputField from './input-components/NumberInputField'
+import ReactionSchemeDropDownMenu from './input-components/ReactionSchemeDropDownMenu'
 import TextInputField from './input-components/TextInputField'
 import { datetimeSchema, determineSchema } from './zip-download/zodSchemes'
 
@@ -291,6 +292,9 @@ const InspectorSidebar = ({
               </svg>
             </button>
             <p className="font-bold">{getItemName(item)}</p>
+            {(item as ExtendedFolder).dtype === 'sample' && item.parentUid && (
+              <ReactionSchemeDropDownMenu item={item as ExtendedFolder} />
+            )}
             <div className="flex flex-col gap-4">
               {item.metadata &&
                 Object.entries(item.metadata).map(([key, value]) =>

@@ -95,6 +95,7 @@ const handleCustomRequest = async ({
               isFolder: true,
               name: folder,
               parentUid: '',
+              reactionSchemeType: 'none',
               treeId: targetTreeRoot,
               uid: v4(),
             }) as unknown as Promise<void>
@@ -136,6 +137,7 @@ const handleCustomRequest = async ({
         isFolder: true,
         name,
         parentUid,
+        reactionSchemeType: 'none',
         treeId: targetTreeRoot,
         uid: v4(),
       })
@@ -235,6 +237,7 @@ const handleCustomRequest = async ({
             isFolder: true,
             name: folderName,
             parentUid: '',
+            reactionSchemeType: 'none',
             treeId: targetTreeRoot,
             uid: v4(),
           })

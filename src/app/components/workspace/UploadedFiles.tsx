@@ -10,7 +10,7 @@ const UploadedFiles = ({
   ) => Promise<void>
 }) => (
   <div className="flex w-full flex-col" onContextMenu={onContextMenu}>
-    <div className="relative h-full bg-white px-2 py-4 shadow-sm">
+    <div className="relative h-full overflow-y-auto bg-white px-2 py-4 shadow-sm">
       {children}
     </div>
   </div>
