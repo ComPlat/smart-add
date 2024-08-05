@@ -12,7 +12,7 @@ export const ReactionsReactantSample = ({
   sampleReactionUidMap,
 }: ReactionSchemeProps) => {
   const allowedFolders = assignedFolders.filter(
-    (folder) => folder.parentUid && folder.reactionSchemeType === 'product',
+    (folder) => folder.parentUid && folder.reactionSchemeType === 'reactant',
   )
 
   return allowedFolders.reduce((acc, folder, index) => {
