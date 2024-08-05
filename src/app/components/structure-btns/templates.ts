@@ -80,6 +80,7 @@ export const createSample = async (
     '',
     getMetadata('', uniqueFolderName, 'sample'),
     'sample',
+    'product',
   )
   const analysesFolder = await createFolder(
     `${uniqueFolderName}/analyses`,
@@ -151,6 +152,7 @@ export const createReaction = async (
     reactionFolder.uid,
     getMetadata(reactionFolder.uid, sampleName, 'sample', ''),
     'sample',
+    'product',
   )
   const analysesFolder = await createFolder(
     `${uniqueFolderName}/${sampleName}/analyses`,
