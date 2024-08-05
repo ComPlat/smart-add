@@ -169,12 +169,6 @@ export const generateExportJson = async (
     },
     {},
   )
-
-  const solvents = ReactionsSolventSample({
-    processedFolders,
-    sampleReactionUidMap,
-  })
-
   const container = Container({
     assignedFolders,
     currentDate,
@@ -202,6 +196,11 @@ export const generateExportJson = async (
   })
 
   const products = ReactionsProductSample({
+    assignedFolders,
+    sampleReactionUidMap,
+  })
+
+  const solvents = ReactionsSolventSample({
     assignedFolders,
     sampleReactionUidMap,
   })

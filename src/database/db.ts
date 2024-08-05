@@ -54,6 +54,7 @@ export type ReactionSchemeType =
   | 'none'
   | 'product'
   | 'reactant'
+  | 'solvent'
   | 'startingMaterial'
 
 export type ExtendedFolder = {
