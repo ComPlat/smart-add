@@ -64,6 +64,7 @@ const ReactionSchemeDropDownMenu = ({
           <option value="startingMaterial">Starting material</option>
           <option value="reactant">Reactant</option>
           <option value="product">Product</option>
+          <option value="solvent">Solvent</option>
         </optgroup>
       </select>
     </label>
