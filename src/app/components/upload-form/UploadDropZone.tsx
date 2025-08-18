@@ -304,7 +304,6 @@ const UploadDropZone = ({ children }: UploadDropZoneProps) => {
     name: 'file',
     onChange(info) {
       setUploadFileList(info.fileList)
-      setProgress
     },
     showUploadList: false,
   }

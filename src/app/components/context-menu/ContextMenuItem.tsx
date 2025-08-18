@@ -7,7 +7,7 @@ const ContextMenuContainer = ({
   y,
 }: {
   children: ReactNode
-  contextMenuRef: RefObject<HTMLDivElement>
+  contextMenuRef: RefObject<HTMLDivElement | null>
   x: number
   y: number
 }) => (

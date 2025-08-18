@@ -60,9 +60,9 @@ export function identifyType<T extends ZodRawShape>(
 ] {
   const field = schema.shape[key]
   if (field instanceof ZodOptional || field instanceof ZodNullable) {
-    return [identifyTypeName(field.unwrap()), true]
+    return [identifyTypeName(field.unwrap() as unknown as ZodType), true]
   } else {
-    return [identifyTypeName(field), false]
+    return [identifyTypeName(field as unknown as ZodType), false]
   }
 }
 
@@ -70,7 +70,7 @@ type ZodType =
   | ZodAny
   | ZodArray<ZodString>
   | ZodBoolean
-  | ZodEnum<[string, ...string[]]>
+  | ZodEnum<any>
   | ZodNull
   | ZodNumber
   | ZodString

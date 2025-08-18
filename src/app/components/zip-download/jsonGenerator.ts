@@ -1,4 +1,3 @@
-/* eslint-disable perfectionist/sort-objects */
 import { ExtendedFile, ExtendedFolder } from '@/database/db'
 import { v4 } from 'uuid'
 

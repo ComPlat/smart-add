@@ -207,15 +207,17 @@ const InspectorSidebar = ({
 
           updatedMetadata = Object.entries(updatedMetadata).reduce(
             (acc, [key, value]) => {
-              if (value !== undefined) acc[key] = value
+              if (value !== undefined && value !== null) {
+                acc[key] = value
+              }
               return acc
             },
             {} as Metadata,
           )
 
-          await filesDB.folders.where({ fullPath }).modify({
-            metadata: updatedMetadata,
-            name: updatedName,
+          await filesDB.folders.where({ fullPath }).modify((folder) => {
+            folder.metadata = updatedMetadata as Metadata
+            folder.name = updatedName
           })
 
           renameFolder(item as ExtendedFolder, tree, updatedName)
@@ -255,8 +257,13 @@ const InspectorSidebar = ({
     await updateMetadata(key, newValues)
   }
 
-  const getItemName = (item: ExtendedFile | ExtendedFolder) =>
-    (item as ExtendedFile).file?.name ?? item.name ?? ''
+  const getItemName = (item: ExtendedFile | ExtendedFolder) => {
+    const file = (item as ExtendedFile).file
+    if (file && 'name' in file) {
+      return file.name
+    }
+    return item.name ?? ''
+  }
 
   return (
     <>

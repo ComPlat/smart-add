@@ -19,7 +19,7 @@ const FileList = () => {
           <div className="flex gap-2">
             <PaperClipOutlined className="text-neutral-400" />
             <p className="data-file-path: mr-3 line-clamp-1 text-neutral-900">
-              {file.file.name}
+              {'name' in file.file ? file.file.name : 'Unknown file'}
             </p>
           </div>
           <DeleteFileButton file={file} />

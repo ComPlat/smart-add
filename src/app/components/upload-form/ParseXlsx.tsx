@@ -10,11 +10,24 @@ const ParseXlsx = () => {
   const [output, setOutput] = useState(null as XLSX.WorkBook | null)
 
   const handleFileChange = async () => {
-    const file: ExtendedFile | undefined = await filesDB.files.get({ fullPath })
-    if (!file) return
+    // Try to find file by fullPath first, then by name if not found
+    let file: ExtendedFile | undefined = await filesDB.files.get({ fullPath })
 
-    const fileAsFile = new File([file.file], file.file.name, {
-      type: file.file.type,
+    if (!file) {
+      // Fallback: search by name if fullPath lookup fails
+      const files = await filesDB.files.where('name').equals(fullPath).toArray()
+      file = files[0]
+    }
+
+    if (!file) {
+      console.error('File not found:', fullPath)
+      return
+    }
+
+    const fileName = 'name' in file.file ? file.file.name : 'unknown.xlsx'
+    const fileType = file.file.type
+    const fileAsFile = new File([file.file], fileName, {
+      type: fileType,
     })
 
     const reader = new FileReader()

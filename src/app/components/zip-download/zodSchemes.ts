@@ -1,4 +1,3 @@
-/* eslint-disable perfectionist/sort-objects */
 import { Metadata } from '@/database/db'
 import { ZodObject, ZodRawShape, z } from 'zod'
 
@@ -16,7 +15,7 @@ const temperatureObjectSchema = z.object({
 })
 export type TemperatureObject = z.infer<typeof temperatureObjectSchema>
 
-const textObjectSchema = z.object({
+export const textObjectSchema = z.object({
   ops: z.array(z.object({ insert: z.string() })).default([{ insert: '\n' }]),
 })
 export type TextObject = z.infer<typeof textObjectSchema>

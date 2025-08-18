@@ -8,7 +8,7 @@ WORKDIR /app
 # Copy package files
 COPY package.json ./
 # Install dependencies using npm
-RUN npm install --production=false
+RUN npm install --production=false --legacy-peer-deps
 
 # Build the source code
 FROM base AS builder

@@ -31,7 +31,7 @@ export const Attachment = async ({
       )?.[0] || ''
 
     const attachmentId = v4()
-    const filename = file.file.name
+    const filename = 'name' in file.file ? file.file.name : 'unknown'
     const identifier = file.name.split('.')[0]
     const fileType = file.file.type
     const attachableType = 'Container'

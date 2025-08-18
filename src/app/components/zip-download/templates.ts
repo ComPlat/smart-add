@@ -1,6 +1,4 @@
 import { Sample } from './zodSchemes'
-
-/* eslint-disable perfectionist/sort-objects */
 export const reactionSampleTemplate = {
   reaction_id: null,
   sample_id: null,

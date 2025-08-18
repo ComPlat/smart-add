@@ -71,15 +71,19 @@ const FileDownloader = () => {
           Object.entries(tree).map(async ([name, value]) => {
             const newPath = `attachments/${name}`
 
-            if (name.endsWith('.zip') && typeof value === 'object') {
+            if (
+              name.endsWith('.zip') &&
+              typeof value === 'object' &&
+              !(value instanceof Blob)
+            ) {
               const nestedZip = new JSZip()
-              await addFilesToZip(value, nestedZip)
+              await addFilesToZip(value as FileTree, nestedZip)
               const nestedBlob = await nestedZip.generateAsync({ type: 'blob' })
               parentZip.file(newPath, nestedBlob)
             } else if (value instanceof Blob) {
               parentZip.file(newPath, value)
-            } else {
-              await addFilesToZip(value, parentZip)
+            } else if (typeof value === 'object') {
+              await addFilesToZip(value as FileTree, parentZip)
             }
           }),
         )

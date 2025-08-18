@@ -1,88 +1,64 @@
 name: 'Run CI checks'
-
 on: push
-
 env:
   PRIMARY_NODE_VERSION: 18
-
 jobs:
   lint:
     name: Lint code
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
         with:
           version: 8
-
-      - name: Install Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: ${{ env.PRIMARY_NODE_VERSION }}
           cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm lint
 
-      - name: Install all packages
-        run: pnpm install
-
-      - name: Lint
-        run: pnpm lint
-
-  e2e-test:
-    name: End-To-End tests
+  build:
+    name: Build
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
         with:
           version: 8
-
-      - name: Install Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: ${{ env.PRIMARY_NODE_VERSION }}
           cache: 'pnpm'
-
-      - name: Install all packages
-        run: pnpm install
-
-      - name: Run tests
-        uses: cypress-io/github-action@v5
-        with:
-          build: pnpm build
-          start: pnpm start
-          browser: chrome
+      - run: pnpm install
+      - run: pnpm build
 
   component-test:
     name: Component tests
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
         with:
           version: 8
-
-      - name: Install Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: ${{ env.PRIMARY_NODE_VERSION }}
           cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm component:headless
 
-      - name: Install all packages
-        run: pnpm install
-
-      - name: Run tests
-        uses: cypress-io/github-action@v5
+  e2e-test:
+    name: End-to-end tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
         with:
-          component: true
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.PRIMARY_NODE_VERSION }}
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm e2e:headless

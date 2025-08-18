@@ -20,7 +20,7 @@ const DeleteContextMenuItem: FC<DeleteProps> = ({
   item,
   tree,
 }) => {
-  const popupRef = useRef(null)
+  const popupRef = useRef<HTMLDivElement>(null)
 
   const [showConfirmation, setShowConfirmation] = useState(false)
 
