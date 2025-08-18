@@ -1,7 +1,10 @@
 name: 'Run CI checks'
+
 on: push
+
 env:
-  PRIMARY_NODE_VERSION: 18
+  PRIMARY_NODE_VERSION: 20
+
 jobs:
   lint:
     name: Lint code
@@ -45,7 +48,23 @@ jobs:
         with:
           node-version: ${{ env.PRIMARY_NODE_VERSION }}
           cache: 'pnpm'
+      
+      # Cache Cypress binary
+      - name: Cache Cypress
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      
       - run: pnpm install
+      
+      # Ensure Cypress binary is installed
+      - name: Verify Cypress binary
+        run: pnpm exec cypress install
+      
+      - name: Create empty pages directory for Next.js compatibility
+        run: mkdir -p pages
+      
       - run: pnpm component:headless
 
   e2e-test:
@@ -60,5 +79,18 @@ jobs:
         with:
           node-version: ${{ env.PRIMARY_NODE_VERSION }}
           cache: 'pnpm'
+      
+      # Cache Cypress binary
+      - name: Cache Cypress
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      
       - run: pnpm install
+      
+      # Ensure Cypress binary is installed
+      - name: Verify Cypress binary
+        run: pnpm exec cypress install
+      
       - run: pnpm e2e:headless
