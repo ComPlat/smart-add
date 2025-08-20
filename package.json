@@ -14,7 +14,6 @@
     "component:headless": "cypress run --component"
   },
   "dependencies": {
-    "@ant-design/icons": "6.0.0",
     "antd": "5.27.0",
     "file-saver": "2.0.5",
     "jszip": "3.10.1",

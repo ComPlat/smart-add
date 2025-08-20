@@ -1,7 +1,7 @@
 'use client'
 
 import { filesDB } from '@/database/db'
-import { PaperClipOutlined } from '@ant-design/icons'
+import { FaPaperclip } from 'react-icons/fa6'
 import { useLiveQuery } from 'dexie-react-hooks'
 
 import { DeleteFileButton } from './DeleteFileButton'
@@ -17,7 +17,7 @@ const FileList = () => {
           key={file.id}
         >
           <div className="flex gap-2">
-            <PaperClipOutlined className="text-neutral-400" />
+            <FaPaperclip />
             <p className="data-file-path: mr-3 line-clamp-1 text-neutral-900">
               {'name' in file.file ? file.file.name : 'Unknown file'}
             </p>

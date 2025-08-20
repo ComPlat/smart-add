@@ -1,8 +1,8 @@
 import { ExtendedFile, ExtendedFolder } from '@/database/db'
 import { FileNode } from '@/helper/types'
 import { useOnClickOutside } from '@/hooks/useOnClickOutside'
-import { DeleteOutlined } from '@ant-design/icons'
 import { FC, useRef, useState } from 'react'
+import { FaDeleteLeft } from 'react-icons/fa6'
 
 import deleteFile from '../deleteFile'
 import deleteFolder from '../deleteFolder'
@@ -45,9 +45,9 @@ const DeleteContextMenuItem: FC<DeleteProps> = ({
       className={`${className} ${showConfirmation && 'bg-gray-300'} relative`}
       onClick={() => setShowConfirmation(true)}
     >
-      <span>
-        <DeleteOutlined className="text-red-500" />
-        <span className="ml-2">Delete</span>
+      <span className="flex items-center space-x-2">
+        <FaDeleteLeft className="text-red-500" />
+        <span>Delete</span>
       </span>
       {showConfirmation && (
         <div

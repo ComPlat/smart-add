@@ -15,6 +15,9 @@ const config = {
             mid: 'rgba(70, 120, 178, 0.10)',
           },
         },
+        'kit-primary-full': '#4678B2',
+        'kit-primary-light': 'rgba(0, 118, 255, 0.16)',
+        'kit-primary-mid': 'rgba(70, 120, 178, 0.10)',
       },
       keyframes: {
         emergeFromLamp: {

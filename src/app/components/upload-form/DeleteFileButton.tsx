@@ -1,5 +1,5 @@
 import { ExtendedFile, filesDB } from '@/database/db'
-import { DeleteOutlined } from '@ant-design/icons'
+import { MdDeleteOutline } from 'react-icons/md'
 
 const handleDelete = (file: ExtendedFile, event: React.MouseEvent) => {
   event.preventDefault()
@@ -22,7 +22,7 @@ const DeleteFileButton = ({ file }: { file: ExtendedFile }) => (
     className="rounded-sm px-0.5 text-neutral-400 transition-all hover:border-neutral-200 hover:bg-neutral-200 hover:text-neutral-900"
     onClick={(event) => handleDelete(file, event)}
   >
-    <DeleteOutlined />
+    <MdDeleteOutline size={20} />
   </button>
 )
 
