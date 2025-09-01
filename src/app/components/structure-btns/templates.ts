@@ -56,7 +56,7 @@ const getMetadata = (
         description: '',
         extended_metadata: {
           status: null,
-          kind: null
+          kind: null,
         },
         name,
         parent_id,

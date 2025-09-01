@@ -167,7 +167,7 @@ function determineInputComponent<T extends ZodRawShape>(
       )
     }
     case 'solvent': {
-       // Always use SolventInputField for complex solvent arrays
+      // Always use SolventInputField for complex solvent arrays
       const solventValues = Array.isArray(value) ? (value as SolventItem[]) : []
       return (
         <SolventInputField
@@ -183,7 +183,7 @@ function determineInputComponent<T extends ZodRawShape>(
       // Use analysis-specific options if this is an extended_metadata field for analysis containers
       const isAnalysisStatus = metadata?.container_type === 'analysis'
       const options = isAnalysisStatus ? analysisStatusOptions : statusOptions
-      
+
       return (
         <SelectField
           key={key}
@@ -389,25 +389,26 @@ const InspectorSidebar = ({
           if (!dbItem) return
 
           let updatedMetadata = { ...dbItem.metadata }
-          
+
           // Check if this is an extended_metadata field
           const containerType = updatedMetadata.container_type || ''
-          
+
           if (isExtendedMetadataField(containerType, key)) {
             // Update within extended_metadata
-            const currentExtendedMetadata = updatedMetadata.extended_metadata || {}
+            const currentExtendedMetadata =
+              updatedMetadata.extended_metadata || {}
             updatedMetadata = {
               ...updatedMetadata,
               extended_metadata: {
                 ...currentExtendedMetadata,
-                [key]: newValue
-              }
+                [key]: newValue,
+              },
             }
           } else {
             // Regular top-level field
             updatedMetadata = { ...updatedMetadata, [key]: newValue }
           }
-          
+
           let updatedName = item.name
           if (key === 'name') {
             updatedName = newValue as string
@@ -450,7 +451,7 @@ const InspectorSidebar = ({
     const target = e.target
     let newValue = extractValue(target)
 
-     // Handle datetime fields - ensure proper ISO format
+    // Handle datetime fields - ensure proper ISO format
     if (
       typeof newValue === 'string' &&
       (key.endsWith('_at') || key.startsWith('timestamp_'))
@@ -478,10 +479,7 @@ const InspectorSidebar = ({
     // ONLY apply interlinking for density/molarity fields (no extra work for description, etc.)
     if (key === 'density' && newValue !== null) {
       await updateMetadata('molarity_value', null)
-    } else if (
-      key === 'molarity_value' &&
-      newValue !== null
-    ) {
+    } else if (key === 'molarity_value' && newValue !== null) {
       await updateMetadata('density', null)
     }
   }
@@ -507,10 +505,7 @@ const InspectorSidebar = ({
     // ONLY apply interlinking for density/molarity fields (no extra work for description, etc.)
     if (key === 'density' && newValue !== null) {
       await updateMetadata('molarity_value', null)
-    } else if (
-      key === 'molarity_value' &&
-      newValue !== null
-    ) {
+    } else if (key === 'molarity_value' && newValue !== null) {
       await updateMetadata('density', null)
     }
   }
@@ -569,26 +564,35 @@ const InspectorSidebar = ({
                 (() => {
                   const metadata = item.metadata
                   const flattenedEntries: [string, MetadataValue][] = []
-                  
+
                   // Add all top-level metadata except extended_metadata
                   Object.entries(metadata)
-                    .filter(([key]) => key !== 'extended_metadata' && !isHidden(key))
-                    .forEach(([key, value]) => flattenedEntries.push([key, value]))
-                  
+                    .filter(
+                      ([key]) => key !== 'extended_metadata' && !isHidden(key),
+                    )
+                    .forEach(([key, value]) =>
+                      flattenedEntries.push([key, value]),
+                    )
+
                   // Add extended_metadata fields if they exist
-                  if (metadata.extended_metadata && typeof metadata.extended_metadata === 'object') {
+                  if (
+                    metadata.extended_metadata &&
+                    typeof metadata.extended_metadata === 'object'
+                  ) {
                     const containerType = metadata.container_type
-                    
+
                     Object.entries(metadata.extended_metadata)
                       .filter(([key]) => {
                         if (isHidden(key)) return false
-                        
+
                         // Only show container-type specific fields
                         return isExtendedMetadataField(containerType || '', key)
                       })
-                      .forEach(([key, value]) => flattenedEntries.push([key, value]))
+                      .forEach(([key, value]) =>
+                        flattenedEntries.push([key, value]),
+                      )
                   }
-                  
+
                   return flattenedEntries
                 })()
                   .sort(([keyA], [keyB]) => {

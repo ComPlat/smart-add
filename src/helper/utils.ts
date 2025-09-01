@@ -121,7 +121,7 @@ export function identifyTypeName(
   }
 }
 const hiddenKeys = Object.freeze([
-   //Hidden keys for Sample
+  //Hidden keys for Sample
   'created_at',
   'updated_at',
   'deleted_at',
@@ -149,7 +149,7 @@ const hiddenKeys = Object.freeze([
   'metrics',
   'sum_formula',
   'real_amount_value',
-    //Hidden keys for Reaction
+  //Hidden keys for Reaction
   'reaction_svg_file',
   'rinchi_long_key',
   'rinchi_string',
@@ -157,7 +157,7 @@ const hiddenKeys = Object.freeze([
   'rinchi_short_key',
   'origin',
   'duration',
-  'content'
+  'content',
 ])
 
 export const isHidden = (key: string): boolean => hiddenKeys.includes(key)
@@ -168,8 +168,12 @@ const extendedMetadataFields = Object.freeze({
   dataset: ['instrument'],
 } as const)
 
-export const isExtendedMetadataField = (containerType: string, key: string): boolean => {
-  const fields = extendedMetadataFields[containerType as keyof typeof extendedMetadataFields]
+export const isExtendedMetadataField = (
+  containerType: string,
+  key: string,
+): boolean => {
+  const fields =
+    extendedMetadataFields[containerType as keyof typeof extendedMetadataFields]
   return fields ? (fields as readonly string[]).includes(key) : false
 }
 
