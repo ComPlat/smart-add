@@ -57,7 +57,7 @@ const NumberInputField: React.FC<NumberInputFieldProps> = ({
         step={step}
         title={value ? value.toString() : ''}
         type="number"
-        value={value || ''}
+        value={value !== undefined && value !== null ? value : ''}
       />
     </label>
   )

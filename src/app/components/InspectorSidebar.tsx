@@ -243,17 +243,18 @@ function determineInputComponent<T extends ZodRawShape>(
       }
     case 'number': {
       // Special handling for purity field
-      const isOnlyPositive = key === 'purity' || key === 'density'
+      const isPurity = key === 'purity'
+      const isDensity = key === 'density'
 
       return (
         <NumberInputField
           key={key}
-          max={isOnlyPositive ? 1 : undefined}
-          min={isOnlyPositive ? 0 : undefined}
+          max={isPurity ? 1 : undefined}
+          min={isPurity || isDensity ? 0 : undefined}
           name={key}
           onChange={(e) => handleInputChange(e, key)}
           readonly={readonly}
-          step={isOnlyPositive ? 0.1 : undefined}
+          step={isPurity || isDensity ? 0.1 : undefined}
           value={value as number}
         />
       )
@@ -465,12 +466,11 @@ const InspectorSidebar = ({
     await updateMetadata(key, newValue)
 
     // ONLY apply interlinking for density/molarity fields (no extra work for description, etc.)
-    if (key === 'density' && newValue !== null && newValue !== 0) {
+    if (key === 'density' && newValue !== null) {
       await updateMetadata('molarity_value', null)
     } else if (
       key === 'molarity_value' &&
-      newValue !== null &&
-      newValue !== 0
+      newValue !== null
     ) {
       await updateMetadata('density', null)
     }
@@ -495,12 +495,11 @@ const InspectorSidebar = ({
     await updateMetadata(key, newValue)
 
     // ONLY apply interlinking for density/molarity fields (no extra work for description, etc.)
-    if (key === 'density' && newValue !== null && newValue !== 0) {
+    if (key === 'density' && newValue !== null) {
       await updateMetadata('molarity_value', null)
     } else if (
       key === 'molarity_value' &&
-      newValue !== null &&
-      newValue !== 0
+      newValue !== null
     ) {
       await updateMetadata('density', null)
     }
