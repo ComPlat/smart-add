@@ -33,8 +33,12 @@ export const collectionTemplate = {
 
 export const sampleTemplate: Sample = {
   name: null,
+  stereo: {
+    abs: 'any',
+    rel: 'any',
+  },
   target_amount_value: null,
-  target_amount_unit: null,
+  target_amount_unit: 'mg',
   created_at: '',
   updated_at: '',
   description: null,
@@ -51,7 +55,7 @@ export const sampleTemplate: Sample = {
   created_by: null,
   short_label: null,
   real_amount_value: null,
-  real_amount_unit: null,
+  real_amount_unit: 'mg',
   imported_readout: null,
   deleted_at: null,
   sample_svg_file: null,
@@ -63,16 +67,15 @@ export const sampleTemplate: Sample = {
   fingerprint_id: null,
   xref: null,
   molarity_value: null,
-  molarity_unit: null,
+  molarity_unit: 'M',
   molecule_name_id: null,
   molfile_version: null,
-  stereo: null,
   mol_rdkit: null,
   metrics: null,
   decoupled: true,
   molecular_mass: null,
   sum_formula: null,
-  solvent: null,
+  solvent: [],
 }
 
 export const collectionsSampleTemplate = {

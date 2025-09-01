@@ -20,7 +20,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = ({
   <label className="flex gap-2">
     <input
       checked={checked}
-      className={`rounded border px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
+      className={`rounded border border-gray-300 px-2 py-1 outline-gray-200 hover:border-kit-primary-full focus:border-kit-primary-full ${className}`}
       disabled={disabled}
       id={id}
       name={name}

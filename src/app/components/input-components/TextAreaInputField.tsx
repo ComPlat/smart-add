@@ -1,17 +1,18 @@
 import { formatLabel } from '@/helper/utils'
 
-interface TextInputFieldProps {
+interface TextAreaInputFieldProps {
   autoFocus?: boolean
   className?: string
   id?: string
   name: string
-  onChange: React.ChangeEventHandler<HTMLInputElement>
+  onChange: React.ChangeEventHandler<HTMLTextAreaElement>
   placeholder?: string
   readonly: boolean
+  rows?: number
   value?: string
 }
 
-const TextInputField: React.FC<TextInputFieldProps> = ({
+const TextAreaInputField: React.FC<TextAreaInputFieldProps> = ({
   autoFocus = false,
   className = '',
   id,
@@ -19,13 +20,14 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
   onChange,
   placeholder = 'Enter text...',
   readonly = false,
+  rows = 3,
   value = '',
 }) => {
   return (
     <label className="flex flex-col text-sm">
       <p className="font-bold">{formatLabel(name)}</p>
-      <input
-        className={`mt-2 rounded border border-gray-300 px-2 py-1 outline-gray-200 focus:border-kit-primary-full
+      <textarea
+        className={`mt-2 rounded border border-gray-300 px-2 py-1 outline-gray-200 focus:border-kit-primary-full resize-vertical
         ${
           readonly
             ? 'cursor-not-allowed bg-gray-100 hover:border-inherit'
@@ -37,11 +39,11 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
         onChange={onChange}
         placeholder={placeholder}
         readOnly={readonly}
-        type="text"
+        rows={rows}
         value={value}
       />
     </label>
   )
 }
 
-export default TextInputField
+export default TextAreaInputField

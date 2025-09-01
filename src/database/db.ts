@@ -1,5 +1,7 @@
 import {
   ArrayType,
+  SolventType,
+  StereoType,
   TemperatureObject,
   TextObject,
 } from '@/app/components/zip-download/zodSchemes'
@@ -9,6 +11,8 @@ import Dexie, { Table } from 'dexie'
 export type Metadata = {
   [key: string]:
     | ArrayType
+    | SolventType
+    | StereoType
     | TemperatureObject
     | TextObject
     | boolean
@@ -19,6 +23,8 @@ export type Metadata = {
 
 export type MetadataValue =
   | ArrayType
+  | SolventType
+  | StereoType
   | TemperatureObject
   | TextObject
   | boolean

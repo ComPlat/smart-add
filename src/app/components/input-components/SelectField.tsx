@@ -1,47 +1,60 @@
 import { formatLabel } from '@/helper/utils'
 
-interface TextInputFieldProps {
-  autoFocus?: boolean
+export interface SelectOption {
+  value: string
+  label: string
+}
+
+interface SelectFieldProps {
   className?: string
   id?: string
   name: string
-  onChange: React.ChangeEventHandler<HTMLInputElement>
+  onChange: React.ChangeEventHandler<HTMLSelectElement>
+  options: SelectOption[]
   placeholder?: string
-  readonly: boolean
+  readonly?: boolean
   value?: string
 }
 
-const TextInputField: React.FC<TextInputFieldProps> = ({
-  autoFocus = false,
+const SelectField: React.FC<SelectFieldProps> = ({
   className = '',
   id,
   name,
   onChange,
-  placeholder = 'Enter text...',
+  options,
+  placeholder,
   readonly = false,
   value = '',
 }) => {
   return (
     <label className="flex flex-col text-sm">
       <p className="font-bold">{formatLabel(name)}</p>
-      <input
+      <select
         className={`mt-2 rounded border border-gray-300 px-2 py-1 outline-gray-200 focus:border-kit-primary-full
         ${
           readonly
             ? 'cursor-not-allowed bg-gray-100 hover:border-inherit'
             : 'bg-white hover:border-kit-primary-full'
         } ${className}`}
-        autoFocus={autoFocus}
+        disabled={readonly}
         id={id}
         name={name}
         onChange={onChange}
-        placeholder={placeholder}
-        readOnly={readonly}
-        type="text"
         value={value}
-      />
+      >
+        {placeholder && (
+          <option value="" disabled>
+            {placeholder}
+          </option>
+        )}
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
     </label>
   )
 }
 
-export default TextInputField
+export default SelectField

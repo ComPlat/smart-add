@@ -23,6 +23,24 @@ export type TextObject = z.infer<typeof textObjectSchema>
 const arraySchema = z.array(z.union([z.string(), z.number()]))
 export type ArrayType = z.infer<typeof arraySchema>
 
+const stereoSchema = z
+  .object({
+    abs: z.string(),
+    rel: z.string(),
+  })
+  .nullable()
+export type StereoType = z.infer<typeof stereoSchema>
+
+const solventItemSchema = z.object({
+  label: z.string(),
+  smiles: z.string(),
+  inchikey: z.string(),
+  ratio: z.number(),
+})
+
+const solventSchema = z.union([nullableString, z.array(solventItemSchema)])
+export type SolventType = z.infer<typeof solventSchema>
+
 export const reactionSampleSchema = z.object({
   reaction_id: uuidSchema,
   sample_id: uuidSchema,
@@ -59,8 +77,10 @@ export type Collection = z.infer<typeof collectionSchema>
 
 export const sampleSchema = z.object({
   name: nullableString,
+  decoupled: z.boolean(),
+  stereo: stereoSchema,
   target_amount_value: nullableNumber,
-  target_amount_unit: nullableString,
+  target_amount_unit: nullableString.default('mg'),
   created_at: datetimeSchema,
   updated_at: datetimeSchema,
   description: nullableString,
@@ -77,28 +97,26 @@ export const sampleSchema = z.object({
   created_by: uuidSchema,
   short_label: nullableString,
   real_amount_value: nullableNumber,
-  real_amount_unit: nullableString,
+  real_amount_unit: nullableString.default('mg'),
   imported_readout: nullableString,
   deleted_at: z.null(),
   sample_svg_file: nullableString,
   user_id: uuidSchema,
   identifier: nullableString,
   density: nullableNumber,
-  melting_point: nullableString,
-  boiling_point: nullableString,
+  molarity_value: nullableNumber,
+  molarity_unit: nullableString.default('M'),
+  melting_point: nullableString, // Changed to string to support ranges like "12.0..Infinity"
+  boiling_point: nullableString, // Changed to string to support ranges like "-Infinity..Infinity"
   fingerprint_id: uuidSchema,
   xref: z.any().nullable(),
-  molarity_value: nullableNumber,
-  molarity_unit: nullableString,
   molecule_name_id: uuidSchema,
   molfile_version: nullableString,
-  stereo: z.any(),
   mol_rdkit: nullableString,
   metrics: nullableString,
-  decoupled: z.boolean(),
   molecular_mass: nullableNumber,
   sum_formula: nullableString,
-  solvent: z.union([nullableString, z.array(z.string())]),
+  solvent: solventSchema,
 })
 export type Sample = z.infer<typeof sampleSchema>
 
@@ -139,8 +157,8 @@ export const moleculeSchema = z.object({
   density: nullableNumber,
   molecular_weight: nullableNumber,
   molfile: nullableString,
-  melting_point: nullableNumber,
-  boiling_point: nullableNumber,
+  melting_point: nullableString, // Changed to string to support ranges like "12.0..Infinity"
+  boiling_point: nullableString, // Changed to string to support ranges like "-Infinity..Infinity"
   sum_formular: nullableString,
   names: z.array(z.string()).nullable(),
   iupac_name: nullableString,
@@ -393,8 +411,8 @@ export const sampleWorksheetTableSchema = z.object({
   location: nullableString,
   secret: nullableString,
   'sample readout': nullableString,
-  'melting pt': nullableString,
-  'boiling pt': nullableString,
+  'melting pt': nullableNumber,
+  'boiling pt': nullableNumber,
   created_at: nullableString,
   updated_at: nullableString,
   user_labels: nullableString,

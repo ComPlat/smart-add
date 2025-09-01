@@ -69,7 +69,7 @@ const ArrayInputField: React.FC<ArrayInputFieldProps> = ({
       {values.map((value, index) => (
         <div className="mb-1 flex items-center" key={index}>
           <input
-            className="mr-2 flex-1 rounded border px-2 py-1 outline-gray-200 focus:border-kit-primary-full"
+            className="mr-2 flex-1 rounded border border-gray-300 px-2 py-1 outline-gray-200 focus:border-kit-primary-full"
             list={`${name}-options-${index}`}
             onChange={(e) => handleItemChange(e.target.value, index)}
             value={value}

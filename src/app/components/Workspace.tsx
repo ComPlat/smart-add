@@ -37,12 +37,8 @@ type Database = {
 }
 
 type FocusedItemProps = {
-  focusedItem: (TreeItemIndex & (TreeItemIndex | TreeItemIndex[])) | undefined
-  setFocusedItem: Dispatch<
-    SetStateAction<
-      (TreeItemIndex & (TreeItemIndex | TreeItemIndex[])) | undefined
-    >
-  >
+  focusedItem: TreeItemIndex | undefined
+  setFocusedItem: Dispatch<SetStateAction<TreeItemIndex | undefined>>
 }
 
 const initialContextMenu = {
@@ -132,13 +128,16 @@ const Workspace = ({ focusedItem, setFocusedItem }: FocusedItemProps) => {
 
   const handleOnFocusItem = (item: TreeItem) => setFocusedItem(item.index)
 
-  const handleOnSelectItem = (items: TreeItemIndex[]) => setSelectedItems(items)
+  const handleOnSelectItem = (items: TreeItemIndex[]) => {
+    setSelectedItems(items)
+    // Also set focus when item is selected (mouse click)
+    if (items.length > 0) {
+      setFocusedItem(items[0])
+    }
+  }
 
   const handleOnDrop = (items: TreeItem[], target: DraggingPosition) =>
     handleFileMove(items, target, tree)
-
-  const handleCanDropAt = (items: TreeItem[], target: DraggingPosition) =>
-    canDropAt(items, target, tree)
 
   const handleFileTreeContextMenu = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -225,7 +224,7 @@ const Workspace = ({ focusedItem, setFocusedItem }: FocusedItemProps) => {
           )
         }
         canDragAndDrop
-        canDropAt={handleCanDropAt}
+        canDropAt={(items, target) => canDropAt(items, target, tree)}
         canDropOnFolder
         canReorderItems
         canSearch={false}

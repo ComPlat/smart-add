@@ -1,8 +1,8 @@
 import Home from '../../src/app/page'
 
 describe('<Home />', () => {
-  it('has headline', () => {
+  it('has SmartAdd logo', () => {
     cy.mount(<Home />)
-    cy.get('h1').contains('SmartAdd')
+    cy.get('img[alt="SmartAdd Logo"]').should('exist')
   })
 })

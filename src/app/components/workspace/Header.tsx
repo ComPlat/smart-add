@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { FaRegBell } from 'react-icons/fa6'
 
 import chemotionLogo from '../../../../public/Chemotion_full.svg'
+import logo from '../../../../public/logo.png'
 
 const Header = () => {
   const [open, setOpen] = useState(false)
@@ -19,10 +20,21 @@ const Header = () => {
 
   return (
     <header className="flex w-full flex-row justify-between bg-white px-4 py-2 shadow-sm">
-      <Link href="https://chemotion.net/">
-        <Image alt="Chemotion Logo" height={50} priority src={chemotionLogo} />
+      <Link href="https://chemotion.net/" className="self-center">
+        <Image
+          alt="Chemotion Logo"
+          className="self-center"
+          height={50}
+          priority
+          src={chemotionLogo}
+        />
       </Link>
-      <h1 className="self-center">SmartAdd</h1>
+      <Image
+        alt="SmartAdd Logo"
+        className="self-center"
+        height={100}
+        src={logo}
+      />
       <Popover
         content={<a onClick={hide}>Close</a>}
         onOpenChange={handleOpenChange}

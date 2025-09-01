@@ -22,6 +22,7 @@ import {
   reactionSchema,
   sampleSchema,
 } from './zodSchemes'
+import { formatForExport } from '@/helper/fieldValidation'
 
 const currentDate = new Date().toISOString()
 const user_id = null
@@ -104,11 +105,26 @@ export const generateExportJson = async (
   const uidToSample = processedFolders.reduce((acc, folder) => {
     if (folder.dtype !== 'sample') return acc
 
+    // Format temperature fields for export (append ..Infinity to single numbers)
+    const formattedMetadata = { ...folder.metadata }
+    if (formattedMetadata.boiling_point) {
+      formattedMetadata.boiling_point = formatForExport(
+        'boiling_point',
+        formattedMetadata.boiling_point,
+      )
+    }
+    if (formattedMetadata.melting_point) {
+      formattedMetadata.melting_point = formatForExport(
+        'melting_point',
+        formattedMetadata.melting_point,
+      )
+    }
+
     const sample = {
       [sampleReactionUidMap[folder.uid]]: {
         ...sampleSchema.parse({
           ...sampleTemplate,
-          ...folder.metadata,
+          ...formattedMetadata,
           ancestry: Ancestry(folder, assignedFolders, uidMap),
           created_at: currentDate,
           updated_at: currentDate,

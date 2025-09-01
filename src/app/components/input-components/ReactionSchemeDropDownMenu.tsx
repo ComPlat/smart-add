@@ -40,8 +40,8 @@ const ReactionSchemeDropDownMenu = ({
       const dbItem = await filesDB.folders.get({ fullPath })
 
       if (!dbItem) return
-      await filesDB.folders.where({ fullPath }).modify({
-        reactionSchemeType: value,
+      await filesDB.folders.where({ fullPath }).modify((folder) => {
+        folder.reactionSchemeType = value
       })
       setSchemeType(value)
     } catch (error) {
@@ -53,7 +53,7 @@ const ReactionSchemeDropDownMenu = ({
     <label className="flex flex-col text-sm">
       <p className="font-bold">{formatLabel('Reaction scheme type')}</p>
       <select
-        className="mt-2 rounded border bg-white px-2 py-1 outline-gray-200
+        className="mt-2 rounded border border-gray-300 bg-white px-2 py-1 outline-gray-200
         hover:border-kit-primary-full focus:border-kit-primary-full"
         name="reaction-scheme-type"
         onChange={handleOnChange}

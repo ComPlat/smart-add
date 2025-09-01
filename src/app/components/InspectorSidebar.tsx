@@ -7,7 +7,15 @@ import {
 } from '@/database/db'
 import { retrieveTree } from '@/helper/retrieveTree'
 import { FileNode } from '@/helper/types'
-import { identifyType, isReadonly } from '@/helper/utils'
+import {
+  identifyType,
+  isHidden,
+  isReadonly,
+  isTextArea,
+  isQuantityValue,
+  isQuantityUnit,
+  getQuantityUnitKey,
+} from '@/helper/utils'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { TreeItemIndex } from 'react-complex-tree'
@@ -19,22 +27,123 @@ import CheckboxField from './input-components/CheckboxField'
 import DateInputField from './input-components/DateInputField'
 import NumberInputField from './input-components/NumberInputField'
 import ReactionSchemeDropDownMenu from './input-components/ReactionSchemeDropDownMenu'
+import QuantityInputField from './input-components/QuantityInputField'
+import SolventInputField, {
+  SolventItem,
+} from './input-components/SolventInputField'
+import StereoSelectField from './input-components/StereoSelectField'
+import TextAreaInputField from './input-components/TextAreaInputField'
 import TextInputField from './input-components/TextInputField'
 import { datetimeSchema, determineSchema } from './zip-download/zodSchemes'
 
 function determineInputComponent<T extends ZodRawShape>(
   key: string,
   value: MetadataValue,
-  handleInputChange: (e: ChangeEvent<HTMLInputElement>, key: string) => void,
+  handleInputChange: (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    key: string,
+  ) => void,
+  handleSelectChange: (e: ChangeEvent<HTMLSelectElement>, key: string) => void,
   handleArrayChange: (newValues: string[], key: string) => Promise<void>,
+  updateMetadata: (key: string, newValue: MetadataValue) => Promise<void>,
   schema?: ZodObject<T>,
+  metadata?: Record<string, MetadataValue>,
 ) {
   if (!schema) return
 
   const [type] = identifyType(schema, key)
   const readonly = isReadonly(key)
 
-  switch (type) {
+  // Skip unit fields as they're handled by QuantityInputField
+  if (isQuantityUnit(key)) {
+    return null
+  }
+
+  // Determine special case types before the switch
+  let componentType: string = type
+  if (isQuantityValue(key)) {
+    componentType = 'quantity'
+  } else if (key === 'stereo' && value && typeof value === 'object') {
+    componentType = 'stereo'
+  } else if (key === 'solvent') {
+    componentType = 'solvent'
+  }
+
+  switch (componentType) {
+    case 'quantity': {
+      const unitKey = getQuantityUnitKey(key)
+      const unitValue = unitKey && metadata ? metadata[unitKey] : undefined
+
+      return (
+        <QuantityInputField
+          key={key}
+          valueKey={key}
+          unitKey={unitKey || key + '_unit'}
+          value={value as number}
+          unit={unitValue as string}
+          readonly={readonly}
+          onValueChange={handleInputChange}
+          onUnitChange={handleSelectChange}
+          metadata={metadata}
+        />
+      )
+    }
+    case 'stereo': {
+      const stereoValue = value as { abs?: string; rel?: string }
+
+      return (
+        <div key={key} className="flex flex-col gap-4">
+          <StereoSelectField
+            type="abs"
+            value={stereoValue.abs || ''}
+            onChange={(e) => {
+              const newStereoValue = { ...stereoValue, abs: e.target.value }
+              handleSelectChange(
+                { target: { value: JSON.stringify(newStereoValue) } } as any,
+                key,
+              )
+            }}
+            readonly={readonly}
+          />
+          <StereoSelectField
+            type="rel"
+            value={stereoValue.rel || ''}
+            onChange={(e) => {
+              const newStereoValue = { ...stereoValue, rel: e.target.value }
+              handleSelectChange(
+                { target: { value: JSON.stringify(newStereoValue) } } as any,
+                key,
+              )
+            }}
+            readonly={readonly}
+          />
+        </div>
+      )
+    }
+    case 'solvent': {
+      // Handle solvent as either string or array of solvent objects
+      if (Array.isArray(value)) {
+        return (
+          <SolventInputField
+            key={key}
+            name={key}
+            onChange={(newValue) => updateMetadata(key, newValue)}
+            readonly={readonly}
+            values={value as SolventItem[]}
+          />
+        )
+      } else {
+        return (
+          <TextInputField
+            key={key}
+            name={key}
+            onChange={(e) => handleInputChange(e, key)}
+            readonly={readonly}
+            value={(value as string) || ''}
+          />
+        )
+      }
+    }
     case 'string':
       if (datetimeSchema.safeParse(value).success) {
         return (
@@ -43,6 +152,16 @@ function determineInputComponent<T extends ZodRawShape>(
             name={key}
             onChange={(e) => handleInputChange(e, key)}
             raw={false}
+            readonly={readonly}
+            value={(value as string) || ''}
+          />
+        )
+      } else if (isTextArea(key)) {
+        return (
+          <TextAreaInputField
+            key={key}
+            name={key}
+            onChange={(e) => handleInputChange(e, key)}
             readonly={readonly}
             value={(value as string) || ''}
           />
@@ -58,16 +177,23 @@ function determineInputComponent<T extends ZodRawShape>(
           />
         )
       }
-    case 'number':
+    case 'number': {
+      // Special handling for purity field
+      const isOnlyPositive = key === 'purity' || key === 'density'
+
       return (
         <NumberInputField
           key={key}
+          max={isOnlyPositive ? 1 : undefined}
+          min={isOnlyPositive ? 0 : undefined}
           name={key}
           onChange={(e) => handleInputChange(e, key)}
           readonly={readonly}
+          step={isOnlyPositive ? 0.1 : undefined}
           value={value as number}
         />
       )
+    }
     case 'boolean':
       return (
         <CheckboxField
@@ -127,10 +253,12 @@ function determineInputComponent<T extends ZodRawShape>(
 
 const InspectorSidebar = ({
   focusedItem,
+  setFocusedItem,
 }: {
   focusedItem: TreeItemIndex | undefined
+  setFocusedItem: (item: TreeItemIndex | undefined) => void
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(true)
   const [item, setItem] = useState<ExtendedFile | ExtendedFolder | null>(null)
   const [tree, setTree] = useState({} as Record<string, FileNode>)
 
@@ -164,30 +292,34 @@ const InspectorSidebar = ({
         setItem(items[0])
         setIsOpen(true)
       }
+    } else {
+      setItem(null)
     }
   }, [database?.files, database?.folders, focusedItem])
 
   const handleClose = () => {
     setIsOpen(false)
+    setFocusedItem(undefined)
   }
 
   const extractValue = (
-    target: EventTarget & HTMLInputElement,
+    target: EventTarget & (HTMLInputElement | HTMLTextAreaElement),
   ): boolean | number | string | undefined => {
-    switch (target.type) {
-      case 'checkbox':
-        return target.checked
-      case 'number':
-        return Number(target.value)
-      default:
-        return target.value
+    if ('type' in target) {
+      const inputTarget = target as HTMLInputElement
+      switch (inputTarget.type) {
+        case 'checkbox':
+          return inputTarget.checked
+        case 'number':
+          return Number(inputTarget.value)
+        default:
+          return inputTarget.value
+      }
     }
+    return (target as HTMLTextAreaElement).value
   }
 
-  const updateMetadata = async (
-    key: string,
-    newValue: boolean | number | string | string[] | undefined,
-  ) => {
+  const updateMetadata = async (key: string, newValue: MetadataValue) => {
     if (!item || !item.fullPath) return
 
     const fullPath = item.fullPath
@@ -207,9 +339,7 @@ const InspectorSidebar = ({
 
           updatedMetadata = Object.entries(updatedMetadata).reduce(
             (acc, [key, value]) => {
-              if (value !== undefined && value !== null) {
-                acc[key] = value
-              }
+              if (value !== undefined) acc[key] = value
               return acc
             },
             {} as Metadata,
@@ -221,7 +351,6 @@ const InspectorSidebar = ({
           })
 
           renameFolder(item as ExtendedFolder, tree, updatedName)
-          if (item.name !== updatedName) handleClose()
 
           setItem(
             (prevItem) =>
@@ -239,18 +368,62 @@ const InspectorSidebar = ({
   }
 
   const handleInputChange = async (
-    e: ChangeEvent<HTMLInputElement>,
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     key: string,
   ) => {
     const target = e.target
     let newValue = extractValue(target)
 
-    if (typeof newValue === 'string') {
+    // Only add 'Z' for actual datetime fields (fields ending with '_at')
+    if (typeof newValue === 'string' && key.endsWith('_at')) {
       const parsedDate = new Date(newValue)
       if (!isNaN(parsedDate.getTime())) newValue += 'Z'
     }
+    console.log('New Value:', newValue, 'for key:', key)
 
+    // Update the field value
     await updateMetadata(key, newValue)
+
+    // ONLY apply interlinking for density/molarity fields (no extra work for description, etc.)
+    if (key === 'density' && newValue !== null && newValue !== 0) {
+      await updateMetadata('molarity_value', null)
+    } else if (
+      key === 'molarity_value' &&
+      newValue !== null &&
+      newValue !== 0
+    ) {
+      await updateMetadata('density', null)
+    }
+  }
+
+  const handleSelectChange = async (
+    e: ChangeEvent<HTMLSelectElement>,
+    key: string,
+  ) => {
+    let newValue: MetadataValue = e.target.value
+    // Handle stereo object updates
+    if (key === 'stereo' && typeof newValue === 'string') {
+      try {
+        newValue = JSON.parse(newValue) as MetadataValue
+      } catch (error) {
+        console.error('Failed to parse stereo value:', error)
+        return
+      }
+    }
+
+    // Update the field value
+    await updateMetadata(key, newValue)
+
+    // ONLY apply interlinking for density/molarity fields (no extra work for description, etc.)
+    if (key === 'density' && newValue !== null && newValue !== 0) {
+      await updateMetadata('molarity_value', null)
+    } else if (
+      key === 'molarity_value' &&
+      newValue !== null &&
+      newValue !== 0
+    ) {
+      await updateMetadata('density', null)
+    }
   }
 
   const handleArrayChange = async (newValues: string[], key: string) => {
@@ -267,7 +440,7 @@ const InspectorSidebar = ({
 
   return (
     <>
-      {isOpen && item && (
+      {isOpen && item && (item as ExtendedFolder).dtype !== 'analyses' && (
         <aside
           className={`right-0 top-0 ml-2 w-1/3 flex-col rounded-tl-xl bg-white ${
             isOpen ? 'translate-x-0' : 'translate-x-full'
@@ -304,15 +477,43 @@ const InspectorSidebar = ({
             )}
             <div className="flex flex-col gap-4">
               {item.metadata &&
-                Object.entries(item.metadata).map(([key, value]) =>
-                  determineInputComponent(
-                    key,
-                    value,
-                    handleInputChange,
-                    handleArrayChange,
-                    item.metadata ? determineSchema(item.metadata) : undefined,
-                  ),
-                )}
+                Object.entries(item.metadata)
+                  .filter(([key]) => !isHidden(key))
+                  .sort(([keyA], [keyB]) => {
+                    const topFields = [
+                      'name',
+                      'description',
+                      'decoupled',
+                      'external_label',
+                      'density',
+                      'molarity_value',
+                      'purity',
+                      'target_amount_value',
+                      'real_amount_value',
+                    ]
+                    const indexA = topFields.indexOf(keyA)
+                    const indexB = topFields.indexOf(keyB)
+
+                    if (indexA !== -1 && indexB !== -1) return indexA - indexB
+                    if (indexA !== -1) return -1
+                    if (indexB !== -1) return 1
+                    return 0
+                  })
+                  .map(([key, value]) =>
+                    determineInputComponent(
+                      key,
+                      value,
+                      handleInputChange,
+                      handleSelectChange,
+                      handleArrayChange,
+                      updateMetadata,
+                      item.metadata
+                        ? determineSchema(item.metadata)
+                        : undefined,
+                      item.metadata,
+                    ),
+                  )
+                  .filter(Boolean)}
             </div>
           </div>
         </aside>

@@ -2,15 +2,12 @@
 
 import { useState } from 'react'
 import { TreeItemIndex } from 'react-complex-tree'
-
 import InspectorSidebar from './components/InspectorSidebar'
 import Workspace from './components/Workspace'
 import Header from './components/workspace/Header'
 
 export default function App() {
-  const [focusedItem, setFocusedItem] = useState<
-    TreeItemIndex & (TreeItemIndex | TreeItemIndex[])
-  >()
+  const [focusedItem, setFocusedItem] = useState<TreeItemIndex | undefined>()
 
   return (
     <main className="flex h-screen bg-gray-100">
@@ -18,7 +15,10 @@ export default function App() {
         <Header />
         <Workspace focusedItem={focusedItem} setFocusedItem={setFocusedItem} />
       </div>
-      <InspectorSidebar focusedItem={focusedItem} />
+      <InspectorSidebar
+        focusedItem={focusedItem}
+        setFocusedItem={setFocusedItem}
+      />
     </main>
   )
 }
