@@ -47,13 +47,7 @@ const SubContainer = ({
         containable_type,
         created_at: currentDate,
         description: null,
-        extended_metadata: isAnalysis
-          ? {
-              content: '{"ops":[{"insert":"\\n"}]}',
-              index: '0',
-              report: 'true',
-            }
-          : {},
+        extended_metadata: folder.metadata?.extended_metadata || {},
         name: folder.name,
         parent_id: uidMap[folder.parentUid] || null,
         updated_at: currentDate,

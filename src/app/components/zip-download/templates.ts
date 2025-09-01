@@ -276,7 +276,7 @@ export const datasetTemplate = {
   description: '',
   name: 'new',
   extended_metadata: {
-    report: 'true',
+    instrument: null,
   },
   plain_text_content: null,
 }

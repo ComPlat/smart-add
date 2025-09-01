@@ -286,7 +286,13 @@ export const containerSchema = z.object({
   name: nullableString,
   container_type: nullableString,
   description: nullableString,
-  extended_metadata: z.any(),
+  extended_metadata: z.object({
+    // Analysis container fields
+    status: z.enum(['Confirmed', 'Unconfirmed']).nullable().optional(),
+    kind: nullableString.optional(),
+    // Dataset container fields
+    instrument: nullableString.optional()
+  }).catchall(z.any()),
   created_at: datetimeSchema,
   updated_at: datetimeSchema,
   parent_id: uuidSchema,

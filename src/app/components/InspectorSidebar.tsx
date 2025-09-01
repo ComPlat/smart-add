@@ -9,6 +9,7 @@ import { retrieveTree } from '@/helper/retrieveTree'
 import { FileNode } from '@/helper/types'
 import {
   identifyType,
+  isExtendedMetadataField,
   isHidden,
   isReadonly,
   isTextArea,
@@ -58,6 +59,11 @@ const statusOptions: SelectOption[] = [
   { value: 'Analyses Pending', label: 'Analyses Pending' },
 ]
 
+const analysisStatusOptions: SelectOption[] = [
+  { value: 'Confirmed', label: 'Confirmed' },
+  { value: 'Unconfirmed', label: 'Unconfirmed' },
+]
+
 const roleOptions: SelectOption[] = [
   { value: 'gp', label: 'General Procedure (gp)' },
   { value: 'parts', label: 'Parts' },
@@ -103,6 +109,10 @@ function determineInputComponent<T extends ZodRawShape>(
     componentType = 'status'
   } else if (key === 'role') {
     componentType = 'role'
+  } else if (key === 'instrument') {
+    componentType = 'string'
+  } else if (key === 'kind') {
+    componentType = 'string'
   }
 
   switch (componentType) {
@@ -170,12 +180,16 @@ function determineInputComponent<T extends ZodRawShape>(
       )
     }
     case 'status': {
+      // Use analysis-specific options if this is an extended_metadata field for analysis containers
+      const isAnalysisStatus = metadata?.container_type === 'analysis'
+      const options = isAnalysisStatus ? analysisStatusOptions : statusOptions
+      
       return (
         <SelectField
           key={key}
           name={key}
           onChange={(e) => handleSelectChange(e, key)}
-          options={statusOptions}
+          options={options}
           placeholder="Select status..."
           readonly={readonly}
           value={(value as string) || ''}
@@ -267,28 +281,6 @@ function determineInputComponent<T extends ZodRawShape>(
           key={key}
           name={key}
           onChange={(e) => handleInputChange(e, key)}
-        />
-      )
-    // TODO: Implement enum and object input components
-    //        temperature, and text objects
-    case 'enum':
-      return (
-        <TextInputField
-          key={key}
-          name={key}
-          onChange={(e) => handleInputChange(e, key)}
-          readonly={true}
-          value={'TODO: Enum/Select'}
-        />
-      )
-    case 'object':
-      return (
-        <TextInputField
-          key={key}
-          name={key}
-          onChange={(e) => handleInputChange(e, key)}
-          readonly={true}
-          value={'TODO: Object'}
         />
       )
     case 'array':
@@ -396,7 +388,26 @@ const InspectorSidebar = ({
           const dbItem = await filesDB.folders.get({ fullPath })
           if (!dbItem) return
 
-          let updatedMetadata = { ...dbItem.metadata, [key]: newValue }
+          let updatedMetadata = { ...dbItem.metadata }
+          
+          // Check if this is an extended_metadata field
+          const containerType = updatedMetadata.container_type || ''
+          
+          if (isExtendedMetadataField(containerType, key)) {
+            // Update within extended_metadata
+            const currentExtendedMetadata = updatedMetadata.extended_metadata || {}
+            updatedMetadata = {
+              ...updatedMetadata,
+              extended_metadata: {
+                ...currentExtendedMetadata,
+                [key]: newValue
+              }
+            }
+          } else {
+            // Regular top-level field
+            updatedMetadata = { ...updatedMetadata, [key]: newValue }
+          }
+          
           let updatedName = item.name
           if (key === 'name') {
             updatedName = newValue as string
@@ -460,7 +471,6 @@ const InspectorSidebar = ({
         }
       }
     }
-    console.log('New Value:', newValue, 'for key:', key)
 
     // Update the field value
     await updateMetadata(key, newValue)
@@ -519,7 +529,7 @@ const InspectorSidebar = ({
 
   return (
     <>
-      {isOpen && item && (item as ExtendedFolder).dtype !== 'analyses' && (
+      {isOpen && item && (
         <aside
           className={`right-0 top-0 ml-2 w-1/3 flex-col rounded-tl-xl bg-white ${
             isOpen ? 'translate-x-0' : 'translate-x-full'
@@ -556,11 +566,36 @@ const InspectorSidebar = ({
             )}
             <div className="flex flex-col gap-4">
               {item.metadata &&
-                Object.entries(item.metadata)
-                  .filter(([key]) => !isHidden(key))
+                (() => {
+                  const metadata = item.metadata
+                  const flattenedEntries: [string, MetadataValue][] = []
+                  
+                  // Add all top-level metadata except extended_metadata
+                  Object.entries(metadata)
+                    .filter(([key]) => key !== 'extended_metadata' && !isHidden(key))
+                    .forEach(([key, value]) => flattenedEntries.push([key, value]))
+                  
+                  // Add extended_metadata fields if they exist
+                  if (metadata.extended_metadata && typeof metadata.extended_metadata === 'object') {
+                    const containerType = metadata.container_type
+                    
+                    Object.entries(metadata.extended_metadata)
+                      .filter(([key]) => {
+                        if (isHidden(key)) return false
+                        
+                        // Only show container-type specific fields
+                        return isExtendedMetadataField(containerType || '', key)
+                      })
+                      .forEach(([key, value]) => flattenedEntries.push([key, value]))
+                  }
+                  
+                  return flattenedEntries
+                })()
                   .sort(([keyA], [keyB]) => {
                     const topFields = [
                       'name',
+                      'instrument',
+                      'status',
                       'description',
                       'decoupled',
                       'external_label',
@@ -569,6 +604,7 @@ const InspectorSidebar = ({
                       'purity',
                       'target_amount_value',
                       'real_amount_value',
+                      'kind',
                     ]
                     const indexA = topFields.indexOf(keyA)
                     const indexB = topFields.indexOf(keyB)

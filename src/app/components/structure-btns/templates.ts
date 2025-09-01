@@ -34,7 +34,6 @@ const getMetadata = (
       } as Reaction
     case 'structure':
     case 'analyses':
-    case 'analysis':
       return {
         ancestry: parent_id,
         containable_id: '',
@@ -43,6 +42,22 @@ const getMetadata = (
         created_at: currentDate,
         description: '',
         extended_metadata: {},
+        name,
+        parent_id,
+        updated_at: currentDate,
+      } as Container
+    case 'analysis':
+      return {
+        ancestry: parent_id,
+        containable_id: '',
+        containable_type: containable_type || '',
+        container_type: type || '',
+        created_at: currentDate,
+        description: '',
+        extended_metadata: {
+          status: null,
+          kind: null
+        },
         name,
         parent_id,
         updated_at: currentDate,

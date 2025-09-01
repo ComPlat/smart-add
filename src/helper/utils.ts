@@ -148,7 +148,6 @@ const hiddenKeys = Object.freeze([
   'deprecated_solvent',
   'metrics',
   'sum_formula',
-  'molfile',
   'real_amount_value',
     //Hidden keys for Reaction
   'reaction_svg_file',
@@ -157,10 +156,22 @@ const hiddenKeys = Object.freeze([
   'rinchi_web_key',
   'rinchi_short_key',
   'origin',
-  'duration'
+  'duration',
+  'content'
 ])
 
 export const isHidden = (key: string): boolean => hiddenKeys.includes(key)
+
+// Extended metadata field mapping by container type
+const extendedMetadataFields = Object.freeze({
+  analysis: ['status', 'kind'],
+  dataset: ['instrument'],
+} as const)
+
+export const isExtendedMetadataField = (containerType: string, key: string): boolean => {
+  const fields = extendedMetadataFields[containerType as keyof typeof extendedMetadataFields]
+  return fields ? (fields as readonly string[]).includes(key) : false
+}
 
 const textAreaKeys = Object.freeze(['description', 'molfile'])
 
