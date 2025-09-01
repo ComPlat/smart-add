@@ -34,7 +34,37 @@ import SolventInputField, {
 import StereoSelectField from './input-components/StereoSelectField'
 import TextAreaInputField from './input-components/TextAreaInputField'
 import TextInputField from './input-components/TextInputField'
-import { datetimeSchema, determineSchema } from './zip-download/zodSchemes'
+import SelectField, { SelectOption } from './input-components/SelectField'
+import { determineSchema } from './zip-download/zodSchemes'
+
+const tlcSolventsOptions: SelectOption[] = [
+  {
+    value: 'cyclohexane/ethyl acetate 20:1',
+    label: 'cyclohexane/ethyl acetate 20:1',
+  },
+  { value: 'CH₂Cl₂/MeOH 20:1', label: 'CH₂Cl₂/MeOH 20:1' },
+  {
+    value: 'cyclohexane/ethyl acetate 20:1 + 1% NEt₃',
+    label: 'cyclohexane/ethyl acetate 20:1 + 1% NEt₃',
+  },
+]
+
+const statusOptions: SelectOption[] = [
+  { value: 'Planned', label: 'Planned' },
+  { value: 'Running', label: 'Running' },
+  { value: 'Done', label: 'Done' },
+  { value: 'Successful', label: 'Successful' },
+  { value: 'Not Successful', label: 'Not Successful' },
+  { value: 'Analyses Pending', label: 'Analyses Pending' },
+]
+
+const roleOptions: SelectOption[] = [
+  { value: 'gp', label: 'General Procedure (gp)' },
+  { value: 'parts', label: 'Parts' },
+  { value: 'single', label: 'Single' },
+  { value: 'parallel', label: 'Parallel' },
+  { value: 'screening', label: 'Screening' },
+]
 
 function determineInputComponent<T extends ZodRawShape>(
   key: string,
@@ -67,6 +97,12 @@ function determineInputComponent<T extends ZodRawShape>(
     componentType = 'stereo'
   } else if (key === 'solvent') {
     componentType = 'solvent'
+  } else if (key === 'tlc_solvents') {
+    componentType = 'tlc_solvents'
+  } else if (key === 'status') {
+    componentType = 'status'
+  } else if (key === 'role') {
+    componentType = 'role'
   }
 
   switch (componentType) {
@@ -121,31 +157,59 @@ function determineInputComponent<T extends ZodRawShape>(
       )
     }
     case 'solvent': {
-      // Handle solvent as either string or array of solvent objects
-      if (Array.isArray(value)) {
-        return (
-          <SolventInputField
-            key={key}
-            name={key}
-            onChange={(newValue) => updateMetadata(key, newValue)}
-            readonly={readonly}
-            values={value as SolventItem[]}
-          />
-        )
-      } else {
-        return (
-          <TextInputField
-            key={key}
-            name={key}
-            onChange={(e) => handleInputChange(e, key)}
-            readonly={readonly}
-            value={(value as string) || ''}
-          />
-        )
-      }
+       // Always use SolventInputField for complex solvent arrays
+      const solventValues = Array.isArray(value) ? (value as SolventItem[]) : []
+      return (
+        <SolventInputField
+          key={key}
+          name={key}
+          onChange={(newValue) => updateMetadata(key, newValue)}
+          readonly={readonly}
+          values={solventValues}
+        />
+      )
+    }
+    case 'status': {
+      return (
+        <SelectField
+          key={key}
+          name={key}
+          onChange={(e) => handleSelectChange(e, key)}
+          options={statusOptions}
+          placeholder="Select status..."
+          readonly={readonly}
+          value={(value as string) || ''}
+        />
+      )
+    }
+    case 'role': {
+      return (
+        <SelectField
+          key={key}
+          name={key}
+          onChange={(e) => handleSelectChange(e, key)}
+          options={roleOptions}
+          placeholder="Select role..."
+          readonly={readonly}
+          value={(value as string) || ''}
+        />
+      )
+    }
+    case 'tlc_solvents': {
+      return (
+        <SelectField
+          key={key}
+          name={key}
+          onChange={(e) => handleSelectChange(e, key)}
+          options={tlcSolventsOptions}
+          placeholder="Select TLC solvent..."
+          readonly={readonly}
+          value={(value as string) || ''}
+        />
+      )
     }
     case 'string':
-      if (datetimeSchema.safeParse(value).success) {
+      if (key.endsWith('_at') || key.startsWith('timestamp_')) {
         return (
           <DateInputField
             key={key}
@@ -374,10 +438,26 @@ const InspectorSidebar = ({
     const target = e.target
     let newValue = extractValue(target)
 
-    // Only add 'Z' for actual datetime fields (fields ending with '_at')
-    if (typeof newValue === 'string' && key.endsWith('_at')) {
-      const parsedDate = new Date(newValue)
-      if (!isNaN(parsedDate.getTime())) newValue += 'Z'
+     // Handle datetime fields - ensure proper ISO format
+    if (
+      typeof newValue === 'string' &&
+      (key.endsWith('_at') || key.startsWith('timestamp_'))
+    ) {
+      // If it's already ISO format or the DateInputField has converted it, don't modify
+      if (
+        newValue.includes('T') &&
+        (newValue.endsWith('Z') ||
+          newValue.includes('+') ||
+          newValue.includes('-'))
+      ) {
+        // Already in ISO format, keep as is
+      } else {
+        // Try to parse as date and convert to ISO if valid
+        const parsedDate = new Date(newValue)
+        if (!isNaN(parsedDate.getTime())) {
+          newValue = parsedDate.toISOString()
+        }
+      }
     }
     console.log('New Value:', newValue, 'for key:', key)
 

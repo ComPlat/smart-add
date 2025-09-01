@@ -121,6 +121,7 @@ export function identifyTypeName(
   }
 }
 const hiddenKeys = Object.freeze([
+   //Hidden keys for Sample
   'created_at',
   'updated_at',
   'deleted_at',
@@ -149,6 +150,14 @@ const hiddenKeys = Object.freeze([
   'sum_formula',
   'molfile',
   'real_amount_value',
+    //Hidden keys for Reaction
+  'reaction_svg_file',
+  'rinchi_long_key',
+  'rinchi_string',
+  'rinchi_web_key',
+  'rinchi_short_key',
+  'origin',
+  'duration'
 ])
 
 export const isHidden = (key: string): boolean => hiddenKeys.includes(key)
