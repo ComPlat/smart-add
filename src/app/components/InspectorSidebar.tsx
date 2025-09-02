@@ -26,6 +26,7 @@ import renameFolder from './context-menu/renameFolder'
 import ArrayInputField from './input-components/ArrayInputField'
 import CheckboxField from './input-components/CheckboxField'
 import DateInputField from './input-components/DateInputField'
+import FileUploadInputField from './input-components/FileUploadInputField'
 import NumberInputField from './input-components/NumberInputField'
 import ReactionSchemeDropDownMenu from './input-components/ReactionSchemeDropDownMenu'
 import QuantityInputField from './input-components/QuantityInputField'
@@ -113,6 +114,8 @@ function determineInputComponent<T extends ZodRawShape>(
     componentType = 'string'
   } else if (key === 'kind') {
     componentType = 'string'
+  } else if (key === 'molfile') {
+    componentType = 'molfile'
   }
 
   switch (componentType) {
@@ -283,6 +286,19 @@ function determineInputComponent<T extends ZodRawShape>(
           onChange={(e) => handleInputChange(e, key)}
         />
       )
+    case 'molfile': {
+      return (
+        <FileUploadInputField
+          key={key}
+          name={key}
+          onChange={(content) => updateMetadata(key, content)}
+          readonly={readonly}
+          value={value as string}
+          acceptedTypes=".mol,.txt"
+          maxFileSize={1024 * 1024} // 1MB
+        />
+      )
+    }
     case 'array':
       return (
         <ArrayInputField
