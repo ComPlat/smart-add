@@ -614,10 +614,11 @@ const InspectorSidebar = ({
                   .sort(([keyA], [keyB]) => {
                     const topFields = [
                       'name',
+                      'decoupled',
                       'instrument',
+                      'molfile',
                       'status',
                       'description',
-                      'decoupled',
                       'external_label',
                       'density',
                       'molarity_value',

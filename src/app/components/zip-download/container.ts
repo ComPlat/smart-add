@@ -35,8 +35,6 @@ const SubContainer = ({
   const { containable_id = null, containable_type = null } =
     dtypeMapping[folder.dtype as keyof typeof dtypeMapping] || {}
 
-  const isAnalysis = folder.metadata?.container_type === 'analysis'
-
   return {
     [uidMap[folder.uid]]: {
       ...containerSchema.parse({

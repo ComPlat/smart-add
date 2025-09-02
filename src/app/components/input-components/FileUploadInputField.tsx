@@ -33,19 +33,23 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
 
     // Check minimum lines (header block + counts line)
     if (lines.length < 4) {
-      errors.push('MOL file must have at least 4 lines (3 header lines + counts line)')
+      errors.push(
+        'MOL file must have at least 4 lines (3 header lines + counts line)',
+      )
       return { isValid: false, errors }
     }
 
     // Check for M  END terminator
-    const hasEndTerminator = lines.some(line => line.trim().startsWith('M  END'))
+    const hasEndTerminator = lines.some((line) =>
+      line.trim().startsWith('M  END'),
+    )
     if (!hasEndTerminator) {
       errors.push('Missing "M  END" terminator')
     }
 
     return {
       isValid: errors.length === 0,
-      errors: errors.length > 0 ? errors : undefined
+      errors: errors.length > 0 ? errors : undefined,
     }
   }
 
@@ -68,14 +72,15 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
 
     try {
       const content = await file.text()
-      
+
       // Validate MOL file format for both .mol and .txt files
       if (extension === 'mol' || extension === 'txt') {
         const validation = validateMolFile(content)
         setMolInfo(validation)
-        
+
         if (!validation.isValid) {
-          const errorMsg = validation.errors?.join('\n') || 'Invalid MOL file format'
+          const errorMsg =
+            validation.errors?.join('\n') || 'Invalid MOL file format'
           alert(`MOL File Validation Error:\n\n${errorMsg}`)
           return
         }
@@ -83,7 +88,7 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
         // For other file types, clear validation info
         setMolInfo(null)
       }
-      
+
       onChange(content)
     } catch (error) {
       console.error('Error reading file:', error)
@@ -104,7 +109,7 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
   return (
     <div className="flex flex-col text-sm">
       <p className="font-bold">{formatLabel(name)}</p>
-      
+
       <div className="mt-2 space-y-2">
         {/* File Upload Button */}
         <div className="flex gap-2">
@@ -127,7 +132,7 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
           >
             Upload File
           </label>
-          
+
           {value && (
             <button
               type="button"
@@ -143,14 +148,18 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
         {/* MOL File Status */}
         {molInfo && molInfo.isValid && (
           <div className="rounded border border-green-200 bg-green-50 p-2">
-            <p className="text-xs font-semibold text-green-800">✓ Valid MOL file format</p>
+            <p className="text-xs font-semibold text-green-800">
+              ✓ Valid MOL file format
+            </p>
           </div>
         )}
 
         {/* Validation Errors */}
         {molInfo && !molInfo.isValid && (
           <div className="rounded border border-red-200 bg-red-50 p-3">
-            <h4 className="text-xs font-semibold text-red-800 mb-2">Validation Errors</h4>
+            <h4 className="text-xs font-semibold text-red-800 mb-2">
+              Validation Errors
+            </h4>
             <ul className="text-xs text-red-700 space-y-1">
               {molInfo.errors?.map((error, index) => (
                 <li key={index} className="flex items-start">
@@ -165,10 +174,10 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
         {/* Content Preview */}
         <textarea
           className={`mt-2 h-32 w-full rounded border px-2 py-1 text-xs font-mono outline-gray-200 focus:border-kit-primary-full ${
-            molInfo && molInfo.isValid 
-              ? 'border-green-300' 
-              : molInfo && !molInfo.isValid 
-              ? 'border-red-300' 
+            molInfo && molInfo.isValid
+              ? 'border-green-300'
+              : molInfo && !molInfo.isValid
+              ? 'border-red-300'
               : 'border-gray-300'
           } ${
             readonly
@@ -177,13 +186,14 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
           }`}
           placeholder="File content will appear here..."
           readOnly
-          value={value}
+          value={value || ''}
           title="File content (read-only)"
         />
-        
+
         {/* File Info */}
         <p className="text-xs text-gray-500">
-          Accepted formats: {acceptedTypes} | Max size: {maxFileSize / 1024 / 1024}MB
+          Accepted formats: {acceptedTypes} | Max size:{' '}
+          {maxFileSize / 1024 / 1024}MB
         </p>
       </div>
     </div>

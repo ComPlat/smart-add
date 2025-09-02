@@ -5,6 +5,7 @@ import {
   filesDB,
 } from '@/database/db'
 import { FileNode } from '@/helper/types'
+import { dragNotifications } from '@/utils/dragNotifications'
 import { DraggingPosition, TreeItem, TreeItemIndex } from 'react-complex-tree'
 
 const findItemInTable = async (
@@ -165,6 +166,11 @@ const handleFileMove = async (
           await table.put(item as ExtendedFile & ExtendedFolder)
         }),
       ),
+  )
+
+  // Show success notification after successful drop
+  dragNotifications.showSuccess(
+    `Successfully moved ${items.length} item${items.length > 1 ? 's' : ''}!`,
   )
 }
 
