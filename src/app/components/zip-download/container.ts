@@ -44,7 +44,7 @@ const SubContainer = ({
         containable_id,
         containable_type,
         created_at: currentDate,
-        description: null,
+        description: folder.metadata?.description || null,
         extended_metadata: folder.metadata?.extended_metadata || {},
         name: folder.name,
         parent_id: uidMap[folder.parentUid] || null,

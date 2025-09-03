@@ -65,7 +65,7 @@ export const sampleTemplate: Sample = {
   melting_point: null,
   boiling_point: null,
   fingerprint_id: null,
-  xref: null,
+  xref: {},
   molarity_value: null,
   molarity_unit: 'M',
   molecule_name_id: null,

@@ -3,9 +3,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import { FaRegBell } from 'react-icons/fa6'
-
 import chemotionLogo from '../../../../public/Chemotion_full.svg'
-import logo from '../../../../public/logo.png'
+import logo from '../../../../public/smartadd.png'
+import smartAdd1 from '../../../../public/smarAdd1.png'
+import smartAdd2 from '../../../../public/smartAdd2.png'
+import smartAdd3 from '../../../../public/smartAdd3.png'
 
 const Header = () => {
   const [open, setOpen] = useState(false)
@@ -33,7 +35,9 @@ const Header = () => {
         alt="SmartAdd Logo"
         className="self-center"
         height={100}
-        src={logo}
+        width={100}
+        priority
+        src={smartAdd3}
       />
       <Popover
         content={<a onClick={hide}>Close</a>}

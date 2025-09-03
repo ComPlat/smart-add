@@ -109,7 +109,7 @@ export const sampleSchema = z.object({
   melting_point: nullableString, // Changed to string to support ranges like "12.0..Infinity"
   boiling_point: nullableString, // Changed to string to support ranges like "-Infinity..Infinity"
   fingerprint_id: uuidSchema,
-  xref: z.any().nullable(),
+  xref: z.object({}).catchall(z.any()).default({}),
   molecule_name_id: uuidSchema,
   molfile_version: nullableString,
   mol_rdkit: nullableString,

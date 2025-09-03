@@ -24,6 +24,7 @@ export const getTotalLength = (
 }
 
 const readonlyKeys = Object.freeze([
+  "name",
   'created_at',
   'updated_at',
   'deleted_at',
@@ -62,18 +63,18 @@ export function identifyType<T extends ZodRawShape>(
   schema: ZodObject<T>,
   key: keyof T,
 ): [
-  (
-    | 'array'
-    | 'boolean'
-    | 'enum'
-    | 'null'
-    | 'number'
-    | 'object'
-    | 'string'
-    | 'unknown'
-  ),
-  boolean,
-] {
+    (
+      | 'array'
+      | 'boolean'
+      | 'enum'
+      | 'null'
+      | 'number'
+      | 'object'
+      | 'string'
+      | 'unknown'
+    ),
+    boolean,
+  ] {
   const field = schema.shape[key]
   if (field instanceof ZodOptional || field instanceof ZodNullable) {
     return [identifyTypeName(field.unwrap() as unknown as ZodType), true]
@@ -89,6 +90,7 @@ type ZodType =
   | ZodEnum<any>
   | ZodNull
   | ZodNumber
+  | ZodObject<any>
   | ZodString
 
 export function identifyTypeName(
@@ -111,6 +113,8 @@ export function identifyTypeName(
   } else if (type instanceof ZodNull) {
     return 'null'
   } else if (type instanceof ZodAny) {
+    return 'object'
+  } else if (type instanceof ZodObject) {
     return 'object'
   } else if (type instanceof ZodEnum) {
     return 'enum'
@@ -158,6 +162,10 @@ const hiddenKeys = Object.freeze([
   'origin',
   'duration',
   'content',
+  'conditions',
+  'variations',
+  'temperature',
+  'observation',
 ])
 
 export const isHidden = (key: string): boolean => hiddenKeys.includes(key)
