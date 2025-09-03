@@ -8,6 +8,7 @@ import chemotionLogo from '../../../../public/Chemotion_full.svg'
 // import smartAdd1 from '../../../../public/smarAdd1.png'
 // import smartAdd2 from '../../../../public/smartAdd2.png'
 import smartAdd3 from '../../../../public/smartAdd3.png'
+import smartAdd4 from '../../../../public/smartAdd4.png'
 
 const Header = () => {
   const [open, setOpen] = useState(false)
@@ -37,7 +38,7 @@ const Header = () => {
         height={100}
         width={100}
         priority
-        src={smartAdd3}
+        src={smartAdd4}
       />
       <Popover
         content={<a onClick={hide}>Close</a>}
