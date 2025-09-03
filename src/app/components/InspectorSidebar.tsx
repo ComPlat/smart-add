@@ -36,42 +36,15 @@ import SolventInputField, {
 import StereoSelectField from './input-components/StereoSelectField'
 import TextAreaInputField from './input-components/TextAreaInputField'
 import TextInputField from './input-components/TextInputField'
-import SelectField, { SelectOption } from './input-components/SelectField'
+import SelectField from './input-components/SelectField'
+import OntologyTreeSelect from './input-components/OntologyTreeSelect'
 import { determineSchema } from './zip-download/zodSchemes'
-
-const tlcSolventsOptions: SelectOption[] = [
-  {
-    value: 'cyclohexane/ethyl acetate 20:1',
-    label: 'cyclohexane/ethyl acetate 20:1',
-  },
-  { value: 'CH₂Cl₂/MeOH 20:1', label: 'CH₂Cl₂/MeOH 20:1' },
-  {
-    value: 'cyclohexane/ethyl acetate 20:1 + 1% NEt₃',
-    label: 'cyclohexane/ethyl acetate 20:1 + 1% NEt₃',
-  },
-]
-
-const statusOptions: SelectOption[] = [
-  { value: 'Planned', label: 'Planned' },
-  { value: 'Running', label: 'Running' },
-  { value: 'Done', label: 'Done' },
-  { value: 'Successful', label: 'Successful' },
-  { value: 'Not Successful', label: 'Not Successful' },
-  { value: 'Analyses Pending', label: 'Analyses Pending' },
-]
-
-const analysisStatusOptions: SelectOption[] = [
-  { value: 'Confirmed', label: 'Confirmed' },
-  { value: 'Unconfirmed', label: 'Unconfirmed' },
-]
-
-const roleOptions: SelectOption[] = [
-  { value: 'gp', label: 'General Procedure (gp)' },
-  { value: 'parts', label: 'Parts' },
-  { value: 'single', label: 'Single' },
-  { value: 'parallel', label: 'Parallel' },
-  { value: 'screening', label: 'Screening' },
-]
+import {
+  tlcSolventsOptions,
+  statusOptions,
+  analysisStatusOptions,
+  roleOptions,
+} from './input-components/selectOptions'
 
 function determineInputComponent<T extends ZodRawShape>(
   key: string,
@@ -113,7 +86,9 @@ function determineInputComponent<T extends ZodRawShape>(
   } else if (key === 'instrument') {
     componentType = 'string'
   } else if (key === 'kind') {
-    componentType = 'string'
+    componentType = 'kind'
+  } else if (key === 'rnxo') {
+    componentType = 'rnxo'
   } else if (key === 'molfile') {
     componentType = 'molfile'
   }
@@ -222,6 +197,32 @@ function determineInputComponent<T extends ZodRawShape>(
           placeholder="Select TLC solvent..."
           readonly={readonly}
           value={(value as string) || ''}
+        />
+      )
+    }
+    case 'kind': {
+      return (
+        <OntologyTreeSelect
+          key={key}
+          value={(value as string) || ''}
+          onChange={(selectedValue) => updateMetadata(key, selectedValue)}
+          ontologyType={'analysis'}
+          placeholder={`Select analysis ontology type...`}
+          readonly={readonly}
+          name="kind"
+        />
+      )
+    }
+    case 'rnxo': {
+      return (
+        <OntologyTreeSelect
+          key={key}
+          value={(value as string) || ''}
+          onChange={(selectedValue) => updateMetadata(key, selectedValue)}
+          ontologyType="reaction"
+          placeholder="Select reaction ontology type..."
+          readonly={readonly}
+          name="rnxo"
         />
       )
     }
@@ -618,7 +619,8 @@ const InspectorSidebar = ({
                       'instrument',
                       'molfile',
                       'status',
-                      'description',
+                      'rnxo',
+                      'solvent',
                       'external_label',
                       'density',
                       'molarity_value',
@@ -626,6 +628,7 @@ const InspectorSidebar = ({
                       'target_amount_value',
                       'real_amount_value',
                       'kind',
+                      'description',
                     ]
                     const indexA = topFields.indexOf(keyA)
                     const indexB = topFields.indexOf(keyB)

@@ -38,5 +38,5 @@ export const roleOptions: SelectOption[] = [
   {
     label: 'Single',
     value: 'single',
-  }
+  },
 ]
