@@ -9,6 +9,8 @@ import {
   FaRegFilePdf,
   FaRegFileWord,
   FaRegFileZipper,
+  FaFolderMinus,
+  FaFolderPlus 
 } from 'react-icons/fa6'
 import { MdFolder, MdFolderOpen } from 'react-icons/md'
 import { PiFileSvgBold } from 'react-icons/pi'
@@ -31,6 +33,8 @@ const ICONS: Readonly<Record<string, ReactElement>> = {
   xlx: <FaRegFileExcel />,
   zip: <FaFileZipper />,
   zipOpen: <FaRegFileZipper />,
+  folderPlus: <FaFolderPlus />,
+  folderMinus: <FaFolderMinus />,
 }
 
 export { ICONS }
