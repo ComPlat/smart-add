@@ -178,7 +178,7 @@ export const reactionTemplate = {
   rinchi_short_key: null,
   rinchi_web_key: null,
   duration: null,
-  rnxo: null,
+  rxno: null,
   conditions: null,
   variations: null,
 }

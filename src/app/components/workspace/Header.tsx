@@ -4,9 +4,9 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { FaRegBell } from 'react-icons/fa6'
 import chemotionLogo from '../../../../public/Chemotion_full.svg'
-import logo from '../../../../public/smartadd.png'
-import smartAdd1 from '../../../../public/smarAdd1.png'
-import smartAdd2 from '../../../../public/smartAdd2.png'
+// import logo from '../../../../public/smartadd.png'
+// import smartAdd1 from '../../../../public/smarAdd1.png'
+// import smartAdd2 from '../../../../public/smartAdd2.png'
 import smartAdd3 from '../../../../public/smartAdd3.png'
 
 const Header = () => {

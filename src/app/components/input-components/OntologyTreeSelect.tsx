@@ -66,7 +66,7 @@ const loadOntologyData = async (
     return ontologyCache.get(ontologyType)!
   }
 
-  const fileName = ontologyType === 'reaction' ? 'rnxo.json' : 'chmo.json'
+  const fileName = ontologyType === 'reaction' ? 'rxno.json' : 'chmo.json'
   const response = await fetch(`/data/ontologies/${fileName}`)
 
   if (!response.ok) {

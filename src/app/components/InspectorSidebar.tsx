@@ -87,8 +87,8 @@ function determineInputComponent<T extends ZodRawShape>(
     componentType = 'string'
   } else if (key === 'kind') {
     componentType = 'kind'
-  } else if (key === 'rnxo') {
-    componentType = 'rnxo'
+  } else if (key === 'rxno') {
+    componentType = 'rxno'
   } else if (key === 'molfile') {
     componentType = 'molfile'
   }
@@ -213,7 +213,7 @@ function determineInputComponent<T extends ZodRawShape>(
         />
       )
     }
-    case 'rnxo': {
+    case 'rxno': {
       return (
         <OntologyTreeSelect
           key={key}
@@ -222,7 +222,7 @@ function determineInputComponent<T extends ZodRawShape>(
           ontologyType="reaction"
           placeholder="Select reaction ontology type..."
           readonly={readonly}
-          name="rnxo"
+          name="rxno"
         />
       )
     }
@@ -619,7 +619,7 @@ const InspectorSidebar = ({
                       'instrument',
                       'molfile',
                       'status',
-                      'rnxo',
+                      'rxno',
                       'solvent',
                       'external_label',
                       'density',

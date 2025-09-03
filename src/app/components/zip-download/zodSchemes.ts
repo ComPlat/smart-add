@@ -386,7 +386,7 @@ export const reactionSchema = z.object({
   rinchi_short_key: nullableString,
   rinchi_web_key: nullableString,
   duration: nullableString,
-  rnxo: nullableString,
+  rxno: nullableString,
   conditions: nullableString,
   variations: nullableString,
 })
