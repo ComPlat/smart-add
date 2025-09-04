@@ -10,7 +10,7 @@ import {
   FaRegFileWord,
   FaRegFileZipper,
   FaFolderMinus,
-  FaFolderPlus 
+  FaFolderPlus,
 } from 'react-icons/fa6'
 import { MdFolder, MdFolderOpen } from 'react-icons/md'
 import { PiFileSvgBold } from 'react-icons/pi'

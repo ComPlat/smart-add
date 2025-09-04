@@ -7,7 +7,7 @@ import chemotionLogo from '../../../../public/Chemotion_full.svg'
 // import logo from '../../../../public/smartadd.png'
 // import smartAdd1 from '../../../../public/smarAdd1.png'
 // import smartAdd2 from '../../../../public/smartAdd2.png'
-import smartAdd3 from '../../../../public/smartAdd3.png'
+// import smartAdd3 from '../../../../public/smartAdd3.png'
 import smartAdd4 from '../../../../public/smartAdd4.png'
 
 const Header = () => {

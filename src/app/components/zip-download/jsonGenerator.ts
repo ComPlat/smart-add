@@ -166,9 +166,12 @@ export const generateExportJson = async (
 
     // Convert description from string to Delta format for reactions AFTER parsing
     const reactionForExport = { ...parsedReaction }
-    if (reactionForExport.description && typeof reactionForExport.description === 'string') {
+    if (
+      reactionForExport.description &&
+      typeof reactionForExport.description === 'string'
+    ) {
       ;(reactionForExport as any).description = {
-        ops: [{ insert: reactionForExport.description + '\n' }]
+        ops: [{ insert: reactionForExport.description + '\n' }],
       }
     }
 

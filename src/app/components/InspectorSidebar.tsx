@@ -468,26 +468,10 @@ const InspectorSidebar = ({
     const target = e.target
     let newValue = extractValue(target)
 
-    // Handle datetime fields - ensure proper ISO format
-    if (
-      typeof newValue === 'string' &&
-      (key.endsWith('_at') || key.startsWith('timestamp_'))
-    ) {
-      // If it's already ISO format or the DateInputField has converted it, don't modify
-      if (
-        newValue.includes('T') &&
-        (newValue.endsWith('Z') ||
-          newValue.includes('+') ||
-          newValue.includes('-'))
-      ) {
-        // Already in ISO format, keep as is
-      } else {
-        // Try to parse as date and convert to ISO if valid
-        const parsedDate = new Date(newValue)
-        if (!isNaN(parsedDate.getTime())) {
-          newValue = parsedDate.toISOString()
-        }
-      }
+    // Only add 'Z' for actual datetime fields (fields ending with '_at')
+    if (typeof newValue === 'string' && key.endsWith('_at')) {
+      const parsedDate = new Date(newValue)
+      if (!isNaN(parsedDate.getTime())) newValue += 'Z'
     }
 
     // Update the field value

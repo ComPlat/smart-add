@@ -1,5 +1,13 @@
 import { formatLabel } from '@/helper/utils'
 import { MdAccessTime } from 'react-icons/md'
+import { DatePicker } from 'antd'
+import { useState, useEffect } from 'react'
+import dayjs from 'dayjs'
+import type { Dayjs } from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+
+// Extend dayjs with required plugins
+dayjs.extend(customParseFormat)
 
 interface DateInputFieldProps {
   autoFocus?: boolean
@@ -21,12 +29,26 @@ const DateInputField: React.FC<DateInputFieldProps> = ({
   readonly = false,
   value = '',
 }) => {
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const [displayValue, setDisplayValue] = useState('')
+
+  // Update display value when prop value changes
+  useEffect(() => {
+    if (name.startsWith('timestamp_')) {
+      // For timestamp fields, store as DD/MM/YYYY HH:mm:ss format directly
+      setDisplayValue(value || '')
+    } else {
+      // For other date fields, convert from ISO to display format
+      setDisplayValue(formatDisplayValue(value))
+    }
+  }, [value, name])
+
   // Convert ISO datetime to DD/MM/YYYY HH:mm:ss format for display
   const formatDisplayValue = (isoValue: string): string => {
     if (!isoValue) return ''
     try {
       const date = new Date(isoValue)
-      if (isNaN(date.getTime())) return isoValue // Return original if invalid
+      if (isNaN(date.getTime())) return ''
 
       const day = date.getDate().toString().padStart(2, '0')
       const month = (date.getMonth() + 1).toString().padStart(2, '0')
@@ -37,48 +59,39 @@ const DateInputField: React.FC<DateInputFieldProps> = ({
 
       return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`
     } catch {
-      return isoValue
+      return ''
     }
   }
 
-  // Convert DD/MM/YYYY HH:mm:ss format to ISO datetime
+  // Handle input change - only allow valid date characters
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value
-
-    // Check if input matches DD/MM/YYYY HH:mm:ss format
-    const dateTimeRegex = /^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})$/
-    const match = inputValue.match(dateTimeRegex)
-
-    if (match) {
-      const [, day, month, year, hours, minutes, seconds] = match
-      // Convert to ISO format (YYYY-MM-DDTHH:mm:ss.000Z)
-      const isoDate = new Date(
-        parseInt(year),
-        parseInt(month) - 1,
-        parseInt(day),
-        parseInt(hours),
-        parseInt(minutes),
-        parseInt(seconds),
-      )
-      if (!isNaN(isoDate.getTime())) {
-        e.target.value = isoDate.toISOString()
-      }
-    }
-
-    onChange(e)
+    const filteredValue = e.target.value.replace(/[^0-9\/: ]/g, '')
+    setDisplayValue(filteredValue)
+    
+    // For timestamp fields, store DD/MM/YYYY HH:mm:ss format directly
+    // For other fields (read-only), they will be processed by InspectorSidebar
+    onChange({
+      target: { value: filteredValue, name: e.target.name },
+    } as React.ChangeEvent<HTMLInputElement>)
   }
 
-  const displayValue = formatDisplayValue(value)
+  const handleDatePickerChange = (date: Dayjs | null) => {
+    const displayFormat = date ? date.format('DD/MM/YYYY HH:mm:ss') : ''
+    setDisplayValue(displayFormat)
+    onChange({
+      target: { value: displayFormat, name },
+    } as React.ChangeEvent<HTMLInputElement>)
+    setShowDatePicker(false)
+  }
 
-  const setCurrentTime = () => {
-    const now = new Date()
+  const toggleDatePicker = () => {
+    if (!readonly) setShowDatePicker(!showDatePicker)
+  }
 
-    // Create synthetic event with ISO format for storage
-    const syntheticEvent = {
-      target: { value: now.toISOString(), name },
-    } as React.ChangeEvent<HTMLInputElement>
-
-    onChange(syntheticEvent)
+  const getDayjsValue = (): Dayjs | null => {
+    if (!value) return null
+    const dayjsValue = dayjs(value, 'DD/MM/YYYY HH:mm:ss')
+    return dayjsValue.isValid() ? dayjsValue : null
   }
 
   return (
@@ -104,14 +117,29 @@ const DateInputField: React.FC<DateInputFieldProps> = ({
         {!readonly && (
           <button
             type="button"
-            onClick={setCurrentTime}
+            onClick={toggleDatePicker}
             className="mt-2 rounded border border-gray-300 bg-gray-50 px-3 py-1 text-sm hover:bg-gray-100 focus:border-kit-primary-full flex items-center justify-center"
-            title="Set current time"
+            title="Open date picker"
           >
             <MdAccessTime />
           </button>
         )}
       </div>
+      
+      {showDatePicker && !readonly && (
+        <div className="mt-2 relative">
+          <DatePicker
+            open={showDatePicker}
+            format="DD/MM/YYYY HH:mm:ss"
+            onChange={handleDatePickerChange}
+            onOpenChange={setShowDatePicker}
+            placeholder="DD/MM/YYYY HH:mm:ss"
+            showTime={{ format: 'HH:mm:ss' }}
+            style={{ width: '100%' }}
+            value={getDayjsValue()}
+          />
+        </div>
+      )}
     </label>
   )
 }
