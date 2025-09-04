@@ -67,7 +67,7 @@ const DateInputField: React.FC<DateInputFieldProps> = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const filteredValue = e.target.value.replace(/[^0-9\/: ]/g, '')
     setDisplayValue(filteredValue)
-    
+
     // For timestamp fields, store DD/MM/YYYY HH:mm:ss format directly
     // For other fields (read-only), they will be processed by InspectorSidebar
     onChange({
@@ -125,7 +125,7 @@ const DateInputField: React.FC<DateInputFieldProps> = ({
           </button>
         )}
       </div>
-      
+
       {showDatePicker && !readonly && (
         <div className="mt-2 relative">
           <DatePicker
