@@ -154,13 +154,13 @@ const OntologyTreeSelect: React.FC<TreeSelectFieldProps> = ({
 
   const onthologyLabel = name
     ? formatLabel(name) === 'Kind'
-      ? 'Type Ontology(CHMO)'
-      : formatLabel(name)
+      ? 'Type (Chemicals Method Ontology - CHMO)'
+      : formatLabel(name)==="Rxno"?"Type (Name Reaction Ontology - RXNO)":undefined
     : undefined
 
   return (
     <label className="flex flex-col text-sm">
-      {onthologyLabel && <p className="font-bold">{onthologyLabel}</p>}
+      {onthologyLabel && <p className="font-bold mb-2">{onthologyLabel}</p>}
       <TreeSelect
         style={{ width: '100%' }}
         value={value || undefined}

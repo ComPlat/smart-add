@@ -5,9 +5,13 @@ import { useState, useEffect } from 'react'
 import dayjs from 'dayjs'
 import type { Dayjs } from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
+import weekday from 'dayjs/plugin/weekday'
+import localeData from 'dayjs/plugin/localeData'
 
 // Extend dayjs with required plugins
 dayjs.extend(customParseFormat)
+dayjs.extend(weekday)
+dayjs.extend(localeData)
 
 interface DateInputFieldProps {
   autoFocus?: boolean
