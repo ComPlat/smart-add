@@ -531,7 +531,7 @@ const InspectorSidebar = ({
             isOpen ? 'translate-x-0' : 'translate-x-full'
           } z-40 max-h-screen overflow-y-auto p-4 duration-300 ease-in-out`}
         >
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-4">
             <button onClick={handleClose}>
               <svg
                 className="absolute right-2 top-2 h-6 w-6 cursor-pointer duration-100 hover:text-kit-primary-full"

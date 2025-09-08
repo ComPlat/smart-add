@@ -2,13 +2,9 @@ import { Badge, Popover } from 'antd'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
-import { FaRegBell } from 'react-icons/fa6'
+// import { FaRegBell } from 'react-icons/fa6'
 import chemotionLogo from '../../../../public/Chemotion_full.svg'
-// import logo from '../../../../public/smartadd.png'
-// import smartAdd1 from '../../../../public/smarAdd1.png'
-// import smartAdd2 from '../../../../public/smartAdd2.png'
-// import smartAdd3 from '../../../../public/smartAdd3.png'
-import smartAdd4 from '../../../../public/smartAdd4.png'
+import logo from '../../../../public/logo.png'
 
 const Header = () => {
   const [open, setOpen] = useState(false)
@@ -22,25 +18,28 @@ const Header = () => {
   }
 
   return (
-    <header className="flex w-full flex-row justify-between bg-white px-4 py-2 shadow-sm">
+    <header 
+    className="flex w-full flex-row justify-between bg-white px-4 py-2 shadow-sm"
+    >
       <Link href="https://chemotion.net/" className="self-center">
         <Image
           alt="Chemotion Logo"
-          className="self-center"
-          height={50}
-          priority
           src={chemotionLogo}
         />
       </Link>
       <Image
         alt="SmartAdd Logo"
         className="self-center"
-        height={100}
         width={100}
-        priority
-        src={smartAdd4}
+        src={logo}
       />
-      <Popover
+
+      <button className="self-center rounded bg-kit-primary-full px-2 py-1 text-sm text-white duration-150 hover:bg-kit-primary-full/90"
+        onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSe84-hT72jy6ZEeHYPl5WC8WmrnWDV-0RaBwYmrWTwcYsZs2w/viewform?usp=sharing&ouid=100466825347759062327')}
+      >
+        Write Feedback
+      </button>
+      {/* <Popover
         content={<a onClick={hide}>Close</a>}
         onOpenChange={handleOpenChange}
         open={open}
@@ -53,7 +52,7 @@ const Header = () => {
             <FaRegBell size={20} />
           </Badge>
         </button>
-      </Popover>
+      </Popover> */}
     </header>
   )
 }
