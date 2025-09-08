@@ -13,6 +13,7 @@ interface FileUploadInputFieldProps {
   value?: string
   acceptedTypes?: string
   maxFileSize?: number // in bytes
+  onValidationChange?: (isValid: boolean) => void
 }
 
 const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
@@ -22,6 +23,7 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
   value = '',
   acceptedTypes = '.mol,.txt',
   maxFileSize = 1024 * 1024, // 1MB default
+  onValidationChange,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [molInfo, setMolInfo] = useState<MolFileInfo | null>(null)
@@ -77,6 +79,7 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
       if (extension === 'mol' || extension === 'txt') {
         const validation = validateMolFile(content)
         setMolInfo(validation)
+        onValidationChange?.(validation.isValid)
 
         if (!validation.isValid) {
           const errorMsg =
@@ -87,6 +90,7 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
       } else {
         // For other file types, clear validation info
         setMolInfo(null)
+        onValidationChange?.(false)
       }
 
       onChange(content)
@@ -104,6 +108,7 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
   const handleClear = () => {
     onChange('')
     setMolInfo(null)
+    onValidationChange?.(false)
   }
 
   return (

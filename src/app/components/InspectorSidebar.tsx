@@ -46,6 +46,23 @@ import {
   roleOptions,
 } from './input-components/selectOptions'
 
+// MOL file validation function (copied from FileUploadInputField for consistency)
+const validateMolFile = (content: string): boolean => {
+  if (!content || typeof content !== 'string') return false
+
+  const lines = content.split('\n')
+
+  // Check minimum lines (header block + counts line)
+  if (lines.length < 4) return false
+
+  // Check for M  END terminator
+  const hasEndTerminator = lines.some((line) =>
+    line.trim().startsWith('M  END'),
+  )
+
+  return hasEndTerminator
+}
+
 function determineInputComponent<T extends ZodRawShape>(
   key: string,
   value: MetadataValue,
@@ -58,11 +75,14 @@ function determineInputComponent<T extends ZodRawShape>(
   updateMetadata: (key: string, newValue: MetadataValue) => Promise<void>,
   schema?: ZodObject<T>,
   metadata?: Record<string, MetadataValue>,
+  isMolValid?: boolean,
+  onMolValidationChange?: (isValid: boolean) => void,
 ) {
   if (!schema) return
 
   const [type] = identifyType(schema, key)
-  const readonly = isReadonly(key)
+  // Special logic for decoupled field - make it editable when MOL file is valid
+  const readonly = key === 'decoupled' ? !isMolValid : isReadonly(key)
 
   // Skip unit fields as they're handled by QuantityInputField
   if (isQuantityUnit(key)) {
@@ -297,6 +317,7 @@ function determineInputComponent<T extends ZodRawShape>(
           value={value as string}
           acceptedTypes=".mol,.txt"
           maxFileSize={1024 * 1024} // 1MB
+          onValidationChange={onMolValidationChange}
         />
       )
     }
@@ -335,6 +356,7 @@ const InspectorSidebar = ({
   const [isOpen, setIsOpen] = useState(true)
   const [item, setItem] = useState<ExtendedFile | ExtendedFolder | null>(null)
   const [tree, setTree] = useState({} as Record<string, FileNode>)
+  const [isMolValid, setIsMolValid] = useState(false)
 
   const database = useLiveQuery(async () => {
     const files = await filesDB.files.toArray()
@@ -370,6 +392,16 @@ const InspectorSidebar = ({
       setItem(null)
     }
   }, [database?.files, database?.folders, focusedItem])
+
+  // Check if existing MOL content is valid when item changes
+  useEffect(() => {
+    if (item?.metadata?.molfile && typeof item.metadata.molfile === 'string') {
+      const isValid = validateMolFile(item.metadata.molfile)
+      setIsMolValid(isValid)
+    } else {
+      setIsMolValid(false)
+    }
+  }, [item])
 
   const handleClose = () => {
     setIsOpen(false)
@@ -634,6 +666,8 @@ const InspectorSidebar = ({
                         ? determineSchema(item.metadata)
                         : undefined,
                       item.metadata,
+                      isMolValid,
+                      setIsMolValid,
                     ),
                   )
                   .filter(Boolean)}
