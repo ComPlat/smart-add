@@ -27,6 +27,9 @@ export const Attachment = async ({
       Object.entries(container).find(
         ([key, container]) =>
           key === uidMap[file.parentUid] &&
+          container &&
+          typeof container === 'object' &&
+          'container_type' in container &&
           container.container_type === 'dataset',
       )?.[0] || ''
 

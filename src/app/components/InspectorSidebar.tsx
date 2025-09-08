@@ -440,22 +440,22 @@ const InspectorSidebar = ({
           let updatedMetadata = { ...dbItem.metadata }
 
           // Check if this is an extended_metadata field
-          const containerType = updatedMetadata.container_type || ''
+          const containerType = String(updatedMetadata.container_type || '')
 
           if (isExtendedMetadataField(containerType, key)) {
             // Update within extended_metadata
             const currentExtendedMetadata =
-              updatedMetadata.extended_metadata || {}
+              (updatedMetadata.extended_metadata as Record<string, any>) || {}
             updatedMetadata = {
               ...updatedMetadata,
               extended_metadata: {
                 ...currentExtendedMetadata,
                 [key]: newValue,
-              },
+              } as any,
             }
           } else {
             // Regular top-level field
-            updatedMetadata = { ...updatedMetadata, [key]: newValue }
+            updatedMetadata = { ...updatedMetadata, [key]: newValue } as any
           }
 
           let updatedName = item.name
@@ -619,7 +619,10 @@ const InspectorSidebar = ({
                         if (isHidden(key)) return false
 
                         // Only show container-type specific fields
-                        return isExtendedMetadataField(containerType || '', key)
+                        return isExtendedMetadataField(
+                          String(containerType || ''),
+                          key,
+                        )
                       })
                       .forEach(([key, value]) =>
                         flattenedEntries.push([key, value]),

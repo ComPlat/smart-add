@@ -93,7 +93,7 @@ export const createSample = async (
     baseFolderName,
     true,
     '',
-    getMetadata('', uniqueFolderName, 'sample'),
+    getMetadata('', uniqueFolderName, 'sample') as any,
     'sample',
     'product',
   )
@@ -102,14 +102,14 @@ export const createSample = async (
     'analyses',
     true,
     sampleFolder.uid,
-    getMetadata(sampleFolder.uid, 'analyses', 'analyses'),
+    getMetadata(sampleFolder.uid, 'analyses', 'analyses') as any,
     'analyses',
   )
   const structureFolder = await createSubFolders(
     uniqueFolderName,
     ['structure'],
     sampleFolder.uid,
-    [getMetadata(sampleFolder.uid, 'structure', 'structure', '')],
+    [getMetadata(sampleFolder.uid, 'structure', 'structure', '') as any],
     Array(datasets.length).fill('structure'),
   )
   const analysisFolders = await createSubFolders(
@@ -118,7 +118,7 @@ export const createSample = async (
     analysesFolder.uid,
     analyses.map(
       (analysis) =>
-        getMetadata(analysesFolder.uid, analysis, 'analysis', '') as Container,
+        getMetadata(analysesFolder.uid, analysis, 'analysis', '') as any,
     ),
     Array(analyses.length).fill('analysis'),
   )
@@ -129,7 +129,7 @@ export const createSample = async (
       datasets,
       folder.uid,
       datasets.map(
-        (dataset) => getMetadata(folder.uid, dataset, 'dataset') as Container,
+        (dataset) => getMetadata(folder.uid, dataset, 'dataset') as any,
       ),
       Array(datasets.length).fill('dataset'),
     )
@@ -157,7 +157,7 @@ export const createReaction = async (
     baseFolderName,
     true,
     '',
-    getMetadata('', uniqueFolderName, 'reaction'),
+    getMetadata('', uniqueFolderName, 'reaction') as any,
     'reaction',
   )
   const sampleFolder = await createFolder(
@@ -165,7 +165,7 @@ export const createReaction = async (
     sampleName,
     true,
     reactionFolder.uid,
-    getMetadata(reactionFolder.uid, sampleName, 'sample', ''),
+    getMetadata(reactionFolder.uid, sampleName, 'sample', '') as any,
     'sample',
     'product',
   )
@@ -174,7 +174,7 @@ export const createReaction = async (
     'analyses',
     true,
     sampleFolder.uid,
-    getMetadata(sampleFolder.uid, 'analyses', 'analyses', ''),
+    getMetadata(sampleFolder.uid, 'analyses', 'analyses', '') as any,
     'analyses',
   )
 
@@ -184,7 +184,7 @@ export const createReaction = async (
     analysesFolder.uid,
     analyses.map(
       (analysis) =>
-        getMetadata(analysesFolder.uid, analysis, 'analysis', '') as Container,
+        getMetadata(analysesFolder.uid, analysis, 'analysis', '') as any,
     ),
     Array(analyses.length).fill('analysis'),
   )
@@ -195,7 +195,7 @@ export const createReaction = async (
       datasets,
       folder.uid,
       datasets.map(
-        (dataset) => getMetadata(folder.uid, dataset, 'dataset') as Container,
+        (dataset) => getMetadata(folder.uid, dataset, 'dataset') as any,
       ),
       Array(datasets.length).fill('dataset'),
     )
@@ -208,13 +208,8 @@ export const createReaction = async (
       ['structure', 'analyses'],
       sampleFolder.uid,
       [
-        getMetadata(
-          sampleFolder.uid,
-          'structure',
-          'structure',
-          '',
-        ) as Container,
-        getMetadata(sampleFolder.uid, 'analyses', 'analyses') as Container,
+        getMetadata(sampleFolder.uid, 'structure', 'structure', '') as any,
+        getMetadata(sampleFolder.uid, 'analyses', 'analyses') as any,
       ],
       ['structure', 'analyses'],
     ),
@@ -241,7 +236,7 @@ export const createAnalysis = async (
     uniqueFolderName,
     true,
     parentUid,
-    getMetadata(parentUid, uniqueFolderName, 'analysis', '') as Container,
+    getMetadata(parentUid, uniqueFolderName, 'analysis', '') as any,
     'analysis',
   )
 
@@ -250,12 +245,10 @@ export const createAnalysis = async (
     datasets,
     analysisFolder.uid,
     datasets.map(
-      (dataset) =>
-        getMetadata(analysisFolder.uid, dataset, 'dataset') as Container,
+      (dataset) => getMetadata(analysisFolder.uid, dataset, 'dataset') as any,
     ),
     Array(datasets.length).fill('dataset'),
   )
-
   return Promise.all(datasetFolders)
 }
 
@@ -276,7 +269,7 @@ export const createDataset = async (
     uniqueFolderName,
     true,
     parentUid,
-    getMetadata(parentUid, uniqueFolderName, 'dataset', '') as Container,
+    getMetadata(parentUid, uniqueFolderName, 'dataset', '') as any,
     'dataset',
   )
 
