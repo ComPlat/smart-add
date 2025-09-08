@@ -111,7 +111,9 @@ const FileDownloader = () => {
       const exportedZipFileName = `export_${formatDateToTimeStamp(new Date())}`
 
       saveAs(blob, exportedZipFileName)
-      dragNotifications.showSuccess(`${exportedZipFileName} downloaded successfully`)
+      dragNotifications.showSuccess(
+        `${exportedZipFileName} downloaded successfully`,
+      )
     } catch (error) {
       console.error(error)
     }
