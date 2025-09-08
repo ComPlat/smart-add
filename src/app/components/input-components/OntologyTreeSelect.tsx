@@ -155,7 +155,9 @@ const OntologyTreeSelect: React.FC<TreeSelectFieldProps> = ({
   const onthologyLabel = name
     ? formatLabel(name) === 'Kind'
       ? 'Type (Chemicals Method Ontology - CHMO)'
-      : formatLabel(name)==="Rxno"?"Type (Name Reaction Ontology - RXNO)":undefined
+      : formatLabel(name) === 'Rxno'
+      ? 'Type (Name Reaction Ontology - RXNO)'
+      : undefined
     : undefined
 
   return (
