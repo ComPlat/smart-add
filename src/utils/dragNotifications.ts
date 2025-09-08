@@ -108,7 +108,7 @@ class DragNotificationSystem {
         notification.type === 'error'
           ? '#ff4d4f'
           : notification.type === 'success'
-          ? '#52c41a'
+          ? 'var(--kit-primary-full, #4678B2)'
           : '#faad14'
       };
     `
