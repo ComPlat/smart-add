@@ -1,0 +1,240 @@
+{
+  "title": "SmartAdd User Training Guide",
+  "description": "Simplify your chemical data for Chemotion",
+  "mainVideo": {
+    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "title": "Complete SmartAdd Tutorial - From Upload to Export",
+    "description": "Watch this comprehensive tutorial to learn how to use SmartAdd effectively for organizing your chemistry data."
+  },
+  "sections": [
+    {
+      "id": "what-is-smartadd",
+      "title": "What is SmartAdd?",
+      "description": "Introduction to SmartAdd and its benefits",
+      "content": [
+        {
+          "type": "text",
+          "content": "SmartAdd is a web-based companion for Chemotion that helps researchers import, organize, and prepare chemical data before sending it into Chemotion. Instead of wrestling with complex file structures or scattered files, SmartAdd gives you a clear, visual tree view to curate your collection."
+        },
+        {
+          "type": "text",
+          "content": "Before SmartAdd: Hours spent organizing scattered files, manual entry of sample/reaction information, steep learning curve for new users, higher risk of errors during import."
+        },
+        {
+          "type": "text",
+          "content": "With SmartAdd: Drag & drop your files, organized in minutes, tree view clearly shows collection structure, inline editing of samples, reactions, and analyses, export-ready data for Chemotion."
+        }
+      ]
+    },
+    {
+      "id": "getting-started",
+      "title": "Getting Started",
+      "description": "Requirements and first upload steps",
+      "content": [
+        {
+          "type": "text",
+          "content": "Requirements: A modern browser (Chrome, Firefox, Safari, Edge), analytical data files or ZIP archives of your datasets. No installation required."
+        },
+        {
+          "type": "text",
+          "content": "First Upload: Open SmartAdd in your browser, drag & drop analytical files or a ZIP into the upload area, SmartAdd processes the files and shows them as a tree in the right-side workspace."
+        }
+      ]
+    },
+    {
+      "id": "interface-overview",
+      "title": "Understanding the Interface",
+      "description": "Left panel and right workspace overview",
+      "content": [
+        {
+          "type": "text",
+          "content": "📥 Left Panel — Import & Actions:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "\"Drag files here\" upload area",
+            "Upload progress and status",
+            "Action buttons (e.g., Add Sample, Add Reaction, Clear)",
+            "Drag analytical files or ZIP archives",
+            "Use action buttons to add entities",
+            "Click Clear to reset"
+          ]
+        },
+        {
+          "type": "text",
+          "content": "🌳 Right Workspace — Tree View & Editor (Data Preparation):"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Tree view of collections (samples, reactions, analyses)",
+            "Clickable nodes to select items",
+            "Properties editor for the selected item",
+            "Expand/collapse nodes to explore the hierarchy",
+            "Select a node to edit its properties",
+            "Changes save instantly"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "step-by-step-workflow",
+      "title": "Step-by-Step Workflow",
+      "description": "Complete workflow from upload to export",
+      "content": [
+        {
+          "type": "text",
+          "content": "Step 1: Upload Data - Prepare a ZIP (recommended) or drag individual analytical files, include related spectra/logs/metadata."
+        },
+        {
+          "type": "text",
+          "content": "Step 2: Explore & Prepare (Right-Side Tree View) - Review how SmartAdd structured your collection. Typical hierarchy: Samples → Reactions → Analyses / Files. Select a node to edit properties in the editor."
+        },
+        {
+          "type": "text",
+          "content": "Common fields to edit:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Sample: name, amount + units (mg, g, mol), purity, location, description",
+            "Reaction: roles (reactant/product/solvent), RF value, Roles",
+            "Analysis: Type Ontology, file attachments, status, description"
+          ]
+        },
+        {
+          "type": "text",
+          "content": "Step 3: Organize Reactions - Click Add Reaction to create a reaction node, link samples and set roles (reactant/product/solvent)."
+        },
+        {
+          "type": "text",
+          "content": "Step 4: Export for Chemotion - Review: ensure you haven't missed anything you need and relationships correct. Export: click Download as ZIP (ready for Chemotion import). Direct export to Chemotion is planned in a future release."
+        },
+        {
+          "type": "text",
+          "content": "Step 5: Import the ZIP into Chemotion - Open Chemotion, go to Import, select the ZIP file exported from SmartAdd, follow prompts to complete the import."
+        }
+      ]
+    },
+    {
+      "id": "tips-best-practices",
+      "title": "Tips & Best Practices",
+      "description": "Guidelines for optimal use",
+      "content": [
+        {
+          "type": "text",
+          "content": "Before you start:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Keep folders logical before zipping",
+            "Use clear filenames (avoid special characters)",
+            "Include all related data (spectra/logs/metadata)"
+          ]
+        },
+        {
+          "type": "text",
+          "content": "While using SmartAdd:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Work sample-by-sample",
+            "Use consistent naming conventions",
+            "Periodically export a ZIP (checkpoint)",
+            "Validate fields before final export"
+          ]
+        },
+        {
+          "type": "text",
+          "content": "Quality tips:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Be descriptive (use full names)",
+            "Always include units",
+            "Add context in description fields",
+            "Group related items together"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "troubleshooting",
+      "title": "Troubleshooting",
+      "description": "Common issues and solutions",
+      "content": [
+        {
+          "type": "text",
+          "content": "Upload issues:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "ZIP won't upload → check size limit, re-zip, refresh page",
+            "Tree looks wrong → verify original structure, Clear and re-upload"
+          ]
+        },
+        {
+          "type": "text",
+          "content": "Editing issues:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Can't edit → ensure a node, not a folder, is selected",
+            "Changes not visible → click outside field, re-select the node"
+          ]
+        },
+        {
+          "type": "text",
+          "content": "Export issues:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Download blocked → check browser download settings / pop-up blocker",
+            "Try another browser if needed"
+          ]
+        }
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "question": "What browsers are supported?",
+      "answer": "SmartAdd works on all modern browsers including Chrome, Firefox, Safari, and Edge. No installation is required."
+    },
+    {
+      "question": "What file formats can I upload?",
+      "answer": "You can upload analytical data files, ZIP archives containing your datasets, and MOL files. ZIP format is recommended for organized collections."
+    },
+    {
+      "question": "How do I organize my data before uploading?",
+      "answer": "Keep folders logical before zipping, use clear filenames (avoid special characters), and include all related data like spectra, logs, and metadata."
+    },
+    {
+      "question": "Can I edit sample and reaction properties?",
+      "answer": "Yes! Select any node in the tree view to edit its properties. Common fields include sample names, amounts with units, purity, reaction roles, and analysis techniques."
+    },
+    {
+      "question": "How do I export my data for Chemotion?",
+      "answer": "Click the Download as ZIP button after preparing your data. The exported ZIP is ready for Chemotion import. Direct export to Chemotion is planned for future releases."
+    },
+    {
+      "question": "What keyboard shortcuts are available?",
+      "answer": "Arrow keys: Navigate the tree, Enter: Expand/collapse, Tab: Move between editor fields, Ctrl/⌘+S: Export, Esc: Clear selection."
+    },
+    {
+      "question": "Where can I get help?",
+      "answer": "Use the built-in FAQ, contact support, submit feedback and feature requests, or check out our tutorials and documentation."
+    },
+    {
+      "question": "What's coming next for SmartAdd?",
+      "answer": "Upcoming features include tree view enhancements (filters/search), direct import to Chemotion (no manual download), import from other ELNs, and extensions beyond chemistry to other research domains."
+    }
+  ]
+}

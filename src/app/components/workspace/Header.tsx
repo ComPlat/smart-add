@@ -30,18 +30,16 @@ const Header = () => {
       <Popover
         content={
           <div className="flex flex-col gap-2 w-48">
-            <button
-              className="rounded bg-gray-300 px-3 py-2 text-sm text-gray-800 duration-150 hover:bg-gray-400 text-left"
+            <Link
+              href="/docs"
+              target="_blank"
+              className="rounded bg-gray-300 px-3 py-2 text-sm text-gray-800 duration-150 hover:bg-gray-400 text-left block"
               onClick={() => {
-                window.open(
-                  'https://docs.google.com/document/d/1g48--Au2t0pluTcMe-tDJuY7bH4ceruJ5fPOCKQP-bw/edit?usp=sharing',
-                  '_blank',
-                )
                 hide()
               }}
             >
               Documentation
-            </button>
+            </Link>
             <button
               className="rounded bg-kit-primary-full px-3 py-2 text-sm text-white duration-150 hover:bg-kit-primary-full/90 text-left"
               onClick={() => {
