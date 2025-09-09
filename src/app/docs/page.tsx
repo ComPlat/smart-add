@@ -5,13 +5,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import {
   FaPlay,
-  FaLink,
   FaArrowLeft,
   FaBook,
   FaQuestionCircle,
   FaChevronRight,
-  FaCopy,
-  FaCheck,
 } from 'react-icons/fa'
 import {
   MdScience,
@@ -59,7 +56,6 @@ export default function DocumentationPage() {
   const [documentation, setDocumentation] = useState<Documentation | null>(null)
   const [activeSection, setActiveSection] = useState<string>('overview')
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null)
-  const [copiedUrl, setCopiedUrl] = useState(false)
 
   useEffect(() => {
     fetch('/data/documentation.json')
@@ -75,12 +71,6 @@ export default function DocumentationPage() {
   const getYouTubeEmbedUrl = (url: string) => {
     const videoId = url.split('v=')[1]?.split('&')[0]
     return videoId ? `https://www.youtube.com/embed/${videoId}` : url
-  }
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-    setCopiedUrl(true)
-    setTimeout(() => setCopiedUrl(false), 2000)
   }
 
   const handleSectionTransition = (newSection: string) => {
@@ -184,25 +174,6 @@ export default function DocumentationPage() {
                     className="w-full h-full"
                     allowFullScreen
                   />
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-6 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <FaLink className="text-kit-primary-full" size={18} />
-                    <span className="text-sm text-gray-700 font-semibold">
-                      Share this tutorial:
-                    </span>
-                  </div>
-                  <code className="text-sm bg-white px-4 py-2 rounded border border-gray-200 flex-1 font-mono text-gray-800">
-                    {documentation.mainVideo.url}
-                  </code>
-                  <button
-                    onClick={() => copyToClipboard(documentation.mainVideo.url)}
-                    className="flex items-center gap-2 px-6 py-3 text-sm bg-kit-primary-full text-white rounded hover:bg-kit-primary-full/90"
-                  >
-                    {copiedUrl ? <FaCheck size={14} /> : <FaCopy size={14} />}
-                    {copiedUrl ? 'Copied!' : 'Copy Link'}
-                  </button>
                 </div>
               </div>
             </div>

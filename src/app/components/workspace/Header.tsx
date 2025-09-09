@@ -33,7 +33,7 @@ const Header = () => {
             <Link
               href="/docs"
               target="_blank"
-              className="rounded bg-gray-300 px-3 py-2 text-sm text-gray-800 duration-150 hover:bg-gray-400 text-left block"
+              className="rounded !bg-gray-600 px-3 py-2 text-sm !text-white duration-150 hover:!bg-gray-800 text-left block"
               onClick={() => {
                 hide()
               }}
