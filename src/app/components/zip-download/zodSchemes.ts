@@ -109,7 +109,7 @@ export const sampleSchema = z.object({
   melting_point: nullableString, // Changed to string to support ranges like "12.0..Infinity"
   boiling_point: nullableString, // Changed to string to support ranges like "-Infinity..Infinity"
   fingerprint_id: uuidSchema,
-  xref: z.any().nullable(),
+  xref: z.object({}).catchall(z.any()).default({}),
   molecule_name_id: uuidSchema,
   molfile_version: nullableString,
   mol_rdkit: nullableString,
@@ -286,7 +286,15 @@ export const containerSchema = z.object({
   name: nullableString,
   container_type: nullableString,
   description: nullableString,
-  extended_metadata: z.any(),
+  extended_metadata: z
+    .object({
+      // Analysis container fields
+      status: z.enum(['Confirmed', 'Unconfirmed']).nullable().optional(),
+      kind: nullableString.optional(),
+      // Dataset container fields
+      instrument: nullableString.optional(),
+    })
+    .catchall(z.any()),
   created_at: datetimeSchema,
   updated_at: datetimeSchema,
   parent_id: uuidSchema,
@@ -367,7 +375,7 @@ export const reactionSchema = z.object({
   temperature: temperatureObjectSchema,
   status: nullableString,
   reaction_svg_file: nullableString,
-  solvent: nullableString,
+  solvent: solventSchema,
   deleted_at: z.null(),
   short_label: nullableString,
   created_by: uuidSchema,
@@ -378,7 +386,7 @@ export const reactionSchema = z.object({
   rinchi_short_key: nullableString,
   rinchi_web_key: nullableString,
   duration: nullableString,
-  rnxo: nullableString,
+  rxno: nullableString,
   conditions: nullableString,
   variations: nullableString,
 })
@@ -413,8 +421,8 @@ export const sampleWorksheetTableSchema = z.object({
   'sample readout': nullableString,
   'melting pt': nullableNumber,
   'boiling pt': nullableNumber,
-  created_at: nullableString,
-  updated_at: nullableString,
+  created_at: datetimeSchema,
+  updated_at: datetimeSchema,
   user_labels: nullableString,
   literatures: nullableString,
   'canonical smiles': nullableString,

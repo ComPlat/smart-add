@@ -216,6 +216,7 @@ const Workspace = ({ focusedItem, setFocusedItem }: FocusedItemProps) => {
         assignedLength={db.assignedLength}
         inputLength={db.inputLength}
         tree={tree}
+        setFocusedItem={setFocusedItem}
       />
       <ControlledTreeEnvironment
         canDrag={(items) =>

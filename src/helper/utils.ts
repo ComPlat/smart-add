@@ -24,6 +24,7 @@ export const getTotalLength = (
 }
 
 const readonlyKeys = Object.freeze([
+  'name',
   'created_at',
   'updated_at',
   'deleted_at',
@@ -89,6 +90,7 @@ type ZodType =
   | ZodEnum<any>
   | ZodNull
   | ZodNumber
+  | ZodObject<any>
   | ZodString
 
 export function identifyTypeName(
@@ -112,6 +114,8 @@ export function identifyTypeName(
     return 'null'
   } else if (type instanceof ZodAny) {
     return 'object'
+  } else if (type instanceof ZodObject) {
+    return 'object'
   } else if (type instanceof ZodEnum) {
     return 'enum'
   } else if (type instanceof ZodArray) {
@@ -121,6 +125,7 @@ export function identifyTypeName(
   }
 }
 const hiddenKeys = Object.freeze([
+  //Hidden keys for Sample
   'created_at',
   'updated_at',
   'deleted_at',
@@ -147,11 +152,38 @@ const hiddenKeys = Object.freeze([
   'deprecated_solvent',
   'metrics',
   'sum_formula',
-  'molfile',
   'real_amount_value',
+  //Hidden keys for Reaction
+  'reaction_svg_file',
+  'rinchi_long_key',
+  'rinchi_string',
+  'rinchi_web_key',
+  'rinchi_short_key',
+  'origin',
+  'duration',
+  'content',
+  'conditions',
+  'variations',
+  'temperature',
+  'observation',
 ])
 
 export const isHidden = (key: string): boolean => hiddenKeys.includes(key)
+
+// Extended metadata field mapping by container type
+const extendedMetadataFields = Object.freeze({
+  analysis: ['status', 'kind'],
+  dataset: ['instrument'],
+} as const)
+
+export const isExtendedMetadataField = (
+  containerType: string,
+  key: string,
+): boolean => {
+  const fields =
+    extendedMetadataFields[containerType as keyof typeof extendedMetadataFields]
+  return fields ? (fields as readonly string[]).includes(key) : false
+}
 
 const textAreaKeys = Object.freeze(['description', 'molfile'])
 

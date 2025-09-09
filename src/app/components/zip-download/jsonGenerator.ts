@@ -155,17 +155,28 @@ export const generateExportJson = async (
   const uidToReaction = processedFolders.reduce((acc, folder) => {
     if (folder.dtype !== 'reaction') return acc
 
+    const parsedReaction = reactionSchema.parse({
+      ...reactionTemplate,
+      ...folder.metadata,
+      ancestry: Ancestry(folder, assignedFolders, uidMap),
+      created_at: currentDate,
+      updated_at: currentDate,
+      user_id,
+    })
+
+    // Convert description from string to Delta format for reactions AFTER parsing
+    const reactionForExport = { ...parsedReaction }
+    if (
+      reactionForExport.description &&
+      typeof reactionForExport.description === 'string'
+    ) {
+      ;(reactionForExport as any).description = {
+        ops: [{ insert: reactionForExport.description + '\n' }],
+      }
+    }
+
     const reaction = {
-      [sampleReactionUidMap[folder.uid]]: {
-        ...reactionSchema.parse({
-          ...reactionTemplate,
-          ...folder.metadata,
-          ancestry: Ancestry(folder, assignedFolders, uidMap),
-          created_at: currentDate,
-          updated_at: currentDate,
-          user_id,
-        }),
-      },
+      [sampleReactionUidMap[folder.uid]]: reactionForExport,
     }
     return { ...acc, ...reaction }
   }, {})

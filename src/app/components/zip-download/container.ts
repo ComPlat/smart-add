@@ -35,8 +35,6 @@ const SubContainer = ({
   const { containable_id = null, containable_type = null } =
     dtypeMapping[folder.dtype as keyof typeof dtypeMapping] || {}
 
-  const isAnalysis = folder.metadata?.container_type === 'analysis'
-
   return {
     [uidMap[folder.uid]]: {
       ...containerSchema.parse({
@@ -46,14 +44,8 @@ const SubContainer = ({
         containable_id,
         containable_type,
         created_at: currentDate,
-        description: null,
-        extended_metadata: isAnalysis
-          ? {
-              content: '{"ops":[{"insert":"\\n"}]}',
-              index: '0',
-              report: 'true',
-            }
-          : {},
+        description: folder.metadata?.description || null,
+        extended_metadata: folder.metadata?.extended_metadata || {},
         name: folder.name,
         parent_id: uidMap[folder.parentUid] || null,
         updated_at: currentDate,

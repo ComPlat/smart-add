@@ -1,4 +1,6 @@
 import { FileNode } from '@/helper/types'
+import { Dispatch, SetStateAction } from 'react'
+import { TreeItemIndex } from 'react-complex-tree'
 
 import AddReactionButton from '../structure-btns/AddReactionButton'
 import AddSampleButton from '../structure-btns/AddSampleButton'
@@ -9,9 +11,15 @@ type ToolbarProps = {
   assignedLength: number
   inputLength: number
   tree: Record<string, FileNode>
+  setFocusedItem: Dispatch<SetStateAction<TreeItemIndex | undefined>>
 }
 
-const Toolbar = ({ assignedLength, inputLength, tree }: ToolbarProps) => {
+const Toolbar = ({
+  assignedLength,
+  inputLength,
+  tree,
+  setFocusedItem,
+}: ToolbarProps) => {
   return (
     <aside className="flex justify-between p-2">
       <div className="flex gap-2">
@@ -20,6 +28,7 @@ const Toolbar = ({ assignedLength, inputLength, tree }: ToolbarProps) => {
         <ClearButtonGroup
           assignedLength={assignedLength}
           inputLength={inputLength}
+          setFocusedItem={setFocusedItem}
         />
       </div>
       <FileDownloader />

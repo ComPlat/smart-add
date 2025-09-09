@@ -25,10 +25,10 @@ const Icon = (
   return context.isExpanded
     ? isZip
       ? ICONS.zipOpen
-      : ICONS.folderOpen
+      : ICONS.folderMinus
     : isZip
     ? ICONS.zip
-    : ICONS.folder
+    : ICONS.folderPlus
 }
 
 const renderItem = ({

@@ -1,11 +1,10 @@
-import { Badge, Popover } from 'antd'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
-import { FaRegBell } from 'react-icons/fa6'
-
 import chemotionLogo from '../../../../public/Chemotion_full.svg'
 import logo from '../../../../public/logo.png'
+import { Badge, Popover } from 'antd'
+import { useState } from 'react'
+import { FcSettings } from 'react-icons/fc'
 
 const Header = () => {
   const [open, setOpen] = useState(false)
@@ -17,35 +16,52 @@ const Header = () => {
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen)
   }
-
   return (
-    <header className="flex w-full flex-row justify-between bg-white px-4 py-2 shadow-sm">
+    <header className="flex w-full flex-row justify-between bg-white px-4 py-2 shadow-sm h-24 items-center">
       <Link href="https://chemotion.net/" className="self-center">
-        <Image
-          alt="Chemotion Logo"
-          className="self-center"
-          height={50}
-          priority
-          src={chemotionLogo}
-        />
+        <Image alt="Chemotion Logo" src={chemotionLogo} />
       </Link>
       <Image
         alt="SmartAdd Logo"
         className="self-center"
-        height={100}
+        width={100}
         src={logo}
       />
       <Popover
-        content={<a onClick={hide}>Close</a>}
+        content={
+          <div className="flex flex-col gap-2 w-48">
+            <button
+              className="rounded bg-gray-300 px-3 py-2 text-sm text-gray-800 duration-150 hover:bg-gray-400 text-left"
+              onClick={() => {
+                window.open(
+                  'https://docs.google.com/document/d/1g48--Au2t0pluTcMe-tDJuY7bH4ceruJ5fPOCKQP-bw/edit?usp=sharing',
+                  '_blank',
+                )
+                hide()
+              }}
+            >
+              Documentation
+            </button>
+            <button
+              className="rounded bg-kit-primary-full px-3 py-2 text-sm text-white duration-150 hover:bg-kit-primary-full/90 text-left"
+              onClick={() => {
+                window.open('https://forms.gle/op4TQ3aP3XGYkhpCA', '_blank')
+                hide()
+              }}
+            >
+              Write Feedback
+            </button>
+          </div>
+        }
         onOpenChange={handleOpenChange}
         open={open}
         placement="bottomLeft"
-        title="Notifications"
+        title="Actions"
         trigger="click"
       >
         <button className="flex gap-2">
           <Badge className="self-center" count={0} dot>
-            <FaRegBell size={20} />
+            <FcSettings size={24} />
           </Badge>
         </button>
       </Popover>

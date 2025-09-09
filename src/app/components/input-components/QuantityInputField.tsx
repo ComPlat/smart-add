@@ -1,5 +1,6 @@
 import { formatLabel } from '@/helper/utils'
 import { MetadataValue } from '@/database/db'
+import { ChevronDownIcon } from '../workspace/icons/ChevronDownIcon'
 
 interface QuantityInputFieldProps {
   valueKey: string
@@ -55,6 +56,7 @@ const QuantityInputField: React.FC<QuantityInputFieldProps> = ({
   const category = getUnitCategory(valueKey)
   const availableUnits = unitOptions[category] || unitOptions.amount
   const defaultUnit = getDefaultUnit(category)
+  const isMolarityField = category === 'molarity'
 
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.valueAsNumber
@@ -87,7 +89,7 @@ const QuantityInputField: React.FC<QuantityInputFieldProps> = ({
           min={isPositiveOnly ? 0 : undefined}
           name={valueKey}
           onChange={handleValueChange}
-          placeholder="Enter value..."
+          placeholder="Enter number..."
           readOnly={readonly}
           type="number"
           value={value ?? ''}
@@ -96,11 +98,11 @@ const QuantityInputField: React.FC<QuantityInputFieldProps> = ({
           <select
             className={`w-20 appearance-none rounded border border-gray-300 px-2 py-1 pr-8 outline-gray-200 focus:border-kit-primary-full focus:outline-none
             ${
-              readonly
+              readonly || isMolarityField
                 ? 'cursor-not-allowed bg-gray-100 hover:border-inherit'
                 : 'bg-white hover:border-kit-primary-full'
             }`}
-            disabled={readonly}
+            disabled={readonly || isMolarityField}
             name={unitKey}
             onChange={handleUnitChange}
             value={unit || defaultUnit}
@@ -111,20 +113,7 @@ const QuantityInputField: React.FC<QuantityInputFieldProps> = ({
               </option>
             ))}
           </select>
-
-          {/* Custom chevron */}
-          <svg
-            className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.23 8.27a.75.75 0 01.02-1.06z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <ChevronDownIcon className="w-2 h-2 pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 flex-shrink-0" />
         </div>
       </div>
     </label>

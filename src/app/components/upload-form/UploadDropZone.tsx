@@ -4,7 +4,7 @@ import { filesDB } from '@/database/db'
 import { extractFilesFromZip } from '@/helper/extractFilesFromZip'
 import { readSpreadsheet } from '@/helper/readSpreadsheet'
 import { uploadExtractedFiles } from '@/helper/uploadExtractedFiles'
-import { Progress, Upload, UploadProps, message } from 'antd'
+import { Progress, Upload, UploadProps } from 'antd'
 import { RcFile, UploadFile } from 'antd/es/upload'
 import { Dispatch, SetStateAction, useState } from 'react'
 import { v4 } from 'uuid'
@@ -15,6 +15,7 @@ import {
   SampleWorksheetTable,
 } from '../zip-download/zodSchemes'
 import styles from './UploadDropZone.module.css'
+import { dragNotifications } from '@/utils/dragNotifications'
 
 // HINT: Necessary because of the way the Ant Design Upload Component
 //       handles dropped folders. Need to store already uploaded folders
@@ -270,7 +271,7 @@ const handleCustomRequest = async ({
       })
   }
 
-  message.success(`${file.name} uploaded successfully.`)
+  dragNotifications.showSuccess(`${file.name} uploaded successfully.`)
 
   return true
 }

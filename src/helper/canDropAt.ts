@@ -1,7 +1,6 @@
 import { DraggingPosition, TreeItem } from 'react-complex-tree'
 
 import { FileNode } from './types'
-import { messages } from '@/utils/messages'
 
 const canDropAt = (
   items: TreeItem[],
@@ -9,6 +8,7 @@ const canDropAt = (
   treeData: Record<string, FileNode>,
 ) => {
   console.log('=== DRAG & DROP ATTEMPT ===')
+
   console.log(
     'Items being dragged:',
     items.map((item) => ({
@@ -49,6 +49,7 @@ const canDropAt = (
   // Basic duplicate name check
   const targetNode = getTargetNode()
   console.log('Target node:', {
+    targetNode,
     data: targetNode?.data,
     metadata: targetNode?.metadata,
     isFolder: targetNode?.isFolder,
@@ -78,9 +79,19 @@ const canDropAt = (
     })
 
     if (isActuallyAFolder) {
-      console.log('❌ BLOCKED: Only files can be dropped in ExportFiles area')
-      messages.dragDropWarnings.onlyFilesInExport()
-      return false
+      // Allow samples to be dropped into reactions within ExportFiles area
+      const isSample = sourceNode?.dtype === 'sample'
+      const isTargetReaction = targetNode?.dtype === 'reaction'
+
+      if (isSample && isTargetReaction) {
+        console.log(
+          '✅ ALLOWED: Sample can be dropped into reaction in ExportFiles area',
+        )
+        // Continue with other validation rules
+      } else {
+        console.log('❌ BLOCKED: Only files can be dropped in ExportFiles area')
+        return false
+      }
     }
 
     // NEW RESTRICTION 1.1: Files can only be dropped in dataset containers
@@ -91,7 +102,7 @@ const canDropAt = (
       !(window as any).Cypress
     ) {
       const targetName = targetNode?.data || ''
-      const isTargetDataset = targetName.toLowerCase().includes('dataset')
+      const isTargetDataset = targetNode?.dtype === 'dataset'
 
       console.log('🔍 Dataset container check:', {
         targetName,
@@ -111,7 +122,6 @@ const canDropAt = (
               target.targetType === 'between-items' ? target.parentItem : 'N/A',
           },
         )
-        messages.dragDropWarnings.onlyInDatasetContainers()
         return false
       }
     }
@@ -128,15 +138,16 @@ const canDropAt = (
 
     if (isActuallyAFolder) {
       const isRestrictedFolder =
-        sourceName.toLowerCase().includes('analyses') ||
-        sourceName.toLowerCase().includes('sample') ||
-        sourceName.toLowerCase().includes('reaction') ||
-        sourceName.toLowerCase().includes('dataset')
+        sourceNode?.dtype === 'analyses' ||
+        sourceNode?.dtype === 'sample' ||
+        sourceNode?.dtype === 'reaction' ||
+        sourceNode?.dtype === 'dataset'
 
       console.log('🔍 UploadFiles check:', {
         targetTreeId: target.treeId,
         sourceIndex: items[0].index,
         sourceName,
+        sourceDtype: sourceNode?.dtype,
         isActuallyAFolder,
         isRestrictedFolder,
         originalIsFolder: sourceNode?.isFolder || items[0].isFolder,
@@ -146,31 +157,31 @@ const canDropAt = (
         console.log(
           '❌ BLOCKED: Cannot drop analyses, sample, reaction, or dataset folders into upload area',
         )
-        messages.dragDropWarnings.noRestrictedFoldersInUpload()
         return false
       }
     }
   }
 
-  //  logic: Reactions cannot be dropped into samples
-  // Simple name-based detection for now
+  // Business logic: Use dtype for reliable type detection
   const sourceNode = treeData[items[0].index]
   if (sourceNode && targetNode) {
     const sourceName = items[0].data || sourceNode.data
     const targetName = targetNode.data
 
-    // Detect item types by naming pattern
-    const isSourceReaction = sourceName.toLowerCase().includes('reaction')
-    const isSourceAnalysis = sourceName.toLowerCase().includes('analysis')
-    const isSourceSample = sourceName.toLowerCase().includes('sample')
-    const isSourceDataset = sourceName.toLowerCase().includes('dataset')
-    const isTargetReaction = targetName.toLowerCase().includes('reaction')
-    const isTargetSample = targetName.toLowerCase().includes('sample')
-    const isTargetAnalyses = targetName.toLowerCase().includes('analyses')
+    // Detect item types by dtype (much more reliable than name-based detection)
+    const isSourceReaction = sourceNode.dtype === 'reaction'
+    const isSourceAnalysis = sourceNode.dtype === 'analysis'
+    const isSourceSample = sourceNode.dtype === 'sample'
+    const isSourceDataset = sourceNode.dtype === 'dataset'
+    const isTargetReaction = targetNode.dtype === 'reaction'
+    const isTargetSample = targetNode.dtype === 'sample'
+    const isTargetAnalyses = targetNode.dtype === 'analyses'
 
-    console.log(' logic check:', {
+    console.log('🔍 Business logic check:', {
       sourceName,
       targetName,
+      sourceDtype: sourceNode.dtype,
+      targetDtype: targetNode.dtype,
       isSourceReaction,
       isSourceAnalysis,
       isSourceSample,
@@ -183,14 +194,12 @@ const canDropAt = (
     // Rule 1: Reaction cannot be dropped into Sample
     if (isSourceReaction && isTargetSample) {
       console.log('❌ BLOCKED: Cannot drop reaction into sample')
-      messages.dragDropWarnings.noReactionInSample()
       return false
     }
 
     // Rule 2: Reaction cannot be dropped into another Reaction
     if (isSourceReaction && isTargetReaction) {
       console.log('❌ BLOCKED: Cannot drop reaction into another reaction')
-      messages.dragDropWarnings.noReactionInReaction()
       return false
     }
 
@@ -199,26 +208,23 @@ const canDropAt = (
       console.log(
         '❌ BLOCKED: Analysis can only be dropped into analyses folder',
       )
-      messages.dragDropWarnings.analysisOnlyInAnalysesFolder()
       return false
     }
 
     // Rule 4: Sample cannot be dropped into another Sample
     if (isSourceSample && isTargetSample) {
       console.log('❌ BLOCKED: Cannot drop sample into another sample')
-      messages.dragDropWarnings.noSampleInSample()
       return false
     }
 
     // Rule 5: Dataset can only be dropped into analysis items (not reactions, samples, or analyses folders)
     if (isSourceDataset) {
-      const isTargetAnalysis = targetName.toLowerCase().includes('analysis')
+      const isTargetAnalysis = targetNode.dtype === 'analysis'
 
       if (!isTargetAnalysis) {
         console.log(
           '❌ BLOCKED: Dataset can only be dropped into analysis items',
         )
-        messages.dragDropWarnings.datasetOnlyInAnalysis()
         return false
       }
     }

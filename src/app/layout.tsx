@@ -5,6 +5,9 @@ import './globals.css'
 export const metadata: Metadata = {
   description: 'A description for SmartAdd app',
   title: 'SmartAdd',
+  icons: {
+    icon: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({

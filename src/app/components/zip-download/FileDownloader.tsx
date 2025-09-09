@@ -2,14 +2,13 @@
 
 import { ExtendedFile, filesDB } from '@/database/db'
 import { formatDateToTimeStamp } from '@/helper/formatDateToTimeStamp'
-import { message } from 'antd'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { saveAs } from 'file-saver'
 import JSZip from 'jszip'
 import { v4 } from 'uuid'
-
 import { Button } from '../workspace/Button'
 import { generateExportJson } from './jsonGenerator'
+import { dragNotifications } from '@/utils/dragNotifications'
 
 interface FileTree {
   [key: string]: Blob | FileTree
@@ -112,7 +111,9 @@ const FileDownloader = () => {
       const exportedZipFileName = `export_${formatDateToTimeStamp(new Date())}`
 
       saveAs(blob, exportedZipFileName)
-      message.success(`${exportedZipFileName} downloaded successfully`)
+      dragNotifications.showSuccess(
+        `${exportedZipFileName} downloaded successfully`,
+      )
     } catch (error) {
       console.error(error)
     }

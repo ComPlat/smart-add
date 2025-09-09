@@ -36,6 +36,7 @@ const convertToFileTree = (
           index: currentFolder.folderObj.fullPath,
           isFolder: true,
           uid: currentFolder.folderObj.uid,
+          dtype: currentFolder.folderObj.dtype,
         }
 
         const childNodes: Record<string, FileNode>[] = Object.values(
@@ -163,6 +164,7 @@ const retrieveTree = (
         index: root,
         isFolder: true,
         uid: 'root',
+        dtype: undefined,
       },
     }
 

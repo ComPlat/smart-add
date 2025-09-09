@@ -65,7 +65,7 @@ export const sampleTemplate: Sample = {
   melting_point: null,
   boiling_point: null,
   fingerprint_id: null,
-  xref: null,
+  xref: {},
   molarity_value: null,
   molarity_unit: 'M',
   molecule_name_id: null,
@@ -178,7 +178,7 @@ export const reactionTemplate = {
   rinchi_short_key: null,
   rinchi_web_key: null,
   duration: null,
-  rnxo: null,
+  rxno: null,
   conditions: null,
   variations: null,
 }
@@ -276,7 +276,7 @@ export const datasetTemplate = {
   description: '',
   name: 'new',
   extended_metadata: {
-    report: 'true',
+    instrument: null,
   },
   plain_text_content: null,
 }

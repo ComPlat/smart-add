@@ -9,6 +9,7 @@ import { retrieveTree } from '@/helper/retrieveTree'
 import { FileNode } from '@/helper/types'
 import {
   identifyType,
+  isExtendedMetadataField,
   isHidden,
   isReadonly,
   isTextArea,
@@ -25,6 +26,7 @@ import renameFolder from './context-menu/renameFolder'
 import ArrayInputField from './input-components/ArrayInputField'
 import CheckboxField from './input-components/CheckboxField'
 import DateInputField from './input-components/DateInputField'
+import FileUploadInputField from './input-components/FileUploadInputField'
 import NumberInputField from './input-components/NumberInputField'
 import ReactionSchemeDropDownMenu from './input-components/ReactionSchemeDropDownMenu'
 import QuantityInputField from './input-components/QuantityInputField'
@@ -34,7 +36,32 @@ import SolventInputField, {
 import StereoSelectField from './input-components/StereoSelectField'
 import TextAreaInputField from './input-components/TextAreaInputField'
 import TextInputField from './input-components/TextInputField'
-import { datetimeSchema, determineSchema } from './zip-download/zodSchemes'
+import SelectField from './input-components/SelectField'
+import OntologyTreeSelect from './input-components/OntologyTreeSelect'
+import { determineSchema } from './zip-download/zodSchemes'
+import {
+  tlcSolventsOptions,
+  statusOptions,
+  analysisStatusOptions,
+  roleOptions,
+} from './input-components/selectOptions'
+
+// MOL file validation function (copied from FileUploadInputField for consistency)
+const validateMolFile = (content: string): boolean => {
+  if (!content || typeof content !== 'string') return false
+
+  const lines = content.split('\n')
+
+  // Check minimum lines (header block + counts line)
+  if (lines.length < 4) return false
+
+  // Check for M  END terminator
+  const hasEndTerminator = lines.some((line) =>
+    line.trim().startsWith('M  END'),
+  )
+
+  return hasEndTerminator
+}
 
 function determineInputComponent<T extends ZodRawShape>(
   key: string,
@@ -48,11 +75,14 @@ function determineInputComponent<T extends ZodRawShape>(
   updateMetadata: (key: string, newValue: MetadataValue) => Promise<void>,
   schema?: ZodObject<T>,
   metadata?: Record<string, MetadataValue>,
+  isMolValid?: boolean,
+  onMolValidationChange?: (isValid: boolean) => void,
 ) {
   if (!schema) return
 
   const [type] = identifyType(schema, key)
-  const readonly = isReadonly(key)
+  // Special logic for decoupled field - make it editable when MOL file is valid
+  const readonly = key === 'decoupled' ? !isMolValid : isReadonly(key)
 
   // Skip unit fields as they're handled by QuantityInputField
   if (isQuantityUnit(key)) {
@@ -67,6 +97,20 @@ function determineInputComponent<T extends ZodRawShape>(
     componentType = 'stereo'
   } else if (key === 'solvent') {
     componentType = 'solvent'
+  } else if (key === 'tlc_solvents') {
+    componentType = 'tlc_solvents'
+  } else if (key === 'status') {
+    componentType = 'status'
+  } else if (key === 'role') {
+    componentType = 'role'
+  } else if (key === 'instrument') {
+    componentType = 'string'
+  } else if (key === 'kind') {
+    componentType = 'kind'
+  } else if (key === 'rxno') {
+    componentType = 'rxno'
+  } else if (key === 'molfile') {
+    componentType = 'molfile'
   }
 
   switch (componentType) {
@@ -121,31 +165,89 @@ function determineInputComponent<T extends ZodRawShape>(
       )
     }
     case 'solvent': {
-      // Handle solvent as either string or array of solvent objects
-      if (Array.isArray(value)) {
-        return (
-          <SolventInputField
-            key={key}
-            name={key}
-            onChange={(newValue) => updateMetadata(key, newValue)}
-            readonly={readonly}
-            values={value as SolventItem[]}
-          />
-        )
-      } else {
-        return (
-          <TextInputField
-            key={key}
-            name={key}
-            onChange={(e) => handleInputChange(e, key)}
-            readonly={readonly}
-            value={(value as string) || ''}
-          />
-        )
-      }
+      // Always use SolventInputField for complex solvent arrays
+      const solventValues = Array.isArray(value) ? (value as SolventItem[]) : []
+      return (
+        <SolventInputField
+          key={key}
+          name={key}
+          onChange={(newValue) => updateMetadata(key, newValue)}
+          readonly={readonly}
+          values={solventValues}
+        />
+      )
+    }
+    case 'status': {
+      // Use analysis-specific options if this is an extended_metadata field for analysis containers
+      const isAnalysisStatus = metadata?.container_type === 'analysis'
+      const options = isAnalysisStatus ? analysisStatusOptions : statusOptions
+
+      return (
+        <SelectField
+          key={key}
+          name={key}
+          onChange={(e) => handleSelectChange(e, key)}
+          options={options}
+          placeholder="Select status..."
+          readonly={readonly}
+          value={(value as string) || ''}
+        />
+      )
+    }
+    case 'role': {
+      return (
+        <SelectField
+          key={key}
+          name={key}
+          onChange={(e) => handleSelectChange(e, key)}
+          options={roleOptions}
+          placeholder="Select role..."
+          readonly={readonly}
+          value={(value as string) || ''}
+        />
+      )
+    }
+    case 'tlc_solvents': {
+      return (
+        <SelectField
+          key={key}
+          name={key}
+          onChange={(e) => handleSelectChange(e, key)}
+          options={tlcSolventsOptions}
+          placeholder="Select TLC solvent..."
+          readonly={readonly}
+          value={(value as string) || ''}
+        />
+      )
+    }
+    case 'kind': {
+      return (
+        <OntologyTreeSelect
+          key={key}
+          value={(value as string) || ''}
+          onChange={(selectedValue) => updateMetadata(key, selectedValue)}
+          ontologyType={'analysis'}
+          placeholder={`Select analysis ontology type...`}
+          readonly={readonly}
+          name="kind"
+        />
+      )
+    }
+    case 'rxno': {
+      return (
+        <OntologyTreeSelect
+          key={key}
+          value={(value as string) || ''}
+          onChange={(selectedValue) => updateMetadata(key, selectedValue)}
+          ontologyType="reaction"
+          placeholder="Select reaction ontology type..."
+          readonly={readonly}
+          name="rxno"
+        />
+      )
     }
     case 'string':
-      if (datetimeSchema.safeParse(value).success) {
+      if (key.endsWith('_at') || key.startsWith('timestamp_')) {
         return (
           <DateInputField
             key={key}
@@ -179,17 +281,18 @@ function determineInputComponent<T extends ZodRawShape>(
       }
     case 'number': {
       // Special handling for purity field
-      const isOnlyPositive = key === 'purity' || key === 'density'
+      const isPurity = key === 'purity'
+      const isDensity = key === 'density'
 
       return (
         <NumberInputField
           key={key}
-          max={isOnlyPositive ? 1 : undefined}
-          min={isOnlyPositive ? 0 : undefined}
+          max={isPurity ? 1 : undefined}
+          min={isPurity || isDensity ? 0 : undefined}
           name={key}
           onChange={(e) => handleInputChange(e, key)}
           readonly={readonly}
-          step={isOnlyPositive ? 0.1 : undefined}
+          step={isPurity || isDensity ? 0.1 : undefined}
           value={value as number}
         />
       )
@@ -204,28 +307,20 @@ function determineInputComponent<T extends ZodRawShape>(
           onChange={(e) => handleInputChange(e, key)}
         />
       )
-    // TODO: Implement enum and object input components
-    //        temperature, and text objects
-    case 'enum':
+    case 'molfile': {
       return (
-        <TextInputField
+        <FileUploadInputField
           key={key}
           name={key}
-          onChange={(e) => handleInputChange(e, key)}
-          readonly={true}
-          value={'TODO: Enum/Select'}
+          onChange={(content) => updateMetadata(key, content)}
+          readonly={readonly}
+          value={value as string}
+          acceptedTypes=".mol,.txt"
+          maxFileSize={1024 * 1024} // 1MB
+          onValidationChange={onMolValidationChange}
         />
       )
-    case 'object':
-      return (
-        <TextInputField
-          key={key}
-          name={key}
-          onChange={(e) => handleInputChange(e, key)}
-          readonly={true}
-          value={'TODO: Object'}
-        />
-      )
+    }
     case 'array':
       return (
         <ArrayInputField
@@ -261,6 +356,7 @@ const InspectorSidebar = ({
   const [isOpen, setIsOpen] = useState(true)
   const [item, setItem] = useState<ExtendedFile | ExtendedFolder | null>(null)
   const [tree, setTree] = useState({} as Record<string, FileNode>)
+  const [isMolValid, setIsMolValid] = useState(false)
 
   const database = useLiveQuery(async () => {
     const files = await filesDB.files.toArray()
@@ -297,6 +393,16 @@ const InspectorSidebar = ({
     }
   }, [database?.files, database?.folders, focusedItem])
 
+  // Check if existing MOL content is valid when item changes
+  useEffect(() => {
+    if (item?.metadata?.molfile && typeof item.metadata.molfile === 'string') {
+      const isValid = validateMolFile(item.metadata.molfile)
+      setIsMolValid(isValid)
+    } else {
+      setIsMolValid(false)
+    }
+  }, [item])
+
   const handleClose = () => {
     setIsOpen(false)
     setFocusedItem(undefined)
@@ -331,7 +437,27 @@ const InspectorSidebar = ({
           const dbItem = await filesDB.folders.get({ fullPath })
           if (!dbItem) return
 
-          let updatedMetadata = { ...dbItem.metadata, [key]: newValue }
+          let updatedMetadata = { ...dbItem.metadata }
+
+          // Check if this is an extended_metadata field
+          const containerType = String(updatedMetadata.container_type || '')
+
+          if (isExtendedMetadataField(containerType, key)) {
+            // Update within extended_metadata
+            const currentExtendedMetadata =
+              (updatedMetadata.extended_metadata as Record<string, any>) || {}
+            updatedMetadata = {
+              ...updatedMetadata,
+              extended_metadata: {
+                ...currentExtendedMetadata,
+                [key]: newValue,
+              } as any,
+            }
+          } else {
+            // Regular top-level field
+            updatedMetadata = { ...updatedMetadata, [key]: newValue } as any
+          }
+
           let updatedName = item.name
           if (key === 'name') {
             updatedName = newValue as string
@@ -379,19 +505,14 @@ const InspectorSidebar = ({
       const parsedDate = new Date(newValue)
       if (!isNaN(parsedDate.getTime())) newValue += 'Z'
     }
-    console.log('New Value:', newValue, 'for key:', key)
 
     // Update the field value
     await updateMetadata(key, newValue)
 
     // ONLY apply interlinking for density/molarity fields (no extra work for description, etc.)
-    if (key === 'density' && newValue !== null && newValue !== 0) {
+    if (key === 'density' && newValue !== null) {
       await updateMetadata('molarity_value', null)
-    } else if (
-      key === 'molarity_value' &&
-      newValue !== null &&
-      newValue !== 0
-    ) {
+    } else if (key === 'molarity_value' && newValue !== null) {
       await updateMetadata('density', null)
     }
   }
@@ -415,13 +536,9 @@ const InspectorSidebar = ({
     await updateMetadata(key, newValue)
 
     // ONLY apply interlinking for density/molarity fields (no extra work for description, etc.)
-    if (key === 'density' && newValue !== null && newValue !== 0) {
+    if (key === 'density' && newValue !== null) {
       await updateMetadata('molarity_value', null)
-    } else if (
-      key === 'molarity_value' &&
-      newValue !== null &&
-      newValue !== 0
-    ) {
+    } else if (key === 'molarity_value' && newValue !== null) {
       await updateMetadata('density', null)
     }
   }
@@ -440,13 +557,13 @@ const InspectorSidebar = ({
 
   return (
     <>
-      {isOpen && item && (item as ExtendedFolder).dtype !== 'analyses' && (
+      {isOpen && item && (
         <aside
           className={`right-0 top-0 ml-2 w-1/3 flex-col rounded-tl-xl bg-white ${
             isOpen ? 'translate-x-0' : 'translate-x-full'
           } z-40 max-h-screen overflow-y-auto p-4 duration-300 ease-in-out`}
         >
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-4">
             <button onClick={handleClose}>
               <svg
                 className="absolute right-2 top-2 h-6 w-6 cursor-pointer duration-100 hover:text-kit-primary-full"
@@ -477,19 +594,60 @@ const InspectorSidebar = ({
             )}
             <div className="flex flex-col gap-4">
               {item.metadata &&
-                Object.entries(item.metadata)
-                  .filter(([key]) => !isHidden(key))
+                (() => {
+                  const metadata = item.metadata
+                  const flattenedEntries: [string, MetadataValue][] = []
+
+                  // Add all top-level metadata except extended_metadata
+                  Object.entries(metadata)
+                    .filter(
+                      ([key]) => key !== 'extended_metadata' && !isHidden(key),
+                    )
+                    .forEach(([key, value]) =>
+                      flattenedEntries.push([key, value]),
+                    )
+
+                  // Add extended_metadata fields if they exist
+                  if (
+                    metadata.extended_metadata &&
+                    typeof metadata.extended_metadata === 'object'
+                  ) {
+                    const containerType = metadata.container_type
+
+                    Object.entries(metadata.extended_metadata)
+                      .filter(([key]) => {
+                        if (isHidden(key)) return false
+
+                        // Only show container-type specific fields
+                        return isExtendedMetadataField(
+                          String(containerType || ''),
+                          key,
+                        )
+                      })
+                      .forEach(([key, value]) =>
+                        flattenedEntries.push([key, value]),
+                      )
+                  }
+
+                  return flattenedEntries
+                })()
                   .sort(([keyA], [keyB]) => {
                     const topFields = [
                       'name',
-                      'description',
                       'decoupled',
+                      'instrument',
+                      'molfile',
+                      'status',
+                      'rxno',
+                      'solvent',
                       'external_label',
                       'density',
                       'molarity_value',
                       'purity',
                       'target_amount_value',
                       'real_amount_value',
+                      'kind',
+                      'description',
                     ]
                     const indexA = topFields.indexOf(keyA)
                     const indexB = topFields.indexOf(keyB)
@@ -511,6 +669,8 @@ const InspectorSidebar = ({
                         ? determineSchema(item.metadata)
                         : undefined,
                       item.metadata,
+                      isMolValid,
+                      setIsMolValid,
                     ),
                   )
                   .filter(Boolean)}
