@@ -76,7 +76,7 @@ const getMetadata = (
 }
 
 const analyses = ['analysis_1', 'analysis_2']
-const datasets = ['dataset_1', 'dataset_2']
+const datasets = ['dataset_1']
 
 export const createSample = async (
   baseFolderName: string,
