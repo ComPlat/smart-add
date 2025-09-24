@@ -83,9 +83,18 @@ const canDropAt = (
       const isSample = sourceNode?.dtype === 'sample'
       const isTargetReaction = targetNode?.dtype === 'reaction'
 
+      // Allow datasets to be dropped into analysis containers
+      const isDataset = sourceNode?.dtype === 'dataset'
+      const isTargetAnalysis = targetNode?.dtype === 'analysis'
+
       if (isSample && isTargetReaction) {
         console.log(
           '✅ ALLOWED: Sample can be dropped into reaction in ExportFiles area',
+        )
+        // Continue with other validation rules
+      } else if (isDataset && isTargetAnalysis) {
+        console.log(
+          '✅ ALLOWED: Dataset can be dropped into analysis in ExportFiles area',
         )
         // Continue with other validation rules
       } else {

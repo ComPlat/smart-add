@@ -38,6 +38,7 @@ const ClickOnAnalysesContextMenu = ({
       closeContextMenu={closeContextMenu}
       targetItem={targetItem}
       tree={tree}
+      hideDeleteOption={true}
     />
   </>
 )

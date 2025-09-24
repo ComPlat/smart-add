@@ -52,7 +52,7 @@ const ReactionSchemeDropDownMenu = ({
 
   return (
     <label className="flex flex-col text-sm">
-      <p className="font-bold">{formatLabel('Reaction type')}</p>
+      <p className="font-bold">{formatLabel('type')}</p>
       <div className="relative mt-2">
         <select
           className="w-full appearance-none rounded border border-gray-300 bg-white px-2 py-1 pr-8 outline-gray-200
@@ -62,7 +62,7 @@ const ReactionSchemeDropDownMenu = ({
           value={schemeType}
         >
           <option value="none">None</option>
-          <optgroup label="Reaction type">
+          <optgroup label="Type">
             <option value="startingMaterial">Starting material</option>
             <option value="reactant">Reactant</option>
             <option value="product">Product</option>

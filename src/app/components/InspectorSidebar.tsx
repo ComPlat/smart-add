@@ -555,6 +555,27 @@ const InspectorSidebar = ({
     return item.name ?? ''
   }
 
+  const getImage = (item: ExtendedFile | ExtendedFolder) => {
+    const file = (item as ExtendedFile).file
+    // Check if it's a file and has an image MIME type
+    if (file && file.type && file.type.startsWith('image/')) {
+      const imageUrl = URL.createObjectURL(file as Blob)
+      const altText = 'name' in file ? (file as any).name : ''
+      return (
+        <div className="mt-0">
+          <img
+            src={imageUrl}
+            alt={altText}
+            className="max-w-full h-auto rounded border"
+            style={{ maxHeight: '300px' }}
+          />
+        </div>
+      )
+    }
+
+    return null
+  }
+
   return (
     <>
       {isOpen && item && (
@@ -589,6 +610,7 @@ const InspectorSidebar = ({
               </svg>
             </button>
             <p className="font-bold">{getItemName(item)}</p>
+            {getImage(item)}
             {(item as ExtendedFolder).dtype === 'sample' && item.parentUid && (
               <ReactionSchemeDropDownMenu item={item as ExtendedFolder} />
             )}

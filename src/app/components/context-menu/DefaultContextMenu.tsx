@@ -9,10 +9,12 @@ const DefaultContextMenu = ({
   closeContextMenu,
   targetItem,
   tree,
+  hideDeleteOption = false,
 }: {
   closeContextMenu: () => void
   targetItem: ExtendedFile | ExtendedFolder
   tree: Record<string, FileNode>
+  hideDeleteOption?: boolean
 }) => (
   <>
     <RenameContextMenuItem
@@ -21,11 +23,13 @@ const DefaultContextMenu = ({
       tree={tree}
     />
     <ContextMenuDivider />
-    <DeleteContextMenuItem
-      close={closeContextMenu}
-      item={targetItem}
-      tree={tree}
-    />
+    {!hideDeleteOption && (
+      <DeleteContextMenuItem
+        close={closeContextMenu}
+        item={targetItem}
+        tree={tree}
+      />
+    )}
   </>
 )
 
