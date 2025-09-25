@@ -18,7 +18,7 @@ import {
 
 import AssignmentTreeContextMenu from './context-menu/AssignmentTreeContextMenu'
 import FileTreeContextMenu from './context-menu/FileTreeContextMenu'
-import { renderItem } from './tree-view/renderItem'
+import { createRenderItem } from './tree-view/renderItem'
 import { UploadDropZone } from './upload-form/UploadDropZone'
 import { ExportFiles } from './workspace/ExportFiles'
 import { ExportFilesText } from './workspace/ExportFilesText'
@@ -256,7 +256,7 @@ const Workspace = ({ focusedItem, setFocusedItem }: FocusedItemProps) => {
                     {children}
                   </div>
                 )}
-                renderItem={renderItem}
+                renderItem={createRenderItem(tree)}
                 rootItem={inputTreeRoot}
                 treeId="inputTree"
                 treeLabel="Input Tree"
@@ -280,7 +280,7 @@ const Workspace = ({ focusedItem, setFocusedItem }: FocusedItemProps) => {
                   {children}
                 </div>
               )}
-              renderItem={renderItem}
+              renderItem={createRenderItem(tree)}
               rootItem={assignmentTreeRoot}
               treeId="assignmentTree"
               treeLabel="Assignment Tree"

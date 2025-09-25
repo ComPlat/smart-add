@@ -1,4 +1,4 @@
-import { Metadata, Datatype } from '@/database/db'
+import { Metadata, Datatype, ReactionSchemeType } from '@/database/db'
 
 interface FileNode {
   canMove: boolean
@@ -9,6 +9,7 @@ interface FileNode {
   metadata?: Metadata
   uid: null | string
   dtype?: Datatype
+  reactionSchemeType?: ReactionSchemeType
 }
 
 interface FolderDepthMap {
