@@ -95,6 +95,7 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
           } text-sm text-gray-800 duration-75 hover:text-kit-primary-full`}
           style={{
             marginLeft: `${depth * 25}px`,
+            marginBottom: '2px',
           }}
           type="button"
         >
@@ -118,7 +119,7 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
               <>
                 {title}
                 {reactionSchemeType && (
-                  <span className="ml-2 px-1.5 py-0.5 text-xs bg-blue-100 text-blue-800 rounded">
+                  <span className="ml-2 px-1.5 py-0.5 text-xs bg-kit-primary-light text-kit-primary-full rounded">
                     {reactionSchemeType}
                   </span>
                 )}

@@ -81,6 +81,8 @@ const datasets = ['dataset_1']
 export const createSample = async (
   baseFolderName: string,
   tree: Record<string, FileNode>,
+  fullPath?: string,
+  parentUid?: string,
 ) => {
   const uniqueFolderName = getUniqueFolderName(
     baseFolderName,
@@ -88,17 +90,22 @@ export const createSample = async (
     baseFolderName,
   )
 
+  const samplePath = fullPath
+    ? `${fullPath}/${uniqueFolderName}`
+    : uniqueFolderName
+  const sampleParentUid = parentUid || ''
+
   const sampleFolder = await createFolder(
-    uniqueFolderName,
+    samplePath,
     baseFolderName,
     true,
-    '',
-    getMetadata('', uniqueFolderName, 'sample') as any,
+    sampleParentUid,
+    getMetadata(sampleParentUid, uniqueFolderName, 'sample') as any,
     'sample',
     'product',
   )
   const analysesFolder = await createFolder(
-    `${uniqueFolderName}/analyses`,
+    `${samplePath}/analyses`,
     'analyses',
     true,
     sampleFolder.uid,
@@ -106,14 +113,14 @@ export const createSample = async (
     'analyses',
   )
   // const structureFolder = await createSubFolders(
-  //   uniqueFolderName,
+  //   samplePath,
   //   ['structure'],
   //   sampleFolder.uid,
   //   [getMetadata(sampleFolder.uid, 'structure', 'structure', '') as any],
   //   Array(datasets.length).fill('structure'),
   // )
   const analysisFolders = await createSubFolders(
-    `${uniqueFolderName}/analyses`,
+    `${samplePath}/analyses`,
     analyses,
     analysesFolder.uid,
     analyses.map(
@@ -248,13 +255,13 @@ export const createReaction = async (
   const promises = [
     createSubFolders(
       `${uniqueFolderName}/${sampleName}`,
-      ['structure', 'analyses'],
+      [/* 'structure', */ 'analyses'],
       sampleFolder.uid,
       [
-        getMetadata(sampleFolder.uid, 'structure', 'structure', '') as any,
+        // getMetadata(sampleFolder.uid, 'structure', 'structure', '') as any,
         getMetadata(sampleFolder.uid, 'analyses', 'analyses') as any,
       ],
-      ['structure', 'analyses'],
+      [/* 'structure', */ 'analyses'],
     ),
     datasetFolders,
     reactionDatasetFolders,
