@@ -1,5 +1,4 @@
 import { DraggingPosition, TreeItem } from 'react-complex-tree'
-
 import { FileNode } from './types'
 
 const canDropAt = (
@@ -87,6 +86,12 @@ const canDropAt = (
       const isDataset = sourceNode?.dtype === 'dataset'
       const isTargetAnalysis = targetNode?.dtype === 'analysis'
 
+      // Allow simple folders to be dropped into datasets
+      // Simple folders are only 'folder' type or undefined
+      const isSimpleFolder =
+        !sourceNode?.dtype || sourceNode?.dtype === 'folder'
+      const isTargetDataset = targetNode?.dtype === 'dataset'
+
       if (isSample && isTargetReaction) {
         console.log(
           '✅ ALLOWED: Sample can be dropped into reaction in ExportFiles area',
@@ -96,6 +101,9 @@ const canDropAt = (
         console.log(
           '✅ ALLOWED: Dataset can be dropped into analysis in ExportFiles area',
         )
+        // Continue with other validation rules
+      } else if (isSimpleFolder && isTargetDataset) {
+        console.log('✅ ALLOWED: Simple folder can be dropped into dataset')
         // Continue with other validation rules
       } else {
         console.log('❌ BLOCKED: Only files can be dropped in ExportFiles area')
@@ -119,7 +127,11 @@ const canDropAt = (
         sourceName,
       })
 
-      if (!isTargetDataset) {
+      if (
+        !isTargetDataset &&
+        targetNode?.dtype &&
+        targetNode?.dtype !== 'folder'
+      ) {
         console.log(
           '❌ BLOCKED: Files can only be dropped in dataset containers',
           {
