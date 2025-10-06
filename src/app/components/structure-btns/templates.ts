@@ -1,7 +1,16 @@
 import { FileNode } from '@/helper/types'
 
-import { reactionTemplate, sampleTemplate } from '../zip-download/templates'
-import { Container, Reaction, Sample } from '../zip-download/zodSchemes'
+import {
+  moleculeTemplate,
+  reactionTemplate,
+  sampleTemplate,
+} from '../zip-download/templates'
+import {
+  Container,
+  Molecule,
+  Reaction,
+  Sample,
+} from '../zip-download/zodSchemes'
 import { datasetTemplate } from './../zip-download/templates'
 import {
   createFolder,
@@ -14,7 +23,7 @@ const getMetadata = (
   name: string,
   type: string,
   containable_type?: string,
-): Container | Reaction | Sample => {
+): Container | Reaction | Sample | Molecule => {
   const currentDate = new Date().toISOString()
 
   switch (type) {
@@ -32,7 +41,12 @@ const getMetadata = (
         name,
         updated_at: currentDate,
       } as Reaction
-    case 'structure':
+    case 'molecule':
+      return {
+        ...moleculeTemplate,
+        created_at: currentDate,
+        updated_at: currentDate,
+      } as Molecule
     case 'analyses':
       return {
         ancestry: parent_id,
@@ -112,13 +126,13 @@ export const createSample = async (
     getMetadata(sampleFolder.uid, 'analyses', 'analyses') as any,
     'analyses',
   )
-  // const structureFolder = await createSubFolders(
-  //   samplePath,
-  //   ['structure'],
-  //   sampleFolder.uid,
-  //   [getMetadata(sampleFolder.uid, 'structure', 'structure', '') as any],
-  //   Array(datasets.length).fill('structure'),
-  // )
+  const moleculeFolder = await createSubFolders(
+    samplePath,
+    ['molecule'],
+    sampleFolder.uid,
+    [getMetadata(sampleFolder.uid, 'molecule', 'molecule', '') as any],
+    Array(1).fill('molecule'),
+  )
   const analysisFolders = await createSubFolders(
     `${samplePath}/analyses`,
     analyses,
@@ -143,7 +157,7 @@ export const createSample = async (
   })
   const datasetFolders = await Promise.all(datasetFoldersPromises)
 
-  const promises = [analysisFolders, datasetFolders]
+  const promises = [moleculeFolder, analysisFolders, datasetFolders]
 
   return Promise.all(promises)
 }
@@ -255,13 +269,13 @@ export const createReaction = async (
   const promises = [
     createSubFolders(
       `${uniqueFolderName}/${sampleName}`,
-      [/* 'structure', */ 'analyses'],
+      ['molecule', 'analyses'],
       sampleFolder.uid,
       [
-        // getMetadata(sampleFolder.uid, 'structure', 'structure', '') as any,
+        getMetadata(sampleFolder.uid, 'molecule', 'molecule', '') as any,
         getMetadata(sampleFolder.uid, 'analyses', 'analyses') as any,
       ],
-      [/* 'structure', */ 'analyses'],
+      ['molecule', 'analyses'],
     ),
     datasetFolders,
     reactionDatasetFolders,

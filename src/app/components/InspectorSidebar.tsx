@@ -557,10 +557,18 @@ const InspectorSidebar = ({
 
   const getImage = (item: ExtendedFile | ExtendedFolder) => {
     const file = (item as ExtendedFile).file
-    // Check if it's a file and has an image MIME type
-    if (file && file.type && file.type.startsWith('image/')) {
+    const extension = (item as ExtendedFile).extension?.toLowerCase()
+    const imageExtensions = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'svg']
+
+    // Check if it's a file and has an image MIME type or image extension
+    const isImage =
+      file &&
+      ((file.type && file.type.startsWith('image/')) ||
+        (extension && imageExtensions.includes(extension)))
+
+    if (isImage) {
       const imageUrl = URL.createObjectURL(file as Blob)
-      const altText = 'name' in file ? (file as any).name : ''
+      const altText = 'name' in file ? (file as any).name : item.name
       return (
         <div className="mt-0">
           <img
@@ -619,16 +627,22 @@ const InspectorSidebar = ({
                 (() => {
                   const metadata = item.metadata
                   const flattenedEntries: [string, MetadataValue][] = []
-
+                  // Determine schema type based on container_type or item type
+                  const schemaName = String(
+                    metadata.container_type ||
+                      (item as ExtendedFolder).dtype ||
+                      '',
+                  )
                   // Add all top-level metadata except extended_metadata
                   Object.entries(metadata)
                     .filter(
-                      ([key]) => key !== 'extended_metadata' && !isHidden(key),
+                      ([key]) =>
+                        key !== 'extended_metadata' &&
+                        !isHidden(key, schemaName),
                     )
                     .forEach(([key, value]) =>
                       flattenedEntries.push([key, value]),
                     )
-
                   // Add extended_metadata fields if they exist
                   if (
                     metadata.extended_metadata &&
@@ -638,7 +652,7 @@ const InspectorSidebar = ({
 
                     Object.entries(metadata.extended_metadata)
                       .filter(([key]) => {
-                        if (isHidden(key)) return false
+                        if (isHidden(key, schemaName)) return false
 
                         // Only show container-type specific fields
                         return isExtendedMetadataField(

@@ -12,13 +12,12 @@ import {
   collectionTemplate,
   collectionsReactionTemplate,
   collectionsSampleTemplate,
-  moleculeTemplate,
   reactionTemplate,
   sampleTemplate,
 } from './templates'
 import {
-  moleculeNameSchema,
   moleculeSchema,
+  moleculeNameSchema,
   reactionSchema,
   sampleSchema,
 } from './zodSchemes'
@@ -26,6 +25,7 @@ import { formatForExport } from '@/helper/fieldValidation'
 
 const currentDate = new Date().toISOString()
 const user_id = null
+const EXPORT_SOURCE = 'smart-add'
 
 function generateUidMap(assignedFolders: ExtendedFolder[]) {
   return assignedFolders.reduce((uidMap: Record<string, string>, folder) => {
@@ -48,6 +48,18 @@ function generateSampleReactionUidMap(assignedFolders: ExtendedFolder[]) {
   }, {})
 }
 
+function generateMoleculeUidMap(assignedFolders: ExtendedFolder[]) {
+  return assignedFolders.reduce((uidMap: Record<string, string>, folder) => {
+    if (folder.dtype === 'molecule') {
+      return {
+        ...uidMap,
+        [folder.uid]: v4(),
+      }
+    }
+    return uidMap
+  }, {})
+}
+
 export const generateExportJson = async (
   assignedFiles: ExtendedFile[],
   assignedFolders: ExtendedFolder[],
@@ -61,6 +73,7 @@ export const generateExportJson = async (
   }, [] as ExtendedFolder[])
   const uidMap = generateUidMap(processedFolders)
   const sampleReactionUidMap = generateSampleReactionUidMap(processedFolders)
+  const moleculeUidMap = generateMoleculeUidMap(processedFolders)
 
   const collectionId = v4()
   const uidToCollection = {
@@ -73,37 +86,69 @@ export const generateExportJson = async (
     },
   }
 
-  const moleculeId = v4()
-  const uidToMolecule = {
-    [moleculeId]: {
-      ...moleculeSchema.parse({
-        ...moleculeTemplate,
-        inchikey: 'DUMMY',
-        created_at: currentDate,
-        updated_at: currentDate,
-        is_partial: false,
-      }),
-    },
-  }
+  // Extract real molecules from folders
+  const uidToMolecule = processedFolders.reduce(
+    (acc, folder) => {
+      if (folder.dtype !== 'molecule') return acc
 
-  // TODO: DUMMY DATA
-  const moleculeNameId = v4()
-  const uidToMoleculeName = {
-    [moleculeNameId]: {
-      ...moleculeNameSchema.parse({
-        molecule_id: moleculeId,
-        user_id: null,
-        description: 'iupac_name',
-        name: 'N-[1-amyl-7-(trifluoromethyl)indazol-3-yl]-2-phenyl-acetamide',
-        deleted_at: null,
-        created_at: '2019-07-07T01:18:35.740Z',
-        updated_at: '2019-07-07T01:18:35.740Z',
-      }),
+      const moleculeData = folder.metadata
+      if (!moleculeData) return acc
+
+      return {
+        ...acc,
+        [moleculeUidMap[folder.uid]]: {
+          ...moleculeSchema.parse({
+            ...moleculeData,
+            created_at: currentDate,
+            updated_at: currentDate,
+          }),
+        },
+      }
     },
-  }
+    {} as Record<string, any>,
+  )
+
+  // Generate MoleculeName entries for each molecule
+  const uidToMoleculeName = processedFolders.reduce(
+    (acc, folder) => {
+      if (folder.dtype !== 'molecule') return acc
+
+      const moleculeData = folder.metadata
+      if (!moleculeData) return acc
+
+      const moleculeId = moleculeUidMap[folder.uid]
+      const moleculeName =
+        moleculeData.name || moleculeData.iupac_name || 'Unknown Molecule'
+
+      return {
+        ...acc,
+        [v4()]: moleculeNameSchema.parse({
+          molecule_id: moleculeId,
+          user_id: user_id,
+          description: moleculeData.description || null,
+          name: String(moleculeName),
+          deleted_at: null,
+          created_at: currentDate,
+          updated_at: currentDate,
+        }),
+      }
+    },
+    {} as Record<string, any>,
+  )
 
   const uidToSample = processedFolders.reduce((acc, folder) => {
     if (folder.dtype !== 'sample') return acc
+
+    // Find the molecule folder that's a child of this sample
+    const moleculeFolder = processedFolders.find(
+      (f) => f.dtype === 'molecule' && f.parentUid === folder.uid,
+    )
+    const linkedMoleculeId = moleculeFolder
+      ? moleculeUidMap[moleculeFolder.uid]
+      : null
+
+    // Get molecule molfile to copy to sample
+    const moleculeMolfile = moleculeFolder?.metadata?.molfile || null
 
     // Format temperature fields for export (append ..Infinity to single numbers)
     const formattedMetadata = { ...folder.metadata }
@@ -128,9 +173,11 @@ export const generateExportJson = async (
           ancestry: Ancestry(folder, assignedFolders, uidMap),
           created_at: currentDate,
           updated_at: currentDate,
-          molecule_id: moleculeId,
-          name: 'decoupled sample',
-          sum_formula: 'undefined structure',
+          molecule_id: linkedMoleculeId,
+          molfile: moleculeMolfile,
+          decoupled: moleculeMolfile ? false : true,
+          name: moleculeMolfile ? null : 'decoupled sample',
+          sum_formula: moleculeMolfile ? null : 'undefined structure',
         }),
       },
     }
@@ -198,6 +245,7 @@ export const generateExportJson = async (
   const container = Container({
     assignedFolders,
     currentDate,
+    moleculeUidMap,
     processedFolders,
     sampleReactionUidMap,
     uidMap,
@@ -246,6 +294,7 @@ export const generateExportJson = async (
     ReactionsReactantSample: reactants,
     ReactionsProductSample: products,
     ReactionsSolventSample: solvents,
+    source: EXPORT_SOURCE,
   }
 
   return exportJson

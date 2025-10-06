@@ -52,9 +52,9 @@ export type Datatype =
   | 'analysis'
   | 'dataset'
   | 'folder'
+  | 'molecule'
   | 'reaction'
   | 'sample'
-  | 'structure'
 
 export type ReactionSchemeType =
   | 'none'
