@@ -11,6 +11,12 @@ class DragNotificationSystem {
   private container: HTMLDivElement | null = null
   private lastMessages: Map<string, number> = new Map() // Track last time each message was shown
   private readonly THROTTLE_DELAY = 2000 // 2 seconds between same messages
+  private readonly MAX_NOTIFICATIONS = 3 // Maximum visible notifications at once
+  private queue: Array<{
+    message: string
+    type: 'error' | 'warning' | 'info' | 'success'
+  }> = []
+  private isProcessingQueue = false
 
   constructor() {
     this.createContainer()
@@ -34,21 +40,60 @@ class DragNotificationSystem {
 
   showError(message: string, delay = 800) {
     setTimeout(() => {
-      this.addNotification(message, 'error')
+      this.queueNotification(message, 'error')
     }, delay)
   }
 
   showWarning(message: string, delay = 800) {
     setTimeout(() => {
-      this.addNotification(message, 'warning')
+      this.queueNotification(message, 'warning')
     }, delay)
   }
 
   showSuccess(message: string, delay = 800) {
     setTimeout(() => {
       this.clearAllNotifications() // Clear existing messages before showing success
-      this.addNotification(message, 'success')
+      this.queueNotification(message, 'success')
     }, delay)
+  }
+
+  private queueNotification(
+    message: string,
+    type: 'error' | 'warning' | 'info' | 'success',
+  ) {
+    // Check if already in queue to prevent duplicates
+    const alreadyQueued = this.queue.some(
+      (n) => n.message === message && n.type === type,
+    )
+    if (alreadyQueued) return
+
+    // Add to queue
+    this.queue.push({ message, type })
+
+    // Process queue
+    this.processQueue()
+  }
+
+  private async processQueue() {
+    if (this.isProcessingQueue) return
+    this.isProcessingQueue = true
+
+    while (this.queue.length > 0) {
+      // Wait if we have too many notifications showing
+      while (this.notifications.length >= this.MAX_NOTIFICATIONS) {
+        await new Promise((resolve) => setTimeout(resolve, 500))
+      }
+
+      const next = this.queue.shift()
+      if (next) {
+        this.addNotification(next.message, next.type)
+      }
+
+      // Small delay between showing notifications
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    }
+
+    this.isProcessingQueue = false
   }
 
   private clearAllNotifications() {
@@ -57,6 +102,8 @@ class DragNotificationSystem {
       this.removeNotification(notification.id)
     })
     this.notifications = []
+    // Also clear the queue
+    this.queue = []
   }
 
   private addNotification(
