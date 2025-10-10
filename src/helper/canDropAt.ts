@@ -86,6 +86,10 @@ const canDropAt = (
       const isDataset = sourceNode?.dtype === 'dataset'
       const isTargetAnalysis = targetNode?.dtype === 'analysis'
 
+      // Allow analysis to be dropped into analyses folders
+      const isAnalysis = sourceNode?.dtype === 'analysis'
+      const isTargetAnalyses = targetNode?.dtype === 'analyses'
+
       // Allow simple folders to be dropped into datasets
       // Simple folders are only 'folder' type or undefined
       const isSimpleFolder =
@@ -100,6 +104,11 @@ const canDropAt = (
       } else if (isDataset && isTargetAnalysis) {
         console.log(
           '✅ ALLOWED: Dataset can be dropped into analysis in ExportFiles area',
+        )
+        // Continue with other validation rules
+      } else if (isAnalysis && isTargetAnalyses) {
+        console.log(
+          '✅ ALLOWED: Analysis can be dropped into analyses folder in ExportFiles area',
         )
         // Continue with other validation rules
       } else if (isSimpleFolder && isTargetDataset) {
