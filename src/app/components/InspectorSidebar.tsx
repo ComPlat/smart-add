@@ -357,6 +357,7 @@ const InspectorSidebar = ({
   const [item, setItem] = useState<ExtendedFile | ExtendedFolder | null>(null)
   const [tree, setTree] = useState({} as Record<string, FileNode>)
   const [isMolValid, setIsMolValid] = useState(false)
+  const [prevMolValid, setPrevMolValid] = useState(false)
 
   const database = useLiveQuery(async () => {
     const files = await filesDB.files.toArray()
@@ -395,13 +396,73 @@ const InspectorSidebar = ({
 
   // Check if existing MOL content is valid when item changes
   useEffect(() => {
-    if (item?.metadata?.molfile && typeof item.metadata.molfile === 'string') {
-      const isValid = validateMolFile(item.metadata.molfile)
-      setIsMolValid(isValid)
-    } else {
+    const checkMolFileValidity = async () => {
+      // First check if the current item has a molfile
+      if (
+        item?.metadata?.molfile &&
+        typeof item.metadata.molfile === 'string'
+      ) {
+        const isValid = validateMolFile(item.metadata.molfile)
+        setIsMolValid(isValid)
+        return
+      }
+      // If current item doesn't have molfile, check if it's a sample with a molecule child
+      if (item?.fullPath && database?.folders) {
+        // Look for a child molecule container
+        const moleculeChild = database.folders.find(
+          (folder) =>
+            folder.fullPath?.startsWith(item.fullPath + '/') &&
+            folder.dtype === 'molecule',
+        )
+        if (
+          moleculeChild?.metadata?.molfile &&
+          typeof moleculeChild.metadata.molfile === 'string'
+        ) {
+          const isValid = validateMolFile(moleculeChild.metadata.molfile)
+          setIsMolValid(isValid)
+
+          // If molfile just became valid (wasn't valid before), set decoupled to false
+          if (
+            isValid &&
+            !prevMolValid &&
+            (item as ExtendedFolder).dtype === 'sample'
+          ) {
+            setPrevMolValid(true)
+            await filesDB.folders
+              .where({ fullPath: item.fullPath })
+              .modify((folder) => {
+                folder.metadata = {
+                  ...folder.metadata,
+                  decoupled: false,
+                } as Metadata
+              })
+          } else if (isValid) {
+            setPrevMolValid(true)
+          }
+          return
+        }
+      }
+      // No valid molfile found - set decoupled to true if it's a sample
       setIsMolValid(false)
+      setPrevMolValid(false)
+      if (
+        item?.fullPath &&
+        (item as ExtendedFolder).dtype === 'sample' &&
+        item.metadata?.decoupled !== true
+      ) {
+        await filesDB.folders
+          .where({ fullPath: item.fullPath })
+          .modify((folder) => {
+            folder.metadata = {
+              ...folder.metadata,
+              decoupled: true,
+            } as Metadata
+          })
+      }
     }
-  }, [item])
+
+    checkMolFileValidity()
+  }, [item, database])
 
   const handleClose = () => {
     setIsOpen(false)
@@ -672,6 +733,7 @@ const InspectorSidebar = ({
                       'name',
                       'decoupled',
                       'instrument',
+                      'cano_smiles',
                       'molfile',
                       'status',
                       'rxno',
