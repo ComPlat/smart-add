@@ -97,6 +97,13 @@ export const createSample = async (
   tree: Record<string, FileNode>,
   fullPath?: string,
   parentUid?: string,
+  reactionSchemeType:
+    | 'none'
+    | 'product'
+    | 'solvent'
+    | 'reactant'
+    | 'startingMaterial' = 'product',
+  customMoleculeMetadata?: Partial<Molecule>,
 ) => {
   const uniqueFolderName = getUniqueFolderName(
     baseFolderName,
@@ -116,7 +123,7 @@ export const createSample = async (
     sampleParentUid,
     getMetadata(sampleParentUid, uniqueFolderName, 'sample') as any,
     'sample',
-    'product',
+    reactionSchemeType,
   )
   const analysesFolder = await createFolder(
     `${samplePath}/analyses`,
@@ -126,11 +133,25 @@ export const createSample = async (
     getMetadata(sampleFolder.uid, 'analyses', 'analyses') as any,
     'analyses',
   )
+
+  // Merge custom molecule metadata with default template if provided
+  const moleculeMetadata = customMoleculeMetadata
+    ? {
+        ...(getMetadata(
+          sampleFolder.uid,
+          'molecule',
+          'molecule',
+          '',
+        ) as Molecule),
+        ...customMoleculeMetadata,
+      }
+    : (getMetadata(sampleFolder.uid, 'molecule', 'molecule', '') as any)
+
   const moleculeFolder = await createSubFolders(
     samplePath,
     ['molecule'],
     sampleFolder.uid,
-    [getMetadata(sampleFolder.uid, 'molecule', 'molecule', '') as any],
+    [moleculeMetadata],
     Array(1).fill('molecule'),
   )
   const analysisFolders = await createSubFolders(

@@ -77,6 +77,8 @@ function determineInputComponent<T extends ZodRawShape>(
   metadata?: Record<string, MetadataValue>,
   isMolValid?: boolean,
   onMolValidationChange?: (isValid: boolean) => void,
+  currentItem?: ExtendedFile | ExtendedFolder | null,
+  tree?: Record<string, FileNode>,
 ) {
   if (!schema) return
 
@@ -167,6 +169,11 @@ function determineInputComponent<T extends ZodRawShape>(
     case 'solvent': {
       // Always use SolventInputField for complex solvent arrays
       const solventValues = Array.isArray(value) ? (value as SolventItem[]) : []
+      // Only pass reactionFolder if currentItem is a reaction
+      const reactionFolder =
+        currentItem && (currentItem as ExtendedFolder).dtype === 'reaction'
+          ? (currentItem as ExtendedFolder)
+          : undefined
       return (
         <SolventInputField
           key={key}
@@ -174,6 +181,8 @@ function determineInputComponent<T extends ZodRawShape>(
           onChange={(newValue) => updateMetadata(key, newValue)}
           readonly={readonly}
           values={solventValues}
+          reactionFolder={reactionFolder}
+          tree={tree}
         />
       )
     }
@@ -769,6 +778,8 @@ const InspectorSidebar = ({
                       item.metadata,
                       isMolValid,
                       setIsMolValid,
+                      item,
+                      tree,
                     ),
                   )
                   .filter(Boolean)}
