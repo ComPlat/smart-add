@@ -91,28 +91,28 @@ function determineInputComponent<T extends ZodRawShape>(
     return null
   }
 
-  // Determine special case types before the switch
+  // Map special field keys to their component types
+  const specialFieldTypes: Record<string, string> = {
+    solvent: 'solvent',
+    tlc_solvents: 'tlc_solvents',
+    status: 'status',
+    role: 'role',
+    instrument: 'string',
+    kind: 'kind',
+    rxno: 'rxno',
+    molfile: 'molfile',
+  }
+
+  // Determine component type
   let componentType: string = type
   if (isQuantityValue(key)) {
     componentType = 'quantity'
   } else if (key === 'stereo' && value && typeof value === 'object') {
     componentType = 'stereo'
-  } else if (key === 'solvent') {
-    componentType = 'solvent'
-  } else if (key === 'tlc_solvents') {
-    componentType = 'tlc_solvents'
-  } else if (key === 'status') {
-    componentType = 'status'
-  } else if (key === 'role') {
-    componentType = 'role'
-  } else if (key === 'instrument') {
-    componentType = 'string'
-  } else if (key === 'kind') {
-    componentType = 'kind'
-  } else if (key === 'rxno') {
-    componentType = 'rxno'
-  } else if (key === 'molfile') {
-    componentType = 'molfile'
+  } else if (key === 'temperature' && value && typeof value === 'object') {
+    componentType = 'temperature'
+  } else if (specialFieldTypes[key]) {
+    componentType = specialFieldTypes[key]
   }
 
   switch (componentType) {
@@ -183,6 +183,37 @@ function determineInputComponent<T extends ZodRawShape>(
           values={solventValues}
           reactionFolder={reactionFolder}
           tree={tree}
+        />
+      )
+    }
+    case 'temperature': {
+      // Temperature is stored as an object: {data: [], userText: "123", valueUnit: "°C"}
+      const tempObj = value as {
+        data: any[]
+        userText: string | null
+        valueUnit: string | null
+      }
+
+      return (
+        <QuantityInputField
+          key={key}
+          valueKey={key}
+          unitKey={`${key}_unit`}
+          value={tempObj.userText ? parseFloat(tempObj.userText) : undefined}
+          unit={tempObj.valueUnit || undefined}
+          readonly={readonly}
+          onValueChange={(e) =>
+            updateMetadata(key, {
+              ...tempObj,
+              userText: e.target.value || null,
+              // Set unit to existing or default to °C when value is entered
+              valueUnit: e.target.value ? tempObj.valueUnit || '°C' : null,
+            })
+          }
+          onUnitChange={(e) =>
+            updateMetadata(key, { ...tempObj, valueUnit: e.target.value })
+          }
+          metadata={metadata}
         />
       )
     }

@@ -164,7 +164,6 @@ const hiddenKeys = Object.freeze([
   'content',
   'conditions',
   'variations',
-  'temperature',
   'observation',
   //Hidden keys for Molecule
   'inchikey',
