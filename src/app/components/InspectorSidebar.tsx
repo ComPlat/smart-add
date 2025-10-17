@@ -24,6 +24,7 @@ import { ZodObject, ZodRawShape } from 'zod'
 
 import renameFolder from './context-menu/renameFolder'
 import ArrayInputField from './input-components/ArrayInputField'
+import AutoCompleteField from './input-components/AutoCompleteField'
 import CheckboxField from './input-components/CheckboxField'
 import DateInputField from './input-components/DateInputField'
 import FileUploadInputField from './input-components/FileUploadInputField'
@@ -249,12 +250,12 @@ function determineInputComponent<T extends ZodRawShape>(
     }
     case 'tlc_solvents': {
       return (
-        <SelectField
+        <AutoCompleteField
           key={key}
           name={key}
-          onChange={(e) => handleSelectChange(e, key)}
+          onChange={(selectedValue) => updateMetadata(key, selectedValue)}
           options={tlcSolventsOptions}
-          placeholder="Select TLC solvent..."
+          placeholder="Select or type TLC solvent..."
           readonly={readonly}
           value={(value as string) || ''}
         />
