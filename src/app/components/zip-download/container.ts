@@ -8,6 +8,7 @@ interface SubContainerParams {
   assignedFolders: ExtendedFolder[]
   currentDate: string
   folder: ExtendedFolder
+  moleculeUidMap: Record<string, string>
   sampleReactionUidMap: Record<string, string>
   uidMap: Record<string, string>
   user_id: null | string
@@ -17,11 +18,16 @@ const SubContainer = ({
   assignedFolders,
   currentDate,
   folder,
+  moleculeUidMap,
   sampleReactionUidMap,
   uidMap,
   user_id,
 }: SubContainerParams) => {
   const dtypeMapping = {
+    molecule: {
+      containable_id: moleculeUidMap[folder.uid],
+      containable_type: 'Molecule',
+    },
     reaction: {
       containable_id: sampleReactionUidMap[folder.uid],
       containable_type: 'Reaction',
@@ -58,6 +64,7 @@ const SubContainer = ({
 interface ContainerParams {
   assignedFolders: ExtendedFolder[]
   currentDate: string
+  moleculeUidMap: Record<string, string>
   processedFolders: ExtendedFolder[]
   sampleReactionUidMap: Record<string, string>
   uidMap: Record<string, string>
@@ -67,16 +74,14 @@ interface ContainerParams {
 export const Container = ({
   assignedFolders,
   currentDate,
+  moleculeUidMap,
   processedFolders,
   sampleReactionUidMap,
   uidMap,
   user_id,
 }: ContainerParams) => {
   const allowedFolders = processedFolders.filter((folder) => {
-    return (
-      folder.metadata?.container_type !== 'structure' &&
-      folder.metadata?.container_type !== 'folder'
-    )
+    return folder.metadata?.container_type !== 'folder'
   })
 
   return allowedFolders.reduce((previousContainer, folder) => {
@@ -84,6 +89,7 @@ export const Container = ({
       assignedFolders,
       currentDate,
       folder,
+      moleculeUidMap,
       sampleReactionUidMap,
       uidMap,
       user_id,

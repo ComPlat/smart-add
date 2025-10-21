@@ -23,15 +23,17 @@ const Toolbar = ({
   return (
     <aside className="flex justify-between p-2">
       <div className="flex gap-2">
-        <AddSampleButton tree={tree} />
-        <AddReactionButton tree={tree} />
         <ClearButtonGroup
           assignedLength={assignedLength}
           inputLength={inputLength}
           setFocusedItem={setFocusedItem}
         />
       </div>
-      <FileDownloader />
+      <div className="flex gap-2">
+        <FileDownloader />
+        <AddSampleButton tree={tree} />
+        <AddReactionButton tree={tree} />
+      </div>
     </aside>
   )
 }

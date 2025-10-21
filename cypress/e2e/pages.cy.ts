@@ -35,4 +35,42 @@ describe('Pages', () => {
       })
     })
   })
+
+  describe('InspectorSidebar', () => {
+    it('shows image preview after image is clicked', () => {
+      const zipFile = 'cypress/fixtures/test-images.zip'
+      const imageFileName = 'smartAdd5.png'
+
+      // Upload the ZIP file
+      cy.get('span[role=button]').selectFile(zipFile, {
+        action: 'drag-drop',
+      })
+
+      // Wait for ZIP folder to appear and expand it
+      cy.get('button[data-rct-item-id="test-images.zip"]', {
+        timeout: 10000,
+      }).click()
+
+      // Expand the inner folder
+      cy.get('button[data-rct-item-id="test-images.zip/test-images"]', {
+        timeout: 10000,
+      }).click()
+
+      // Click on the image file
+      cy.get(
+        `button[data-rct-item-id="test-images.zip/test-images/${imageFileName}"]`,
+        { timeout: 10000 },
+      ).click()
+
+      // Wait for inspector sidebar to be visible
+      cy.get('aside', { timeout: 5000 }).should('be.visible')
+
+      // Verify image is displayed
+      cy.get('aside img', { timeout: 10000 })
+        .should('be.visible')
+        .and('have.attr', 'alt', imageFileName)
+        .and('have.attr', 'src')
+        .and('match', /^blob:/)
+    })
+  })
 })

@@ -20,19 +20,26 @@ const unitOptions: Record<string, string[]> = {
   volume: ['μL', 'mL', 'L'],
   // Molarity units
   molarity: ['μM', 'mM', 'M'],
+  // Temperature units
+  temperature: ['°C', '°F', 'K'],
   // General units
   amount: ['mg', 'g', 'kg', 'μL', 'mL', 'L', 'μM', 'mM', 'M'],
 }
 
+// Determine which unit category a field belongs to based on its name
 const getUnitCategory = (fieldName: string): string => {
+  if (fieldName.includes('temperature')) return 'temperature'
   if (fieldName.includes('molarity')) return 'molarity'
   if (fieldName.includes('density')) return 'mass'
   if (fieldName.includes('amount')) return 'amount'
   return 'amount'
 }
 
+// Get the default unit for each category
 const getDefaultUnit = (category: string): string => {
   switch (category) {
+    case 'temperature':
+      return '°C'
     case 'molarity':
       return 'M'
     case 'mass':

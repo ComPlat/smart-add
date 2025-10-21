@@ -38,6 +38,7 @@ const ClickOnAnalysesContextMenu = ({
       closeContextMenu={closeContextMenu}
       targetItem={targetItem}
       tree={tree}
+      hideDeleteOption={true}
     />
   </>
 )
@@ -53,6 +54,29 @@ const ClickOnAnalysisContextMenu = ({
 }) => (
   <>
     <AddDatasetContextMenuItem
+      close={closeContextMenu}
+      item={targetItem}
+      tree={tree}
+    />
+    <DefaultContextMenu
+      closeContextMenu={closeContextMenu}
+      targetItem={targetItem}
+      tree={tree}
+    />
+  </>
+)
+
+const ClickOnReactionContextMenu = ({
+  closeContextMenu,
+  targetItem,
+  tree,
+}: {
+  closeContextMenu: () => void
+  targetItem: ExtendedFile | ExtendedFolder
+  tree: Record<string, FileNode>
+}) => (
+  <>
+    <AddSampleContextMenuItem
       close={closeContextMenu}
       item={targetItem}
       tree={tree}
@@ -82,10 +106,13 @@ const CreateStructureContextMenu = ({
 const ContextMenu = ({ closeContextMenu, targetItem, tree }: ContextMenu) => {
   const isFolder = targetItem?.isFolder
   const containerType = targetItem?.metadata?.container_type
+  const dtype =
+    targetItem && 'dtype' in targetItem ? targetItem.dtype : undefined
 
   const isAnalysesFolder = isFolder && containerType === 'analyses'
   const isAnalysisFolder = isFolder && containerType === 'analysis'
   const isStructureFolder = isFolder && containerType === 'structure'
+  const isReactionFolder = isFolder && dtype === 'reaction'
 
   if (!targetItem) {
     return (
@@ -116,7 +143,22 @@ const ContextMenu = ({ closeContextMenu, targetItem, tree }: ContextMenu) => {
     )
   }
 
-  if (!isAnalysesFolder && !isAnalysisFolder && !isStructureFolder) {
+  if (isReactionFolder) {
+    return (
+      <ClickOnReactionContextMenu
+        closeContextMenu={closeContextMenu}
+        targetItem={targetItem}
+        tree={tree}
+      />
+    )
+  }
+
+  if (
+    !isAnalysesFolder &&
+    !isAnalysisFolder &&
+    !isStructureFolder &&
+    !isReactionFolder
+  ) {
     return (
       <DefaultContextMenu
         closeContextMenu={closeContextMenu}

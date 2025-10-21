@@ -29,3 +29,30 @@
   0% { opacity: 0; }
   100% { opacity: 1; }
 }
+
+/* AutoComplete styling to match SelectField */
+.custom-autocomplete .ant-select-selector {
+  border: 1px solid #d1d5db !important;
+  border-radius: 0.25rem !important;
+  padding: 0.25rem 0.5rem !important;
+  height: 32px !important;
+  box-shadow: none !important;
+}
+
+.custom-autocomplete .ant-select-selector:hover {
+  border-color: var(--color-kit-primary-full) !important;
+}
+
+.custom-autocomplete.ant-select-focused .ant-select-selector {
+  border-color: var(--color-kit-primary-full) !important;
+  box-shadow: none !important;
+}
+
+.custom-autocomplete.ant-select-disabled .ant-select-selector {
+  background-color: #f3f4f6 !important;
+  cursor: not-allowed !important;
+}
+
+.custom-autocomplete.ant-select-disabled .ant-select-selector:hover {
+  border-color: #d1d5db !important;
+}

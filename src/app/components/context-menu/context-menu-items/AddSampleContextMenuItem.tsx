@@ -1,3 +1,4 @@
+import { ExtendedFile, ExtendedFolder } from '@/database/db'
 import { FileNode } from '@/helper/types'
 import { useOnClickOutside } from '@/hooks/useOnClickOutside'
 import { FC, useRef, useState } from 'react'
@@ -7,15 +8,17 @@ import { getUniqueFolderName } from '../../structure-btns/folderUtils'
 import { createSample } from '../../structure-btns/templates'
 import Modal from './Modal'
 
-interface AddAnalysisProps {
+interface AddSampleProps {
   className?: string
   close: () => void
+  item?: ExtendedFile | ExtendedFolder
   tree: Record<string, FileNode>
 }
 
-const AddSampleContextMenuItem: FC<AddAnalysisProps> = ({
+const AddSampleContextMenuItem: FC<AddSampleProps> = ({
   className,
   close,
+  item,
   tree,
 }) => {
   const baseName = 'Sample'
@@ -30,7 +33,11 @@ const AddSampleContextMenuItem: FC<AddAnalysisProps> = ({
   const handleAddSample = async () => {
     const uniqueFolderName = getUniqueFolderName(folderName, tree, baseName)
 
-    await createSample(uniqueFolderName, tree)
+    if (item) {
+      await createSample(uniqueFolderName, tree, item.fullPath, item.uid)
+    } else {
+      await createSample(uniqueFolderName, tree)
+    }
 
     setFolderName(baseName)
     setShowInput(false)

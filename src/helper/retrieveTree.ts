@@ -37,6 +37,7 @@ const convertToFileTree = (
           isFolder: true,
           uid: currentFolder.folderObj.uid,
           dtype: currentFolder.folderObj.dtype,
+          reactionSchemeType: currentFolder.folderObj.reactionSchemeType,
         }
 
         const childNodes: Record<string, FileNode>[] = Object.values(

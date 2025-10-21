@@ -164,11 +164,58 @@ const hiddenKeys = Object.freeze([
   'content',
   'conditions',
   'variations',
-  'temperature',
   'observation',
+  //Hidden keys for Molecule
+  'inchikey',
+  'names',
+  'density',
+  'inchistring',
+  'molecular_weight',
+  'sum_formular',
+  'exact_molecular_weight',
+  'cas',
+  'molfile_version',
+  'is_partial',
+  'deleted_at',
+  'iupac_name',
+  'molecule_svg_file',
 ])
 
-export const isHidden = (key: string): boolean => hiddenKeys.includes(key)
+// Keys to hide for specific schemas
+// Add any schema type and keys you want to hide for that schema
+const schemaSpecificHiddenKeys: Record<string, readonly string[]> =
+  Object.freeze({
+    sample: ['molfile'], // Hide molfile for samples
+    molecule: ['melting_point', 'boiling_point', 'name'], // Show all molecule-specific keys (nothing hidden beyond global hiddenKeys)
+    reaction: [], // Show all reaction-specific keys
+    analyses: ['description', 'container_type'], // Show all analysis-specific keys
+    analysis: [], // Show all analysis-specific keys
+    dataset: [], // Show all dataset-specific keys
+    // Add more schema types as needed...
+  })
+
+/**
+ * Check if a key should be hidden in the inspector
+ * @param key - The field key to check
+ * @param schemaName - Optional schema type (e.g., 'sample', 'molecule', 'reaction')
+ * @returns true if the key should be hidden
+ *
+ * @example
+ * isHidden('molfile', 'sample') // true - molfile hidden for samples
+ * isHidden('molfile', 'molecule') // false - molfile shown for molecules
+ * isHidden('created_at') // true - globally hidden
+ */
+export const isHidden = (key: string, schemaName?: string): boolean => {
+  // First check global hidden keys
+  if (hiddenKeys.includes(key)) return true
+
+  // Then check schema-specific hidden keys
+  if (schemaName && schemaSpecificHiddenKeys[schemaName]) {
+    return schemaSpecificHiddenKeys[schemaName].includes(key)
+  }
+
+  return false
+}
 
 // Extended metadata field mapping by container type
 const extendedMetadataFields = Object.freeze({

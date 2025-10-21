@@ -1,8 +1,11 @@
+import { ExtendedFolder } from '@/database/db'
 import { formatLabel } from '@/helper/utils'
+import { FileNode } from '@/helper/types'
 import { useState } from 'react'
 import SelectField from './SelectField'
 import { allSolventOptions } from './solventOptions'
 import { FaDeleteLeft } from 'react-icons/fa6'
+import { createSample } from '../structure-btns/templates'
 
 export interface SolventItem {
   label: string
@@ -16,6 +19,8 @@ interface SolventInputFieldProps {
   onChange: (newValue: SolventItem[]) => void
   readonly?: boolean
   values: SolventItem[]
+  reactionFolder?: ExtendedFolder
+  tree?: Record<string, FileNode>
 }
 
 const SolventInputField: React.FC<SolventInputFieldProps> = ({
@@ -23,14 +28,40 @@ const SolventInputField: React.FC<SolventInputFieldProps> = ({
   onChange,
   readonly = false,
   values = [],
+  reactionFolder,
+  tree,
 }) => {
   const [isExpanded, setIsExpanded] = useState(true)
+  const [creatingIndex, setCreatingIndex] = useState<number | null>(null)
 
-  const addSolventFromDropdown = (selectedOption: string) => {
+  const addSolventFromDropdown = async (selectedOption: string) => {
     const option = allSolventOptions.find((opt) => opt.label === selectedOption)
-    if (option) {
+    if (!option) return
+
+    // If reactionFolder and tree are provided, create a sample directly
+    if (reactionFolder && tree) {
+      setCreatingIndex(-1) // Use -1 to indicate dropdown loading
+      try {
+        const displayName = option.label || option.value.external_label
+        await createSample(
+          displayName,
+          tree,
+          reactionFolder.fullPath,
+          reactionFolder.uid,
+          'solvent',
+          {
+            cano_smiles: option.value.smiles,
+            iupac_name: displayName,
+          },
+        )
+      } catch (error) {
+        console.error('Failed to create solvent sample:', error)
+      } finally {
+        setCreatingIndex(null)
+      }
+    } else {
       const newSolvent: SolventItem = {
-        label: option.value.external_label,
+        label: option.label || option.value.external_label,
         smiles: option.value.smiles,
         inchikey: '',
         ratio: 1,
@@ -62,7 +93,9 @@ const SolventInputField: React.FC<SolventInputFieldProps> = ({
   return (
     <div className="flex flex-col text-sm">
       <div className="flex items-center justify-between">
-        <p className="font-bold">{formatLabel(name)}</p>
+        <p className="font-bold">
+          {reactionFolder ? 'Solvents' : formatLabel(name)}
+        </p>
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
@@ -78,19 +111,26 @@ const SolventInputField: React.FC<SolventInputFieldProps> = ({
           <SelectField
             name="add_solvent"
             options={solventDropdownOptions}
-            placeholder="Select solvents or drag-n-drop molecules"
+            placeholder={
+              creatingIndex === -1
+                ? 'Creating solvent sample...'
+                : reactionFolder && tree
+                ? 'Select solvent (creates sample automatically)'
+                : 'Select solvents or drag-n-drop molecules'
+            }
             value=""
             onChange={(e) => {
               if (e.target.value) {
                 addSolventFromDropdown(e.target.value)
               }
             }}
+            readonly={creatingIndex === -1}
           />
         </div>
       )}
 
-      {/* Summary view when collapsed */}
-      {!isExpanded && values.length > 0 && (
+      {/* Summary view when collapsed - only for legacy data */}
+      {!isExpanded && values.length > 0 && !reactionFolder && (
         <div className="mt-2 p-2 bg-gray-50 rounded border text-xs">
           {values.map((solvent, index) => (
             <div
@@ -103,8 +143,8 @@ const SolventInputField: React.FC<SolventInputFieldProps> = ({
         </div>
       )}
 
-      {/* Detailed table view when expanded */}
-      {isExpanded && values.length > 0 && (
+      {/* Detailed table view when expanded - only show for legacy data */}
+      {isExpanded && values.length > 0 && !reactionFolder && (
         <div className="mt-2">
           <table className="w-full border-collapse text-xs">
             <thead>
@@ -154,6 +194,14 @@ const SolventInputField: React.FC<SolventInputFieldProps> = ({
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Show message for reactions - solvents are now samples */}
+      {reactionFolder && tree && (
+        <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
+          💡 Solvents are created as samples in the reaction. View them in the
+          workspace tree.
         </div>
       )}
     </div>

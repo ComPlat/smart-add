@@ -162,10 +162,10 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
         {/* Validation Errors */}
         {molInfo && !molInfo.isValid && (
           <div className="rounded border border-red-200 bg-red-50 p-3">
-            <h4 className="text-xs font-semibold text-red-800 mb-2">
+            <h4 className="mb-2 text-xs font-semibold text-red-800">
               Validation Errors
             </h4>
-            <ul className="text-xs text-red-700 space-y-1">
+            <ul className="space-y-1 text-xs text-red-700">
               {molInfo.errors?.map((error, index) => (
                 <li key={index} className="flex items-start">
                   <span className="mr-1">•</span>
@@ -178,7 +178,7 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
 
         {/* Content Preview */}
         <textarea
-          className={`mt-2 h-32 w-full rounded border px-2 py-1 text-xs font-mono outline-gray-200 focus:border-kit-primary-full ${
+          className={`mt-2 h-96 w-full rounded border px-2 py-1 font-mono text-xs outline-gray-200 focus:border-kit-primary-full ${
             molInfo && molInfo.isValid
               ? 'border-green-300'
               : molInfo && !molInfo.isValid
@@ -190,9 +190,27 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
               : 'bg-white hover:border-kit-primary-full'
           }`}
           placeholder="File content will appear here..."
-          readOnly
+          readOnly={readonly}
           value={value || ''}
-          title="File content (read-only)"
+          title={
+            readonly ? 'File content (read-only)' : 'File content (editable)'
+          }
+          onChange={(e) => {
+            if (!readonly) {
+              const content = e.target.value
+              onChange(content)
+
+              // Validate on change
+              if (content) {
+                const validation = validateMolFile(content)
+                setMolInfo(validation)
+                onValidationChange?.(validation.isValid)
+              } else {
+                setMolInfo(null)
+                onValidationChange?.(false)
+              }
+            }
+          }}
         />
 
         {/* File Info */}

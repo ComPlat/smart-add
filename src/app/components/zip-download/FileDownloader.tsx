@@ -10,10 +10,6 @@ import { Button } from '../workspace/Button'
 import { generateExportJson } from './jsonGenerator'
 import { dragNotifications } from '@/utils/dragNotifications'
 
-interface FileTree {
-  [key: string]: Blob | FileTree
-}
-
 const FileDownloader = () => {
   const assignedFiles =
     useLiveQuery(() =>
@@ -23,6 +19,39 @@ const FileDownloader = () => {
     useLiveQuery(() =>
       filesDB.folders.where('treeId').equals('assignmentTreeRoot').toArray(),
     ) || []
+
+  interface CategorizedFiles {
+    directFiles: ExtendedFile[]
+    folderGroups: Record<string, ExtendedFile[]>
+  }
+
+  const categorizeFiles = (assignedFiles: ExtendedFile[]): CategorizedFiles => {
+    const directFiles: ExtendedFile[] = []
+    const folderGroups: Record<string, ExtendedFile[]> = {}
+
+    assignedFiles.forEach((file) => {
+      const pathParts = file.fullPath.split('/')
+      const datasetIndex = pathParts.findIndex((part) =>
+        part.startsWith('dataset_'),
+      )
+
+      if (datasetIndex !== -1) {
+        const afterDataset = pathParts.slice(datasetIndex + 1)
+
+        if (afterDataset.length === 1) {
+          // Direct file: dataset_X/file.ext
+          directFiles.push(file)
+        } else {
+          // File in subfolder: dataset_X/subfolder/file.ext
+          const folderPath = pathParts.slice(0, datasetIndex + 2).join('/')
+          if (!folderGroups[folderPath]) folderGroups[folderPath] = []
+          folderGroups[folderPath].push(file)
+        }
+      }
+    })
+
+    return { directFiles, folderGroups }
+  }
 
   const transformAssignedFilesToHaveUniqueNames = (
     assignedFiles: ExtendedFile[],
@@ -42,58 +71,88 @@ const FileDownloader = () => {
     return uniqueAssignedFiles
   }
 
-  const constructTree = (files: ExtendedFile[]): FileTree => {
-    return files.reduce((previousTree: FileTree, file: ExtendedFile) => {
-      const components = file.fullPath.split('/')
-
-      const componentsTree = components.reduce((previousTree, component) => {
-        const value = previousTree[component] ? previousTree[component] : {}
-        const componentTreeEntry = { [component]: value }
-        return Object.assign(previousTree, componentTreeEntry)
-      }, {} as FileTree)
-
-      const fileTree = { [file.name]: file.file }
-
-      return Object.assign(previousTree, componentsTree, fileTree)
-    }, {} as FileTree)
-  }
-
   const handleClick = async () => {
     try {
       const zip = new JSZip()
-      const transformedAssignedFiles =
-        transformAssignedFilesToHaveUniqueNames(assignedFiles)
-      const fileTree = constructTree(transformedAssignedFiles)
+      const { directFiles, folderGroups } = categorizeFiles(assignedFiles)
 
-      const addFilesToZip = async (tree: FileTree, parentZip: JSZip = zip) => {
-        await Promise.all(
-          Object.entries(tree).map(async ([name, value]) => {
-            const newPath = `attachments/${name}`
+      // Handle direct files - give them UUIDs
+      const processedDirectFiles =
+        transformAssignedFilesToHaveUniqueNames(directFiles)
 
-            if (
-              name.endsWith('.zip') &&
-              typeof value === 'object' &&
-              !(value instanceof Blob)
-            ) {
-              const nestedZip = new JSZip()
-              await addFilesToZip(value as FileTree, nestedZip)
-              const nestedBlob = await nestedZip.generateAsync({ type: 'blob' })
-              parentZip.file(newPath, nestedBlob)
-            } else if (value instanceof Blob) {
-              parentZip.file(newPath, value)
-            } else if (typeof value === 'object') {
-              await addFilesToZip(value as FileTree, parentZip)
-            }
+      // Handle folder groups - create ZIPs for each folder
+      const processedFolderZips: ExtendedFile[] = []
+
+      for (const [folderPath, filesInFolder] of Object.entries(folderGroups)) {
+        const folderZip = new JSZip()
+        const folderName = folderPath.split('/').pop() // Get last part (folder name)
+
+        // Add all files from this folder to the folder ZIP, preserving internal structure
+        filesInFolder.forEach((file) => {
+          // Calculate relative path from the root folder (preserve internal structure)
+          const pathParts = file.fullPath.split('/')
+          const datasetIndex = pathParts.findIndex((part) =>
+            part.startsWith('dataset_'),
+          )
+          const relativePath = pathParts.slice(datasetIndex + 2).join('/') // Everything after root folder
+          folderZip.file(relativePath, file.file)
+        })
+
+        // Generate the folder ZIP blob
+        const folderZipBlob = await folderZip.generateAsync({ type: 'blob' })
+
+        // Create a UUID for this folder ZIP
+        const folderUuid = v4()
+
+        // Find the dataset parent UID - we need to traverse up to find the dataset container
+        // The files point to the immediate folder, but we need the dataset container
+        let currentFolderUid = filesInFolder[0]?.parentUid || ''
+        let datasetParentUid = ''
+
+        // Traverse up the folder hierarchy to find the dataset container
+        while (currentFolderUid) {
+          const currentFolder = assignedFolders.find(
+            (f) => f.uid === currentFolderUid,
+          )
+          if (currentFolder?.dtype === 'dataset') {
+            datasetParentUid = currentFolderUid
+            break
+          }
+          currentFolderUid = currentFolder?.parentUid || ''
+        }
+
+        // Remove .zip extension from folder name if it exists to avoid .zip.zip
+        const cleanFolderName = folderName?.endsWith('.zip')
+          ? folderName.slice(0, -4)
+          : folderName
+
+        const folderZipFile: ExtendedFile = {
+          ...filesInFolder[0], // Use first file as template
+          name: `${folderUuid}.zip`,
+          file: new File([folderZipBlob], `${cleanFolderName}.zip`, {
+            type: 'application/zip',
           }),
-        )
+          fullPath: folderPath, // Keep original folder path for JSON generation
+          parentUid: datasetParentUid, // Ensure it points to the correct dataset container
+          uid: folderUuid, // Set unique ID for the ZIP file
+        }
 
-        return parentZip
+        processedFolderZips.push(folderZipFile)
       }
 
-      await addFilesToZip(fileTree)
+      // Combine processed files for final ZIP
+      const allProcessedFiles = [
+        ...processedDirectFiles,
+        ...processedFolderZips,
+      ]
+
+      // Add all processed files to main ZIP
+      allProcessedFiles.forEach((file) => {
+        zip.file(`attachments/${file.name}`, file.file)
+      })
 
       const exportJsonData = await generateExportJson(
-        transformedAssignedFiles,
+        allProcessedFiles,
         assignedFolders,
       )
       const exportJson = new File(
