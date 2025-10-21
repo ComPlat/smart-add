@@ -19,6 +19,7 @@ import FileUploadInputField from '../input-components/FileUploadInputField'
 import NumberInputField from '../input-components/NumberInputField'
 import QuantityInputField from '../input-components/QuantityInputField'
 import SelectField from '../input-components/SelectField'
+import SmilesInputField from '../input-components/SmilesInputField'
 import SolventInputField, {
   SolventItem,
 } from '../input-components/SolventInputField'
@@ -60,6 +61,7 @@ const specialFieldTypes: Record<string, string> = {
   kind: 'kind',
   rxno: 'rxno',
   molfile: 'molfile',
+  cano_smiles: 'cano_smiles',
 }
 
 export function determineInputComponent<T extends ZodRawShape>({
@@ -156,6 +158,15 @@ export function determineInputComponent<T extends ZodRawShape>({
         value,
         readonly,
         updateMetadata,
+        onMolValidationChange,
+      )
+
+    case 'cano_smiles':
+      return renderSmilesField(
+        key,
+        value,
+        readonly,
+        handleInputChange,
         onMolValidationChange,
       )
 
@@ -433,6 +444,28 @@ function renderMolfileField(
       value={value as string}
       acceptedTypes=".mol,.txt"
       maxFileSize={1024 * 1024}
+      onValidationChange={onMolValidationChange}
+    />
+  )
+}
+
+function renderSmilesField(
+  key: string,
+  value: MetadataValue,
+  readonly: boolean,
+  handleInputChange: (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    key: string,
+  ) => void,
+  onMolValidationChange?: (isValid: boolean) => void,
+) {
+  return (
+    <SmilesInputField
+      key={key}
+      name={key}
+      onChange={(e) => handleInputChange(e, key)}
+      readonly={readonly}
+      value={(value as string) || ''}
       onValidationChange={onMolValidationChange}
     />
   )
