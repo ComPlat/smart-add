@@ -31,7 +31,13 @@ const AddReactionContextMenuItem: FC<AddAnalysisProps> = ({
   useOnClickOutside(popupRef, () => showInput && setShowInput(false))
 
   const handleAddReaction = async () => {
-    const uniqueFolderName = getUniqueFolderName(folderName, tree, baseName, false, '')
+    const uniqueFolderName = getUniqueFolderName(
+      folderName,
+      tree,
+      baseName,
+      false,
+      '',
+    )
 
     const uniqueSampleName = getUniqueFolderName(
       sampleName,

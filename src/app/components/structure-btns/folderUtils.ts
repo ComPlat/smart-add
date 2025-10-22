@@ -15,26 +15,24 @@ export const getUniqueFolderName = (
   appendNumberIfDuplicate: boolean = true,
   parentPath?: string,
 ) => {
-  console.log("Objects: ", folderName, tree, baseName, appendNumberIfDuplicate, parentPath);
-  
   // Filter tree to only include siblings (same parent) if parentPath is provided
-  const relevantNodes = parentPath !== undefined
-    ? Object.entries(tree)
-        .filter(([path, _]) => {
-          // Get the parent of this node by removing the last segment
-          const lastSlashIndex = path.lastIndexOf('/')
-          const nodeparent = lastSlashIndex > 0 ? path.substring(0, lastSlashIndex) : ''
-          return nodeparent === parentPath
-        })
-        .map(([_, node]) => node)
-    : Object.values(tree)
+  const relevantNodes =
+    parentPath !== undefined
+      ? Object.entries(tree)
+          .filter(([path]) => {
+            // Get the parent of this node by removing the last segment
+            const lastSlashIndex = path.lastIndexOf('/')
+            const nodeparent =
+              lastSlashIndex > 0 ? path.substring(0, lastSlashIndex) : ''
+            return nodeparent === parentPath
+          })
+          .map(([, node]) => node)
+      : Object.values(tree)
 
   // When appendNumberIfDuplicate is false, respect user's exact input
   if (!appendNumberIfDuplicate) {
     // Check if the exact folderName (as entered by user) already exists among siblings
-    const exactMatch = relevantNodes.some(
-      (node) => node.data === folderName,
-    )
+    const exactMatch = relevantNodes.some((node) => node.data === folderName)
 
     // If exact name doesn't exist, use it as-is
     if (!exactMatch) {
@@ -66,9 +64,7 @@ export const getUniqueFolderName = (
 
   const highestCounter = Math.max(...relevantNodes.map(searchTree), 0)
 
-  const isDuplicate = relevantNodes.some(
-    (node) => node.data === cleanBaseName,
-  )
+  const isDuplicate = relevantNodes.some((node) => node.data === cleanBaseName)
 
   if (!isDuplicate) {
     return cleanBaseName

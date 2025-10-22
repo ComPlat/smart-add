@@ -105,9 +105,7 @@ export const createSample = async (
     | 'startingMaterial' = 'product',
   customMoleculeMetadata?: Partial<Molecule>,
 ) => {
-  const samplePath = fullPath
-    ? `${fullPath}/${baseFolderName}`
-    : baseFolderName
+  const samplePath = fullPath ? `${fullPath}/${baseFolderName}` : baseFolderName
   const sampleParentUid = parentUid || ''
 
   const sampleFolder = await createFolder(
