@@ -105,15 +105,7 @@ export const createSample = async (
     | 'startingMaterial' = 'product',
   customMoleculeMetadata?: Partial<Molecule>,
 ) => {
-  const uniqueFolderName = getUniqueFolderName(
-    baseFolderName,
-    tree,
-    baseFolderName,
-  )
-
-  const samplePath = fullPath
-    ? `${fullPath}/${uniqueFolderName}`
-    : uniqueFolderName
+  const samplePath = fullPath ? `${fullPath}/${baseFolderName}` : baseFolderName
   const sampleParentUid = parentUid || ''
 
   const sampleFolder = await createFolder(
@@ -121,7 +113,7 @@ export const createSample = async (
     baseFolderName,
     true,
     sampleParentUid,
-    getMetadata(sampleParentUid, uniqueFolderName, 'sample') as any,
+    getMetadata(sampleParentUid, baseFolderName, 'sample') as any,
     'sample',
     reactionSchemeType,
   )
@@ -188,22 +180,16 @@ export const createReaction = async (
   tree: Record<string, FileNode>,
   sampleName: string,
 ) => {
-  const uniqueFolderName = getUniqueFolderName(
-    baseFolderName,
-    tree,
-    baseFolderName,
-  )
-
   const reactionFolder = await createFolder(
-    uniqueFolderName,
+    baseFolderName,
     baseFolderName,
     true,
     '',
-    getMetadata('', uniqueFolderName, 'reaction') as any,
+    getMetadata('', baseFolderName, 'reaction') as any,
     'reaction',
   )
   const sampleFolder = await createFolder(
-    `${uniqueFolderName}/${sampleName}`,
+    `${baseFolderName}/${sampleName}`,
     sampleName,
     true,
     reactionFolder.uid,
@@ -212,7 +198,7 @@ export const createReaction = async (
     'product',
   )
   const analysesFolder = await createFolder(
-    `${uniqueFolderName}/${sampleName}/analyses`,
+    `${baseFolderName}/${sampleName}/analyses`,
     'analyses',
     true,
     sampleFolder.uid,
@@ -221,7 +207,7 @@ export const createReaction = async (
   )
 
   const analysisFolders = await createSubFolders(
-    `${uniqueFolderName}/${sampleName}/analyses`,
+    `${baseFolderName}/${sampleName}/analyses`,
     analyses,
     analysesFolder.uid,
     analyses.map(
@@ -246,7 +232,7 @@ export const createReaction = async (
 
   // Create analyses folder for the reaction itself
   const reactionAnalysesFolder = await createFolder(
-    `${uniqueFolderName}/analyses`,
+    `${baseFolderName}/analyses`,
     'analyses',
     true,
     reactionFolder.uid,
@@ -255,7 +241,7 @@ export const createReaction = async (
   )
 
   const reactionAnalysisFolders = await createSubFolders(
-    `${uniqueFolderName}/analyses`,
+    `${baseFolderName}/analyses`,
     analyses,
     reactionAnalysesFolder.uid,
     analyses.map(
@@ -289,7 +275,7 @@ export const createReaction = async (
 
   const promises = [
     createSubFolders(
-      `${uniqueFolderName}/${sampleName}`,
+      `${baseFolderName}/${sampleName}`,
       ['molecule', 'analyses'],
       sampleFolder.uid,
       [
@@ -315,6 +301,8 @@ export const createAnalysis = async (
     baseFolderName,
     tree,
     baseFolderName,
+    false,
+    fullPath,
   )
 
   const analysisFolder = await createFolder(
@@ -348,6 +336,8 @@ export const createDataset = async (
     baseFolderName,
     tree,
     baseFolderName,
+    false,
+    fullPath,
   )
 
   const datasetFolder = await createFolder(

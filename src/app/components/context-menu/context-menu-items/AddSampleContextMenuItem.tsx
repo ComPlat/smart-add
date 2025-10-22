@@ -31,7 +31,13 @@ const AddSampleContextMenuItem: FC<AddSampleProps> = ({
   useOnClickOutside(popupRef, () => showInput && setShowInput(false))
 
   const handleAddSample = async () => {
-    const uniqueFolderName = getUniqueFolderName(folderName, tree, baseName)
+    const uniqueFolderName = getUniqueFolderName(
+      folderName,
+      tree,
+      baseName,
+      false,
+      item?.fullPath || '',
+    )
 
     if (item) {
       await createSample(uniqueFolderName, tree, item.fullPath, item.uid)

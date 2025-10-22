@@ -27,11 +27,19 @@ const AddReactionButton = ({
 
   const handleOk = async () => {
     setIsModalVisible(false)
-    const uniqueFolderName = getUniqueFolderName(folderName, tree, baseName)
+    const uniqueFolderName = getUniqueFolderName(
+      folderName,
+      tree,
+      baseName,
+      false,
+      '',
+    )
     const uniqueSampleName = getUniqueFolderName(
       sampleName,
       tree,
       baseSampleName,
+      false,
+      uniqueFolderName,
     )
     await createReaction(uniqueFolderName, tree, uniqueSampleName)
     setFolderName(baseName)
