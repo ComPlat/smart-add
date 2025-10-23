@@ -32,9 +32,14 @@ const FileDownloader = () => {
 
     assignedFiles.forEach((file) => {
       const pathParts = file.fullPath.split('/')
-      const datasetIndex = pathParts.findIndex((part) =>
-        part.startsWith('dataset_'),
-      )
+      const datasetIndex = pathParts.findIndex((part) => {
+        const folder = assignedFolders.find(
+          (f) =>
+            f.fullPath ===
+            pathParts.slice(0, pathParts.indexOf(part) + 1).join('/'),
+        )
+        return folder?.dtype === 'dataset'
+      })
 
       if (datasetIndex !== -1) {
         const afterDataset = pathParts.slice(datasetIndex + 1)
@@ -92,9 +97,14 @@ const FileDownloader = () => {
         filesInFolder.forEach((file) => {
           // Calculate relative path from the root folder (preserve internal structure)
           const pathParts = file.fullPath.split('/')
-          const datasetIndex = pathParts.findIndex((part) =>
-            part.startsWith('dataset_'),
-          )
+          const datasetIndex = pathParts.findIndex((part) => {
+            const folder = assignedFolders.find(
+              (f) =>
+                f.fullPath ===
+                pathParts.slice(0, pathParts.indexOf(part) + 1).join('/'),
+            )
+            return folder?.dtype === 'dataset'
+          })
           const relativePath = pathParts.slice(datasetIndex + 2).join('/') // Everything after root folder
           folderZip.file(relativePath, file.file)
         })
