@@ -1,7 +1,6 @@
 'use client'
 
 import { ExtendedFile, filesDB } from '@/database/db'
-import { formatDateToTimeStamp } from '@/helper/formatDateToTimeStamp'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { saveAs } from 'file-saver'
 import JSZip from 'jszip'
@@ -9,6 +8,8 @@ import { v4 } from 'uuid'
 import { Button } from '../workspace/Button'
 import { generateExportJson } from './jsonGenerator'
 import { dragNotifications } from '@/utils/dragNotifications'
+
+const zipDate = new Date().toLocaleDateString().replace(/\//g, '-')
 
 const FileDownloader = () => {
   const assignedFiles =
@@ -167,7 +168,7 @@ const FileDownloader = () => {
 
       const blob = await zip.generateAsync({ type: 'blob' })
 
-      const exportedZipFileName = `export_${formatDateToTimeStamp(new Date())}`
+      const exportedZipFileName = `SmartAdd-${zipDate}`
 
       saveAs(blob, exportedZipFileName)
       dragNotifications.showSuccess(
