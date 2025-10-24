@@ -158,7 +158,7 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
               )}
             </span>
           </div>
-          
+
           {isReactionFolder && (
             <button
               className="px-1 py-1 mt-1 mb-1 bg-kit-primary-full text-white hover:bg-kit-primary-full/90 rounded duration-150 transition-colors text-xs font-medium"
