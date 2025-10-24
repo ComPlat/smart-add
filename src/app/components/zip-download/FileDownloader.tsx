@@ -1,7 +1,6 @@
 'use client'
 
 import { ExtendedFile, filesDB } from '@/database/db'
-import { formatDateToTimeStamp } from '@/helper/formatDateToTimeStamp'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { saveAs } from 'file-saver'
 import JSZip from 'jszip'
@@ -9,6 +8,8 @@ import { v4 } from 'uuid'
 import { Button } from '../workspace/Button'
 import { generateExportJson } from './jsonGenerator'
 import { dragNotifications } from '@/utils/dragNotifications'
+
+const zipDate = new Date().toLocaleDateString().replace(/\//g, '-')
 
 const FileDownloader = () => {
   const assignedFiles =
@@ -31,9 +32,14 @@ const FileDownloader = () => {
 
     assignedFiles.forEach((file) => {
       const pathParts = file.fullPath.split('/')
-      const datasetIndex = pathParts.findIndex((part) =>
-        part.startsWith('dataset_'),
-      )
+      const datasetIndex = pathParts.findIndex((part) => {
+        const folder = assignedFolders.find(
+          (f) =>
+            f.fullPath ===
+            pathParts.slice(0, pathParts.indexOf(part) + 1).join('/'),
+        )
+        return folder?.dtype === 'dataset'
+      })
 
       if (datasetIndex !== -1) {
         const afterDataset = pathParts.slice(datasetIndex + 1)
@@ -91,9 +97,14 @@ const FileDownloader = () => {
         filesInFolder.forEach((file) => {
           // Calculate relative path from the root folder (preserve internal structure)
           const pathParts = file.fullPath.split('/')
-          const datasetIndex = pathParts.findIndex((part) =>
-            part.startsWith('dataset_'),
-          )
+          const datasetIndex = pathParts.findIndex((part) => {
+            const folder = assignedFolders.find(
+              (f) =>
+                f.fullPath ===
+                pathParts.slice(0, pathParts.indexOf(part) + 1).join('/'),
+            )
+            return folder?.dtype === 'dataset'
+          })
           const relativePath = pathParts.slice(datasetIndex + 2).join('/') // Everything after root folder
           folderZip.file(relativePath, file.file)
         })
@@ -167,7 +178,7 @@ const FileDownloader = () => {
 
       const blob = await zip.generateAsync({ type: 'blob' })
 
-      const exportedZipFileName = `export_${formatDateToTimeStamp(new Date())}`
+      const exportedZipFileName = `SmartAdd-${zipDate}`
 
       saveAs(blob, exportedZipFileName)
       dragNotifications.showSuccess(
