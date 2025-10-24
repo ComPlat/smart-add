@@ -120,7 +120,9 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
                 {title}
                 {reactionSchemeType && (
                   <span className="ml-2 px-1.5 py-0.5 text-xs bg-kit-primary-light text-kit-primary-full rounded">
-                    {reactionSchemeType}
+                    {reactionSchemeType
+                      .replace(/([A-Z])/g, ' $1')
+                      .replace(/^./, (str) => str.toUpperCase())}
                   </span>
                 )}
               </>
