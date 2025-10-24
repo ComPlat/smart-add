@@ -24,6 +24,7 @@ import {
 import { formatForExport } from '@/helper/fieldValidation'
 
 const currentDate = new Date().toISOString()
+const zipDate = new Date().toLocaleDateString().replace(/\//g, '.')
 const user_id = null
 const EXPORT_SOURCE = 'smart-add'
 
@@ -81,7 +82,7 @@ export const generateExportJson = async (
       ...collectionTemplate,
       created_at: currentDate,
       updated_at: currentDate,
-      label: 'Exported Collection',
+      label: `SmartAdd - ${zipDate}`,
       user_id,
     },
   }

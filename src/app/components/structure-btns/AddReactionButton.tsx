@@ -1,8 +1,7 @@
 import { FileNode } from '@/helper/types'
 import { Input, Modal } from 'antd'
 import { useState } from 'react'
-import { FaPlus } from 'react-icons/fa6'
-
+import { FaPlus, FaDeleteLeft } from 'react-icons/fa6'
 import { Button } from '../workspace/Button'
 import { getUniqueFolderName } from './folderUtils'
 import { createReaction } from './templates'
@@ -19,7 +18,7 @@ const AddReactionButton = ({
 
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [folderName, setFolderName] = useState(baseName)
-  const [sampleName, setSampleName] = useState(baseSampleName)
+  const [sampleNames, setSampleNames] = useState([baseSampleName])
 
   const showModal = () => {
     setIsModalVisible(true)
@@ -34,22 +33,31 @@ const AddReactionButton = ({
       false,
       '',
     )
-    const uniqueSampleName = getUniqueFolderName(
-      sampleName,
-      tree,
-      baseSampleName,
-      false,
-      uniqueFolderName,
-    )
-    await createReaction(uniqueFolderName, tree, uniqueSampleName)
+
+    // Create multiple samples with unique names
+    for (const sampleName of sampleNames) {
+      if (sampleName.trim()) {
+        // Only create if name is not empty
+        const uniqueSampleName = getUniqueFolderName(
+          sampleName,
+          tree,
+          baseSampleName,
+          false,
+          uniqueFolderName,
+        )
+        await createReaction(uniqueFolderName, tree, uniqueSampleName)
+      }
+    }
+
+    // Reset form
     setFolderName(baseName)
-    setSampleName(baseSampleName)
+    setSampleNames([baseSampleName])
   }
 
   const handleCancel = () => {
     setIsModalVisible(false)
     setFolderName(baseName)
-    setSampleName(baseSampleName)
+    setSampleNames([baseSampleName])
   }
 
   return (
@@ -78,7 +86,7 @@ const AddReactionButton = ({
         open={isModalVisible}
         title="Enter Reaction and Sample Names"
       >
-        <div className="mb-4">
+        <div className="mb-1">
           <label
             className="block text-sm font-medium text-gray-700"
             htmlFor="reactionName"
@@ -101,13 +109,42 @@ const AddReactionButton = ({
           >
             Sample Name
           </label>
-          <Input
-            className="mt-1"
-            id="sampleName"
-            onChange={(e) => setSampleName(e.target.value)}
-            placeholder="Enter sample name"
-            value={sampleName}
-          />
+
+          <div className="">
+            {sampleNames.map((name, index) => (
+              <div className="mb-1 flex" key={index}>
+                <Input
+                  id={`sampleName-${index}`}
+                  onChange={(e) => {
+                    const newNames = [...sampleNames]
+                    newNames[index] = e.target.value
+                    setSampleNames(newNames)
+                  }}
+                  placeholder="Enter sample name"
+                  value={name}
+                />
+                {index === 0 ? (
+                  <Button
+                    className="ml-2 p-0 w-8 h-8 flex items-center justify-center border-blue-500 hover:border-blue-700"
+                    icon={<FaPlus size={15} />}
+                    onClick={() =>
+                      setSampleNames([...sampleNames, baseSampleName])
+                    }
+                  />
+                ) : (
+                  <Button
+                    className="ml-2 p-0 w-8 h-8 flex items-center justify-center border-red-500 hover:border-red-700"
+                    icon={<FaDeleteLeft className="text-red-500" size={15} />}
+                    onClick={() => {
+                      const newNames = [...sampleNames]
+                      newNames.splice(index, 1)
+                      setSampleNames(newNames)
+                    }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </Modal>
     </>
