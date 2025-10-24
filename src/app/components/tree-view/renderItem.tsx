@@ -1,8 +1,11 @@
 import { ReactElement, ReactNode } from 'react'
 import { TreeItem, TreeItemRenderContext } from 'react-complex-tree'
+import { FaPlus } from 'react-icons/fa6'
 
 import { FileNode } from '@/helper/types'
 import { ICONS } from './fileIcons'
+import { createSample } from '../structure-btns/templates'
+import { getUniqueFolderName } from '../structure-btns/folderUtils'
 
 interface RenderItemParams {
   children: ReactNode
@@ -75,6 +78,31 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
         ? fileNode.reactionSchemeType
         : null
 
+    // Check if this is a reaction folder
+    const isReactionFolder = fileNode?.isFolder && fileNode.dtype === 'reaction'
+
+    const handleAddSampleToReaction = async (e: React.MouseEvent) => {
+      e.stopPropagation()
+      if (fileNode) {
+        const baseSampleName = 'Sample'
+        const uniqueSampleName = getUniqueFolderName(
+          baseSampleName,
+          tree,
+          baseSampleName,
+          false,
+          fileNode.index,
+        )
+
+        await createSample(
+          uniqueSampleName,
+          tree,
+          fileNode.index,
+          fileNode.uid || undefined,
+          'product',
+        )
+      }
+    }
+
     return (
       <li
         title={String(title)}
@@ -84,7 +112,7 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
         <button
           {...context.itemContainerWithoutChildrenProps}
           {...context.interactiveElementProps}
-          className={`flex items-center px-2 text-sm
+          className={`flex items-center justify-between px-2 text-sm
           ${
             context.isSelected
               ? 'my-1 rounded-md bg-kit-primary-mid font-bold'
@@ -99,35 +127,48 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
           }}
           type="button"
         >
-          <span className={`mr-2 ${titleClass}`}>
-            {Icon(item, context, title)}
-          </span>
-          <span
-            className={`truncate ${
-              shouldHideTitle ? 'invisible' : ''
-            } ${titleClass}`}
-          />
-          <span
-            className={`truncate ${
-              shouldHideTitle ? 'invisible' : ''
-            } ${titleClass}`}
-            data-mykey={item.index}
-          >
-            {shouldHideTitle ? (
-              <span className="invisible">{'\u200B'}</span>
-            ) : (
-              <>
-                {title}
-                {reactionSchemeType && (
-                  <span className="ml-2 px-1.5 py-0.5 text-xs bg-kit-primary-light text-kit-primary-full rounded">
-                    {reactionSchemeType
-                      .replace(/([A-Z])/g, ' $1')
-                      .replace(/^./, (str) => str.toUpperCase())}
-                  </span>
-                )}
-              </>
-            )}
-          </span>
+          <div className="flex items-center">
+            <span className={`mr-2 ${titleClass}`}>
+              {Icon(item, context, title)}
+            </span>
+            <span
+              className={`truncate ${
+                shouldHideTitle ? 'invisible' : ''
+              } ${titleClass}`}
+            />
+            <span
+              className={`truncate ${
+                shouldHideTitle ? 'invisible' : ''
+              } ${titleClass}`}
+              data-mykey={item.index}
+            >
+              {shouldHideTitle ? (
+                <span className="invisible">{'\u200B'}</span>
+              ) : (
+                <>
+                  {title}
+                  {reactionSchemeType && (
+                    <span className="ml-2 px-1.5 py-0.5 text-xs bg-kit-primary-light text-kit-primary-full rounded">
+                      {reactionSchemeType
+                        .replace(/([A-Z])/g, ' $1')
+                        .replace(/^./, (str) => str.toUpperCase())}
+                    </span>
+                  )}
+                </>
+              )}
+            </span>
+          </div>
+
+          {isReactionFolder && (
+            <button
+              className="px-1 py-1 mt-1 mb-1 bg-kit-primary-full text-white hover:bg-kit-primary-full/90 rounded duration-150 transition-colors text-xs font-medium"
+              onClick={handleAddSampleToReaction}
+              title="Add sample to reaction"
+              type="button"
+            >
+              <FaPlus className="w-3 h-3" />
+            </button>
+          )}
         </button>
         {children}
       </li>
