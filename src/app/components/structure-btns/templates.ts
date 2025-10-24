@@ -17,6 +17,7 @@ import {
   createSubFolders,
   getUniqueFolderName,
 } from './folderUtils'
+import { ReactionSchemeType } from '@/database/db'
 
 const getMetadata = (
   parent_id: string,
@@ -179,6 +180,7 @@ export const createReaction = async (
   baseFolderName: string,
   tree: Record<string, FileNode>,
   sampleName: string,
+  reactionSchemeType: ReactionSchemeType = 'product',
 ) => {
   const reactionFolder = await createFolder(
     baseFolderName,
@@ -195,7 +197,7 @@ export const createReaction = async (
     reactionFolder.uid,
     getMetadata(reactionFolder.uid, sampleName, 'sample', '') as any,
     'sample',
-    'product',
+    reactionSchemeType,
   )
   const analysesFolder = await createFolder(
     `${baseFolderName}/${sampleName}/analyses`,
