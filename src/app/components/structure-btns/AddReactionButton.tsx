@@ -38,25 +38,73 @@ const AddReactionButton = ({
       false,
       '',
     )
-    // Create multiple samples with unique names
+
+    let reactionFolderUid: string | undefined
+
+    // Create reaction with first sample, then add remaining samples
     for (const [index, sampleName] of sampleNames.entries()) {
       if (sampleName.trim()) {
-        // Only create if name is not empty
-        const uniqueSampleName = getUniqueFolderName(
-          sampleName,
-          tree,
-          baseSampleName,
-          false,
-          uniqueFolderName,
-        )
-        await createReaction(
-          uniqueFolderName,
-          tree,
-          uniqueSampleName,
-          sampleTypes[index],
-        )
+        let uniqueSampleName: string
+
+        if (index === 0) {
+          // First sample: just use getUniqueFolderName with tree
+          uniqueSampleName = getUniqueFolderName(
+            sampleName,
+            tree,
+            baseSampleName,
+            false,
+            uniqueFolderName,
+          )
+
+          // Create the reaction with this sample
+          const { reactionFolder } = await createReaction(
+            uniqueFolderName,
+            tree,
+            uniqueSampleName,
+            sampleTypes[index],
+          )
+
+          // Get the UID directly from the returned reaction folder
+          reactionFolderUid = reactionFolder.uid
+        } else if (reactionFolderUid) {
+          // Query database for existing samples in this reaction
+          const { filesDB } = await import('@/database/db')
+          const existingSamples = await filesDB.folders
+            .where('parentUid')
+            .equals(reactionFolderUid)
+            .and((folder) => folder.dtype === 'sample')
+            .toArray()
+
+          // Build a temporary tree with existing samples
+          const tempTree: Record<string, any> = { ...tree }
+          existingSamples.forEach((sample) => {
+            tempTree[sample.fullPath] = {
+              data: sample.name,
+              index: sample.fullPath,
+            }
+          })
+
+          uniqueSampleName = getUniqueFolderName(
+            sampleName,
+            tempTree,
+            baseSampleName,
+            false,
+            uniqueFolderName,
+          )
+
+          // Add sample to the existing reaction
+          const { createSample } = await import('./templates')
+          await createSample(
+            uniqueSampleName,
+            tree,
+            uniqueFolderName, // fullPath
+            reactionFolderUid, // parentUid
+            sampleTypes[index],
+          )
+        }
       }
     }
+
     // Reset form
     setFolderName(baseName)
     setSampleNames([baseSampleName])

@@ -181,7 +181,7 @@ export const createReaction = async (
   tree: Record<string, FileNode>,
   sampleName: string,
   reactionSchemeType: ReactionSchemeType = 'product',
-) => {
+): Promise<{ reactionFolder: any; promises: any[] }> => {
   const reactionFolder = await createFolder(
     baseFolderName,
     baseFolderName,
@@ -290,7 +290,9 @@ export const createReaction = async (
     reactionDatasetFolders,
   ]
 
-  return Promise.all(promises)
+  await Promise.all(promises)
+
+  return { reactionFolder, promises }
 }
 
 export const createAnalysis = async (
