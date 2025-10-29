@@ -1,6 +1,15 @@
 import { ExtendedFile, ExtendedFolder } from '@/database/db'
 import { FileNode, FolderDepthMap } from '@/helper/types'
 
+// Sort order for samples in reactions
+const REACTION_SCHEME_ORDER: Record<string, number> = {
+  startingMaterial: 1,
+  reactant: 2,
+  solvent: 3,
+  product: 4,
+  none: 5,
+}
+
 const convertToFileTree = (
   fileTree: Record<string, FileNode>,
   folderMap: { [key: string]: TempFileNode },
@@ -29,9 +38,31 @@ const convertToFileTree = (
 
       return folders.flatMap((folder) => {
         const currentFolder = folderMap[folder]
+
+        // Sort children: if parent is a reaction, sort samples by reactionSchemeType
+        const childrenKeys = Object.keys(currentFolder.children)
+        const isReaction = currentFolder.folderObj.dtype === 'reaction'
+
+        const getSortOrder = (child: any): number => {
+          if ('extension' in child) return REACTION_SCHEME_ORDER.none
+          const folder = 'folderObj' in child ? child.folderObj : child
+          return (
+            REACTION_SCHEME_ORDER[folder.reactionSchemeType] ??
+            REACTION_SCHEME_ORDER.none
+          )
+        }
+
+        const sortedChildren = isReaction
+          ? [...childrenKeys].sort(
+              (a, b) =>
+                getSortOrder(currentFolder.children[a]) -
+                getSortOrder(currentFolder.children[b]),
+            )
+          : childrenKeys
+
         const folderNode = {
           canMove: true,
-          children: Object.keys(currentFolder.children),
+          children: sortedChildren,
           data: currentFolder.folderObj.name,
           index: currentFolder.folderObj.fullPath,
           isFolder: true,
