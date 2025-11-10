@@ -186,6 +186,7 @@ const hiddenKeys = Object.freeze([
 const schemaSpecificHiddenKeys: Record<string, readonly string[]> =
   Object.freeze({
     sample: ['molfile'], // Hide molfile for samples
+    root: ['molfile'], // Hide molfile for root containers (imported samples with container_type: 'root')
     molecule: ['melting_point', 'boiling_point', 'name'], // Show all molecule-specific keys (nothing hidden beyond global hiddenKeys)
     reaction: [], // Show all reaction-specific keys
     analyses: ['description', 'container_type'], // Show all analysis-specific keys
@@ -232,7 +233,12 @@ export const isExtendedMetadataField = (
   return fields ? (fields as readonly string[]).includes(key) : false
 }
 
-const textAreaKeys = Object.freeze(['description', 'molfile'])
+const textAreaKeys = Object.freeze([
+  'description',
+  'molfile',
+  'plain_text_description',
+  'plain_text_observation',
+])
 
 export const isTextArea = (key: string): boolean => textAreaKeys.includes(key)
 

@@ -3,13 +3,13 @@ import { useState } from 'react'
 import { FaFileImport, FaFileExcel } from 'react-icons/fa6'
 import { Button } from '../workspace/Button'
 import type { UploadFile } from 'antd'
-import { message } from 'antd'
 import {
   useJsonZipUploadConfig,
   useExcelUploadConfig,
 } from './import-modal/useUploadConfig'
 import JsonZipTab from './import-modal/JsonZipTab'
 import ExcelTab from './import-modal/ExcelTab'
+import { dragNotifications } from '@/utils/dragNotifications'
 
 const ImportStructureButton = () => {
   const [isModalVisible, setIsModalVisible] = useState(false)
@@ -25,7 +25,7 @@ const ImportStructureButton = () => {
   const handleOk = async () => {
     if (activeTab === 'json-zip') {
       if (!jsonZipFile) {
-        message.warning('Please upload a file first')
+        dragNotifications.showWarning('Please upload a file first')
         return
       }
 
@@ -40,23 +40,15 @@ const ImportStructureButton = () => {
         }
 
         // Process the file
-        message.loading({ content: 'Processing import file...', key: 'import' })
+        dragNotifications.showWarning('Processing import file...')
 
         const file = jsonZipFile.originFileObj as File
 
-        message.loading({
-          content: 'Importing data to database...',
-          key: 'import',
-        })
+        dragNotifications.showWarning('Importing data to database...')
 
         const { importFromJsonOrZip } = await import('@/helper/importFromZip')
         const result = await importFromJsonOrZip(file)
-
-        message.success({
-          content: result.message,
-          key: 'import',
-          duration: 3,
-        })
+        dragNotifications.showSuccess(result.message)
 
         setIsModalVisible(false)
         setJsonZipFile(null)
@@ -65,23 +57,21 @@ const ImportStructureButton = () => {
         // detect the database changes and update the tree view reactively
       } catch (error) {
         console.error('Import error:', error)
-        message.error({
-          content: `Import failed: ${
+        dragNotifications.showError(
+          `Import failed: ${
             error instanceof Error ? error.message : 'Unknown error'
           }`,
-          key: 'import',
-          duration: 5,
-        })
+        )
       } finally {
         setIsProcessing(false)
       }
     } else if (activeTab === 'excel') {
       if (!excelFile) {
-        message.warning('Please upload an Excel file first')
+        dragNotifications.showWarning('Please upload an Excel file first')
         return
       }
       // TODO: Process the uploaded Excel file
-      message.info('Excel import is not yet implemented')
+      dragNotifications.showWarning('Excel import is not yet implemented')
       console.log('Processing Excel file:', excelFile)
     }
   }

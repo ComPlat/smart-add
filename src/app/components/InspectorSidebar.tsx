@@ -168,9 +168,9 @@ const InspectorSidebar = ({
                         key !== 'extended_metadata' &&
                         !isHidden(key, schemaName),
                     )
-                    .forEach(([key, value]) =>
-                      flattenedEntries.push([key, value]),
-                    )
+                    .forEach(([key, value]) => {
+                      flattenedEntries.push([key, value])
+                    })
 
                   // Add extended_metadata fields if they exist
                   if (
