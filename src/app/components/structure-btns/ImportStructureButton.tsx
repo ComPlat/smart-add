@@ -31,20 +31,29 @@ const ImportStructureButton = () => {
 
       setIsProcessing(true)
       try {
-        // Determine file type
-        // const fileName = jsonZipFile.name.toLowerCase()
-        // const fileType = fileName.endsWith('.json') ? 'json' : 'zip'
+        const fileName = jsonZipFile.name.toLowerCase()
+        const isZip = fileName.endsWith('.zip')
+        const isJson = fileName.endsWith('.json')
+
+        if (!isZip && !isJson) {
+          throw new Error('Please upload a valid JSON or ZIP file')
+        }
 
         // Process the file
         message.loading({ content: 'Processing import file...', key: 'import' })
-        // TODO: Show processed Data
+
+        const file = jsonZipFile.originFileObj as File
+
         message.loading({
           content: 'Importing data to database...',
           key: 'import',
         })
 
+        const { importFromJsonOrZip } = await import('@/helper/importFromZip')
+        const result = await importFromJsonOrZip(file)
+
         message.success({
-          content: `Successfully imported`,
+          content: result.message,
           key: 'import',
           duration: 3,
         })
@@ -52,8 +61,8 @@ const ImportStructureButton = () => {
         setIsModalVisible(false)
         setJsonZipFile(null)
 
-        // Reload the page to refresh the tree view
-        window.location.reload()
+        // Note: No need to reload - useLiveQuery in Workspace will automatically
+        // detect the database changes and update the tree view reactively
       } catch (error) {
         console.error('Import error:', error)
         message.error({
