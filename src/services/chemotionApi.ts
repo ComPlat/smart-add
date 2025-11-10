@@ -1,7 +1,7 @@
 /**
  * Chemotion ELN API Service
  * Handles authentication and data upload to Chemotion ELN
- * Makes direct API calls to Chemotion ELN server
+ * Uses Next.js API proxy to avoid CORS issues
  */
 
 export interface ChemotionAuthResponse {
@@ -115,7 +115,7 @@ class ChemotionApiService {
 
   /**
    * Upload zip file to Chemotion ELN
-   * Makes direct call to Chemotion ELN /api/v1/collections/imports endpoint
+   * Uses Next.js API proxy to avoid CORS issues
    */
   async uploadToChemotion(
     zipBlob: Blob,
@@ -127,20 +127,15 @@ class ChemotionApiService {
       }
 
       const formData = new FormData()
+      formData.append('serverUrl', this.serverUrl)
+      formData.append('endpoint', '/api/v1/collections/imports')
+      formData.append('token', this.authToken)
       formData.append('file', zipBlob, filename)
 
-      const response = await fetch(
-        `${this.serverUrl}/api/v1/collections/imports`,
-        {
-          method: 'POST',
-          mode: 'cors',
-          credentials: 'omit',
-          headers: {
-            Authorization: this.authToken,
-          },
-          body: formData,
-        },
-      )
+      const response = await fetch('/api/chemotion-proxy', {
+        method: 'PUT',
+        body: formData,
+      })
 
       if (response.ok) {
         return { success: true, message: 'Upload successful' }
@@ -155,10 +150,10 @@ class ChemotionApiService {
         }
       }
 
-      const errorText = await response.text()
+      const data = await response.json()
       return {
         success: false,
-        message: errorText || `Upload failed with status ${response.status}`,
+        message: data.error || `Upload failed with status ${response.status}`,
       }
     } catch (error) {
       return {
