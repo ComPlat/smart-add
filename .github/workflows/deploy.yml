@@ -1,4 +1,4 @@
-iname: Build & Deploy (static, pnpm)
+name: Build & Deploy (static, pnpm)
 
 on:
   push:
