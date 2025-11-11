@@ -37,9 +37,8 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: site
-          path: |
-            dist/**
+          name: static-out
+          path: out
           if-no-files-found: error
 
   deploy:
@@ -52,8 +51,8 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: site
-          path: site
+          name: static-out
+          path: out
 
       - name: Prepare SSH
         shell: bash
@@ -84,6 +83,6 @@ jobs:
           # Sync files (delete removed files on server)
           rsync -avz --delete \
             -e "ssh -i ~/.ssh/id_ed25519 -p $PORT -o StrictHostKeyChecking=yes" \
-            site/ "$SSH_USER@$SSH_HOST:$SSH_TARGET_DIR"
+            out/ "$SSH_USER@$SSH_HOST:$SSH_TARGET_DIR"
 
 
