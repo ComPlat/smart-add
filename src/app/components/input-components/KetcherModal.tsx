@@ -6,17 +6,14 @@ import dynamic from 'next/dynamic'
 import { Button } from '../workspace/Button'
 import 'ketcher-react/dist/index.css'
 
-const KetcherEditorWrapper = dynamic(
-  () => import('./KetcherEditorWrapper'),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-[600px] items-center justify-center">
-        <p className="text-gray-500">Loading Ketcher Editor...</p>
-      </div>
-    ),
-  },
-)
+const KetcherEditorWrapper = dynamic(() => import('./KetcherEditorWrapper'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[600px] items-center justify-center">
+      <p className="text-gray-500">Loading Ketcher Editor...</p>
+    </div>
+  ),
+})
 
 interface KetcherModalProps {
   isOpen: boolean
