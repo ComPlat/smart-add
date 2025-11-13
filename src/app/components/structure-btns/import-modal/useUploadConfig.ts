@@ -1,5 +1,6 @@
 import type { UploadProps, UploadFile } from 'antd'
-import { message, Upload } from 'antd'
+import { Upload } from 'antd'
+import { dragNotifications } from '@/utils/dragNotifications'
 
 export const useJsonZipUploadConfig = (
   jsonZipFile: UploadFile | null,
@@ -13,12 +14,12 @@ export const useJsonZipUploadConfig = (
     const fileName = file.name.toLowerCase()
     const isValidType = fileName.endsWith('.json') || fileName.endsWith('.zip')
     if (!isValidType) {
-      message.error('Please upload only JSON or ZIP files')
+      dragNotifications.showError('Please upload only JSON or ZIP files')
       return Upload.LIST_IGNORE
     }
     const isLt50M = file.size / 1024 / 1024 < 50
     if (!isLt50M) {
-      message.error('File must be smaller than 50MB')
+      dragNotifications.showError('File must be smaller than 50MB')
       return Upload.LIST_IGNORE
     }
     return false // Prevent auto upload
@@ -47,12 +48,12 @@ export const useExcelUploadConfig = (
     const fileName = file.name.toLowerCase()
     const isValidType = fileName.endsWith('.xlsx') || fileName.endsWith('.xls')
     if (!isValidType) {
-      message.error('Please upload a valid Excel file')
+      dragNotifications.showError('Please upload a valid Excel file')
       return Upload.LIST_IGNORE
     }
     const isLt50M = file.size / 1024 / 1024 < 50
     if (!isLt50M) {
-      message.error('File must be smaller than 50MB')
+      dragNotifications.showError('File must be smaller than 50MB')
       return Upload.LIST_IGNORE
     }
     return false // Prevent auto upload

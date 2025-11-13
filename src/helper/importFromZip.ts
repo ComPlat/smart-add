@@ -130,6 +130,19 @@ const CONTAINABLE_TYPE_MOLECULE = 'Molecule'
 // Helper functions
 
 /**
+ * Removes structural fields from container data, keeping only metadata fields
+ */
+const extractMetadataFromContainer = (
+  container: ExportContainer,
+): Record<string, unknown> => {
+  // Destructure to exclude structural fields from metadata
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { parent_id, ancestry, containable_id, containable_type, ...metadata } =
+    container
+  return metadata
+}
+
+/**
  * Extracts export data from a JSON or ZIP file
  */
 const getExportData = async (file: File): Promise<ExportJson> => {
@@ -452,7 +465,6 @@ export const importFromJsonOrZip = async (file: File) => {
    * Processes a molecule container and returns folder details
    */
   const processMoleculeContainer = (
-    container: ExportContainer,
     containableId: string,
   ): {
     dtype: Datatype
@@ -479,7 +491,12 @@ export const importFromJsonOrZip = async (file: File) => {
     return {
       dtype: 'molecule',
       folderName,
-      metadata: { ...container, ...molecule },
+      metadata: {
+        ...moleculeTemplate,
+        ...molecule,
+        created_at: molecule.created_at || new Date().toISOString(),
+        updated_at: molecule.updated_at || new Date().toISOString(),
+      },
     }
   }
 
@@ -528,7 +545,7 @@ export const importFromJsonOrZip = async (file: File) => {
         reactionSchemeType = result.reactionSchemeType
       }
     } else if (containableType === CONTAINABLE_TYPE_MOLECULE && containableId) {
-      const result = processMoleculeContainer(container, containableId)
+      const result = processMoleculeContainer(containableId)
       if (result) {
         dtype = result.dtype
         folderName = result.folderName
@@ -537,10 +554,10 @@ export const importFromJsonOrZip = async (file: File) => {
     } else if (container.container_type === CONTAINER_TYPE_ANALYSES) {
       dtype = 'analyses'
       folderName = ANALYSES_FOLDER_NAME
-      // Merge with containerTemplate to ensure all fields exist
+      // Use template for field definitions, then merge container metadata
       metadata = {
         ...containerTemplate,
-        ...container,
+        ...extractMetadataFromContainer(container),
         name: container.name || ANALYSES_FOLDER_NAME,
         container_type: 'analyses',
         extended_metadata: container.extended_metadata || {},
@@ -548,10 +565,11 @@ export const importFromJsonOrZip = async (file: File) => {
     } else if (container.container_type === CONTAINER_TYPE_ANALYSIS) {
       dtype = 'analysis'
       folderName = container.name || DEFAULT_ANALYSIS_NAME
-      // Merge with containerTemplate to ensure all fields exist, including extended_metadata
+      // Use template for field definitions, then merge container metadata
       metadata = {
         ...containerTemplate,
-        ...container,
+        ...extractMetadataFromContainer(container),
+        name: container.name || DEFAULT_ANALYSIS_NAME,
         container_type: 'analysis',
         extended_metadata: {
           status: null,
@@ -566,24 +584,28 @@ export const importFromJsonOrZip = async (file: File) => {
       if (containableId && exportData.Dataset) {
         const dataset = exportData.Dataset[containableId]
         if (dataset) {
+          // Use datasetTemplate for field definitions, then merge dataset and container metadata
           metadata = {
             ...datasetTemplate,
-            ...container,
+            ...extractMetadataFromContainer(container),
             ...dataset,
+            name: dataset.name || container.name || DEFAULT_DATASET_NAME,
           }
           folderName = dataset.name || container.name || DEFAULT_DATASET_NAME
         } else {
-          // No dataset data, use template with container data
+          // No dataset data, use template with container metadata
           metadata = {
             ...datasetTemplate,
-            ...container,
+            ...extractMetadataFromContainer(container),
+            name: container.name || DEFAULT_DATASET_NAME,
           }
         }
       } else {
-        // No dataset table or containable_id, merge with template
+        // No dataset table or containable_id, use template with container metadata
         metadata = {
           ...datasetTemplate,
-          ...container,
+          ...extractMetadataFromContainer(container),
+          name: container.name || DEFAULT_DATASET_NAME,
         }
       }
     }

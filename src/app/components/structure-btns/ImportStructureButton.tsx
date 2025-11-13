@@ -72,6 +72,7 @@ const ImportStructureButton = () => {
       }
       // TODO: Process the uploaded Excel file
       dragNotifications.showWarning('Excel import is not yet implemented')
+      handleCancel()
       console.log('Processing Excel file:', excelFile)
     }
   }

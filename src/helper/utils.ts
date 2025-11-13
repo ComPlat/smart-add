@@ -185,9 +185,9 @@ const hiddenKeys = Object.freeze([
 // Add any schema type and keys you want to hide for that schema
 const schemaSpecificHiddenKeys: Record<string, readonly string[]> =
   Object.freeze({
-    sample: ['molfile'], // Hide molfile for samples
+    sample: ['molfile', 'inventory_sample'], // Hide molfile for samples
     root: ['molfile'], // Hide molfile for root containers (imported samples with container_type: 'root')
-    molecule: ['melting_point', 'boiling_point', 'name'], // Show all molecule-specific keys (nothing hidden beyond global hiddenKeys)
+    molecule: ['melting_point', 'boiling_point', 'name'], // Hide these molecule fields (in addition to global hiddenKeys)
     reaction: [], // Show all reaction-specific keys
     analyses: ['description', 'container_type'], // Show all analysis-specific keys
     analysis: [], // Show all analysis-specific keys

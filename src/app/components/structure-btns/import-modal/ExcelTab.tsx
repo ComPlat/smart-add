@@ -1,6 +1,7 @@
-import { message, Upload } from 'antd'
+import { Upload } from 'antd'
 import type { UploadProps } from 'antd'
 import { FaDownload, FaFileExcel } from 'react-icons/fa6'
+import { dragNotifications } from '@/utils/dragNotifications'
 
 const { Dragger } = Upload
 
@@ -11,9 +12,10 @@ type ExcelTabProps = {
 const ExcelTab = ({ uploadProps }: ExcelTabProps) => {
   const handleDownloadTemplate = () => {
     // TODO: Implement template download
-    message.info('Excel template download will be available soon')
+    dragNotifications.showWarning(
+      'Excel template download will be available soon',
+    )
   }
-  return <p>Excel import is in development! Will be available soon</p>
   return (
     <div className="py-4">
       <div className="mb-4 rounded-lg bg-kit-primary-light p-4 border border-kit-primary-full/20">
