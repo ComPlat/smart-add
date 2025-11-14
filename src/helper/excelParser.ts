@@ -48,7 +48,6 @@ type ReactionRow = {
   solvent?: string
 }
 
-
 /**
  * Parses an Excel file and converts it to export.json format
  */
@@ -157,7 +156,11 @@ export const parseExcelToExportJson = async (
     containerParentMap[containerUuid] = parentId
 
     // Calculate ancestry
-    const ancestry = buildAncestry(containerUuid, containerParentMap, collectionId)
+    const ancestry = buildAncestry(
+      containerUuid,
+      containerParentMap,
+      collectionId,
+    )
 
     // Handle molecule if SMILES or molfile provided
     let moleculeId: string | null = null

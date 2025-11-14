@@ -11,7 +11,7 @@ type ExcelTabProps = {
 
 const ExcelTab = ({ uploadProps }: ExcelTabProps) => {
   const handleDownloadTemplate = () => {
-   try {
+    try {
       // Dynamically import to avoid bundling xlsx in main chunk
       import('@/helper/excelTemplate').then(({ generateExcelTemplate }) => {
         const blob = generateExcelTemplate()

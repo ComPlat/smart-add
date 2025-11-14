@@ -66,7 +66,7 @@ const ImportStructureButton = () => {
         dragNotifications.showWarning('Please upload an Excel file first')
         return
       }
-  setIsProcessing(true)
+      setIsProcessing(true)
       try {
         dragNotifications.showWarning('Processing Excel file...')
 
