@@ -51,7 +51,7 @@ const Header = () => {
                 hide()
               }}
             >
-              Write Feedback
+              Contact Us
             </button>
           </div>
         }

@@ -177,7 +177,9 @@ export const generateExportJson = async (
           molecule_id: linkedMoleculeId,
           molfile: moleculeMolfile,
           decoupled: moleculeMolfile ? false : true,
-          name: moleculeMolfile ? null : 'decoupled sample',
+          name: moleculeMolfile
+            ? null
+            : formattedMetadata.name || folder.name || 'decoupled sample',
           sum_formula: moleculeMolfile ? null : 'undefined structure',
         }),
       },

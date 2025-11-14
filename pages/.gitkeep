@@ -1,0 +1,2 @@
+# This empty directory is required for Cypress component tests with Next.js 15
+# The Cypress webpack integration expects this directory even when using App Router
