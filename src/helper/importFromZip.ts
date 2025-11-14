@@ -8,6 +8,8 @@ import {
   datasetTemplate,
   containerTemplate,
 } from '@/app/components/zip-download/templates'
+import { getUniqueFolderName } from '@/app/components/structure-btns/folderUtils'
+import { FileNode } from './types'
 
 // Types for export data structure
 type ExportJson = {
@@ -128,6 +130,48 @@ const CONTAINABLE_TYPE_SAMPLE = 'Sample'
 const CONTAINABLE_TYPE_MOLECULE = 'Molecule'
 
 // Helper functions
+
+/**
+ * Builds a tree structure from database folders for duplicate checking
+ */
+const buildTreeFromFolders = async (
+  treeId: string,
+): Promise<Record<string, FileNode>> => {
+  const folders = await filesDB.folders.where('treeId').equals(treeId).toArray()
+  const tree: Record<string, FileNode> = {}
+
+  folders.forEach((folder) => {
+    tree[folder.fullPath] = {
+      data: folder.name,
+      index: folder.fullPath,
+      isFolder: true,
+      children: [],
+      canMove: true,
+      uid: folder.uid,
+    }
+  })
+
+  return tree
+}
+
+/**
+ * Adds a folder to the tree (for tracking new folders during import)
+ */
+const addFolderToTree = (
+  tree: Record<string, FileNode>,
+  fullPath: string,
+  name: string,
+  uid: string,
+): void => {
+  tree[fullPath] = {
+    data: name,
+    index: fullPath,
+    isFolder: true,
+    children: [],
+    canMove: true,
+    uid,
+  }
+}
 
 /**
  * Removes structural fields from container data, keeping only metadata fields
@@ -301,9 +345,30 @@ export const importFromJsonOrZip = async (file: File) => {
     throw new Error('Invalid export format: No collection found')
   }
 
+  // Build tree from existing folders for duplicate checking
+  const tree = await buildTreeFromFolders(TARGET_TREE_ROOT)
+
   // Get collection info
   const collection = exportData.Collection[collectionId]
-  const collectionName = collection?.label || DEFAULT_COLLECTION_NAME
+  let collectionName = collection?.label || DEFAULT_COLLECTION_NAME
+
+  // Check for duplicate collection name and make it unique if needed
+  const existingCollection = await filesDB.folders
+    .where('fullPath')
+    .equals(collectionName)
+    .and((folder) => folder.treeId === TARGET_TREE_ROOT)
+    .first()
+
+  if (existingCollection) {
+    // Append timestamp to make unique
+    const timestamp = new Date().toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    })
+    collectionName = `${collectionName} (${timestamp})`
+  }
 
   // Create collection folder
   const collectionUid = v4()
@@ -318,6 +383,9 @@ export const importFromJsonOrZip = async (file: File) => {
     treeId: TARGET_TREE_ROOT,
     uid: collectionUid,
   })
+
+  // Add collection to tree for duplicate checking
+  addFolderToTree(tree, collectionName, collectionName, collectionUid)
 
   // Map old container IDs to new UIDs
   const containerIdToUidMap: Record<string, string> = {}
@@ -610,6 +678,17 @@ export const importFromJsonOrZip = async (file: File) => {
       }
     }
 
+    // Use getUniqueFolderName for samples and reactions to prevent duplicates
+    if (dtype === 'sample' || dtype === 'reaction') {
+      folderName = getUniqueFolderName(
+        folderName,
+        tree,
+        dtype === 'sample' ? DEFAULT_SAMPLE_NAME : DEFAULT_REACTION_NAME,
+        true, // appendNumberIfDuplicate
+        parentPath, // Check only siblings at same level
+      )
+    }
+
     const folderPath = `${parentPath}/${folderName}`
 
     // Create the folder
@@ -629,11 +708,15 @@ export const importFromJsonOrZip = async (file: File) => {
     parentPathCache.set(containerUid, folderPath)
     createdContainers.add(containerId)
 
+    // Add to tree for duplicate checking of future folders
+    addFolderToTree(tree, folderPath, folderName, containerUid)
+
     // After creating a Sample container, check if it needs a molecule folder
     if (dtype === 'sample' && containableId && exportData.Sample) {
       const sample = exportData.Sample[containableId]
 
-      if (sample?.molfile) {
+      // Create molecule folder if sample has molfile OR molecule_id
+      if (sample?.molfile || sample?.molecule_id) {
         // Create molecule folder
         const moleculeUid = v4()
         const moleculeFolderPath = `${folderPath}/${DEFAULT_MOLECULE_NAME}`
@@ -641,7 +724,7 @@ export const importFromJsonOrZip = async (file: File) => {
         // Start with template to ensure all fields exist
         let moleculeMetadata: Record<string, unknown> = {
           ...moleculeTemplate,
-          molfile: sample.molfile,
+          molfile: sample.molfile || null,
           molecule_svg_file: sample.sample_svg_file,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -654,7 +737,7 @@ export const importFromJsonOrZip = async (file: File) => {
             moleculeMetadata = {
               ...moleculeTemplate,
               ...moleculeData,
-              molfile: moleculeData.molfile || sample.molfile,
+              molfile: moleculeData.molfile || sample.molfile || null,
               created_at: moleculeData.created_at || new Date().toISOString(),
               updated_at: moleculeData.updated_at || new Date().toISOString(),
             }
@@ -672,6 +755,14 @@ export const importFromJsonOrZip = async (file: File) => {
           treeId: TARGET_TREE_ROOT,
           uid: moleculeUid,
         })
+
+        // Add molecule to tree
+        addFolderToTree(
+          tree,
+          moleculeFolderPath,
+          DEFAULT_MOLECULE_NAME,
+          moleculeUid,
+        )
 
         sampleUidToMoleculeUid[containerUid] = moleculeUid
       }
