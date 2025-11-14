@@ -1,7 +1,7 @@
 import { filesDB } from '@/database/db'
-import { message } from 'antd'
 import { Dispatch, SetStateAction } from 'react'
 import { TreeItemIndex } from 'react-complex-tree'
+import { dragNotifications } from '@/utils/dragNotifications'
 
 import { Button } from '../workspace/Button'
 
@@ -21,7 +21,7 @@ const clearHandler = async (
     }
   } catch (error) {
     console.error(`Error clearing ${treeId}:`, error)
-    message.warning(`Error clearing ${treeId}.`)
+    dragNotifications.showError(`Error clearing ${treeId}.`)
   }
 }
 

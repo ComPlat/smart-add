@@ -156,8 +156,8 @@ const InspectorSidebar = ({
                   const metadata = item.metadata
                   const flattenedEntries: [string, MetadataValue][] = []
                   const schemaName = String(
-                    metadata.container_type ||
-                      (item as ExtendedFolder).dtype ||
+                    (item as ExtendedFolder).dtype ||
+                      metadata.container_type ||
                       '',
                   )
 

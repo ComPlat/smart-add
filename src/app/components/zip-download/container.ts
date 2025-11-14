@@ -27,19 +27,25 @@ const SubContainer = ({
     molecule: {
       containable_id: moleculeUidMap[folder.uid],
       containable_type: 'Molecule',
+      container_type: 'root',
     },
     reaction: {
       containable_id: sampleReactionUidMap[folder.uid],
       containable_type: 'Reaction',
+      container_type: 'root',
     },
     sample: {
       containable_id: sampleReactionUidMap[folder.uid],
       containable_type: 'Sample',
+      container_type: 'root',
     },
   }
 
-  const { containable_id = null, containable_type = null } =
-    dtypeMapping[folder.dtype as keyof typeof dtypeMapping] || {}
+  const {
+    containable_id = null,
+    containable_type = null,
+    container_type = null,
+  } = dtypeMapping[folder.dtype as keyof typeof dtypeMapping] || {}
 
   return {
     [uidMap[folder.uid]]: {
@@ -49,6 +55,8 @@ const SubContainer = ({
         ancestry: Ancestry(folder, assignedFolders, uidMap),
         containable_id,
         containable_type,
+        container_type:
+          container_type || folder.metadata?.container_type || null,
         created_at: currentDate,
         description: folder.metadata?.description || null,
         extended_metadata: folder.metadata?.extended_metadata || {},

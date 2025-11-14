@@ -39,3 +39,6 @@ cypress/results/*
 cypress/reports/*
 cypress/screenshots/*
 cypress/videos/*
+
+# demo/test data - ignore only specific large test files
+demo-fixtures/export-example.json

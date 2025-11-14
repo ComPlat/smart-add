@@ -119,7 +119,7 @@ export const generateExportJson = async (
 
       const moleculeId = moleculeUidMap[folder.uid]
       const moleculeName =
-        moleculeData.name || moleculeData.iupac_name || 'Unknown Molecule'
+        moleculeData.name || moleculeData.iupac_name || 'molecule'
 
       return {
         ...acc,
