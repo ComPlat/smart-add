@@ -6,6 +6,7 @@ import AddReactionButton from '../structure-btns/AddReactionButton'
 import AddSampleButton from '../structure-btns/AddSampleButton'
 import ClearButtonGroup from '../tree-view/ClearButtonGroup'
 import { FileDownloader } from '../zip-download/FileDownloader'
+import ImportStructureButton from '../structure-btns/ImportStructureButton'
 
 type ToolbarProps = {
   assignedLength: number
@@ -28,6 +29,7 @@ const Toolbar = ({
           inputLength={inputLength}
           setFocusedItem={setFocusedItem}
         />
+        <ImportStructureButton />
       </div>
       <div className="flex gap-2">
         <FileDownloader />

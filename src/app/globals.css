@@ -56,3 +56,16 @@
 .custom-autocomplete.ant-select-disabled .ant-select-selector:hover {
   border-color: #d1d5db !important;
 }
+
+/* Custom Tabs styling */
+.custom-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: var(--color-kit-primary-full) !important;
+}
+
+.custom-tabs .ant-tabs-ink-bar {
+  background: var(--color-kit-primary-full) !important;
+}
+
+.custom-tabs .ant-tabs-tab:hover .ant-tabs-tab-btn {
+  color: var(--color-kit-primary-full) !important;
+}

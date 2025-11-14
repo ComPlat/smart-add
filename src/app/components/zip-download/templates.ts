@@ -181,6 +181,8 @@ export const reactionTemplate = {
   rxno: null,
   conditions: null,
   variations: null,
+  plain_text_description: null,
+  plain_text_observation: null,
 }
 
 export const collectionsReactionTemplate = {
