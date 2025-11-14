@@ -30,6 +30,8 @@ const FileDownloader = () => {
       filesDB.folders.where('treeId').equals('assignmentTreeRoot').toArray(),
     ) || []
 
+  const hasContent = assignedFiles.length > 0 || assignedFolders.length > 0
+
   interface CategorizedFiles {
     directFiles: ExtendedFile[]
     folderGroups: Record<string, ExtendedFile[]>
@@ -277,7 +279,7 @@ const FileDownloader = () => {
   return (
     <>
       <Button
-        disabled={assignedFiles.length === 0 || isUploading}
+        disabled={!hasContent || isUploading}
         label={isUploading ? 'Uploading...' : 'Export Collection'}
         onClick={() => setIsExportModalOpen(true)}
         variant="primary"
