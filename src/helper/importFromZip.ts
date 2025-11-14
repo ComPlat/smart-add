@@ -303,7 +303,25 @@ export const importFromJsonOrZip = async (file: File) => {
 
   // Get collection info
   const collection = exportData.Collection[collectionId]
-  const collectionName = collection?.label || DEFAULT_COLLECTION_NAME
+  let collectionName = collection?.label || DEFAULT_COLLECTION_NAME
+
+  // Check for duplicate collection name and make it unique if needed
+  const existingCollection = await filesDB.folders
+    .where('fullPath')
+    .equals(collectionName)
+    .and((folder) => folder.treeId === TARGET_TREE_ROOT)
+    .first()
+
+  if (existingCollection) {
+    // Append timestamp to make unique
+    const timestamp = new Date().toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    })
+    collectionName = `${collectionName} (${timestamp})`
+  }
 
   // Create collection folder
   const collectionUid = v4()
