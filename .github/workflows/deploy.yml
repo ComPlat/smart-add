@@ -61,6 +61,7 @@ jobs:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_PORT: ${{ secrets.SSH_PORT }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_TARGET_DIR: ${{ secrets.SSH_TARGET_DIR }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
@@ -68,15 +69,6 @@ jobs:
           # Add host to known_hosts (falls back to 22 if SSH_PORT is empty)
           PORT=${SSH_PORT:-22}
           ssh-keyscan -p "$PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts
-
-      - name: Deploy via rsync over SSH
-        shell: bash
-        env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          SSH_TARGET_DIR: ${{ secrets.SSH_TARGET_DIR }}
-        run: |
           PORT=${SSH_PORT:-22}
           # Sync files (delete removed files on server)
           rsync -avz --delete \
