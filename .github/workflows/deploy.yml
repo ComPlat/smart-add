@@ -78,8 +78,6 @@ jobs:
           SSH_TARGET_DIR: ${{ secrets.SSH_TARGET_DIR }}
         run: |
           PORT=${SSH_PORT:-22}
-          # Create target dir if it doesn't exist
-          ssh -i ~/.ssh/id_ed25519 -p "$PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$SSH_TARGET_DIR'"
           # Sync files (delete removed files on server)
           rsync -avz --delete \
             -e "ssh -i ~/.ssh/id_ed25519 -p $PORT -o StrictHostKeyChecking=yes" \
