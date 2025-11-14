@@ -10,15 +10,14 @@ export default function App() {
   const [focusedItem, setFocusedItem] = useState<TreeItemIndex | undefined>()
 
   return (
-    <main className="flex h-screen bg-gray-100">
-      <div className="flex h-full w-full flex-col">
-        <Header />
-        <Workspace focusedItem={focusedItem} setFocusedItem={setFocusedItem} />
-      </div>
-      <InspectorSidebar
-        focusedItem={focusedItem}
-        setFocusedItem={setFocusedItem}
-      />
+    <main className="flex h-screen flex-col bg-gray-100">
+      <Header />
+      <Workspace focusedItem={focusedItem} setFocusedItem={setFocusedItem}>
+        <InspectorSidebar
+          focusedItem={focusedItem}
+          setFocusedItem={setFocusedItem}
+        />
+      </Workspace>
     </main>
   )
 }

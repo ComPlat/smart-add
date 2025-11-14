@@ -37,7 +37,7 @@
         },
         {
           "type": "text",
-          "content": "First Upload: Open SmartAdd in your browser, drag & drop analytical files or a ZIP into the upload area, SmartAdd processes the files and shows them as a tree in the right-side workspace."
+          "content": "First Upload: Open SmartAdd in your browser, drag & drop analytical files or a ZIP into the upload area, SmartAdd processes the files and shows them as a tree in the right-side workspace. The system automatically organizes your data with smart folder naming and structure validation."
         }
       ]
     },
@@ -98,22 +98,85 @@
         {
           "type": "list",
           "items": [
-            "Sample: name, amount + units (mg, g, mol), purity, location, description",
-            "Reaction: roles (reactant/product/solvent), RF value, Roles",
-            "Analysis: Type Ontology, file attachments, status, description"
+            "Sample: name, SMILES notation (with real-time validation), amount + units (mg, g, mol), purity, location, description, sample type",
+            "Reaction: multiple samples with smart sorting, roles (reactant/product/solvent), reaction scheme type, RF value",
+            "Analysis: Type Ontology, file attachments, status, description, dataset inclusion/exclusion"
           ]
         },
         {
           "type": "text",
-          "content": "Step 3: Organize Reactions - Click Add Reaction to create a reaction node, link samples and set roles (reactant/product/solvent)."
+          "content": "Step 3: Organize Reactions - Click Add Reaction to create a reaction node. You can add multiple samples to reactions with automatic smart sorting. Set sample roles (reactant/product/solvent) and define reaction scheme types for proper organization."
         },
         {
           "type": "text",
-          "content": "Step 4: Export for Chemotion - Review: ensure you haven't missed anything you need and relationships correct. Export: click Download as ZIP (ready for Chemotion import). Direct export to Chemotion is planned in a future release."
+          "content": "Step 4: Export for Chemotion - Review: ensure you haven't missed anything you need and relationships correct. You now have two export options:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Download as ZIP: Export your collection as a ZIP file to manually upload to Chemotion later",
+            "Direct Upload to Chemotion: Connect to your Chemotion ELN server and upload directly without manual download"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "key-features",
+      "title": "Key Features",
+      "description": "Overview of SmartAdd capabilities",
+      "content": [
+        {
+          "type": "text",
+          "content": "Multi-Sample Reaction Support:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Add multiple samples to a single reaction",
+            "Automatic smart sorting based on roles",
+            "Define reaction scheme types",
+            "Organized hierarchy for complex reactions"
+          ]
         },
         {
           "type": "text",
-          "content": "Step 5: Import the ZIP into Chemotion - Open Chemotion, go to Import, select the ZIP file exported from SmartAdd, follow prompts to complete the import."
+          "content": "SMILES Validation:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Real-time molecular structure validation",
+            "Syntax checking for SMILES notation",
+            "Instant feedback on structure validity",
+            "Prevents invalid data from being exported"
+          ]
+        },
+        {
+          "type": "text",
+          "content": "Direct Chemotion Integration:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Connect directly to your Chemotion ELN server",
+            "Server connectivity verification",
+            "Secure authentication with username/password",
+            "Upload collections without manual file downloads",
+            "Automatic session management"
+          ]
+        },
+        {
+          "type": "text",
+          "content": "Dataset Management:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Include or exclude specific datasets from export",
+            "Control which files are sent to Chemotion",
+            "Flexible data organization",
+            "Smart folder naming and structure"
+          ]
         }
       ]
     },
@@ -143,8 +206,10 @@
           "items": [
             "Work sample-by-sample",
             "Use consistent naming conventions",
-            "Periodically export a ZIP (checkpoint)",
-            "Validate fields before final export"
+            "Validate SMILES notation as you enter it",
+            "Organize samples in reactions with proper roles",
+            "Use dataset exclusion to control what gets exported",
+            "Periodically export a ZIP (checkpoint)"
           ]
         },
         {
@@ -197,7 +262,21 @@
           "type": "list",
           "items": [
             "Download blocked → check browser download settings / pop-up blocker",
+            "Direct upload fails → verify Chemotion server URL is correct and accessible",
+            "Authentication error → check username and password, ensure server is online",
             "Try another browser if needed"
+          ]
+        },
+        {
+          "type": "text",
+          "content": "SMILES validation issues:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Red validation indicator → check SMILES syntax for errors",
+            "Invalid structure → verify molecular notation follows SMILES standards",
+            "Use ChemDraw or similar tools to generate valid SMILES if unsure"
           ]
         }
       ]
@@ -222,7 +301,7 @@
     },
     {
       "question": "How do I export my data for Chemotion?",
-      "answer": "Click the Download as ZIP button after preparing your data. The exported ZIP is ready for Chemotion import. Direct export to Chemotion is planned for future releases."
+      "answer": "After preparing your data, click Export Collection. You have two options: (1) Download as ZIP - saves the file locally for manual upload to Chemotion, or (2) Direct Upload to Chemotion - authenticate with your Chemotion ELN server and upload directly without manual download."
     },
     {
       "question": "What keyboard shortcuts are available?",
@@ -234,7 +313,19 @@
     },
     {
       "question": "What's coming next for SmartAdd?",
-      "answer": "Upcoming features include tree view enhancements (filters/search), direct import to Chemotion (no manual download), import from other ELNs, and extensions beyond chemistry to other research domains."
+      "answer": "Upcoming features include tree view enhancements (filters/search), advanced batch operations, import from other ELNs, enhanced validation tools, and extensions beyond chemistry to other research domains."
+    },
+    {
+      "question": "What is SMILES validation?",
+      "answer": "SmartAdd includes real-time SMILES (Simplified Molecular Input Line Entry System) validation. When entering molecular structures using SMILES notation, the system validates the syntax and structure to ensure accuracy before export."
+    },
+    {
+      "question": "Can I add multiple samples to a reaction?",
+      "answer": "Yes! You can add multiple samples to reactions with automatic smart sorting. The system intelligently organizes samples based on their roles (reactant/product/solvent) and allows you to define reaction scheme types for proper visualization in Chemotion."
+    },
+    {
+      "question": "How does direct upload to Chemotion work?",
+      "answer": "When you choose 'Upload to Chemotion ELN' from the export menu, you'll be prompted to enter your Chemotion server URL, username, and password. The system verifies server connectivity and authenticates your credentials before uploading your collection directly, eliminating the need for manual file downloads and imports."
     }
   ]
 }

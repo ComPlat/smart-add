@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { ExtendedFile, filesDB } from '@/database/db'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { saveAs } from 'file-saver'
@@ -8,10 +9,18 @@ import { v4 } from 'uuid'
 import { Button } from '../workspace/Button'
 import { generateExportJson } from './jsonGenerator'
 import { dragNotifications } from '@/utils/dragNotifications'
+import { ExportCollectionModal } from '../chemotion/ExportCollectionModal'
+import { ChemotionAuthModal } from '../chemotion/ChemotionAuthModal'
+import { chemotionApi } from '@/services/chemotionApi'
 
 const zipDate = new Date().toLocaleDateString().replace(/\//g, '-')
 
 const FileDownloader = () => {
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const [isAuthenticating, setIsAuthenticating] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+
   const assignedFiles =
     useLiveQuery(() =>
       filesDB.files.where('treeId').equals('assignmentTreeRoot').toArray(),
@@ -77,25 +86,21 @@ const FileDownloader = () => {
     return uniqueAssignedFiles
   }
 
-  const handleClick = async () => {
+  const generateZipBlob = async (): Promise<Blob | null> => {
     try {
       const zip = new JSZip()
       const { directFiles, folderGroups } = categorizeFiles(assignedFiles)
 
-      // Handle direct files - give them UUIDs
       const processedDirectFiles =
         transformAssignedFilesToHaveUniqueNames(directFiles)
 
-      // Handle folder groups - create ZIPs for each folder
       const processedFolderZips: ExtendedFile[] = []
 
       for (const [folderPath, filesInFolder] of Object.entries(folderGroups)) {
         const folderZip = new JSZip()
-        const folderName = folderPath.split('/').pop() // Get last part (folder name)
+        const folderName = folderPath.split('/').pop()
 
-        // Add all files from this folder to the folder ZIP, preserving internal structure
         filesInFolder.forEach((file) => {
-          // Calculate relative path from the root folder (preserve internal structure)
           const pathParts = file.fullPath.split('/')
           const datasetIndex = pathParts.findIndex((part) => {
             const folder = assignedFolders.find(
@@ -105,22 +110,16 @@ const FileDownloader = () => {
             )
             return folder?.dtype === 'dataset'
           })
-          const relativePath = pathParts.slice(datasetIndex + 2).join('/') // Everything after root folder
+          const relativePath = pathParts.slice(datasetIndex + 2).join('/')
           folderZip.file(relativePath, file.file)
         })
 
-        // Generate the folder ZIP blob
         const folderZipBlob = await folderZip.generateAsync({ type: 'blob' })
-
-        // Create a UUID for this folder ZIP
         const folderUuid = v4()
 
-        // Find the dataset parent UID - we need to traverse up to find the dataset container
-        // The files point to the immediate folder, but we need the dataset container
         let currentFolderUid = filesInFolder[0]?.parentUid || ''
         let datasetParentUid = ''
 
-        // Traverse up the folder hierarchy to find the dataset container
         while (currentFolderUid) {
           const currentFolder = assignedFolders.find(
             (f) => f.uid === currentFolderUid,
@@ -132,32 +131,29 @@ const FileDownloader = () => {
           currentFolderUid = currentFolder?.parentUid || ''
         }
 
-        // Remove .zip extension from folder name if it exists to avoid .zip.zip
         const cleanFolderName = folderName?.endsWith('.zip')
           ? folderName.slice(0, -4)
           : folderName
 
         const folderZipFile: ExtendedFile = {
-          ...filesInFolder[0], // Use first file as template
+          ...filesInFolder[0],
           name: `${folderUuid}.zip`,
           file: new File([folderZipBlob], `${cleanFolderName}.zip`, {
             type: 'application/zip',
           }),
-          fullPath: folderPath, // Keep original folder path for JSON generation
-          parentUid: datasetParentUid, // Ensure it points to the correct dataset container
-          uid: folderUuid, // Set unique ID for the ZIP file
+          fullPath: folderPath,
+          parentUid: datasetParentUid,
+          uid: folderUuid,
         }
 
         processedFolderZips.push(folderZipFile)
       }
 
-      // Combine processed files for final ZIP
       const allProcessedFiles = [
         ...processedDirectFiles,
         ...processedFolderZips,
       ]
 
-      // Add all processed files to main ZIP
       allProcessedFiles.forEach((file) => {
         zip.file(`attachments/${file.name}`, file.file)
       })
@@ -177,25 +173,129 @@ const FileDownloader = () => {
       zip.file('export.json', exportJson)
 
       const blob = await zip.generateAsync({ type: 'blob' })
+      return blob
+    } catch (error) {
+      console.error('Error generating zip:', error)
+      return null
+    }
+  }
+
+  const handleDownload = async () => {
+    setIsExportModalOpen(false)
+    try {
+      const blob = await generateZipBlob()
+
+      if (!blob) {
+        dragNotifications.showError('Failed to generate export file')
+        return
+      }
 
       const exportedZipFileName = `SmartAdd-${zipDate}`
-
       saveAs(blob, exportedZipFileName)
       dragNotifications.showSuccess(
         `${exportedZipFileName} downloaded successfully`,
       )
     } catch (error) {
-      console.error(error)
+      console.error('Download error:', error)
+      dragNotifications.showError('Failed to download file')
     }
   }
 
+  const handleUploadToChemotion = () => {
+    setIsExportModalOpen(false)
+    if (chemotionApi.isAuthenticated()) {
+      handleUpload()
+    } else {
+      setIsAuthModalOpen(true)
+    }
+  }
+
+  const handleAuthenticate = async (
+    serverUrl: string,
+    email: string,
+    password: string,
+  ) => {
+    setIsAuthenticating(true)
+    try {
+      const result = await chemotionApi.authenticate(serverUrl, email, password)
+
+      if (result.success) {
+        dragNotifications.showSuccess('Connected to Chemotion ELN')
+        setIsAuthModalOpen(false)
+        await handleUpload()
+      } else {
+        dragNotifications.showError(result.message || 'Authentication failed')
+      }
+    } catch (error) {
+      dragNotifications.showError('Authentication failed. Please try again.')
+      console.error('Auth error:', error)
+    } finally {
+      setIsAuthenticating(false)
+    }
+  }
+
+  const handleUpload = async () => {
+    setIsUploading(true)
+    try {
+      const zipBlob = await generateZipBlob()
+
+      if (!zipBlob) {
+        dragNotifications.showError('Failed to generate export file')
+        return
+      }
+
+      const filename = `SmartAdd-${zipDate}.zip`
+      const result = await chemotionApi.uploadToChemotion(zipBlob, filename)
+
+      if (result.success) {
+        dragNotifications.showSuccess(
+          'Successfully uploaded to Chemotion ELN! Please note that it may take a minute for the collection to appear in your ELN account.',
+        )
+      } else {
+        // Check if authentication expired
+        if (result.message?.includes('Authentication expired')) {
+          dragNotifications.showError(result.message)
+          // Re-open auth modal for user to login again
+          setIsAuthModalOpen(true)
+        } else {
+          dragNotifications.showError(result.message || 'Upload failed')
+        }
+      }
+    } catch (error) {
+      dragNotifications.showError('Upload failed. Please try again.')
+      console.error('Upload error:', error)
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleBackFromAuth = () => {
+    setIsAuthModalOpen(false)
+    setIsExportModalOpen(true)
+  }
+
   return (
-    <Button
-      disabled={assignedFiles.length === 0}
-      label="Download as ZIP"
-      onClick={handleClick}
-      variant="primary"
-    />
+    <>
+      <Button
+        disabled={assignedFiles.length === 0 || isUploading}
+        label={isUploading ? 'Uploading...' : 'Export Collection'}
+        onClick={() => setIsExportModalOpen(true)}
+        variant="primary"
+      />
+      <ExportCollectionModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        onDownload={handleDownload}
+        onUploadToChemotion={handleUploadToChemotion}
+      />
+      <ChemotionAuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onBack={handleBackFromAuth}
+        onAuthenticate={handleAuthenticate}
+        isLoading={isAuthenticating}
+      />
+    </>
   )
 }
 
