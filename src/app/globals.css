@@ -69,3 +69,17 @@
 .custom-tabs .ant-tabs-tab:hover .ant-tabs-tab-btn {
   color: var(--color-kit-primary-full) !important;
 }
+
+/* Custom Upload remove icon - always visible and red */
+.custom-upload-remove-icon .ant-upload-list-item-action {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.custom-upload-remove-icon .ant-upload-list-item-action,
+.custom-upload-remove-icon .ant-upload-list-item-action button,
+.custom-upload-remove-icon .ant-upload-list-item-action .anticon,
+.custom-upload-remove-icon .ant-upload-list-item-action svg {
+  color: #ef4444 !important;
+  fill: #ef4444 !important;
+}
