@@ -1,31 +1,33 @@
-'use client'
-
-import { useState } from 'react'
+import { Ketcher } from 'ketcher-core'
 import { Editor } from 'ketcher-react'
 import { StandaloneStructServiceProvider } from 'ketcher-standalone'
 import 'ketcher-react/dist/index.css'
 
 interface KetcherEditorWrapperProps {
-  onInit?: (ketcher: any) => void
+  onInit?: (ketcher: Ketcher) => void
 }
+
+// Create a single instance of the service provider outside the component
+// to avoid re-initialization on re-renders
+const structServiceProvider = new StandaloneStructServiceProvider()
 
 export default function KetcherEditorWrapper({
   onInit,
 }: KetcherEditorWrapperProps) {
-  const [structServiceProvider] = useState(
-    () => new StandaloneStructServiceProvider(),
-  )
-
   return (
     <div className="h-full w-full">
       <Editor
-        staticResourcesUrl=""
+        staticResourcesUrl="/"
         structServiceProvider={structServiceProvider}
         errorHandler={(error: string) => {
           console.error('Ketcher error:', error)
         }}
-        onInit={(ketcher: any) => {
+        onInit={(ketcher: Ketcher) => {
           console.log('Ketcher initialized:', ketcher)
+          // Make ketcher available globally for debugging (optional)
+          if (typeof window !== 'undefined') {
+            ;(window as any).ketcher = ketcher
+          }
           onInit?.(ketcher)
         }}
       />

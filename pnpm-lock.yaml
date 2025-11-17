@@ -17,6 +17,9 @@ dependencies:
   jszip:
     specifier: 3.10.1
     version: 3.10.1
+  ketcher-core:
+    specifier: ^3.8.0
+    version: 3.8.0(react-dom@19.1.1)(react@19.1.1)
   ketcher-react:
     specifier: 3.6.0
     version: 3.6.0(@types/react@19.1.10)(immutable@3.8.2)(react-dom@19.1.1)(react@19.1.1)
@@ -5236,7 +5239,7 @@ packages:
     resolution: {integrity: sha512-t3qOqDDsyKAm3P9rvelf4Te1CrQcOX1z3v+1Z5B2Ht0qKYtfgRwUk/rPRdM/WNpS9oKfkCoYnCFya+MHvIdBcQ==}
     engines: {node: '>=14'}
     dependencies:
-      '@babel/runtime': 7.28.2
+      '@babel/runtime': 7.28.4
       assert: 2.1.0
       d3: 7.9.0
       file-saver: 2.0.5

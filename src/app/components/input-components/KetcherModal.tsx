@@ -9,7 +9,8 @@ import 'ketcher-react/dist/index.css'
 const KetcherEditorWrapper = dynamic(() => import('./KetcherEditorWrapper'), {
   ssr: false,
   loading: () => (
-    <div className="flex h-[600px] items-center justify-center">
+    <div className="flex h-[600px] flex-col items-center justify-center gap-4">
+      <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-[var(--color-kit-primary-full)]"></div>
       <p className="text-gray-500">Loading Ketcher Editor...</p>
     </div>
   ),
