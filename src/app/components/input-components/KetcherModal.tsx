@@ -39,7 +39,7 @@ export default function KetcherModal({
           console.error('Error loading molfile:', error)
         })
       } else {
-        ketcher.setMolecule("").catch((error: Error) => {
+        ketcher.setMolecule('').catch((error: Error) => {
           console.error('Error clearing editor:', error)
         })
       }
