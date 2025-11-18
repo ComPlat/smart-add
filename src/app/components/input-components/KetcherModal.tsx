@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Modal } from 'antd'
 import dynamic from 'next/dynamic'
 import { Button } from '../workspace/Button'
@@ -20,19 +20,36 @@ interface KetcherModalProps {
   isOpen: boolean
   onClose: () => void
   onSave: (molfile: string) => void
+  initialMolfile?: string
 }
 
 export default function KetcherModal({
   isOpen,
   onClose,
   onSave,
+  initialMolfile,
 }: KetcherModalProps) {
-  const ketcherRef = useRef<any>(null)
+  const [ketcher, setKetcher] = useState<any>(null)
+
+  // Load or clear molfile when Ketcher is ready and modal is open
+  useEffect(() => {
+    if (isOpen && ketcher) {
+      if (initialMolfile?.trim()) {
+        ketcher.setMolecule(initialMolfile).catch((error: Error) => {
+          console.error('Error loading molfile:', error)
+        })
+      } else {
+        ketcher.setMolecule("").catch((error: Error) => {
+          console.error('Error clearing editor:', error)
+        })
+      }
+    }
+  }, [isOpen, ketcher, initialMolfile])
 
   const handleSave = async () => {
-    if (ketcherRef.current) {
+    if (ketcher) {
       try {
-        const molfileData = await ketcherRef.current.getMolfile()
+        const molfileData = await ketcher.getMolfile()
         onSave(molfileData)
         onClose()
       } catch (error) {
@@ -48,9 +65,8 @@ export default function KetcherModal({
     onClose()
   }
 
-  // Pass the ref setter to the KetcherEditor
-  const handleKetcherInit = (ketcher: any) => {
-    ketcherRef.current = ketcher
+  const handleKetcherInit = (ketcherInstance: any) => {
+    setKetcher(ketcherInstance)
   }
 
   return (

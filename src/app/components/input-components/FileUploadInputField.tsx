@@ -249,6 +249,7 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
         isOpen={isKetcherModalOpen}
         onClose={() => setIsKetcherModalOpen(false)}
         onSave={handleKetcherSave}
+        initialMolfile={value}
       />
     </div>
   )

@@ -23,7 +23,6 @@ export default function KetcherEditorWrapper({
           console.error('Ketcher error:', error)
         }}
         onInit={(ketcher: Ketcher) => {
-          console.log('Ketcher initialized:', ketcher)
           // Make ketcher available globally for debugging (optional)
           if (typeof window !== 'undefined') {
             ;(window as any).ketcher = ketcher
