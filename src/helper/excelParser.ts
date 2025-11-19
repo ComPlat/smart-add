@@ -26,13 +26,8 @@ type SampleRow = {
   parent?: string
   name?: string
   external_label?: string
-  role?: string
-  equivalent?: number
-  coefficient?: number
-  density?: number
+  reactionSchemeType?: string
   purity?: number
-  molarity_value?: number
-  molarity_unit?: string
   target_amount_value?: number
   target_amount_unit?: string
   location?: string
@@ -44,7 +39,6 @@ type SampleRow = {
 
 type ReactionRow = {
   identifier: string
-  parent?: string
   name?: string
   description?: string
   status?: string
@@ -179,42 +173,34 @@ export const parseExcelToExportJson = async (
       collectionId,
     )
 
-    // Handle molecule if SMILES or molfile provided
-    let moleculeId: string | null = null
-    if (smp.smiles || smp.molfile) {
-      moleculeId = uuidv4()
+    // Always create a molecule for each sample
+    const moleculeId = uuidv4()
 
-      // Parse through schema to ensure correct types (like export does)
-      Molecule[moleculeId] = moleculeSchema.parse({
-        ...moleculeTemplate,
-        density: smp.density ? Number(smp.density) : null,
-        molfile: smp.molfile || null,
-        cano_smiles: smp.smiles || null,
+    // Parse through schema to ensure correct types (like export does)
+    Molecule[moleculeId] = moleculeSchema.parse({
+      ...moleculeTemplate,
+      molfile: smp.molfile || null,
+      cano_smiles: smp.smiles || null,
+      created_at: currentDate,
+      updated_at: currentDate,
+    })
+
+    // Create molecule name entry
+    if (smp.name) {
+      MoleculeName[uuidv4()] = {
+        ...moleculeNameTemplate,
+        molecule_id: moleculeId,
+        name: smp.name,
         created_at: currentDate,
         updated_at: currentDate,
-      })
-
-      // Create molecule name entry
-      if (smp.name) {
-        MoleculeName[uuidv4()] = {
-          ...moleculeNameTemplate,
-          molecule_id: moleculeId,
-          name: smp.name,
-          created_at: currentDate,
-          updated_at: currentDate,
-        }
       }
-
-      // NOTE: Molecule Container entries are NOT created here.
-      // importFromZip.ts will auto-create molecule folders for samples
-      // with molecule_id or molfile (lines 714-769)
     }
 
     // Parse through schema to ensure correct types (like export does)
     Sample[smpUuid] = sampleSchema.parse({
       ...sampleTemplate,
       name: smp.name || null,
-      decoupled: !moleculeId,
+      decoupled: false, // All samples now have a molecule
       target_amount_value: smp.target_amount_value
         ? Number(smp.target_amount_value)
         : null,
@@ -228,9 +214,9 @@ export const parseExcelToExportJson = async (
       location: smp.location || null,
       ancestry,
       external_label: smp.external_label || null,
-      density: smp.density ? Number(smp.density) : null,
-      molarity_value: smp.molarity_value ? Number(smp.molarity_value) : null,
-      molarity_unit: smp.molarity_unit || 'M',
+      density: null,
+      molarity_value: null,
+      molarity_unit: 'M',
       solvent: smp.solvent || null,
     })
 
@@ -254,15 +240,20 @@ export const parseExcelToExportJson = async (
     }
   })
 
-  // Create Reaction Sample links from samples with parent reactions and roles
+  // Create Reaction Sample links from samples with parent reactions and reactionSchemeType
   const ReactionsStartingMaterialSample: Record<string, unknown> = {}
   const ReactionsReactantSample: Record<string, unknown> = {}
   const ReactionsProductSample: Record<string, unknown> = {}
   const ReactionsSolventSample: Record<string, unknown> = {}
 
   samples.forEach((smp) => {
-    // Only process samples that have a parent reaction and a role
-    if (!smp.parent || !smp.role) return
+    // Only process samples that have a parent reaction and a reactionSchemeType
+    if (
+      !smp.parent ||
+      !smp.reactionSchemeType ||
+      smp.reactionSchemeType === 'none'
+    )
+      return
 
     const reactionId = identifierToUuid[smp.parent]
     const sampleId = identifierToUuid[smp.identifier]
@@ -273,12 +264,12 @@ export const parseExcelToExportJson = async (
       ...reactionSampleTemplate,
       reaction_id: reactionId,
       sample_id: sampleId,
-      equivalent: smp.equivalent ? Number(smp.equivalent) : null,
-      coefficient: smp.coefficient ? Number(smp.coefficient) : 1.0,
+      equivalent: null,
+      coefficient: 1.0,
     }
 
     const linkId = uuidv4()
-    switch (smp.role) {
+    switch (smp.reactionSchemeType) {
       case 'startingMaterial':
         ReactionsStartingMaterialSample[linkId] = linkData
         break
