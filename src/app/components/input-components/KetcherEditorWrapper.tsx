@@ -11,9 +11,7 @@ interface KetcherEditorWrapperProps {
 // to avoid re-initialization on re-renders
 const structServiceProvider = new StandaloneStructServiceProvider()
 
-export default function KetcherEditorWrapper({
-  onInit,
-}: KetcherEditorWrapperProps) {
+export default function KetcherEditorWrapper({}: KetcherEditorWrapperProps) {
   return (
     <div className="h-full w-full">
       <Editor
@@ -27,7 +25,6 @@ export default function KetcherEditorWrapper({
           if (typeof window !== 'undefined') {
             ;(window as any).ketcher = ketcher
           }
-          onInit?.(ketcher)
         }}
       />
     </div>
