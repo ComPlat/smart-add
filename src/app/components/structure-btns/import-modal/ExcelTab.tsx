@@ -11,10 +11,24 @@ type ExcelTabProps = {
 
 const ExcelTab = ({ uploadProps }: ExcelTabProps) => {
   const handleDownloadTemplate = () => {
-    // TODO: Implement template download
-    dragNotifications.showWarning(
-      'Excel template download will be available soon',
-    )
+    try {
+      // Dynamically import to avoid bundling xlsx in main chunk
+      import('@/helper/excelTemplate').then(({ generateExcelTemplate }) => {
+        const blob = generateExcelTemplate()
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = 'SmartAdd_Import_Template.xlsx'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+        dragNotifications.showSuccess('Template downloaded successfully')
+      })
+    } catch (error) {
+      console.error('Failed to download template:', error)
+      dragNotifications.showError('Failed to download template')
+    }
   }
   return (
     <div className="py-4">

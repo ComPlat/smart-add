@@ -10,6 +10,7 @@ export const useJsonZipUploadConfig = (
   multiple: false,
   accept: '.json,.zip',
   fileList: jsonZipFile ? [jsonZipFile] : [],
+  className: 'custom-upload-remove-icon',
   beforeUpload: (file) => {
     const fileName = file.name.toLowerCase()
     const isValidType = fileName.endsWith('.json') || fileName.endsWith('.zip')
@@ -44,6 +45,7 @@ export const useExcelUploadConfig = (
   multiple: false,
   accept: '.xlsx,.xls',
   fileList: excelFile ? [excelFile] : [],
+  className: 'custom-upload-remove-icon',
   beforeUpload: (file) => {
     const fileName = file.name.toLowerCase()
     const isValidType = fileName.endsWith('.xlsx') || fileName.endsWith('.xls')

@@ -38,10 +38,6 @@ const ImportStructureButton = () => {
         if (!isZip && !isJson) {
           throw new Error('Please upload a valid JSON or ZIP file')
         }
-
-        // Process the file
-        dragNotifications.showWarning('Processing import file...')
-
         const file = jsonZipFile.originFileObj as File
 
         dragNotifications.showWarning('Importing data to database...')
@@ -70,10 +66,47 @@ const ImportStructureButton = () => {
         dragNotifications.showWarning('Please upload an Excel file first')
         return
       }
-      // TODO: Process the uploaded Excel file
-      dragNotifications.showWarning('Excel import is not yet implemented')
-      handleCancel()
-      console.log('Processing Excel file:', excelFile)
+      setIsProcessing(true)
+      try {
+        dragNotifications.showWarning('Processing Excel file...')
+
+        const file = excelFile.originFileObj as File
+
+        // Parse Excel to export.json format
+        const { parseExcelToExportJson } = await import('@/helper/excelParser')
+        const exportJson = await parseExcelToExportJson(file)
+
+        dragNotifications.showWarning('Converting to internal format...')
+
+        // Convert export.json to a temporary JSON file
+        const jsonBlob = new Blob([JSON.stringify(exportJson, null, 2)], {
+          type: 'application/json',
+        })
+        const jsonFile = new File([jsonBlob], 'excel-import.json', {
+          type: 'application/json',
+        })
+
+        dragNotifications.showWarning('Importing data to database...')
+
+        // Use existing import logic
+        const { importFromJsonOrZip } = await import('@/helper/importFromZip')
+        const result = await importFromJsonOrZip(jsonFile)
+        dragNotifications.showSuccess(result.message)
+
+        setIsModalVisible(false)
+        setExcelFile(null)
+
+        // Note: No need to reload - useLiveQuery will automatically detect changes
+      } catch (error) {
+        console.error('Excel import error:', error)
+        dragNotifications.showError(
+          `Excel import failed: ${
+            error instanceof Error ? error.message : 'Unknown error'
+          }`,
+        )
+      } finally {
+        setIsProcessing(false)
+      }
     }
   }
 
