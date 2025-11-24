@@ -35,8 +35,9 @@ export default function MoleculeTooltip({
           input,
           { outputFormat: 'svg' },
         )
-
-        setSvg(svgBase64)
+        // Decode base64 to get actual SVG string
+        const svgString = atob(svgBase64)
+        setSvg(svgString)
       } catch (error) {
         console.error('Error generating molecule SVG:', error)
         setSvg(null)
@@ -94,10 +95,9 @@ export default function MoleculeTooltip({
             )}
 
             {!isLoading && svg && (
-              <img
-                src={`data:image/svg+xml;base64,${svg}`}
-                alt="Molecule structure"
-                className="w-full"
+              <div
+                className="w-full [&>svg]:h-auto [&>svg]:max-h-[200px] [&>svg]:w-full"
+                dangerouslySetInnerHTML={{ __html: svg }}
               />
             )}
 

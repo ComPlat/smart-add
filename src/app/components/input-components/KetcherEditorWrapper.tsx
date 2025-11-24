@@ -6,9 +6,6 @@ import 'ketcher-react/dist/index.css'
 interface KetcherEditorWrapperProps {
   onInit?: (ketcher: Ketcher) => void
 }
-
-// Create a single instance of the service provider outside the component
-// to avoid re-initialization on re-renders
 const structServiceProvider = new StandaloneStructServiceProvider()
 
 export default function KetcherEditorWrapper({}: KetcherEditorWrapperProps) {

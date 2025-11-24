@@ -23,9 +23,11 @@ export default function KetcherModal({
 
   // Check if global Ketcher is ready
   useEffect(() => {
-    const checkKetcher = setInterval(() => {
+    const checkKetcher = setInterval(async () => {
       if (typeof window !== 'undefined' && (window as any).ketcher) {
+        const ketcher = (window as any).ketcher
         setIsReady(true)
+        await ketcher.setMolecule(initialMolfile)
         clearInterval(checkKetcher)
       }
     }, 100)
@@ -49,44 +51,6 @@ export default function KetcherModal({
         height: '100%',
       })
       modalContainer.appendChild(ketcherContainer)
-
-      // Load molfile AFTER container is visible and ready
-      const loadMolfile = async () => {
-        const ketcher = (window as any).ketcher
-        if (!ketcher) {
-          console.error('❌ Ketcher instance not found')
-          return
-        }
-
-        const molfile = initialMolfile?.trim() || ''
-
-        try {
-          if (molfile) {
-            console.log(
-              '📝 Calling setMolecule with molfile length:',
-              molfile.length,
-            )
-            const result = await ketcher.setMolecule(molfile)
-            console.log('✅ setMolecule result:', result)
-
-            // Verify it loaded
-            const currentMol = await ketcher.getMolfile()
-            console.log(
-              '🔍 Current molfile in editor (first 200 chars):',
-              currentMol.substring(0, 200),
-            )
-            console.log(
-              '🔍 Has atoms:',
-              currentMol.includes('V2000') && !currentMol.includes('0  0  0'),
-            )
-          }
-        } catch (error) {
-          console.error('❌ Error loading molfile:', error)
-        }
-      }
-
-      // Give the DOM time to update after moving the container
-      setTimeout(loadMolfile, 800)
     }
 
     // Move back when modal closes
@@ -124,6 +88,8 @@ export default function KetcherModal({
   }
 
   const handleCancel = () => {
+    const ketcher = (window as any).ketcher
+    ketcher?.setMolecule('')
     onClose()
   }
 
