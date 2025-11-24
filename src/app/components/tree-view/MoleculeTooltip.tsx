@@ -103,7 +103,11 @@ export default function MoleculeTooltip({
 
             {!isLoading && !svg && (
               <p className="text-xs text-gray-500">
-                Unable to generate structure
+                Unable to generate structure, Please wait and hover again.
+                otherwise check the molecule data.
+                <div className="flex items-center justify-center p-4">
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-200 border-t-kit-primary-full"></div>
+                </div>
               </p>
             )}
           </div>,
