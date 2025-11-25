@@ -1,5 +1,5 @@
 import { formatLabel } from '@/helper/utils'
-import { ChangeEvent, useRef, useState } from 'react'
+import { ChangeEvent, useRef, useState, useEffect } from 'react'
 import KetcherModal from './KetcherModal'
 
 interface MolFileInfo {
@@ -56,6 +56,17 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
       errors: errors.length > 0 ? errors : undefined,
     }
   }
+
+  useEffect(() => {
+    if (value && value.trim()) {
+      const validation = validateMolFile(value)
+      setMolInfo(validation)
+      onValidationChange?.(validation.isValid)
+    } else {
+      setMolInfo(null)
+      onValidationChange?.(false)
+    }
+  }, [value])
 
   const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
