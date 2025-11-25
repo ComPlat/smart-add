@@ -10,6 +10,7 @@ import {
 } from '@/helper/utils'
 import { ChangeEvent } from 'react'
 import { ZodObject, ZodRawShape } from 'zod'
+import dynamic from 'next/dynamic'
 
 import ArrayInputField from '../input-components/ArrayInputField'
 import AutoCompleteField from '../input-components/AutoCompleteField'
@@ -33,6 +34,12 @@ import {
   analysisStatusOptions,
   roleOptions,
 } from '../input-components/selectOptions'
+
+// Dynamically import ReactQuill with SSR disabled to avoid "document is not defined" error
+const ReactQuill = dynamic(() => import('../input-components/ReactQuill'), {
+  ssr: false,
+  loading: () => <div className="p-2 text-gray-500">Loading editor...</div>,
+})
 
 interface ComponentMapperProps<T extends ZodRawShape> {
   key: string
@@ -62,6 +69,7 @@ const specialFieldTypes: Record<string, string> = {
   rxno: 'rxno',
   molfile: 'molfile',
   cano_smiles: 'cano_smiles',
+  content: 'content',
 }
 
 export function determineInputComponent<T extends ZodRawShape>({
@@ -169,6 +177,9 @@ export function determineInputComponent<T extends ZodRawShape>({
         handleInputChange,
         onMolValidationChange,
       )
+
+    case 'content':
+      return renderContentField(key, value, readonly, updateMetadata)
 
     case 'string':
       return renderStringField(key, value, readonly, handleInputChange)
@@ -573,6 +584,46 @@ function renderArrayField(
       onChange={(newValues) => handleArrayChange(newValues, key)}
       readonly={readonly}
       values={(value as string[]) || []}
+    />
+  )
+}
+
+function renderContentField(
+  key: string,
+  value: MetadataValue,
+  readonly: boolean,
+  updateMetadata: (key: string, newValue: MetadataValue) => Promise<void>,
+) {
+  // Parse value if it's a JSON string, otherwise use as-is
+  let deltaValue: any
+
+  if (typeof value === 'string') {
+    try {
+      // Try to parse as JSON
+      deltaValue = JSON.parse(value)
+    } catch {
+      // If parsing fails, wrap it as a Delta object
+      deltaValue = { ops: [{ insert: value || '\n' }] }
+    }
+  } else if (value && typeof value === 'object' && 'ops' in value) {
+    // Already a Delta object
+    deltaValue = value
+  } else {
+    // Default empty content
+    deltaValue = { ops: [{ insert: '\n' }] }
+  }
+
+  return (
+    <ReactQuill
+      key={key}
+      value={deltaValue}
+      readOnly={readonly}
+      theme="snow"
+      onChange={(_html, _delta, source, editor) => {
+        if (source === 'user') {
+          updateMetadata(key, editor.getContents() as any)
+        }
+      }}
     />
   )
 }

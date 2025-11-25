@@ -16,7 +16,9 @@ const temperatureObjectSchema = z.object({
 export type TemperatureObject = z.infer<typeof temperatureObjectSchema>
 
 export const textObjectSchema = z.object({
-  ops: z.array(z.object({ insert: z.string() })).default([{ insert: '\n' }]),
+  ops: z
+    .array(z.object({ insert: z.string() }).catchall(z.any()))
+    .default([{ insert: '\n' }]),
 })
 export type TextObject = z.infer<typeof textObjectSchema>
 
@@ -293,7 +295,21 @@ export const containerSchema = z.object({
       kind: nullableString.optional(),
       index: z.union([z.string(), z.number(), z.null()]).optional(),
       report: z.union([z.string(), z.boolean(), z.null()]).optional(),
-      content: nullableString.optional(),
+      content: z
+        .union([z.string(), textObjectSchema])
+        .optional()
+        .transform((val) => {
+          // If content is a JSON string, parse it into an object
+          if (typeof val === 'string') {
+            try {
+              return JSON.parse(val)
+            } catch {
+              // If parsing fails, return as-is
+              return val
+            }
+          }
+          return val
+        }),
       // Dataset container fields
       instrument: nullableString.optional(),
     })
