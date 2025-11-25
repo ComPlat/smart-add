@@ -81,6 +81,7 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
 
     // Check if this is a reaction folder
     const isReactionFolder = fileNode?.isFolder && fileNode.dtype === 'reaction'
+    const isSample = fileNode?.isFolder && fileNode.dtype === 'sample'
 
     const handleAddSampleToReaction = async (e: React.MouseEvent) => {
       e.stopPropagation()
@@ -132,6 +133,16 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
             <span className={`mr-2 ${titleClass}`}>
               {Icon(item, context, title)}
             </span>
+            {isReactionFolder && (
+              <img
+                src="/reaction.svg"
+                alt="reaction"
+                className="w-4 h-4 mr-1"
+              />
+            )}
+            {isSample && (
+              <img src="/sample.svg" alt="sample" className="w-4 h-4 mr-1" />
+            )}
             <span
               className={`truncate ${
                 shouldHideTitle ? 'invisible' : ''
@@ -147,7 +158,7 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
                 <span className="invisible">{'\u200B'}</span>
               ) : (
                 <>
-                  {fileNode?.dtype === 'sample' ? (
+                  {isSample ? (
                     (() => {
                       // Look for molecule as a child of the sample
                       let molfile: string | undefined
