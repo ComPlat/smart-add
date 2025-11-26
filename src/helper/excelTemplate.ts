@@ -107,7 +107,6 @@ export const generateExcelTemplate = (): Blob => {
       'status',
       'temperature',
       'duration',
-      'rxno',
     ],
     [
       'reaction1',
@@ -116,7 +115,6 @@ export const generateExcelTemplate = (): Blob => {
       'Successful',
       '25',
       '2h',
-      'RXN-001',
     ],
   ]
   const ws_reactions = XLSX.utils.aoa_to_sheet(reactionsData)
