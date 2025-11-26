@@ -153,6 +153,10 @@ const hiddenKeys = Object.freeze([
   'metrics',
   'sum_formula',
   'real_amount_value',
+  'log_data',
+  'sample_type',
+  'sample_details',
+  'stereo',
   //Hidden keys for Reaction
   'reaction_svg_file',
   'rinchi_long_key',
@@ -179,6 +183,8 @@ const hiddenKeys = Object.freeze([
   'deleted_at',
   'iupac_name',
   'molecule_svg_file',
+  'mol3k',
+  'mol2k',
 ])
 
 // Keys to hide for specific schemas
