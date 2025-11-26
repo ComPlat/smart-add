@@ -6,6 +6,7 @@ import { FileNode } from '@/helper/types'
 import { ICONS } from './fileIcons'
 import { createSample } from '../structure-btns/templates'
 import { getUniqueFolderName } from '../structure-btns/folderUtils'
+import MoleculeTooltip from './MoleculeTooltip'
 
 interface RenderItemParams {
   children: ReactNode
@@ -80,6 +81,7 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
 
     // Check if this is a reaction folder
     const isReactionFolder = fileNode?.isFolder && fileNode.dtype === 'reaction'
+    const isSample = fileNode?.isFolder && fileNode.dtype === 'sample'
 
     const handleAddSampleToReaction = async (e: React.MouseEvent) => {
       e.stopPropagation()
@@ -131,6 +133,16 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
             <span className={`mr-2 ${titleClass}`}>
               {Icon(item, context, title)}
             </span>
+            {isReactionFolder && (
+              <img
+                src="/reaction.svg"
+                alt="reaction"
+                className="w-4 h-4 mr-1"
+              />
+            )}
+            {isSample && (
+              <img src="/sample.svg" alt="sample" className="w-4 h-4 mr-1" />
+            )}
             <span
               className={`truncate ${
                 shouldHideTitle ? 'invisible' : ''
@@ -146,13 +158,59 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
                 <span className="invisible">{'\u200B'}</span>
               ) : (
                 <>
-                  {title}
-                  {reactionSchemeType && (
-                    <span className="ml-2 px-1.5 py-0.5 text-xs bg-kit-primary-light text-kit-primary-full rounded">
-                      {reactionSchemeType
-                        .replace(/([A-Z])/g, ' $1')
-                        .replace(/^./, (str) => str.toUpperCase())}
-                    </span>
+                  {isSample ? (
+                    (() => {
+                      // Look for molecule as a child of the sample
+                      let molfile: string | undefined
+                      let smiles: string | undefined
+
+                      // Check if sample has molfile directly in metadata
+                      if (fileNode?.metadata) {
+                        molfile = (fileNode.metadata as any)?.molfile
+                        smiles = (fileNode.metadata as any)?.cano_smiles
+                      }
+
+                      // Look for a molecule child folder (children are paths)
+                      if (!molfile && !smiles && fileNode?.children) {
+                        const moleculeChildPath = fileNode.children.find(
+                          (childPath) => {
+                            const child = tree[childPath]
+                            return child?.dtype === 'molecule'
+                          },
+                        )
+                        if (moleculeChildPath) {
+                          const moleculeNode = tree[moleculeChildPath]
+                          molfile = (moleculeNode?.metadata as any)?.molfile
+                          smiles = (moleculeNode?.metadata as any)?.cano_smiles
+                        }
+                      }
+
+                      return (
+                        <MoleculeTooltip molfile={molfile} smiles={smiles}>
+                          <span>
+                            {title}
+                            {reactionSchemeType && (
+                              <span className="ml-2 px-1.5 py-0.5 text-xs bg-kit-primary-light text-kit-primary-full rounded">
+                                {reactionSchemeType
+                                  .replace(/([A-Z])/g, ' $1')
+                                  .replace(/^./, (str) => str.toUpperCase())}
+                              </span>
+                            )}
+                          </span>
+                        </MoleculeTooltip>
+                      )
+                    })()
+                  ) : (
+                    <>
+                      {title}
+                      {reactionSchemeType && (
+                        <span className="ml-2 px-1.5 py-0.5 text-xs bg-kit-primary-light text-kit-primary-full rounded">
+                          {reactionSchemeType
+                            .replace(/([A-Z])/g, ' $1')
+                            .replace(/^./, (str) => str.toUpperCase())}
+                        </span>
+                      )}
+                    </>
                   )}
                 </>
               )}

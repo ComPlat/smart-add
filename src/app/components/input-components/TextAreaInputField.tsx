@@ -1,5 +1,5 @@
 import { formatLabel } from '@/helper/utils'
-
+import React, { useState } from 'react'
 interface TextAreaInputFieldProps {
   autoFocus?: boolean
   className?: string
@@ -23,6 +23,7 @@ const TextAreaInputField: React.FC<TextAreaInputFieldProps> = ({
   rows = 3,
   value = '',
 }) => {
+  const [description, setDescription] = useState(value)
   return (
     <label className="flex flex-col text-sm">
       <p className="font-bold">{formatLabel(name)}</p>
@@ -36,11 +37,14 @@ const TextAreaInputField: React.FC<TextAreaInputFieldProps> = ({
         autoFocus={autoFocus}
         id={id}
         name={name}
-        onChange={onChange}
         placeholder={placeholder}
         readOnly={readonly}
         rows={rows}
-        value={value}
+        onChange={(e) => {
+          setDescription(e.target.value)
+          onChange(e)
+        }}
+        value={description}
       />
     </label>
   )

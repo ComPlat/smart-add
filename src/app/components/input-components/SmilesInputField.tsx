@@ -54,7 +54,7 @@ const SmilesInputField: React.FC<SmilesInputFieldProps> = ({
         }`}
         name={name}
         onChange={handleChange}
-        placeholder="Enter SMILES notation (e.g., CCO, c1ccccc1)"
+        placeholder="Enter SMILES notation (e.g., CCO, C1(O)NC(=O)C2=CC=CC=C21)"
         readOnly={readonly}
         type="text"
         value={value}
