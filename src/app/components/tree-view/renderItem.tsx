@@ -114,6 +114,7 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
         <button
           {...context.itemContainerWithoutChildrenProps}
           {...context.interactiveElementProps}
+          data-mykey={item.index}
           className={`flex items-center justify-between px-2 text-sm
           ${
             context.isSelected
@@ -143,11 +144,6 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
             {isSample && (
               <img src="/sample.svg" alt="sample" className="w-4 h-4 mr-1" />
             )}
-            <span
-              className={`truncate ${
-                shouldHideTitle ? 'invisible' : ''
-              } ${titleClass}`}
-            />
             <span
               className={`truncate ${
                 shouldHideTitle ? 'invisible' : ''
@@ -186,8 +182,12 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
                       }
 
                       return (
-                        <MoleculeTooltip molfile={molfile} smiles={smiles}>
-                          <span>
+                        <MoleculeTooltip
+                          molfile={molfile}
+                          smiles={smiles}
+                          data-mykey={item.index}
+                        >
+                          <>
                             {title}
                             {reactionSchemeType && (
                               <span className="ml-2 px-1.5 py-0.5 text-xs bg-kit-primary-light text-kit-primary-full rounded">
@@ -196,7 +196,7 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
                                   .replace(/^./, (str) => str.toUpperCase())}
                               </span>
                             )}
-                          </span>
+                          </>
                         </MoleculeTooltip>
                       )
                     })()
