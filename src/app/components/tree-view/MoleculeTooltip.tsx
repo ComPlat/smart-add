@@ -33,7 +33,10 @@ export default function MoleculeTooltip({
 
         const svgBase64 = await ketcher.structService.generateImageAsBase64(
           input,
-          { outputFormat: 'svg' },
+          {
+            outputFormat: 'svg',
+            'dearomatize-on-load': true,
+          },
         )
         // Decode base64 to get actual SVG string
         const svgString = atob(svgBase64)
