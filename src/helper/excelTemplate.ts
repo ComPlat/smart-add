@@ -100,14 +100,7 @@ export const generateExcelTemplate = (): Blob => {
 
   // Sheet 2: Reactions
   const reactionsData = [
-    [
-      'identifier',
-      'name',
-      'description',
-      'status',
-      'temperature',
-      'duration',
-    ],
+    ['identifier', 'name', 'description', 'status', 'temperature', 'duration'],
     [
       'reaction1',
       'Esterification',
