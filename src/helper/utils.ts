@@ -187,6 +187,10 @@ const hiddenKeys = Object.freeze([
   'molecule_svg_file',
   'mol3k',
   'mol2k',
+  'inventory_id',
+  'devicedescription_detail_level',
+  'celllinesample_detail_level',
+  'tabs_segment'
 ])
 
 // Keys to hide for specific schemas
