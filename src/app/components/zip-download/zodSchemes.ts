@@ -295,21 +295,7 @@ export const containerSchema = z.object({
       kind: nullableString.optional(),
       index: z.union([z.string(), z.number(), z.null()]).optional(),
       report: z.union([z.string(), z.boolean(), z.null()]).optional(),
-      content: z
-        .union([z.string(), textObjectSchema])
-        .optional()
-        .transform((val) => {
-          // If content is a JSON string, parse it into an object
-          if (typeof val === 'string') {
-            try {
-              return JSON.parse(val)
-            } catch {
-              // If parsing fails, return as-is
-              return val
-            }
-          }
-          return val
-        }),
+      content: z.union([nullableString, textObjectSchema]).optional(),
       // Dataset container fields
       instrument: nullableString.optional(),
     })
@@ -385,7 +371,7 @@ export const reactionSchema = z
     name: nullableString,
     created_at: datetimeSchema,
     updated_at: datetimeSchema,
-    description: nullableString,
+    description: z.union([nullableString, textObjectSchema]).optional(),
     timestamp_start: nullableString,
     timestamp_stop: nullableString,
     observation: z.union([nullableString, textObjectSchema]),

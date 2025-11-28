@@ -151,7 +151,7 @@ export const reactionTemplate = {
   name: null,
   created_at: null,
   updated_at: null,
-  description: null,
+  description: { ops: [{ insert: '\n' }] },
   timestamp_start: null,
   timestamp_stop: null,
   observation: null,

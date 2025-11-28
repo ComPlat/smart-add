@@ -69,7 +69,6 @@ const specialFieldTypes: Record<string, string> = {
   rxno: 'rxno',
   molfile: 'molfile',
   cano_smiles: 'cano_smiles',
-  content: 'content',
 }
 
 export function determineInputComponent<T extends ZodRawShape>({
@@ -95,6 +94,9 @@ export function determineInputComponent<T extends ZodRawShape>({
     return null
   }
 
+  // Check if value is a textObject (Delta format with 'ops')
+  const isTextObject = value && typeof value === 'object' && 'ops' in value
+
   let componentType: string = type
   if (isQuantityValue(key)) {
     componentType = 'quantity'
@@ -102,6 +104,14 @@ export function determineInputComponent<T extends ZodRawShape>({
     componentType = 'stereo'
   } else if (key === 'temperature' && value && typeof value === 'object') {
     componentType = 'temperature'
+  } else if (
+    (key === 'content' ||
+      (key === 'description' &&
+        currentItem &&
+        (currentItem as ExtendedFolder).dtype === 'reaction')) &&
+    isTextObject
+  ) {
+    componentType = 'richtext'
   } else if (specialFieldTypes[key]) {
     componentType = specialFieldTypes[key]
   }
@@ -178,7 +188,7 @@ export function determineInputComponent<T extends ZodRawShape>({
         onMolValidationChange,
       )
 
-    case 'content':
+    case 'richtext':
       return renderContentField(key, value, readonly, updateMetadata)
 
     case 'string':
