@@ -161,7 +161,6 @@ const hiddenKeys = Object.freeze([
   'rinchi_short_key',
   'origin',
   'duration',
-  'content',
   'conditions',
   'variations',
   'observation',
@@ -220,7 +219,7 @@ export const isHidden = (key: string, schemaName?: string): boolean => {
 
 // Extended metadata field mapping by container type
 const extendedMetadataFields = Object.freeze({
-  analysis: ['status', 'kind'],
+  analysis: ['status', 'kind', 'content'],
   dataset: ['instrument'],
 } as const)
 
