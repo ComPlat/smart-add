@@ -190,7 +190,7 @@ const hiddenKeys = Object.freeze([
   'inventory_id',
   'devicedescription_detail_level',
   'celllinesample_detail_level',
-  'tabs_segment'
+  'tabs_segment',
 ])
 
 // Keys to hide for specific schemas
