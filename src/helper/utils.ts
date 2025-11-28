@@ -169,6 +169,8 @@ const hiddenKeys = Object.freeze([
   'conditions',
   'variations',
   'observation',
+  'vessel_size',
+  'gaseous',
   //Hidden keys for Molecule
   'inchikey',
   'names',
