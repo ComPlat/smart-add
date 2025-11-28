@@ -23,7 +23,11 @@ const JsonZipTab = ({ uploadProps }: JsonZipTabProps) => {
             </h4>
             <p className="text-sm text-gray-700">
               Upload either a JSON file or a ZIP file containing your structure
-              data.
+              data.{' '}
+              <strong>
+                The JSON format should follow either the ChemScanner JSON
+                structure or the SmartAdd export.json format.
+              </strong>
             </p>
           </div>
         </div>

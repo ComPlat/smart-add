@@ -372,7 +372,7 @@ export const reactionSchema = z
     description: nullableString,
     timestamp_start: nullableString,
     timestamp_stop: nullableString,
-    observation: nullableString,
+    observation: z.union([nullableString, textObjectSchema]),
     purification: arraySchema,
     dangerous_products: arraySchema,
     tlc_solvents: z.union([nullableString, arraySchema]),
@@ -394,9 +394,12 @@ export const reactionSchema = z
     duration: nullableString,
     rxno: nullableString,
     conditions: nullableString,
-    variations: nullableString,
+    variations: z.union([nullableString, arraySchema]),
     plain_text_description: nullableString,
     plain_text_observation: nullableString,
+    vessel_size: z.any().optional(),
+    gaseous: z.any().optional(),
+    log_data: z.any().optional(),
   })
   .passthrough()
 export type Reaction = z.infer<typeof reactionSchema>

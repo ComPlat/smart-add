@@ -397,6 +397,28 @@ export const importFromJsonOrZip = async (file: File) => {
   const createdContainers = new Set<string>()
 
   /**
+   * Helper to check if a container is a root container (Sample/Reaction/Molecule)
+   */
+  const isRootContainer = (container: ExportContainer): boolean => {
+    // Check explicit container_type field (ChemScanner format)
+    if (container.container_type === CONTAINER_TYPE_ROOT) {
+      return true
+    }
+
+    // Check by containable_type and parent_id (Chemotion format compatibility)
+    // A container is a root if it has no parent and contains a Sample/Reaction/Molecule
+    if (!container.parent_id && container.containable_id) {
+      return (
+        container.containable_type === CONTAINABLE_TYPE_SAMPLE ||
+        container.containable_type === CONTAINABLE_TYPE_REACTION ||
+        container.containable_type === CONTAINABLE_TYPE_MOLECULE
+      )
+    }
+
+    return false
+  }
+
+  /**
    * Determines the parent UID for a container
    */
   const getParentUid = (container: ExportContainer): string => {
@@ -437,7 +459,7 @@ export const importFromJsonOrZip = async (file: File) => {
 
     // Has parent_id - check if parent is a root container
     const parentContainer = exportData.Container[container.parent_id]
-    if (parentContainer?.container_type === CONTAINER_TYPE_ROOT) {
+    if (parentContainer && isRootContainer(parentContainer)) {
       // Parent is root - the sample/reaction folder should have been created with this UID
       return containerIdToUidMap[container.parent_id]
     }
@@ -453,11 +475,9 @@ export const importFromJsonOrZip = async (file: File) => {
     ([, a], [, b]) => {
       // Prioritize reactions over samples at the same depth
       const isReactionA =
-        a.container_type === CONTAINER_TYPE_ROOT &&
-        a.containable_type === CONTAINABLE_TYPE_REACTION
+        isRootContainer(a) && a.containable_type === CONTAINABLE_TYPE_REACTION
       const isReactionB =
-        b.container_type === CONTAINER_TYPE_ROOT &&
-        b.containable_type === CONTAINABLE_TYPE_REACTION
+        isRootContainer(b) && b.containable_type === CONTAINABLE_TYPE_REACTION
 
       if (isReactionA && !isReactionB) return -1
       if (!isReactionA && isReactionB) return 1
@@ -568,11 +588,43 @@ export const importFromJsonOrZip = async (file: File) => {
     }
   }
 
+  // Track skipped container IDs to skip their children too
+  const skippedContainerIds = new Set<string>()
+
   // Process containers
   for (const [containerId, container] of sortedContainers) {
     const containerUid = containerIdToUidMap[containerId]
     const containableId = container.containable_id
     const containableType = container.containable_type
+
+    // Skip unsupported container types that aren't Samples, Reactions, Molecules, or child containers (analyses/analysis/dataset)
+    const isUnsupportedRootContainer =
+      containableType &&
+      containableType !== CONTAINABLE_TYPE_SAMPLE &&
+      containableType !== CONTAINABLE_TYPE_REACTION &&
+      containableType !== CONTAINABLE_TYPE_MOLECULE &&
+      !container.parent_id
+
+    if (isUnsupportedRootContainer) {
+      console.log(
+        `Skipping unsupported container type: ${containableType} (${
+          container.name || 'unnamed'
+        })`,
+      )
+      skippedContainerIds.add(containerId)
+      continue
+    }
+
+    // Skip containers whose parent was skipped
+    if (container.parent_id && skippedContainerIds.has(container.parent_id)) {
+      console.log(
+        `Skipping child container of skipped parent: ${
+          container.name || 'unnamed'
+        } (${container.container_type})`,
+      )
+      skippedContainerIds.add(containerId)
+      continue
+    }
 
     // Determine parent
     const parentUid = getParentUid(container)

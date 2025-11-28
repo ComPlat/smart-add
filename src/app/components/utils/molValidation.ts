@@ -23,7 +23,7 @@ export const validateSMILES = (smiles: string): boolean => {
 
   // Basic validation: SMILES should contain valid characters
   // Valid SMILES characters include: C, N, O, S, P, F, Cl, Br, I, c, n, o, s, p
-  // and structural characters: (, ), [, ], =, #, -, +, @, /, \, %, digits
+  // and structural characters: (, ), [, ], =, #, -, +, @, /, \, %, digits, . (for fragments)
   const validSmilesPattern = /^[A-Za-z0-9@+\-\[\]()=#$:/\\%.]+$/
 
   if (!validSmilesPattern.test(trimmedSmiles)) return false
@@ -41,13 +41,23 @@ export const validateSMILES = (smiles: string): boolean => {
 
   if (brackets['['] !== 0 || brackets['('] !== 0) return false
 
-  // Check for isolated aromatic atoms (lowercase c, n, o, s, p not in ring context)
-  // Pattern matches aromatic atoms that are NOT followed by a digit (ring closure)
-  // and NOT inside brackets (explicit notation like [c+])
-  const isolatedAromaticPattern = /(?<!\[|\d)[cnops](?!\d|\[)/g
-  const hasIsolatedAromatics = isolatedAromaticPattern.test(trimmedSmiles)
+  // Check for balanced ring closures (digits 0-9 and %10-99)
+  const ringClosures: { [key: string]: number } = {}
 
-  if (hasIsolatedAromatics) return false
+  // Match ring numbers including %NN format
+  const ringPattern = /(%\d{2}|\d)/g
+  const matches = trimmedSmiles.match(ringPattern)
+
+  if (matches) {
+    for (const match of matches) {
+      ringClosures[match] = (ringClosures[match] || 0) + 1
+    }
+
+    // Each ring number should appear exactly twice (opening and closing)
+    for (const count of Object.values(ringClosures)) {
+      if (count !== 2) return false
+    }
+  }
 
   return true
 }
