@@ -10,9 +10,9 @@ import {
 } from '@/helper/utils'
 import { ChangeEvent } from 'react'
 import { ZodObject, ZodRawShape } from 'zod'
-import dynamic from 'next/dynamic'
 
 import ArrayInputField from '../input-components/ArrayInputField'
+import ContentInputField from '../input-components/ContentInputField'
 import AutoCompleteField from '../input-components/AutoCompleteField'
 import CheckboxField from '../input-components/CheckboxField'
 import DateInputField from '../input-components/DateInputField'
@@ -34,12 +34,6 @@ import {
   analysisStatusOptions,
   roleOptions,
 } from '../input-components/selectOptions'
-
-// Dynamically import ReactQuill with SSR disabled to avoid "document is not defined" error
-const ReactQuill = dynamic(() => import('../input-components/ReactQuill'), {
-  ssr: false,
-  loading: () => <div className="p-2 text-gray-500">Loading editor...</div>,
-})
 
 interface ComponentMapperProps<T extends ZodRawShape> {
   key: string
@@ -609,31 +603,23 @@ function renderContentField(
 
   if (typeof value === 'string') {
     try {
-      // Try to parse as JSON
       deltaValue = JSON.parse(value)
     } catch {
-      // If parsing fails, wrap it as a Delta object
       deltaValue = { ops: [{ insert: value || '\n' }] }
     }
   } else if (value && typeof value === 'object' && 'ops' in value) {
-    // Already a Delta object
     deltaValue = value
   } else {
-    // Default empty content
     deltaValue = { ops: [{ insert: '\n' }] }
   }
 
   return (
-    <ReactQuill
+    <ContentInputField
       key={key}
+      fieldKey={key}
       value={deltaValue}
-      readOnly={readonly}
-      theme="snow"
-      onChange={(_html, _delta, source, editor) => {
-        if (source === 'user') {
-          updateMetadata(key, editor.getContents() as any)
-        }
-      }}
+      updateMetadata={updateMetadata}
+      readonly={readonly}
     />
   )
 }
