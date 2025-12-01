@@ -619,22 +619,12 @@ export const importFromJsonOrZip = async (file: File) => {
       !container.parent_id
 
     if (isUnsupportedRootContainer) {
-      console.log(
-        `Skipping unsupported container type: ${containableType} (${
-          container.name || 'unnamed'
-        })`,
-      )
       skippedContainerIds.add(containerId)
       continue
     }
 
     // Skip containers whose parent was skipped
     if (container.parent_id && skippedContainerIds.has(container.parent_id)) {
-      console.log(
-        `Skipping child container of skipped parent: ${
-          container.name || 'unnamed'
-        } (${container.container_type})`,
-      )
       skippedContainerIds.add(containerId)
       continue
     }

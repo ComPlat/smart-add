@@ -175,6 +175,7 @@ export const generateExportJson = async (
           created_at: currentDate,
           updated_at: currentDate,
           molecule_id: linkedMoleculeId,
+          molecule_name_id: null, // Always null for export - prevents referencing non-existent MoleculeName UUIDs
           molfile: moleculeMolfile,
           decoupled: moleculeMolfile ? false : true,
           name: moleculeMolfile
