@@ -22,7 +22,7 @@ describe('Import Structure', () => {
 
       // Verify collection and reaction appear in tree
       cy.get('[data-rct-tree="assignmentTree"]')
-        .contains('Test Collection')
+        .contains('3D')
         .should('be.visible')
         .parent()
         .find('button')
@@ -30,7 +30,7 @@ describe('Import Structure', () => {
         .click()
 
       cy.get('[data-rct-tree="assignmentTree"]')
-        .contains('Test Reaction')
+        .contains('CHI-R41')
         .should('be.visible')
     })
 
@@ -46,14 +46,14 @@ describe('Import Structure', () => {
 
       // Expand to reaction
       cy.get('[data-rct-tree="assignmentTree"]')
-        .contains('Test Collection')
+        .contains('3D')
         .parent()
         .find('button')
         .first()
         .click()
 
       cy.get('[data-rct-tree="assignmentTree"]')
-        .contains('Test Reaction')
+        .contains('CHI-R41')
         .parent()
         .find('button')
         .first()
@@ -61,7 +61,7 @@ describe('Import Structure', () => {
 
       // Verify samples are nested under reaction
       cy.get('[data-rct-tree="assignmentTree"]').within(() => {
-        cy.contains('Product Sample').should('exist')
+        cy.contains('reactant').should('exist')
       })
     })
 
@@ -110,7 +110,7 @@ describe('Import Structure', () => {
 
       // Verify data appears in the tree (which confirms it was saved to IndexedDB)
       cy.get('[data-rct-tree="assignmentTree"]')
-        .contains('Test Collection')
+        .contains('3D')
         .should('be.visible')
         .parent()
         .find('button')
@@ -118,7 +118,7 @@ describe('Import Structure', () => {
         .click()
 
       cy.get('[data-rct-tree="assignmentTree"]')
-        .contains('Test Reaction')
+        .contains('CHI-R41')
         .should('be.visible')
     })
   })

@@ -13,7 +13,7 @@ const ContextMenuContainer = ({
 }) => (
   <div
     className={
-      'absolute z-30 animate-fade-in rounded-lg border border-gray-300 bg-white shadow-lg'
+      'absolute z-50 animate-fade-in rounded-lg border border-gray-300 bg-white shadow-lg'
     }
     ref={contextMenuRef}
     style={{ left: `${x}px`, top: `${y}px` }}

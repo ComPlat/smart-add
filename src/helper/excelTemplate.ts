@@ -100,15 +100,7 @@ export const generateExcelTemplate = (): Blob => {
 
   // Sheet 2: Reactions
   const reactionsData = [
-    [
-      'identifier',
-      'name',
-      'description',
-      'status',
-      'temperature',
-      'duration',
-      'rxno',
-    ],
+    ['identifier', 'name', 'description', 'status', 'temperature', 'duration'],
     [
       'reaction1',
       'Esterification',
@@ -116,7 +108,6 @@ export const generateExcelTemplate = (): Blob => {
       'Successful',
       '25',
       '2h',
-      'RXN-001',
     ],
   ]
   const ws_reactions = XLSX.utils.aoa_to_sheet(reactionsData)

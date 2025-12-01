@@ -44,7 +44,6 @@ type ReactionRow = {
   status?: string
   temperature?: string
   duration?: string
-  rxno?: string
   solvent?: string
 }
 
@@ -117,7 +116,6 @@ export const parseExcelToExportJson = async (
       status: rxn.status || null,
       solvent: rxn.solvent || null,
       duration: rxn.duration || null,
-      rxno: rxn.rxno || null,
       plain_text_description: rxn.description || null,
     })
 
