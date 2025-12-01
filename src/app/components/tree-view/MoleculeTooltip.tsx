@@ -7,12 +7,14 @@ interface MoleculeTooltipProps {
   molfile?: string
   smiles?: string
   children: React.ReactNode
+  'data-mykey'?: string | number
 }
 
 export default function MoleculeTooltip({
   molfile,
   smiles,
   children,
+  'data-mykey': dataMykey,
 }: MoleculeTooltipProps) {
   const [svg, setSvg] = useState<string | null>(null)
   const [isHovered, setIsHovered] = useState(false)
@@ -33,7 +35,10 @@ export default function MoleculeTooltip({
 
         const svgBase64 = await ketcher.structService.generateImageAsBase64(
           input,
-          { outputFormat: 'svg' },
+          {
+            outputFormat: 'svg',
+            'dearomatize-on-load': true,
+          },
         )
         // Decode base64 to get actual SVG string
         const svgString = atob(svgBase64)
@@ -69,8 +74,10 @@ export default function MoleculeTooltip({
       <div
         ref={containerRef}
         className="relative inline-block"
+        data-mykey={dataMykey}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={() => setIsHovered(false)}
+        onContextMenu={() => setIsHovered(false)}
       >
         {children}
       </div>
@@ -80,7 +87,7 @@ export default function MoleculeTooltip({
         typeof window !== 'undefined' &&
         createPortal(
           <div
-            className="fixed z-[9999] rounded-md border border-gray-200 bg-white p-2 shadow-lg"
+            className="fixed z-[45] rounded-md border border-gray-200 bg-white p-2 shadow-lg"
             style={{
               left: `${position.x}px`,
               top: `${position.y}px`,

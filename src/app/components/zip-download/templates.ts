@@ -183,6 +183,9 @@ export const reactionTemplate = {
   variations: null,
   plain_text_description: null,
   plain_text_observation: null,
+  vessel_size: null,
+  gaseous: null,
+  log_data: null,
 }
 
 export const collectionsReactionTemplate = {
