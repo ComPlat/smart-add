@@ -183,13 +183,31 @@ export function determineInputComponent<T extends ZodRawShape>({
       )
 
     case 'richtext':
-      return renderContentField(key, value, readonly, updateMetadata)
+      return renderContentField(
+        key,
+        value,
+        readonly,
+        updateMetadata,
+        currentItem,
+      )
 
     case 'string':
-      return renderStringField(key, value, readonly, handleInputChange)
+      return renderStringField(
+        key,
+        value,
+        readonly,
+        handleInputChange,
+        currentItem,
+      )
 
     case 'number':
-      return renderNumberField(key, value, readonly, handleInputChange)
+      return renderNumberField(
+        key,
+        value,
+        readonly,
+        handleInputChange,
+        currentItem,
+      )
 
     case 'boolean':
       return renderBooleanField(key, value, readonly, handleInputChange)
@@ -208,6 +226,7 @@ export function determineInputComponent<T extends ZodRawShape>({
           onChange={(e) => handleInputChange(e, key)}
           readonly={true}
           value={`Unknown type: ${type}`}
+          itemId={currentItem?.fullPath}
         />
       )
   }
@@ -494,6 +513,7 @@ function renderStringField(
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     key: string,
   ) => void,
+  currentItem?: ExtendedFile | ExtendedFolder | null,
 ) {
   if (key.endsWith('_at') || key.startsWith('timestamp_')) {
     return (
@@ -514,6 +534,7 @@ function renderStringField(
         onChange={(e) => handleInputChange(e, key)}
         readonly={readonly}
         value={(value as string) || ''}
+        itemId={currentItem?.fullPath}
       />
     )
   } else {
@@ -524,6 +545,7 @@ function renderStringField(
         onChange={(e) => handleInputChange(e, key)}
         readonly={readonly}
         value={(value as string) || ''}
+        itemId={currentItem?.fullPath}
       />
     )
   }
@@ -537,6 +559,7 @@ function renderNumberField(
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     key: string,
   ) => void,
+  currentItem?: ExtendedFile | ExtendedFolder | null,
 ) {
   const isPurity = key === 'purity'
   const isDensity = key === 'density'
@@ -551,6 +574,7 @@ function renderNumberField(
       readonly={readonly}
       step={isPurity || isDensity ? 0.1 : undefined}
       value={value as number}
+      itemId={currentItem?.fullPath}
     />
   )
 }
@@ -596,7 +620,12 @@ function renderContentField(
   key: string,
   value: MetadataValue,
   readonly: boolean,
-  updateMetadata: (key: string, newValue: MetadataValue) => Promise<void>,
+  updateMetadata: (
+    key: string,
+    newValue: MetadataValue,
+    targetFullPath?: string,
+  ) => Promise<void>,
+  currentItem?: ExtendedFile | ExtendedFolder | null,
 ) {
   // Parse value if it's a JSON string, otherwise use as-is
   let deltaValue: any
@@ -620,6 +649,7 @@ function renderContentField(
       value={deltaValue}
       updateMetadata={updateMetadata}
       readonly={readonly}
+      itemId={currentItem?.fullPath}
     />
   )
 }

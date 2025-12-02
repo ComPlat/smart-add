@@ -1,9 +1,8 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { debounce } from 'lodash'
-import { ReactQuillHandle } from './ReactQuill'
 
 const ReactQuill = dynamic(() => import('./ReactQuill'), {
   ssr: false,
@@ -13,8 +12,9 @@ const ReactQuill = dynamic(() => import('./ReactQuill'), {
 interface ContentInputFieldProps {
   fieldKey: string
   value: any
-  updateMetadata: (key: string, value: any) => void
+  updateMetadata: (key: string, value: any, targetFullPath?: string) => void
   readonly?: boolean
+  itemId?: string
 }
 
 const ContentInputField = ({
@@ -22,23 +22,26 @@ const ContentInputField = ({
   value,
   updateMetadata,
   readonly = false,
+  itemId,
 }: ContentInputFieldProps) => {
   const [content, setContent] = useState(value)
-  const quillRef = useRef<ReactQuillHandle>(null)
+  const savedItemIdRef = useRef(itemId)
+
+  // Update ref when itemId changes
+  useEffect(() => {
+    savedItemIdRef.current = itemId
+  }, [itemId])
 
   useEffect(() => {
     setContent(value)
   }, [value])
 
   // Debounced save - saves 1 second after user stops typing
-  const debouncedSave = useCallback(
-    debounce((newContent: any) => {
-      if (JSON.stringify(newContent) !== JSON.stringify(value)) {
-        updateMetadata(fieldKey, newContent)
-      }
+  const debouncedSave = useRef(
+    debounce((newContent: any, savedItemId: string) => {
+      updateMetadata(fieldKey, newContent, savedItemId)
     }, 1000),
-    [fieldKey, value, updateMetadata],
-  )
+  ).current
 
   // Cleanup debounce on unmount
   useEffect(() => {
@@ -51,8 +54,8 @@ const ContentInputField = ({
     if (source === 'user') {
       const newContent = delta.ops ? editor.getContents() : html
       setContent(newContent)
-      // Trigger debounced save
-      debouncedSave(newContent)
+      // Trigger debounced save with current itemId
+      debouncedSave(newContent, savedItemIdRef.current || '')
     }
   }
 
@@ -67,7 +70,6 @@ const ContentInputField = ({
         {fieldKey.replace(/_/g, ' ')}
       </label>
       <ReactQuill
-        ref={quillRef}
         value={content}
         onChange={handleChange}
         onBlur={handleBlur}

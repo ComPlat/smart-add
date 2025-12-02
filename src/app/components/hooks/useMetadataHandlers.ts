@@ -40,10 +40,16 @@ export const useMetadataHandlers = ({
     return (target as HTMLTextAreaElement).value
   }
 
-  const updateMetadata = async (key: string, newValue: MetadataValue) => {
+  const updateMetadata = async (
+    key: string,
+    newValue: MetadataValue,
+    targetFullPath?: string,
+  ) => {
     if (!item || !item.fullPath) return
 
-    const fullPath = item.fullPath
+    // Use the provided targetFullPath or fall back to current item's fullPath
+    const fullPath = targetFullPath || item.fullPath
+
     try {
       await filesDB.transaction(
         'rw',
@@ -115,14 +121,17 @@ export const useMetadataHandlers = ({
     const target = e.target
     let newValue = extractValue(target)
 
+    // Extract itemId from dataset if provided
+    const targetPath = (target as any).dataset?.itemId
+
     // Only add 'Z' for actual datetime fields (fields ending with '_at')
     if (typeof newValue === 'string' && key.endsWith('_at')) {
       const parsedDate = new Date(newValue)
       if (!isNaN(parsedDate.getTime())) newValue += 'Z'
     }
 
-    // Update the field value
-    await updateMetadata(key, newValue)
+    // Update the field value with optional targetPath
+    await updateMetadata(key, newValue, targetPath)
 
     // ONLY apply interlinking for density/molarity fields (no extra work for description, etc.)
     if (key === 'density' && newValue !== null) {

@@ -9,6 +9,7 @@ interface TextInputFieldProps {
   placeholder?: string
   readonly: boolean
   value?: string
+  itemId?: string
 }
 
 const TextInputField: React.FC<TextInputFieldProps> = ({
@@ -20,7 +21,16 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
   placeholder = 'Enter text...',
   readonly = false,
   value = '',
+  itemId,
 }) => {
+  const handleChange: React.ChangeEventHandler<HTMLInputField> = (event) => {
+    // Add itemId to dataset if provided
+    if (itemId) {
+      ;(event.target as any).dataset.itemId = itemId
+    }
+    onChange(event)
+  }
+
   return (
     <label className="flex flex-col text-sm">
       <p className="font-bold">{formatLabel(name)}</p>
@@ -34,7 +44,7 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
         autoFocus={autoFocus}
         id={id}
         name={name}
-        onChange={onChange}
+        onChange={handleChange}
         placeholder={placeholder}
         readOnly={readonly}
         type="text"

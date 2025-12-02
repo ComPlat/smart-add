@@ -12,6 +12,7 @@ interface NumberInputFieldProps {
   readonly?: boolean
   step?: number
   value?: number
+  itemId?: string
 }
 
 const NumberInputField: React.FC<NumberInputFieldProps> = ({
@@ -25,10 +26,15 @@ const NumberInputField: React.FC<NumberInputFieldProps> = ({
   readonly = false,
   step,
   value,
+  itemId,
 }) => {
   const handleChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
     const newValue = event.target.valueAsNumber
     if (!isNaN(newValue) || event.target.value === '') {
+      // Add itemId to dataset if provided
+      if (itemId) {
+        ;(event.target as any).dataset.itemId = itemId
+      }
       onChange(event)
     }
   }
