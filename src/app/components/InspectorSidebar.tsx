@@ -211,6 +211,7 @@ const InspectorSidebar = ({
                       'target_amount_value',
                       'real_amount_value',
                       'kind',
+                      'content',
                       'description',
                     ]
                     const indexA = topFields.indexOf(keyA)

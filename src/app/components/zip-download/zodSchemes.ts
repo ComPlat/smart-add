@@ -16,7 +16,9 @@ const temperatureObjectSchema = z.object({
 export type TemperatureObject = z.infer<typeof temperatureObjectSchema>
 
 export const textObjectSchema = z.object({
-  ops: z.array(z.object({ insert: z.string() })).default([{ insert: '\n' }]),
+  ops: z
+    .array(z.object({ insert: z.string() }).catchall(z.any()))
+    .default([{ insert: '\n' }]),
 })
 export type TextObject = z.infer<typeof textObjectSchema>
 
@@ -293,7 +295,7 @@ export const containerSchema = z.object({
       kind: nullableString.optional(),
       index: z.union([z.string(), z.number(), z.null()]).optional(),
       report: z.union([z.string(), z.boolean(), z.null()]).optional(),
-      content: nullableString.optional(),
+      content: z.union([nullableString, textObjectSchema]).optional(),
       // Dataset container fields
       instrument: nullableString.optional(),
     })
@@ -369,10 +371,10 @@ export const reactionSchema = z
     name: nullableString,
     created_at: datetimeSchema,
     updated_at: datetimeSchema,
-    description: nullableString,
+    description: z.union([nullableString, textObjectSchema]).optional(),
     timestamp_start: nullableString,
     timestamp_stop: nullableString,
-    observation: z.union([nullableString, textObjectSchema]),
+    observation: z.union([nullableString, textObjectSchema]).optional(),
     purification: arraySchema,
     dangerous_products: arraySchema,
     tlc_solvents: z.union([nullableString, arraySchema]),
@@ -394,7 +396,7 @@ export const reactionSchema = z
     duration: nullableString,
     rxno: nullableString,
     conditions: nullableString,
-    variations: z.union([nullableString, arraySchema]),
+    variations: z.union([nullableString, arraySchema]).optional(),
     plain_text_description: nullableString,
     plain_text_observation: nullableString,
     vessel_size: z.any().optional(),

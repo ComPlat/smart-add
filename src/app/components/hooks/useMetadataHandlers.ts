@@ -40,10 +40,16 @@ export const useMetadataHandlers = ({
     return (target as HTMLTextAreaElement).value
   }
 
-  const updateMetadata = async (key: string, newValue: MetadataValue) => {
+  const updateMetadata = async (
+    key: string,
+    newValue: MetadataValue,
+    targetFullPath?: string,
+  ) => {
     if (!item || !item.fullPath) return
 
-    const fullPath = item.fullPath
+    // Use the provided targetFullPath or fall back to current item's fullPath
+    const fullPath = targetFullPath || item.fullPath
+
     try {
       await filesDB.transaction(
         'rw',
@@ -72,12 +78,6 @@ export const useMetadataHandlers = ({
             // Regular top-level field
             updatedMetadata = { ...updatedMetadata, [key]: newValue } as any
           }
-
-          let updatedName = item.name
-          if (key === 'name') {
-            updatedName = newValue as string
-          }
-
           updatedMetadata = Object.entries(updatedMetadata).reduce(
             (acc, [key, value]) => {
               if (value !== undefined) acc[key] = value
@@ -88,19 +88,26 @@ export const useMetadataHandlers = ({
 
           await filesDB.folders.where({ fullPath }).modify((folder) => {
             folder.metadata = updatedMetadata as Metadata
-            folder.name = updatedName
+            if (key === 'name') {
+              folder.name = newValue as string
+            }
           })
 
-          renameFolder(item as ExtendedFolder, tree, updatedName)
+          // Only update tree/state for the currently selected item
+          if (fullPath === item.fullPath) {
+            if (key === 'name') {
+              renameFolder(item as ExtendedFolder, tree, newValue as string)
+            }
 
-          setItem(
-            (prevItem) =>
-              ({
-                ...prevItem,
-                metadata: updatedMetadata,
-                name: updatedName,
-              }) as ExtendedFile | ExtendedFolder,
-          )
+            setItem(
+              (prevItem) =>
+                ({
+                  ...prevItem,
+                  metadata: updatedMetadata,
+                  name: key === 'name' ? (newValue as string) : item.name,
+                }) as ExtendedFile | ExtendedFolder,
+            )
+          }
         },
       )
     } catch (error) {
@@ -115,14 +122,17 @@ export const useMetadataHandlers = ({
     const target = e.target
     let newValue = extractValue(target)
 
+    // Extract itemId from dataset if provided
+    const targetPath = (target as any).dataset?.itemId
+
     // Only add 'Z' for actual datetime fields (fields ending with '_at')
     if (typeof newValue === 'string' && key.endsWith('_at')) {
       const parsedDate = new Date(newValue)
       if (!isNaN(parsedDate.getTime())) newValue += 'Z'
     }
 
-    // Update the field value
-    await updateMetadata(key, newValue)
+    // Update the field value with optional targetPath
+    await updateMetadata(key, newValue, targetPath)
 
     // ONLY apply interlinking for density/molarity fields (no extra work for description, etc.)
     if (key === 'density' && newValue !== null) {

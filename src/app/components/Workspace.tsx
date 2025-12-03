@@ -106,7 +106,15 @@ const Workspace = ({
     ExtendedFile | ExtendedFolder
   >()
 
-  if (!db) return <div>Loading...</div>
+  if (!db)
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <div className="flex items-center justify-center p-4">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-200 border-t-kit-primary-full"></div>
+        </div>
+        Loading...
+      </div>
+    )
 
   const viewState = {
     ['assignmentTree']: {

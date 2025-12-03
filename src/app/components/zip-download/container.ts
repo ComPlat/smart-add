@@ -47,6 +47,19 @@ const SubContainer = ({
     container_type = null,
   } = dtypeMapping[folder.dtype as keyof typeof dtypeMapping] || {}
 
+  // Stringify Delta objects for container export
+  const description =
+    folder.metadata?.description &&
+    typeof folder.metadata.description === 'object'
+      ? JSON.stringify(folder.metadata.description)
+      : folder.metadata?.description || null
+
+  const extendedMetadata: any = folder.metadata?.extended_metadata || {}
+  const content =
+    extendedMetadata.content && typeof extendedMetadata.content === 'object'
+      ? JSON.stringify(extendedMetadata.content)
+      : extendedMetadata.content
+
   return {
     [uidMap[folder.uid]]: {
       ...containerSchema.parse({
@@ -58,8 +71,8 @@ const SubContainer = ({
         container_type:
           container_type || folder.metadata?.container_type || null,
         created_at: currentDate,
-        description: folder.metadata?.description || null,
-        extended_metadata: folder.metadata?.extended_metadata || {},
+        description,
+        extended_metadata: { ...extendedMetadata, content },
         name: folder.name,
         parent_id: uidMap[folder.parentUid] || null,
         updated_at: currentDate,
