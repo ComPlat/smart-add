@@ -23,7 +23,7 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
   value = '',
   itemId,
 }) => {
-  const handleChange: React.ChangeEventHandler<HTMLInputField> = (event) => {
+  const handleChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
     // Add itemId to dataset if provided
     if (itemId) {
       ;(event.target as any).dataset.itemId = itemId

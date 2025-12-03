@@ -78,12 +78,6 @@ export const useMetadataHandlers = ({
             // Regular top-level field
             updatedMetadata = { ...updatedMetadata, [key]: newValue } as any
           }
-
-          let updatedName = item.name
-          if (key === 'name') {
-            updatedName = newValue as string
-          }
-
           updatedMetadata = Object.entries(updatedMetadata).reduce(
             (acc, [key, value]) => {
               if (value !== undefined) acc[key] = value
@@ -94,19 +88,26 @@ export const useMetadataHandlers = ({
 
           await filesDB.folders.where({ fullPath }).modify((folder) => {
             folder.metadata = updatedMetadata as Metadata
-            folder.name = updatedName
+            if (key === 'name') {
+              folder.name = newValue as string
+            }
           })
 
-          renameFolder(item as ExtendedFolder, tree, updatedName)
+          // Only update tree/state for the currently selected item
+          if (fullPath === item.fullPath) {
+            if (key === 'name') {
+              renameFolder(item as ExtendedFolder, tree, newValue as string)
+            }
 
-          setItem(
-            (prevItem) =>
-              ({
-                ...prevItem,
-                metadata: updatedMetadata,
-                name: updatedName,
-              }) as ExtendedFile | ExtendedFolder,
-          )
+            setItem(
+              (prevItem) =>
+                ({
+                  ...prevItem,
+                  metadata: updatedMetadata,
+                  name: key === 'name' ? (newValue as string) : item.name,
+                }) as ExtendedFile | ExtendedFolder,
+            )
+          }
         },
       )
     } catch (error) {
