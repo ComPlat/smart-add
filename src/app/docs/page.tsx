@@ -17,7 +17,6 @@ import {
   MdSettings,
   MdHelp,
 } from 'react-icons/md'
-import chemotionLogo from '../../../public/Chemotion_full.svg'
 
 interface ContentItem {
   type: 'text' | 'list' | 'code'
@@ -122,7 +121,7 @@ export default function DocumentationPage() {
               <span className="text-sm font-medium">Back to SmartAdd</span>
             </Link>
             <div className="h-8 w-px bg-gray-300"></div>
-            <Image src={chemotionLogo} alt="Chemotion Logo" height={32} />
+            <Image src="/Chemotion_full.svg" alt="Chemotion Logo" width={100} height={32} />
           </div>
 
           <div className="flex items-center gap-4">
