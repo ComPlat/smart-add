@@ -17,6 +17,12 @@ export default function ReactionTooltip({
   const defaultImageUrl =
     'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3dSEtDvpd9KAn4SdFJVoL0K1lj4Xfc-wVWQ&s'
 
+  // Check if content is inline SVG (starts with <svg)
+  const isSvgContent = (content: string | undefined) => {
+    if (!content) return false
+    return content.trim().startsWith('<svg')
+  }
+
   // Check if URL is valid
   const isValidUrl = (url: string | undefined) => {
     if (!url) return false
@@ -28,9 +34,11 @@ export default function ReactionTooltip({
     }
   }
 
-  const imageUrl = isValidUrl(reactionSvgUrl)
-    ? reactionSvgUrl!
-    : defaultImageUrl
+  const isInlineSvg = isSvgContent(reactionSvgUrl)
+  const imageUrl =
+    !isInlineSvg && isValidUrl(reactionSvgUrl)
+      ? reactionSvgUrl!
+      : defaultImageUrl
 
   const [isHovered, setIsHovered] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -39,8 +47,6 @@ export default function ReactionTooltip({
   const containerRef = useRef<HTMLDivElement>(null)
 
   const handleMouseEnter = () => {
-    if (!imageUrl) return
-
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect()
       setPosition({
@@ -48,11 +54,13 @@ export default function ReactionTooltip({
         y: rect.top,
       })
     }
-    setIsLoading(true)
+    if (!isInlineSvg) {
+      setIsLoading(true)
+    }
     setIsHovered(true)
   }
 
-  const hasReactionImage = !!imageUrl
+  const hasReactionImage = isInlineSvg || !!imageUrl
 
   return (
     <>
@@ -72,37 +80,47 @@ export default function ReactionTooltip({
         typeof window !== 'undefined' &&
         createPortal(
           <div
-            className="fixed z-[45] rounded-md border border-gray-200 bg-white p-2 shadow-lg"
+            className="fixed z-[45] rounded-md border border-gray-200 bg-white p-2 shadow-lg overflow-hidden flex flex-col"
             style={{
               left: `${position.x}px`,
               top: `${position.y}px`,
-              minWidth: '200px',
-              minHeight: '150px',
+              minWidth: '300px',
               maxWidth: '400px',
             }}
           >
-            {isLoading && (
+            {isInlineSvg ? (
+              // Render inline SVG content
               <div
-                className="flex items-center justify-center"
-                style={{ minHeight: '150px' }}
-              >
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-200 border-t-kit-primary-full"></div>
-              </div>
+                className="flex-1 w-full flex items-center justify-center [&>svg]:w-auto"
+                dangerouslySetInnerHTML={{ __html: reactionSvgUrl || '' }}
+              />
+            ) : (
+              // Render image from URL
+              <>
+                {isLoading && (
+                  <div
+                    className="flex items-center justify-center"
+                    style={{ minHeight: '150px' }}
+                  >
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-200 border-t-kit-primary-full"></div>
+                  </div>
+                )}
+                <img
+                  src={imageError ? defaultImageUrl : imageUrl}
+                  alt="Reaction scheme"
+                  className="w-full h-auto max-h-[300px] object-contain"
+                  style={{ display: isLoading ? 'none' : 'block' }}
+                  onLoad={() => setIsLoading(false)}
+                  onLoadStart={() => setIsLoading(true)}
+                  onError={() => {
+                    setIsLoading(false)
+                    if (!imageError) {
+                      setImageError(true)
+                    }
+                  }}
+                />
+              </>
             )}
-            <img
-              src={imageError ? defaultImageUrl : imageUrl}
-              alt="Reaction scheme"
-              className="w-full h-auto max-h-[300px] object-contain"
-              style={{ display: isLoading ? 'none' : 'block' }}
-              onLoad={() => setIsLoading(false)}
-              onLoadStart={() => setIsLoading(true)}
-              onError={() => {
-                setIsLoading(false)
-                if (!imageError) {
-                  setImageError(true)
-                }
-              }}
-            />
           </div>,
           document.body,
         )}
