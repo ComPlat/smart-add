@@ -7,6 +7,7 @@ import { ICONS } from './fileIcons'
 import { createSample } from '../structure-btns/templates'
 import { getUniqueFolderName } from '../structure-btns/folderUtils'
 import MoleculeTooltip from './MoleculeTooltip'
+import ReactionTooltip from './ReactionTooltip'
 
 interface RenderItemParams {
   children: ReactNode
@@ -154,7 +155,20 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
                 <span className="invisible">{'\u200B'}</span>
               ) : (
                 <>
-                  {isSample ? (
+                  {isReactionFolder ? (
+                    (() => {
+                      const reactionSvgUrl = (fileNode?.metadata as any)
+                        ?.reaction_svg_file
+                      return (
+                        <ReactionTooltip
+                          reactionSvgUrl={reactionSvgUrl}
+                          data-mykey={item.index}
+                        >
+                          <>{title}</>
+                        </ReactionTooltip>
+                      )
+                    })()
+                  ) : isSample ? (
                     (() => {
                       // Look for molecule as a child of the sample
                       let molfile: string | undefined

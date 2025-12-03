@@ -72,6 +72,7 @@ const getMetadata = (
         extended_metadata: {
           status: null,
           kind: null,
+          content: { ops: [{ insert: '\n' }] },
         },
         name,
         parent_id,

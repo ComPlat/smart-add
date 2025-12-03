@@ -287,13 +287,26 @@ const processReactionMetadata = (
   reaction: ExportReaction,
   folderName: string,
 ): Record<string, unknown> => {
-  // Convert description from Delta format to plain text if needed
+  // Convert description from Delta format or handle empty/null values
   let description = reaction.description
-  if (description && typeof description === 'object' && 'ops' in description) {
-    // Delta/Quill format - extract plain text
-    description = (description as any).ops
-      .map((op: any) => op.insert || '')
-      .join('')
+  if (typeof description === 'string') {
+    try {
+      const parsed = JSON.parse(description)
+      if (parsed && typeof parsed === 'object' && 'ops' in parsed) {
+        description = parsed
+      }
+    } catch {
+      // Not JSON, keep as string
+    }
+  } else if (
+    !description ||
+    (typeof description === 'object' && Object.keys(description).length === 0)
+  ) {
+    // If description is null, undefined, or empty object, use template default
+    description = reactionTemplate.description
+  } else if (typeof description === 'object' && !('ops' in description)) {
+    // If it's an object but not a Delta format, convert to empty Delta
+    description = { ops: [{ insert: '\n' }] }
   }
 
   return {
@@ -606,22 +619,12 @@ export const importFromJsonOrZip = async (file: File) => {
       !container.parent_id
 
     if (isUnsupportedRootContainer) {
-      console.log(
-        `Skipping unsupported container type: ${containableType} (${
-          container.name || 'unnamed'
-        })`,
-      )
       skippedContainerIds.add(containerId)
       continue
     }
 
     // Skip containers whose parent was skipped
     if (container.parent_id && skippedContainerIds.has(container.parent_id)) {
-      console.log(
-        `Skipping child container of skipped parent: ${
-          container.name || 'unnamed'
-        } (${container.container_type})`,
-      )
       skippedContainerIds.add(containerId)
       continue
     }
@@ -685,6 +688,35 @@ export const importFromJsonOrZip = async (file: File) => {
     } else if (container.container_type === CONTAINER_TYPE_ANALYSIS) {
       dtype = 'analysis'
       folderName = container.name || DEFAULT_ANALYSIS_NAME
+
+      // Parse content field - handle Delta format, empty, and malformed values
+      const extendedMetadata = container.extended_metadata || {}
+      let content = (extendedMetadata as any).content
+      if (typeof content === 'string') {
+        try {
+          const parsed = JSON.parse(content)
+          if (parsed && typeof parsed === 'object' && 'ops' in parsed) {
+            content = parsed
+          }
+        } catch {
+          // Not JSON, keep as string
+        }
+      } else if (
+        content &&
+        typeof content === 'object' &&
+        Object.keys(content).length === 0
+      ) {
+        // Empty object → convert to empty Delta
+        content = { ops: [{ insert: '\n' }] }
+      } else if (
+        content &&
+        typeof content === 'object' &&
+        !('ops' in content)
+      ) {
+        // Object without 'ops' → convert to empty Delta
+        content = { ops: [{ insert: '\n' }] }
+      }
+
       // Use template for field definitions, then merge container metadata
       metadata = {
         ...containerTemplate,
@@ -695,6 +727,7 @@ export const importFromJsonOrZip = async (file: File) => {
           status: null,
           kind: null,
           ...(container.extended_metadata || {}),
+          content,
         },
       }
     } else if (container.container_type === CONTAINER_TYPE_DATASET) {

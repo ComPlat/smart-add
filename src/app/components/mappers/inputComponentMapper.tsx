@@ -12,6 +12,7 @@ import { ChangeEvent } from 'react'
 import { ZodObject, ZodRawShape } from 'zod'
 
 import ArrayInputField from '../input-components/ArrayInputField'
+import ContentInputField from '../input-components/ContentInputField'
 import AutoCompleteField from '../input-components/AutoCompleteField'
 import CheckboxField from '../input-components/CheckboxField'
 import DateInputField from '../input-components/DateInputField'
@@ -87,6 +88,9 @@ export function determineInputComponent<T extends ZodRawShape>({
     return null
   }
 
+  // Check if value is a textObject (Delta format with 'ops')
+  const isTextObject = value && typeof value === 'object' && 'ops' in value
+
   let componentType: string = type
   if (isQuantityValue(key)) {
     componentType = 'quantity'
@@ -94,6 +98,14 @@ export function determineInputComponent<T extends ZodRawShape>({
     componentType = 'stereo'
   } else if (key === 'temperature' && value && typeof value === 'object') {
     componentType = 'temperature'
+  } else if (
+    (key === 'content' ||
+      (key === 'description' &&
+        currentItem &&
+        (currentItem as ExtendedFolder).dtype === 'reaction')) &&
+    isTextObject
+  ) {
+    componentType = 'richtext'
   } else if (specialFieldTypes[key]) {
     componentType = specialFieldTypes[key]
   }
@@ -170,11 +182,32 @@ export function determineInputComponent<T extends ZodRawShape>({
         onMolValidationChange,
       )
 
+    case 'richtext':
+      return renderContentField(
+        key,
+        value,
+        readonly,
+        updateMetadata,
+        currentItem,
+      )
+
     case 'string':
-      return renderStringField(key, value, readonly, handleInputChange)
+      return renderStringField(
+        key,
+        value,
+        readonly,
+        handleInputChange,
+        currentItem,
+      )
 
     case 'number':
-      return renderNumberField(key, value, readonly, handleInputChange)
+      return renderNumberField(
+        key,
+        value,
+        readonly,
+        handleInputChange,
+        currentItem,
+      )
 
     case 'boolean':
       return renderBooleanField(key, value, readonly, handleInputChange)
@@ -193,6 +226,7 @@ export function determineInputComponent<T extends ZodRawShape>({
           onChange={(e) => handleInputChange(e, key)}
           readonly={true}
           value={`Unknown type: ${type}`}
+          itemId={currentItem?.fullPath}
         />
       )
   }
@@ -479,6 +513,7 @@ function renderStringField(
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     key: string,
   ) => void,
+  currentItem?: ExtendedFile | ExtendedFolder | null,
 ) {
   if (key.endsWith('_at') || key.startsWith('timestamp_')) {
     return (
@@ -499,6 +534,7 @@ function renderStringField(
         onChange={(e) => handleInputChange(e, key)}
         readonly={readonly}
         value={(value as string) || ''}
+        itemId={currentItem?.fullPath}
       />
     )
   } else {
@@ -509,6 +545,7 @@ function renderStringField(
         onChange={(e) => handleInputChange(e, key)}
         readonly={readonly}
         value={(value as string) || ''}
+        itemId={currentItem?.fullPath}
       />
     )
   }
@@ -522,6 +559,7 @@ function renderNumberField(
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     key: string,
   ) => void,
+  currentItem?: ExtendedFile | ExtendedFolder | null,
 ) {
   const isPurity = key === 'purity'
   const isDensity = key === 'density'
@@ -536,6 +574,7 @@ function renderNumberField(
       readonly={readonly}
       step={isPurity || isDensity ? 0.1 : undefined}
       value={value as number}
+      itemId={currentItem?.fullPath}
     />
   )
 }
@@ -573,6 +612,44 @@ function renderArrayField(
       onChange={(newValues) => handleArrayChange(newValues, key)}
       readonly={readonly}
       values={(value as string[]) || []}
+    />
+  )
+}
+
+function renderContentField(
+  key: string,
+  value: MetadataValue,
+  readonly: boolean,
+  updateMetadata: (
+    key: string,
+    newValue: MetadataValue,
+    targetFullPath?: string,
+  ) => Promise<void>,
+  currentItem?: ExtendedFile | ExtendedFolder | null,
+) {
+  // Parse value if it's a JSON string, otherwise use as-is
+  let deltaValue: any
+
+  if (typeof value === 'string') {
+    try {
+      deltaValue = JSON.parse(value)
+    } catch {
+      deltaValue = { ops: [{ insert: value || '\n' }] }
+    }
+  } else if (value && typeof value === 'object' && 'ops' in value) {
+    deltaValue = value
+  } else {
+    deltaValue = { ops: [{ insert: '\n' }] }
+  }
+
+  return (
+    <ContentInputField
+      key={key}
+      fieldKey={key}
+      value={deltaValue}
+      updateMetadata={updateMetadata}
+      readonly={readonly}
+      itemId={currentItem?.fullPath}
     />
   )
 }
