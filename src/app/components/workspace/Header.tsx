@@ -1,7 +1,5 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import chemotionLogo from '../../../../public/Chemotion_full.svg'
-import logo from '../../../../public/logo.png'
 import { Badge, Popover } from 'antd'
 import { useState } from 'react'
 import { FcSettings } from 'react-icons/fc'
@@ -19,13 +17,19 @@ const Header = () => {
   return (
     <header className="flex w-full flex-row justify-between bg-white px-4 py-2 shadow-sm h-24 items-center">
       <Link href="https://chemotion.net/" className="self-center">
-        <Image alt="Chemotion Logo" src={chemotionLogo} />
+        <Image
+          alt="Chemotion Logo"
+          width={100}
+          height={60}
+          src="/Chemotion_full.svg"
+        />
       </Link>
       <Image
         alt="SmartAdd Logo"
         className="self-center"
         width={100}
-        src={logo}
+        height={60}
+        src="/logo.png"
       />
       <Popover
         content={
