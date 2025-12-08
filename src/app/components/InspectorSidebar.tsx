@@ -116,7 +116,7 @@ const InspectorSidebar = ({
     <>
       {isOpen && item && (
         <aside
-          className={`right-0 top-0 ml-2 w-1/3 flex-col rounded-tl-xl bg-white ${
+          className={`right-0 top-0 ml-2 w-1/2 flex-col bg-white ${
             isOpen ? 'translate-x-0' : 'translate-x-full'
           } z-40 max-h-screen overflow-y-auto p-4 duration-300 ease-in-out`}
         >
@@ -156,8 +156,8 @@ const InspectorSidebar = ({
                   const metadata = item.metadata
                   const flattenedEntries: [string, MetadataValue][] = []
                   const schemaName = String(
-                    metadata.container_type ||
-                      (item as ExtendedFolder).dtype ||
+                    (item as ExtendedFolder).dtype ||
+                      metadata.container_type ||
                       '',
                   )
 
@@ -211,6 +211,7 @@ const InspectorSidebar = ({
                       'target_amount_value',
                       'real_amount_value',
                       'kind',
+                      'content',
                       'description',
                     ]
                     const indexA = topFields.indexOf(keyA)

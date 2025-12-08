@@ -1,5 +1,6 @@
 import { formatLabel } from '@/helper/utils'
-import { ChangeEvent, useRef, useState } from 'react'
+import { ChangeEvent, useRef, useState, useEffect } from 'react'
+import KetcherModal from './KetcherModal'
 
 interface MolFileInfo {
   isValid: boolean
@@ -27,6 +28,7 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [molInfo, setMolInfo] = useState<MolFileInfo | null>(null)
+  const [isKetcherModalOpen, setIsKetcherModalOpen] = useState(false)
 
   // Basic MOL file validation
   const validateMolFile = (content: string): MolFileInfo => {
@@ -54,6 +56,17 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
       errors: errors.length > 0 ? errors : undefined,
     }
   }
+
+  useEffect(() => {
+    if (value && value.trim()) {
+      const validation = validateMolFile(value)
+      setMolInfo(validation)
+      onValidationChange?.(validation.isValid)
+    } else {
+      setMolInfo(null)
+      onValidationChange?.(false)
+    }
+  }, [value])
 
   const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -111,6 +124,15 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
     onValidationChange?.(false)
   }
 
+  const handleKetcherSave = (molfile: string) => {
+    onChange(molfile)
+
+    // Validate the molfile
+    const validation = validateMolFile(molfile)
+    setMolInfo(validation)
+    onValidationChange?.(validation.isValid)
+  }
+
   return (
     <div className="flex flex-col text-sm">
       <p className="font-bold">{formatLabel(name)}</p>
@@ -137,6 +159,19 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
           >
             Upload File
           </label>
+
+          <button
+            type="button"
+            onClick={() => setIsKetcherModalOpen(true)}
+            disabled={readonly}
+            className={`rounded border px-3 py-1 text-xs font-medium ${
+              readonly
+                ? 'border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed'
+                : 'border-kit-primary-full text-kit-primary-full hover:bg-kit-primary-light'
+            }`}
+          >
+            Draw Structure
+          </button>
 
           {value && (
             <button
@@ -219,6 +254,16 @@ const FileUploadInputField: React.FC<FileUploadInputFieldProps> = ({
           {maxFileSize / 1024 / 1024}MB
         </p>
       </div>
+
+      {/* Ketcher Modal */}
+      {isKetcherModalOpen && (
+        <KetcherModal
+          isOpen={isKetcherModalOpen}
+          onClose={() => setIsKetcherModalOpen(false)}
+          onSave={handleKetcherSave}
+          initialMolfile={value}
+        />
+      )}
     </div>
   )
 }

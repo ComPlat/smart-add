@@ -39,6 +39,7 @@ type Database = {
 type FocusedItemProps = {
   focusedItem: TreeItemIndex | undefined
   setFocusedItem: Dispatch<SetStateAction<TreeItemIndex | undefined>>
+  children?: React.ReactNode
 }
 
 const initialContextMenu = {
@@ -52,7 +53,11 @@ const [inputTreeRoot, assignmentTreeRoot] = [
   'assignmentTreeRoot',
 ]
 
-const Workspace = ({ focusedItem, setFocusedItem }: FocusedItemProps) => {
+const Workspace = ({
+  focusedItem,
+  setFocusedItem,
+  children,
+}: FocusedItemProps) => {
   const [tree, setTree] = useState({} as Record<string, FileNode>)
 
   const db = useLiveQuery(async () => {
@@ -101,7 +106,15 @@ const Workspace = ({ focusedItem, setFocusedItem }: FocusedItemProps) => {
     ExtendedFile | ExtendedFolder
   >()
 
-  if (!db) return <div>Loading...</div>
+  if (!db)
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <div className="flex items-center justify-center p-4">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-200 border-t-kit-primary-full"></div>
+        </div>
+        Loading...
+      </div>
+    )
 
   const viewState = {
     ['assignmentTree']: {
@@ -218,94 +231,99 @@ const Workspace = ({ focusedItem, setFocusedItem }: FocusedItemProps) => {
         tree={tree}
         setFocusedItem={setFocusedItem}
       />
-      <ControlledTreeEnvironment
-        canDrag={(items) =>
-          items.every(
-            (item) => item.data !== 'structure' && item.data !== 'analyses',
-          )
-        }
-        canDragAndDrop
-        canDropAt={(items, target) => canDropAt(items, target, tree)}
-        canDropOnFolder
-        canReorderItems
-        canSearch={false}
-        getItemTitle={(item: TreeItem) => item.data}
-        items={tree}
-        onCollapseItem={handleOnCollapseItem}
-        onDrop={handleOnDrop}
-        onExpandItem={handleOnExpandItem}
-        onFocusItem={handleOnFocusItem}
-        onSelectItems={handleOnSelectItem}
-        viewState={viewState}
-      >
-        <div className="flex h-full w-full flex-row justify-between gap-2 overflow-hidden">
-          <UploadedFiles onContextMenu={handleFileTreeContextMenu}>
-            <UploadFilesText showText={db.inputLength === 0} />
-            <UploadDropZone>
-              <Tree
-                renderItemsContainer={({ children, containerProps }) => (
-                  <ul
-                    onContextMenu={handleFileTreeItemContextMenu}
-                    {...containerProps}
-                  >
-                    {children}
-                  </ul>
-                )}
-                renderTreeContainer={({ children, containerProps }) => (
-                  <div className="h-auto min-h-full" {...containerProps}>
-                    {children}
-                  </div>
-                )}
-                renderItem={createRenderItem(tree)}
-                rootItem={inputTreeRoot}
-                treeId="inputTree"
-                treeLabel="Input Tree"
-              />
-            </UploadDropZone>
-          </UploadedFiles>
+      <div className="flex h-full w-full flex-1 overflow-hidden">
+        <div className="flex h-full w-full flex-1 flex-col overflow-hidden">
+          <ControlledTreeEnvironment
+            canDrag={(items) =>
+              items.every(
+                (item) => item.data !== 'structure' && item.data !== 'analyses',
+              )
+            }
+            canDragAndDrop
+            canDropAt={(items, target) => canDropAt(items, target, tree)}
+            canDropOnFolder
+            canReorderItems
+            canSearch={false}
+            getItemTitle={(item: TreeItem) => item.data}
+            items={tree}
+            onCollapseItem={handleOnCollapseItem}
+            onDrop={handleOnDrop}
+            onExpandItem={handleOnExpandItem}
+            onFocusItem={handleOnFocusItem}
+            onSelectItems={handleOnSelectItem}
+            viewState={viewState}
+          >
+            <div className="flex h-full w-full flex-row justify-between gap-2 overflow-hidden">
+              <UploadedFiles onContextMenu={handleFileTreeContextMenu}>
+                <UploadFilesText showText={db.inputLength === 0} />
+                <UploadDropZone>
+                  <Tree
+                    renderItemsContainer={({ children, containerProps }) => (
+                      <ul
+                        onContextMenu={handleFileTreeItemContextMenu}
+                        {...containerProps}
+                      >
+                        {children}
+                      </ul>
+                    )}
+                    renderTreeContainer={({ children, containerProps }) => (
+                      <div className="h-auto min-h-full" {...containerProps}>
+                        {children}
+                      </div>
+                    )}
+                    renderItem={createRenderItem(tree)}
+                    rootItem={inputTreeRoot}
+                    treeId="inputTree"
+                    treeLabel="Input Tree"
+                  />
+                </UploadDropZone>
+              </UploadedFiles>
 
-          <ExportFiles onContextMenu={handleAssignmentTreeContextMenu}>
-            <ExportFilesText showText={db.assignedLength === 0} />
-            <Tree
-              renderItemsContainer={({ children, containerProps }) => (
-                <ul
-                  onContextMenu={handleAssignmentTreeItemContextMenu}
-                  {...containerProps}
-                >
-                  {children}
-                </ul>
-              )}
-              renderTreeContainer={({ children, containerProps }) => (
-                <div className="h-auto min-h-full" {...containerProps}>
-                  {children}
-                </div>
-              )}
-              renderItem={createRenderItem(tree)}
-              rootItem={assignmentTreeRoot}
-              treeId="assignmentTree"
-              treeLabel="Assignment Tree"
+              <ExportFiles onContextMenu={handleAssignmentTreeContextMenu}>
+                <ExportFilesText showText={db.assignedLength === 0} />
+                <Tree
+                  renderItemsContainer={({ children, containerProps }) => (
+                    <ul
+                      onContextMenu={handleAssignmentTreeItemContextMenu}
+                      {...containerProps}
+                    >
+                      {children}
+                    </ul>
+                  )}
+                  renderTreeContainer={({ children, containerProps }) => (
+                    <div className="h-auto min-h-full" {...containerProps}>
+                      {children}
+                    </div>
+                  )}
+                  renderItem={createRenderItem(tree)}
+                  rootItem={assignmentTreeRoot}
+                  treeId="assignmentTree"
+                  treeLabel="Assignment Tree"
+                />
+              </ExportFiles>
+            </div>
+          </ControlledTreeEnvironment>
+          {fileTreeContextMenu.show && (
+            <FileTreeContextMenu
+              closeContextMenu={fileTreeContextMenuClose}
+              targetItem={contextTarget}
+              tree={tree}
+              x={fileTreeContextMenu.x}
+              y={fileTreeContextMenu.y}
             />
-          </ExportFiles>
+          )}
+          {assignmentTreeContextMenu.show && (
+            <AssignmentTreeContextMenu
+              closeContextMenu={assignmentTreeContextMenuClose}
+              targetItem={contextTarget}
+              tree={tree}
+              x={assignmentTreeContextMenu.x}
+              y={assignmentTreeContextMenu.y}
+            />
+          )}
         </div>
-      </ControlledTreeEnvironment>
-      {fileTreeContextMenu.show && (
-        <FileTreeContextMenu
-          closeContextMenu={fileTreeContextMenuClose}
-          targetItem={contextTarget}
-          tree={tree}
-          x={fileTreeContextMenu.x}
-          y={fileTreeContextMenu.y}
-        />
-      )}
-      {assignmentTreeContextMenu.show && (
-        <AssignmentTreeContextMenu
-          closeContextMenu={assignmentTreeContextMenuClose}
-          targetItem={contextTarget}
-          tree={tree}
-          x={assignmentTreeContextMenu.x}
-          y={assignmentTreeContextMenu.y}
-        />
-      )}
+        {children}
+      </div>
     </Fragment>
   )
 }

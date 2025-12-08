@@ -27,19 +27,38 @@ const SubContainer = ({
     molecule: {
       containable_id: moleculeUidMap[folder.uid],
       containable_type: 'Molecule',
+      container_type: 'root',
     },
     reaction: {
       containable_id: sampleReactionUidMap[folder.uid],
       containable_type: 'Reaction',
+      container_type: 'root',
     },
     sample: {
       containable_id: sampleReactionUidMap[folder.uid],
       containable_type: 'Sample',
+      container_type: 'root',
     },
   }
 
-  const { containable_id = null, containable_type = null } =
-    dtypeMapping[folder.dtype as keyof typeof dtypeMapping] || {}
+  const {
+    containable_id = null,
+    containable_type = null,
+    container_type = null,
+  } = dtypeMapping[folder.dtype as keyof typeof dtypeMapping] || {}
+
+  // Stringify Delta objects for container export
+  const description =
+    folder.metadata?.description &&
+    typeof folder.metadata.description === 'object'
+      ? JSON.stringify(folder.metadata.description)
+      : folder.metadata?.description || null
+
+  const extendedMetadata: any = folder.metadata?.extended_metadata || {}
+  const content =
+    extendedMetadata.content && typeof extendedMetadata.content === 'object'
+      ? JSON.stringify(extendedMetadata.content)
+      : extendedMetadata.content
 
   return {
     [uidMap[folder.uid]]: {
@@ -49,9 +68,11 @@ const SubContainer = ({
         ancestry: Ancestry(folder, assignedFolders, uidMap),
         containable_id,
         containable_type,
+        container_type:
+          container_type || folder.metadata?.container_type || null,
         created_at: currentDate,
-        description: folder.metadata?.description || null,
-        extended_metadata: folder.metadata?.extended_metadata || {},
+        description,
+        extended_metadata: { ...extendedMetadata, content },
         name: folder.name,
         parent_id: uidMap[folder.parentUid] || null,
         updated_at: currentDate,

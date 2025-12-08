@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import './globals.css'
+import GlobalKetcherInit from './components/GlobalKetcherInit'
 
 export const metadata: Metadata = {
   description: 'A description for SmartAdd app',
@@ -17,7 +18,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <GlobalKetcherInit />
+        {children}
+      </body>
     </html>
   )
 }

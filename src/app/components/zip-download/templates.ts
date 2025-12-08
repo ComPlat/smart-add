@@ -151,7 +151,7 @@ export const reactionTemplate = {
   name: null,
   created_at: null,
   updated_at: null,
-  description: null,
+  description: { ops: [{ insert: '\n' }] },
   timestamp_start: null,
   timestamp_stop: null,
   observation: null,
@@ -181,6 +181,11 @@ export const reactionTemplate = {
   rxno: null,
   conditions: null,
   variations: null,
+  plain_text_description: null,
+  plain_text_observation: null,
+  vessel_size: null,
+  gaseous: null,
+  log_data: null,
 }
 
 export const collectionsReactionTemplate = {

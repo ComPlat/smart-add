@@ -16,7 +16,9 @@ const temperatureObjectSchema = z.object({
 export type TemperatureObject = z.infer<typeof temperatureObjectSchema>
 
 export const textObjectSchema = z.object({
-  ops: z.array(z.object({ insert: z.string() })).default([{ insert: '\n' }]),
+  ops: z
+    .array(z.object({ insert: z.string() }).catchall(z.any()))
+    .default([{ insert: '\n' }]),
 })
 export type TextObject = z.infer<typeof textObjectSchema>
 
@@ -280,7 +282,7 @@ export type CollectionsResearchPlan = z.infer<
 >
 
 export const containerSchema = z.object({
-  ancestry: z.string(),
+  ancestry: nullableString,
   containable_id: uuidSchema,
   containable_type: nullableString,
   name: nullableString,
@@ -291,13 +293,18 @@ export const containerSchema = z.object({
       // Analysis container fields
       status: z.enum(['Confirmed', 'Unconfirmed']).nullable().optional(),
       kind: nullableString.optional(),
+      index: z.union([z.string(), z.number(), z.null()]).optional(),
+      report: z.union([z.string(), z.boolean(), z.null()]).optional(),
+      content: z.union([nullableString, textObjectSchema]).optional(),
       // Dataset container fields
       instrument: nullableString.optional(),
     })
-    .catchall(z.any()),
-  created_at: datetimeSchema,
-  updated_at: datetimeSchema,
+    .catchall(z.any())
+    .optional(),
+  created_at: nullableString,
+  updated_at: nullableString,
   parent_id: uuidSchema,
+  plain_text_content: nullableString.optional(),
 })
 export type Container = z.infer<typeof containerSchema>
 
@@ -359,37 +366,44 @@ export const literatureSchema = z.object({
 })
 export type Literature = z.infer<typeof literatureSchema>
 
-export const reactionSchema = z.object({
-  name: nullableString,
-  created_at: datetimeSchema,
-  updated_at: datetimeSchema,
-  description: nullableString,
-  timestamp_start: nullableString,
-  timestamp_stop: nullableString,
-  observation: nullableString,
-  purification: arraySchema,
-  dangerous_products: arraySchema,
-  tlc_solvents: nullableString,
-  tlc_description: nullableString,
-  rf_value: nullableString,
-  temperature: temperatureObjectSchema,
-  status: nullableString,
-  reaction_svg_file: nullableString,
-  solvent: solventSchema,
-  deleted_at: z.null(),
-  short_label: nullableString,
-  created_by: uuidSchema,
-  role: nullableString,
-  origin: z.any(),
-  rinchi_string: nullableString,
-  rinchi_long_key: nullableString,
-  rinchi_short_key: nullableString,
-  rinchi_web_key: nullableString,
-  duration: nullableString,
-  rxno: nullableString,
-  conditions: nullableString,
-  variations: nullableString,
-})
+export const reactionSchema = z
+  .object({
+    name: nullableString,
+    created_at: datetimeSchema,
+    updated_at: datetimeSchema,
+    description: z.union([nullableString, textObjectSchema]).optional(),
+    timestamp_start: nullableString,
+    timestamp_stop: nullableString,
+    observation: z.union([nullableString, textObjectSchema]).optional(),
+    purification: arraySchema,
+    dangerous_products: arraySchema,
+    tlc_solvents: z.union([nullableString, arraySchema]),
+    tlc_description: nullableString,
+    rf_value: nullableString,
+    temperature: temperatureObjectSchema,
+    status: nullableString,
+    reaction_svg_file: nullableString,
+    solvent: solventSchema,
+    deleted_at: z.null(),
+    short_label: nullableString,
+    created_by: uuidSchema,
+    role: nullableString,
+    origin: z.any(),
+    rinchi_string: nullableString,
+    rinchi_long_key: nullableString,
+    rinchi_short_key: nullableString,
+    rinchi_web_key: nullableString,
+    duration: nullableString,
+    rxno: nullableString,
+    conditions: nullableString,
+    variations: z.union([nullableString, arraySchema]).optional(),
+    plain_text_description: nullableString,
+    plain_text_observation: nullableString,
+    vessel_size: z.any().optional(),
+    gaseous: z.any().optional(),
+    log_data: z.any().optional(),
+  })
+  .passthrough()
 export type Reaction = z.infer<typeof reactionSchema>
 
 export const reactionsWorksheetTableSchema = z.object({

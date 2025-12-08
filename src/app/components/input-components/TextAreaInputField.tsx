@@ -1,4 +1,6 @@
 import { formatLabel } from '@/helper/utils'
+import React, { useState, useRef, useEffect } from 'react'
+import { debounce } from 'lodash'
 
 interface TextAreaInputFieldProps {
   autoFocus?: boolean
@@ -10,8 +12,8 @@ interface TextAreaInputFieldProps {
   readonly: boolean
   rows?: number
   value?: string
+  itemId?: string // Full path of the item this field belongs to
 }
-
 const TextAreaInputField: React.FC<TextAreaInputFieldProps> = ({
   autoFocus = false,
   className = '',
@@ -22,7 +24,29 @@ const TextAreaInputField: React.FC<TextAreaInputFieldProps> = ({
   readonly = false,
   rows = 3,
   value = '',
+  itemId,
 }) => {
+  const [description, setDescription] = useState(value)
+
+  const debouncedSave = useRef(
+    debounce((value: string, name: string, savedItemId: string) => {
+      const syntheticEvent = {
+        target: { value, name, dataset: { itemId: savedItemId } },
+      } as any
+      onChange(syntheticEvent)
+    }, 500),
+  ).current
+
+  // Update local state when value prop changes (switching items)
+  useEffect(() => {
+    setDescription(value)
+  }, [value])
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setDescription(e.target.value)
+    debouncedSave(e.target.value, e.target.name, itemId || '')
+  }
+
   return (
     <label className="flex flex-col text-sm">
       <p className="font-bold">{formatLabel(name)}</p>
@@ -36,11 +60,11 @@ const TextAreaInputField: React.FC<TextAreaInputFieldProps> = ({
         autoFocus={autoFocus}
         id={id}
         name={name}
-        onChange={onChange}
         placeholder={placeholder}
         readOnly={readonly}
         rows={rows}
-        value={value}
+        onChange={handleChange}
+        value={description}
       />
     </label>
   )
