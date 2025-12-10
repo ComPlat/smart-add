@@ -60,8 +60,8 @@ dependencies:
     specifier: 11.1.0
     version: 11.1.0
   xlsx:
-    specifier: https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz
-    version: '@cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz'
+    specifier: https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz
+    version: '@cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz'
   zod:
     specifier: 4.0.17
     version: 4.0.17
@@ -8441,10 +8441,10 @@ packages:
     resolution: {integrity: sha512-V50KMwwzqJV0NpZIZFwfOD5/lyny3WlSzRiXgA0G7VUnRlqttta1L6UQIHzd6EuBY/cHGfwTIck7w1yH6Q5zUw==}
     dev: false
 
-  '@cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz':
-    resolution: {tarball: https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz}
+  '@cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz':
+    resolution: {tarball: https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz}
     name: xlsx
-    version: 0.20.0
+    version: 0.20.3
     engines: {node: '>=0.8'}
     hasBin: true
     dev: false

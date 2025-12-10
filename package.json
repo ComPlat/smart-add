@@ -32,7 +32,7 @@
     "tailwindcss": "^4.1.12",
     "typescript": "5.9.2",
     "uuid": "11.1.0",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zod": "4.0.17"
   },
   "devDependencies": {
