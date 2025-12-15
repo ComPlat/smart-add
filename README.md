@@ -1,12 +1,12 @@
 # SmartAdd
 
-## Wireframe
+## Documentation
 
-<https://www.figma.com/file/mpZ5QeOaOpkj3AaPeoKaus/Wireframes?type=design&node-id=109-13398&mode=design&t=2xpSfEaSiHmBlR47-0>
+<https://chemotion.net/docs/services/smartadd>
 
-## Mockups
+## Production
 
-<https://www.figma.com/file/Iczx5uvb1oGyjQ0FQVv3ob/Mockups?type=design&node-id=351-23224&mode=design&t=C9tyBdwB37KDZwh5-0>
+The project is hosted at <https://smartadd.chemotion.net/>
 
 ## Setup
 
@@ -17,13 +17,8 @@
 
 ### Used dependencies
 
-- Node.js, version 18.17.1 (LTS)
-- pnpm, version 8.8.0
-
-## Production
-
-The project is hosted at
-<https://vercel.com/cleaner-code/smart-add>
+- Node.js, version 20.19.4
+- pnpm, version 8.10.2
 
 ## Development
 
@@ -74,48 +69,42 @@ pnpm lint --fix
 
 to automatically fix problems.
 
-## Parsing spreadsheets
-
-Accepted spreadsheet file extensions: <https://docs.sheetjs.com/docs/miscellany/formats>
-
-Elements can be nested, e.g. 2 samples with 3 analyses in 1 reaction. For each element an own sheet should exist.
+## Available Fields
+Elements can be nested, e.g. 2 samples with 3 analyses in 1 reaction. For each element an own set of fields should exist.
 
 ### Reaction
 
-- r short label
+- name
 - description
 - temperature
-- duration
+- timestamp start
+- timestamp end
+- tlc solvents
+- tlc description
+- role
+- solvent
+- status
 
 ### Sample
 
 - residue_type
 - decoupled
 - molecular mass (decoupled)
-- sum formula (decoupled)
 - stereo_abs
 - stereo_rel
-- cas|image
 - sample name
 - molecule name
 - sample external label
-- short label
 - description
 - real amount
 - real unit
 - target amount
 - target unit
 - molarity_value
-- density
-- molfile
 - solvent
 - location
 - secret
 - sample readout
-- melting pt
-- boiling pt
-- created_at
-- updated_at
 - user_labels
 - literatures
 - canonical smiles
@@ -124,9 +113,7 @@ Elements can be nested, e.g. 2 samples with 3 analyses in 1 reaction. For each e
 
 - sample name
 - sample external label
-- short label
 - name
-- description
 - uuid
 - kind
 - status
