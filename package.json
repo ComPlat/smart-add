@@ -23,7 +23,7 @@
     "ketcher-standalone": "3.6.0",
     "lodash": "^4.17.21",
     "mime-types": "2.1.35",
-    "next": "15.4.9",
+    "next": "15.4.10",
     "quill": "2.0.3",
     "react": "19.1.2",
     "react-complex-tree": "2.2.3",
