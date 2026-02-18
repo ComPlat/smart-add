@@ -148,7 +148,7 @@ const handleFileMove = async (
     'rw',
     filesDB.files,
     filesDB.folders,
-    async () =>
+    async () => {
       await Promise.all(
         updatesBatch.map(async (update) => {
           const table = update.isFolder ? filesDB.folders : filesDB.files
@@ -165,7 +165,38 @@ const handleFileMove = async (
           }
           await table.put(item as ExtendedFile & ExtendedFolder)
         }),
-      ),
+      )
+
+      // Update positions when an analysis is reordered within its analyses parent
+      if (target.targetType === 'between-items' && items.length === 1) {
+        const sourceNode = tree[items[0].index]
+        const parentNode = tree[target.parentItem]
+        if (sourceNode?.dtype === 'analysis' && parentNode?.dtype === 'analyses') {
+          const siblings = await filesDB.folders
+            .where('parentUid')
+            .equals(String(parentNode.uid))
+            .and((f) => f.dtype === 'analysis')
+            .toArray()
+          const treeChildren = parentNode.children ?? []
+          siblings.sort((a, b) =>
+            (a.position ?? treeChildren.indexOf(a.fullPath)) -
+            (b.position ?? treeChildren.indexOf(b.fullPath)),
+          )
+          const draggedUid = String(sourceNode.uid)
+          const dragged = siblings.find((s) => s.uid === draggedUid)
+          const withoutDragged = siblings.filter((s) => s.uid !== draggedUid)
+          if (dragged) {
+            const originalIndex = treeChildren.indexOf(dragged.fullPath)
+            const insertAt = Math.min(
+              originalIndex < target.childIndex ? target.childIndex - 1 : target.childIndex,
+              withoutDragged.length,
+            )
+            withoutDragged.splice(insertAt, 0, dragged)
+          }
+          await Promise.all(withoutDragged.map((f, idx) => filesDB.folders.update(f.id!, { position: idx })))
+        }
+      }
+    },
   )
 
   // Show success notification after successful drop

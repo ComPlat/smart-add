@@ -81,6 +81,7 @@ export const createFolder = async (
   metadata: Metadata = { container_type: 'folder' },
   dtype: Datatype = 'folder',
   reactionSchemeType: ReactionSchemeType = 'none',
+  position?: number,
 ): Promise<ExtendedFolder> => {
   const folder: ExtendedFolder = {
     dtype,
@@ -89,6 +90,7 @@ export const createFolder = async (
     metadata,
     name,
     parentUid,
+    position,
     reactionSchemeType,
     treeId: assignmentTree ? 'assignmentTreeRoot' : 'inputTreeRoot',
     uid: v4(),

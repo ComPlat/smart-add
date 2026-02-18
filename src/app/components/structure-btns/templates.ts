@@ -17,7 +17,7 @@ import {
   createSubFolders,
   getUniqueFolderName,
 } from './folderUtils'
-import { ReactionSchemeType } from '@/database/db'
+import { ReactionSchemeType, filesDB } from '@/database/db'
 
 const getMetadata = (
   parent_id: string,
@@ -310,6 +310,14 @@ export const createAnalysis = async (
     fullPath,
   )
 
+  // Determine position = number of existing analysis siblings
+  const existingAnalyses = await filesDB.folders
+    .where('parentUid')
+    .equals(parentUid)
+    .and((f) => f.dtype === 'analysis')
+    .toArray()
+  const nextPosition = existingAnalyses.length
+
   const analysisFolder = await createFolder(
     `${fullPath}/${uniqueFolderName}`,
     uniqueFolderName,
@@ -317,6 +325,8 @@ export const createAnalysis = async (
     parentUid,
     getMetadata(parentUid, uniqueFolderName, 'analysis', '') as any,
     'analysis',
+    'none',
+    nextPosition,
   )
 
   const datasetFolders = await createSubFolders(

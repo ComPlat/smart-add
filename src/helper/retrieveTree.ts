@@ -42,6 +42,7 @@ const convertToFileTree = (
         // Sort children: if parent is a reaction, sort samples by reactionSchemeType
         const childrenKeys = Object.keys(currentFolder.children)
         const isReaction = currentFolder.folderObj.dtype === 'reaction'
+        const isAnalyses = currentFolder.folderObj.dtype === 'analyses'
 
         const getSortOrder = (child: any): number => {
           if ('extension' in child) return REACTION_SCHEME_ORDER.none
@@ -58,6 +59,20 @@ const convertToFileTree = (
                 getSortOrder(currentFolder.children[a]) -
                 getSortOrder(currentFolder.children[b]),
             )
+          : isAnalyses
+          ? [...childrenKeys].sort((a, b) => {
+              const childA = currentFolder.children[a]
+              const childB = currentFolder.children[b]
+              const posA =
+                'folderObj' in childA
+                  ? (childA.folderObj.position ?? Infinity)
+                  : Infinity
+              const posB =
+                'folderObj' in childB
+                  ? (childB.folderObj.position ?? Infinity)
+                  : Infinity
+              return posA - posB
+            })
           : childrenKeys
 
         const folderNode = {

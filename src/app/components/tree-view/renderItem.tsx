@@ -124,10 +124,10 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
           {...context.itemContainerWithoutChildrenProps}
           {...context.interactiveElementProps}
           data-mykey={item.index}
-          className={`flex items-center justify-between px-2 text-sm
+          className={`flex items-center justify-between px-2 text-sm h-7
           ${
             context.isSelected
-              ? 'my-1 rounded-md bg-kit-primary-mid font-bold'
+              ? 'rounded-md bg-kit-primary-mid font-bold'
               : ''
           }
           ${
@@ -135,7 +135,6 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
           } text-sm text-gray-800 duration-75 hover:text-kit-primary-full`}
           style={{
             marginLeft: `${depth * 25}px`,
-            marginBottom: '2px',
           }}
           type="button"
         >
