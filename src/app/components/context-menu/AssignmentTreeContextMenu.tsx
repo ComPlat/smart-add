@@ -39,6 +39,7 @@ const ClickOnAnalysesContextMenu = ({
       targetItem={targetItem}
       tree={tree}
       hideDeleteOption={true}
+      hideRenameOption={true}
     />
   </>
 )

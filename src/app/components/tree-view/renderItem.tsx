@@ -4,7 +4,7 @@ import { FaPlus } from 'react-icons/fa6'
 
 import { FileNode } from '@/helper/types'
 import { ICONS } from './fileIcons'
-import { createSample } from '../structure-btns/templates'
+import { createSample, createAnalysis } from '../structure-btns/templates'
 import { getUniqueFolderName } from '../structure-btns/folderUtils'
 import MoleculeTooltip from './MoleculeTooltip'
 import ReactionTooltip from './ReactionTooltip'
@@ -83,6 +83,14 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
     // Check if this is a reaction folder
     const isReactionFolder = fileNode?.isFolder && fileNode.dtype === 'reaction'
     const isSample = fileNode?.isFolder && fileNode.dtype === 'sample'
+    const isAnalysesFolder = fileNode?.isFolder && fileNode.dtype === 'analyses'
+
+    const handleAddAnalysisToAnalyses = async (e: React.MouseEvent) => {
+      e.stopPropagation()
+      if (fileNode) {
+        await createAnalysis('analysis', fileNode.index, tree, fileNode.uid || '')
+      }
+    }
 
     const handleAddSampleToReaction = async (e: React.MouseEvent) => {
       e.stopPropagation()
@@ -239,6 +247,16 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
               type="button"
             >
               <FaPlus className="w-3 h-3" />
+            </button>
+          )}
+          {isAnalysesFolder && (
+            <button
+              className="px-1 py-1 mt-1 mb-1 bg-emerald-600 text-white hover:bg-emerald-700 rounded duration-150 transition-colors text-xs font-medium"
+              onClick={handleAddAnalysisToAnalyses}
+              title="Add analysis"
+              type="button"
+            >
+              <FaPlus className="w-2.5 h-2.5" />
             </button>
           )}
         </button>
