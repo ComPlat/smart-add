@@ -44,7 +44,6 @@ const canDropAt = (
     const hasFileExtension = /\.[a-zA-Z0-9]+$/.test(sourceName)
     const isActuallyAFolder = !hasFileExtension
 
-
     if (isActuallyAFolder) {
       // Allow samples to be dropped into reactions within ExportFiles area
       const isSample = sourceNode?.dtype === 'sample'
@@ -84,7 +83,6 @@ const canDropAt = (
       typeof window !== 'undefined' &&
       !(window as any).Cypress
     ) {
-      const targetName = targetNode?.data || ''
       const isTargetDataset = targetNode?.dtype === 'dataset'
 
       if (

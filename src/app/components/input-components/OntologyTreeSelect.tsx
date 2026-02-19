@@ -44,11 +44,17 @@ const addRecentlySelected = (ontologyType: string, item: OntologyItem) => {
   if (current.find((i) => i.value === item.value)) return
   const updated = [item, ...current].slice(0, RECENTLY_SELECTED_MAX)
   try {
-    localStorage.setItem(`ontology_recent_${ontologyType}`, JSON.stringify(updated))
+    localStorage.setItem(
+      `ontology_recent_${ontologyType}`,
+      JSON.stringify(updated),
+    )
   } catch {}
 }
 
-const transformOntologyData = (data: OntologyItem[], ontologyType: string): any[] => {
+const transformOntologyData = (
+  data: OntologyItem[],
+  ontologyType: string,
+): any[] => {
   const usedKeys = new Set<string>()
 
   const transform = (items: OntologyItem[]): any[] =>
@@ -72,14 +78,17 @@ const transformOntologyData = (data: OntologyItem[], ontologyType: string): any[
 
         let uniqueKey = item.value
         let counter = 1
-        while (usedKeys.has(uniqueKey)) uniqueKey = `${item.value}__${counter++}`
+        while (usedKeys.has(uniqueKey))
+          uniqueKey = `${item.value}__${counter++}`
         usedKeys.add(uniqueKey)
 
         return {
           title: item.title,
           value: item.value,
           key: uniqueKey,
-          children: item.children?.length ? transform(item.children) : undefined,
+          children: item.children?.length
+            ? transform(item.children)
+            : undefined,
           disabled: item.is_enabled === false,
         }
       })
@@ -88,7 +97,9 @@ const transformOntologyData = (data: OntologyItem[], ontologyType: string): any[
   return transform(data)
 }
 
-const loadOntologyData = async (ontologyType: 'reaction' | 'analysis'): Promise<any[]> => {
+const loadOntologyData = async (
+  ontologyType: 'reaction' | 'analysis',
+): Promise<any[]> => {
   if (!rawDataCache.has(ontologyType)) {
     const fileName = ontologyType === 'reaction' ? 'rxno.json' : 'chmo.json'
     const response = await fetch(`/data/ontologies/${fileName}`)
@@ -130,10 +141,21 @@ const OntologyTreeSelect: React.FC<TreeSelectFieldProps> = ({
     setLoading(true)
     setError(null)
     loadOntologyData(ontologyType)
-      .then((data) => { if (mounted) setTreeData(data) })
-      .catch((err) => { if (mounted) setError(err instanceof Error ? err.message : 'Failed to load ontology data') })
-      .finally(() => { if (mounted) setLoading(false) })
-    return () => { mounted = false }
+      .then((data) => {
+        if (mounted) setTreeData(data)
+      })
+      .catch((err) => {
+        if (mounted)
+          setError(
+            err instanceof Error ? err.message : 'Failed to load ontology data',
+          )
+      })
+      .finally(() => {
+        if (mounted) setLoading(false)
+      })
+    return () => {
+      mounted = false
+    }
   }, [ontologyType])
 
   const handleChange = (selectedValue: string) => {
@@ -145,11 +167,15 @@ const OntologyTreeSelect: React.FC<TreeSelectFieldProps> = ({
 
     onChange?.(cleanValue)
 
-    const fromRecent = getRecentlySelected(ontologyType).find((r) => r.value === cleanValue)
+    const fromRecent = getRecentlySelected(ontologyType).find(
+      (r) => r.value === cleanValue,
+    )
     const title = fromRecent?.title ?? findInTree(treeData, cleanValue)?.title
     if (title) {
       addRecentlySelected(ontologyType, { title, value: cleanValue })
-      setTreeData(transformOntologyData(rawDataCache.get(ontologyType)!, ontologyType))
+      setTreeData(
+        transformOntologyData(rawDataCache.get(ontologyType)!, ontologyType),
+      )
     }
   }
 

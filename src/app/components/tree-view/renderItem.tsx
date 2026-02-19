@@ -88,7 +88,12 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
     const handleAddAnalysisToAnalyses = async (e: React.MouseEvent) => {
       e.stopPropagation()
       if (fileNode) {
-        await createAnalysis('analysis', fileNode.index, tree, fileNode.uid || '')
+        await createAnalysis(
+          'analysis',
+          fileNode.index,
+          tree,
+          fileNode.uid || '',
+        )
       }
     }
 
@@ -125,11 +130,7 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
           {...context.interactiveElementProps}
           data-mykey={item.index}
           className={`flex items-center justify-between px-2 text-sm h-7
-          ${
-            context.isSelected
-              ? 'rounded-md bg-kit-primary-mid font-bold'
-              : ''
-          }
+          ${context.isSelected ? 'rounded-md bg-kit-primary-mid font-bold' : ''}
           ${
             isDraggingOver ? 'rounded-md bg-blue-200' : ''
           } text-sm text-gray-800 duration-75 hover:text-kit-primary-full`}

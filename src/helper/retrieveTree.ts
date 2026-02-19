@@ -65,11 +65,11 @@ const convertToFileTree = (
               const childB = currentFolder.children[b]
               const posA =
                 'folderObj' in childA
-                  ? (childA.folderObj.position ?? Infinity)
+                  ? childA.folderObj.position ?? Infinity
                   : Infinity
               const posB =
                 'folderObj' in childB
-                  ? (childB.folderObj.position ?? Infinity)
+                  ? childB.folderObj.position ?? Infinity
                   : Infinity
               return posA - posB
             })
