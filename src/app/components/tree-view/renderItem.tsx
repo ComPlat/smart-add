@@ -4,7 +4,7 @@ import {
   TreeItemIndex,
   TreeItemRenderContext,
 } from 'react-complex-tree'
-import { FaPlus } from 'react-icons/fa6'
+import { FaEllipsisVertical, FaPlus } from 'react-icons/fa6'
 
 import { FileNode } from '@/helper/types'
 import { ICONS } from './fileIcons'
@@ -45,6 +45,7 @@ const Icon = (
 const createRenderItem = (
   tree: Record<string, FileNode>,
   setExpandedItems?: Dispatch<SetStateAction<TreeItemIndex[]>>,
+  onShowContextMenu?: (fullPath: string, x: number, y: number) => void,
 ) =>
   function RenderItem({
     children,
@@ -92,6 +93,14 @@ const createRenderItem = (
     const isReactionFolder = fileNode?.isFolder && fileNode.dtype === 'reaction'
     const isSample = fileNode?.isFolder && fileNode.dtype === 'sample'
     const isAnalysesFolder = fileNode?.isFolder && fileNode.dtype === 'analyses'
+
+    // Show menu icon on folders that have context menu actions
+    const showMenuIcon = !shouldHideTitle && !!fileNode && !!onShowContextMenu
+
+    const handleMenuClick = (e: React.MouseEvent) => {
+      e.stopPropagation()
+      onShowContextMenu?.(String(item.index), e.pageX, e.pageY)
+    }
 
     const handleAddAnalysisToAnalyses = async (e: React.MouseEvent) => {
       e.stopPropagation()
@@ -266,32 +275,46 @@ const createRenderItem = (
                 </>
               )}
             </span>
+            {showMenuIcon && (
+              <button
+                className="px-0.5 py-0.5 ml-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all duration-150 shrink-0"
+                onClick={handleMenuClick}
+                onMouseDown={(e) => e.preventDefault()}
+                onFocus={(e) => e.stopPropagation()}
+                title="Options"
+                type="button"
+              >
+                <FaEllipsisVertical className="w-3 h-3" />
+              </button>
+            )}
           </div>
 
-          {isReactionFolder && (
-            <button
-              className="px-1 py-1 mt-1 mb-1 bg-kit-primary-full text-white hover:bg-kit-primary-full/90 rounded duration-150 transition-colors text-xs font-medium"
-              onClick={handleAddSampleToReaction}
-              onMouseDown={(e) => e.preventDefault()}
-              onFocus={(e) => e.stopPropagation()}
-              title="Add sample to reaction"
-              type="button"
-            >
-              <FaPlus className="w-3 h-3" />
-            </button>
-          )}
-          {isAnalysesFolder && (
-            <button
-              className="px-1 py-1 mt-1 mb-1 bg-emerald-600 text-white hover:bg-emerald-700 rounded duration-150 transition-colors text-xs font-medium"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={handleAddAnalysisToAnalyses}
-              onFocus={(e) => e.stopPropagation()}
-              title="Add analysis"
-              type="button"
-            >
-              <FaPlus className="w-2.5 h-2.5" />
-            </button>
-          )}
+          <div className="flex items-center gap-0.5 ml-auto shrink-0">
+            {isReactionFolder && (
+              <button
+                className="px-1 py-1 bg-kit-primary-full text-white hover:bg-kit-primary-full/90 rounded duration-150 transition-colors text-xs font-medium"
+                onClick={handleAddSampleToReaction}
+                onMouseDown={(e) => e.preventDefault()}
+                onFocus={(e) => e.stopPropagation()}
+                title="Add sample to reaction"
+                type="button"
+              >
+                <FaPlus className="w-3 h-3" />
+              </button>
+            )}
+            {isAnalysesFolder && (
+              <button
+                className="px-1 py-1 bg-emerald-600 text-white hover:bg-emerald-700 rounded duration-150 transition-colors text-xs font-medium"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={handleAddAnalysisToAnalyses}
+                onFocus={(e) => e.stopPropagation()}
+                title="Add analysis"
+                type="button"
+              >
+                <FaPlus className="w-2.5 h-2.5" />
+              </button>
+            )}
+          </div>
         </button>
         {children}
       </li>

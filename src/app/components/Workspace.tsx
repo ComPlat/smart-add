@@ -223,6 +223,21 @@ const Workspace = ({
   const assignmentTreeContextMenuClose = () =>
     setAssignmentTreeContextMenu(initialContextMenu)
 
+  const handleShowContextMenu = async (
+    fullPath: string,
+    x: number,
+    y: number,
+  ) => {
+    const retrievedFile = await filesDB.files.get({ fullPath })
+    const retrievedFolder = await filesDB.folders.get({ fullPath })
+    const retrieved = retrievedFile || retrievedFolder
+    if (!retrieved) return
+
+    setContextTarget(retrieved)
+    setAssignmentTreeContextMenu({ show: true, x, y })
+    fileTreeContextMenuClose()
+  }
+
   return (
     <Fragment>
       <Toolbar
@@ -295,7 +310,11 @@ const Workspace = ({
                       {children}
                     </div>
                   )}
-                  renderItem={createRenderItem(tree, setExpandedItems)}
+                  renderItem={createRenderItem(
+                    tree,
+                    setExpandedItems,
+                    handleShowContextMenu,
+                  )}
                   rootItem={assignmentTreeRoot}
                   treeId="assignmentTree"
                   treeLabel="Assignment Tree"
