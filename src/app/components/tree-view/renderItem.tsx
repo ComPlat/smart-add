@@ -1,5 +1,9 @@
-import { ReactElement, ReactNode } from 'react'
-import { TreeItem, TreeItemRenderContext } from 'react-complex-tree'
+import { Dispatch, ReactElement, ReactNode, SetStateAction } from 'react'
+import {
+  TreeItem,
+  TreeItemIndex,
+  TreeItemRenderContext,
+} from 'react-complex-tree'
 import { FaPlus } from 'react-icons/fa6'
 
 import { FileNode } from '@/helper/types'
@@ -8,6 +12,7 @@ import { createSample, createAnalysis } from '../structure-btns/templates'
 import { getUniqueFolderName } from '../structure-btns/folderUtils'
 import MoleculeTooltip from './MoleculeTooltip'
 import ReactionTooltip from './ReactionTooltip'
+import { dragNotifications } from '@/utils/dragNotifications'
 
 interface RenderItemParams {
   children: ReactNode
@@ -37,7 +42,10 @@ const Icon = (
     : ICONS.folderPlus
 }
 
-const createRenderItem = (tree: Record<string, FileNode>) =>
+const createRenderItem = (
+  tree: Record<string, FileNode>,
+  setExpandedItems?: Dispatch<SetStateAction<TreeItemIndex[]>>,
+) =>
   function RenderItem({
     children,
     context,
@@ -88,11 +96,25 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
     const handleAddAnalysisToAnalyses = async (e: React.MouseEvent) => {
       e.stopPropagation()
       if (fileNode) {
+        const analysisName = getUniqueFolderName(
+          'analysis',
+          tree,
+          'analysis',
+          false,
+          fileNode.index,
+        )
         await createAnalysis(
           'analysis',
           fileNode.index,
           tree,
           fileNode.uid || '',
+        )
+        setExpandedItems?.((prev) =>
+          prev.includes(fileNode.index) ? prev : [...prev, fileNode.index],
+        )
+        dragNotifications.showSuccess(
+          `"${analysisName}" added to ${parentNode?.data || fileNode.data}`,
+          0,
         )
       }
     }
@@ -115,6 +137,13 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
           fileNode.index,
           fileNode.uid || undefined,
           'product',
+        )
+        setExpandedItems?.((prev) =>
+          prev.includes(fileNode.index) ? prev : [...prev, fileNode.index],
+        )
+        dragNotifications.showSuccess(
+          `"${uniqueSampleName}" added to ${fileNode.data}`,
+          0,
         )
       }
     }

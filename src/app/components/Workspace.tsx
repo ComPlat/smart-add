@@ -271,7 +271,7 @@ const Workspace = ({
                         {children}
                       </div>
                     )}
-                    renderItem={createRenderItem(tree)}
+                    renderItem={createRenderItem(tree, setExpandedItems)}
                     rootItem={inputTreeRoot}
                     treeId="inputTree"
                     treeLabel="Input Tree"
@@ -295,7 +295,7 @@ const Workspace = ({
                       {children}
                     </div>
                   )}
-                  renderItem={createRenderItem(tree)}
+                  renderItem={createRenderItem(tree, setExpandedItems)}
                   rootItem={assignmentTreeRoot}
                   treeId="assignmentTree"
                   treeLabel="Assignment Tree"
