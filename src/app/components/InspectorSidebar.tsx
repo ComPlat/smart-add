@@ -65,6 +65,10 @@ const InspectorSidebar = ({
       if (items.length > 0) {
         setItem(items[0])
         setIsOpen(true)
+      } else {
+        // Item was deleted — clear inspector
+        setItem(null)
+        setFocusedItem(undefined)
       }
     } else {
       setItem(null)

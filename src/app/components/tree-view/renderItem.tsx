@@ -272,6 +272,8 @@ const createRenderItem = (
             <button
               className="px-1 py-1 mt-1 mb-1 bg-kit-primary-full text-white hover:bg-kit-primary-full/90 rounded duration-150 transition-colors text-xs font-medium"
               onClick={handleAddSampleToReaction}
+              onMouseDown={(e) => e.preventDefault()}
+              onFocus={(e) => e.stopPropagation()}
               title="Add sample to reaction"
               type="button"
             >
@@ -281,7 +283,9 @@ const createRenderItem = (
           {isAnalysesFolder && (
             <button
               className="px-1 py-1 mt-1 mb-1 bg-emerald-600 text-white hover:bg-emerald-700 rounded duration-150 transition-colors text-xs font-medium"
+              onMouseDown={(e) => e.preventDefault()}
               onClick={handleAddAnalysisToAnalyses}
+              onFocus={(e) => e.stopPropagation()}
               title="Add analysis"
               type="button"
             >
