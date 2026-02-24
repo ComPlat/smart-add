@@ -4,7 +4,7 @@ import {
   TreeItemIndex,
   TreeItemRenderContext,
 } from 'react-complex-tree'
-import { FaEllipsisVertical, FaPlus } from 'react-icons/fa6'
+import { FaPen, FaPlus, FaTrashCan } from 'react-icons/fa6'
 
 import { FileNode } from '@/helper/types'
 import { ICONS } from './fileIcons'
@@ -45,7 +45,10 @@ const Icon = (
 const createRenderItem = (
   tree: Record<string, FileNode>,
   setExpandedItems?: Dispatch<SetStateAction<TreeItemIndex[]>>,
-  onShowContextMenu?: (fullPath: string, x: number, y: number) => void,
+  actions?: {
+    onRenameClick?: (fullPath: string, x: number, y: number) => void
+    onDeleteClick?: (fullPath: string, x: number, y: number) => void
+  },
 ) =>
   function RenderItem({
     children,
@@ -93,13 +96,28 @@ const createRenderItem = (
     const isReactionFolder = fileNode?.isFolder && fileNode.dtype === 'reaction'
     const isSample = fileNode?.isFolder && fileNode.dtype === 'sample'
     const isAnalysesFolder = fileNode?.isFolder && fileNode.dtype === 'analyses'
+    const isStructureFolder =
+      fileNode?.isFolder &&
+      (fileNode.metadata as any)?.container_type === 'structure'
+    const isMoleculeFolder = fileNode?.isFolder && fileNode.dtype === 'molecule'
 
-    // Show menu icon on folders that have context menu actions
-    const showMenuIcon = !shouldHideTitle && !!fileNode && !!onShowContextMenu
+    // Show rename/delete buttons for actionable nodes (not root, not analyses, not structure, not molecule)
+    const showRenameDelete =
+      !shouldHideTitle &&
+      !!fileNode &&
+      !!actions &&
+      !isAnalysesFolder &&
+      !isStructureFolder &&
+      !isMoleculeFolder
 
-    const handleMenuClick = (e: React.MouseEvent) => {
+    const handleRenameClick = (e: React.MouseEvent) => {
       e.stopPropagation()
-      onShowContextMenu?.(String(item.index), e.pageX, e.pageY)
+      actions?.onRenameClick?.(String(item.index), e.pageX, e.pageY)
+    }
+
+    const handleDeleteClick = (e: React.MouseEvent) => {
+      e.stopPropagation()
+      actions?.onDeleteClick?.(String(item.index), e.pageX, e.pageY)
     }
 
     const handleAddAnalysisToAnalyses = async (e: React.MouseEvent) => {
@@ -275,16 +293,16 @@ const createRenderItem = (
                 </>
               )}
             </span>
-            {showMenuIcon && (
+            {showRenameDelete && (
               <button
-                className="px-0.5 py-0.5 ml-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all duration-150 shrink-0"
-                onClick={handleMenuClick}
+                className="px-0.5 py-0.5 ml-1 rounded text-amber-500 hover:text-amber-600 hover:bg-amber-50 transition-all duration-150 shrink-0"
+                onClick={handleRenameClick}
                 onMouseDown={(e) => e.preventDefault()}
                 onFocus={(e) => e.stopPropagation()}
-                title="Options"
+                title="Rename"
                 type="button"
               >
-                <FaEllipsisVertical className="w-3 h-3" />
+                <FaPen className="w-2.5 h-2.5" />
               </button>
             )}
           </div>
@@ -312,6 +330,18 @@ const createRenderItem = (
                 type="button"
               >
                 <FaPlus className="w-2.5 h-2.5" />
+              </button>
+            )}
+            {showRenameDelete && (
+              <button
+                className="px-1 py-1 rounded text-red-500 hover:text-red-600 hover:bg-red-50 transition-all duration-150"
+                onClick={handleDeleteClick}
+                onMouseDown={(e) => e.preventDefault()}
+                onFocus={(e) => e.stopPropagation()}
+                title="Delete"
+                type="button"
+              >
+                <FaTrashCan className="w-2.5 h-2.5" />
               </button>
             )}
           </div>

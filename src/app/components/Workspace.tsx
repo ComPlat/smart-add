@@ -25,6 +25,8 @@ import { ExportFilesText } from './workspace/ExportFilesText'
 import { Toolbar } from './workspace/Toolbar'
 import { UploadFilesText } from './workspace/UploadFilesText'
 import { UploadedFiles } from './workspace/UploadedFiles'
+import RenamePopup from './tree-view/RenamePopup'
+import DeletePopup from './tree-view/DeletePopup'
 
 type Database = {
   assignedFiles: ExtendedFile[]
@@ -105,6 +107,18 @@ const Workspace = ({
   const [contextTarget, setContextTarget] = useState<
     ExtendedFile | ExtendedFolder
   >()
+
+  const [renamingItem, setRenamingItem] = useState<{
+    item: ExtendedFile | ExtendedFolder
+    x: number
+    y: number
+  } | null>(null)
+
+  const [deletingItem, setDeletingItem] = useState<{
+    item: ExtendedFile | ExtendedFolder
+    x: number
+    y: number
+  } | null>(null)
 
   if (!db)
     return (
@@ -223,19 +237,22 @@ const Workspace = ({
   const assignmentTreeContextMenuClose = () =>
     setAssignmentTreeContextMenu(initialContextMenu)
 
-  const handleShowContextMenu = async (
-    fullPath: string,
-    x: number,
-    y: number,
-  ) => {
-    const retrievedFile = await filesDB.files.get({ fullPath })
-    const retrievedFolder = await filesDB.folders.get({ fullPath })
-    const retrieved = retrievedFile || retrievedFolder
-    if (!retrieved) return
+  const fetchItem = async (fullPath: string) => {
+    const file = await filesDB.files.get({ fullPath })
+    const folder = await filesDB.folders.get({ fullPath })
+    return file || folder
+  }
 
-    setContextTarget(retrieved)
-    setAssignmentTreeContextMenu({ show: true, x, y })
-    fileTreeContextMenuClose()
+  const handleRenameClick = async (fullPath: string, x: number, y: number) => {
+    const item = await fetchItem(fullPath)
+    if (!item) return
+    setRenamingItem({ item, x, y })
+  }
+
+  const handleDeleteClick = async (fullPath: string, x: number, y: number) => {
+    const item = await fetchItem(fullPath)
+    if (!item) return
+    setDeletingItem({ item, x, y })
   }
 
   return (
@@ -310,11 +327,10 @@ const Workspace = ({
                       {children}
                     </div>
                   )}
-                  renderItem={createRenderItem(
-                    tree,
-                    setExpandedItems,
-                    handleShowContextMenu,
-                  )}
+                  renderItem={createRenderItem(tree, setExpandedItems, {
+                    onRenameClick: handleRenameClick,
+                    onDeleteClick: handleDeleteClick,
+                  })}
                   rootItem={assignmentTreeRoot}
                   treeId="assignmentTree"
                   treeLabel="Assignment Tree"
@@ -338,6 +354,24 @@ const Workspace = ({
               tree={tree}
               x={assignmentTreeContextMenu.x}
               y={assignmentTreeContextMenu.y}
+            />
+          )}
+          {renamingItem && (
+            <RenamePopup
+              item={renamingItem.item}
+              tree={tree}
+              x={renamingItem.x}
+              y={renamingItem.y}
+              onClose={() => setRenamingItem(null)}
+            />
+          )}
+          {deletingItem && (
+            <DeletePopup
+              item={deletingItem.item}
+              tree={tree}
+              x={deletingItem.x}
+              y={deletingItem.y}
+              onClose={() => setDeletingItem(null)}
             />
           )}
         </div>
