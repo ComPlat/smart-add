@@ -1,0 +1,16 @@
+FROM node:24-alpine
+
+WORKDIR /app
+RUN apk add --no-cache libc6-compat
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Install dependencies first (cached layer)
+COPY package.json pnpm-lock.yaml ./
+
+RUN pnpm install --frozen-lockfile
+
+# Source is mounted as a volume at runtime, not copied here
+EXPOSE 3000
+
+CMD ["pnpm", "dev"]
