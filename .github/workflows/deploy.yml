@@ -1,8 +1,8 @@
-name: Build & Deploy (static, pnpm)
+name: Build & Deploy (standalone, pnpm)
 
 on:
   push:
-    branches: [main, gh_action]
+    branches: [edge]
 
 concurrency:
   group: "deploy-production"
@@ -15,30 +15,43 @@ jobs:
 
     steps:
       - name: Check out
-        uses: actions/checkout@v4
-
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8
+        uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 22
-          cache: 'pnpm'
+          node-version: 24
+
+      - name: Enable corepack & install pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
 
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
       - name: Build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          NODE_OPTIONS: "--max-old-space-size=4096"
         run: pnpm build
 
+      - name: Prepare artifact
+        run: |
+          mkdir -p artifact/standalone
+          cp -r .next/standalone ./artifact/
+          cp -r .next/static ./artifact/standalone/.next/static
+          [ -d public ] && cp -r public ./artifact/standalone/public || true
+
+          tar -czf app-artifact.tgz -C artifact/standalone .
+
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: static-out
-          path: out
+          name: standalone-out
+          path: |
+            app-artifact.tgz
+          retention-days: 1
           if-no-files-found: error
 
   deploy:
@@ -49,32 +62,41 @@ jobs:
 
     steps:
       - name: Download build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
-          name: static-out
-          path: out
+          name: standalone-out
+          path: standalone-out
 
-      - name: Prepare SSH
-        shell: bash
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Verify host fingerprint
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_HOST_FINGERPRINT: ${{ secrets.SSH_HOST_FINGERPRINT }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          PORT=${SSH_PORT:-22}
+          ssh-keyscan -p "$PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          ssh-keygen -l -f ~/.ssh/known_hosts | grep -qF "$SSH_HOST_FINGERPRINT" \
+            || { echo "Host fingerprint mismatch — aborting"; exit 1; }
+
+      - name: Push artifact on remote
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_PORT: ${{ secrets.SSH_PORT }}
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_TARGET_DIR: ${{ secrets.SSH_TARGET_DIR }}
         run: |
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keygen -l -f ~/.ssh/id_ed25519
-          # Add host to known_hosts (falls back to 22 if SSH_PORT is empty)
           PORT=${SSH_PORT:-22}
-          ssh-keyscan -p "$PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
-          # Sync files (delete removed files on server)
-          rsync -avz --delete \
-            -e "ssh -i ~/.ssh/id_ed25519 -p $PORT -o StrictHostKeyChecking=yes" \
-            out/ "$SSH_USER@$SSH_HOST:$SSH_TARGET_DIR"
+          SSH_OPTS="-p $PORT -o StrictHostKeyChecking=yes"
+
+          rsync -az --delete  \
+            -e "ssh $SSH_OPTS" \
+            standalone-out/ "$SSH_USER@$SSH_HOST:."
+
 
 
