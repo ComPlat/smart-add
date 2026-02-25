@@ -831,9 +831,9 @@ export const importFromJsonOrZip = async (file: File) => {
         // Derive molecule folder name from MoleculeName, metadata, or default
         let moleculeName = DEFAULT_MOLECULE_NAME
         if (exportData.MoleculeName && sample.molecule_id) {
-          const moleculeNameEntry = Object.values(
-            exportData.MoleculeName,
-          ).find((mn) => mn.molecule_id === sample.molecule_id)
+          const moleculeNameEntry = Object.values(exportData.MoleculeName).find(
+            (mn) => mn.molecule_id === sample.molecule_id,
+          )
           if (moleculeNameEntry?.name) {
             moleculeName = moleculeNameEntry.name
           }
@@ -860,12 +860,7 @@ export const importFromJsonOrZip = async (file: File) => {
         })
 
         // Add molecule to tree
-        addFolderToTree(
-          tree,
-          moleculeFolderPath,
-          moleculeName,
-          moleculeUid,
-        )
+        addFolderToTree(tree, moleculeFolderPath, moleculeName, moleculeUid)
 
         sampleUidToMoleculeUid[containerUid] = moleculeUid
       }
