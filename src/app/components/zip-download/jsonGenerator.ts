@@ -177,9 +177,9 @@ export const generateExportJson = async (
           updated_at: currentDate,
           molecule_id: linkedMoleculeId,
           molecule_name_id: linkedMoleculeId
-            ? (Object.entries(uidToMoleculeName).find(
+            ? Object.entries(uidToMoleculeName).find(
                 ([, mn]) => mn.molecule_id === linkedMoleculeId,
-              )?.[0] ?? null)
+              )?.[0] ?? null
             : null,
           molfile: moleculeMolfile,
           decoupled: moleculeMolfile || moleculeCanoSmiles ? false : true,
