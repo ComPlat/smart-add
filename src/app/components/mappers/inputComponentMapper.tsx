@@ -82,7 +82,18 @@ export function determineInputComponent<T extends ZodRawShape>({
   if (!schema) return null
 
   const [type] = identifyType(schema, key)
-  const readonly = key === 'decoupled' ? !isMolValid : isReadonly(key)
+  const isMolecule = (currentItem as ExtendedFolder)?.dtype === 'molecule'
+  const readonly =
+    key === 'decoupled'
+      ? !isMolValid
+      : key === 'name' && isMolecule
+        ? false
+        : isReadonly(key)
+
+  // Molecule name is not in the schema — render as editable string field directly
+  if (key === 'name' && isMolecule) {
+    return renderStringField(key, value, readonly, handleInputChange, currentItem)
+  }
 
   if (isQuantityUnit(key)) {
     return null

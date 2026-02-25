@@ -176,6 +176,11 @@ const InspectorSidebar = ({
                       flattenedEntries.push([key, value]),
                     )
 
+                  // Inject folder name for molecules
+                  if ((item as ExtendedFolder).dtype === 'molecule') {
+                    flattenedEntries.push(['name', item.name])
+                  }
+
                   // Add extended_metadata fields if they exist
                   if (
                     metadata.extended_metadata &&
