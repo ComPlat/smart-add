@@ -295,7 +295,7 @@ const createRenderItem = (
             </span>
             {showRenameDelete && (
               <button
-                className="px-0.5 py-0.5 ml-1 rounded text-amber-500 hover:text-amber-600 hover:bg-amber-50 transition-all duration-150 shrink-0"
+                className="px-1 py-1 ml-1 bg-amber-500 text-white hover:bg-amber-600 rounded duration-150 transition-colors shrink-0"
                 onClick={handleRenameClick}
                 onMouseDown={(e) => e.preventDefault()}
                 onFocus={(e) => e.stopPropagation()}
@@ -317,7 +317,7 @@ const createRenderItem = (
                 title="Add sample to reaction"
                 type="button"
               >
-                <FaPlus className="w-3 h-3" />
+                <FaPlus className="w-2.5 h-2.5" />
               </button>
             )}
             {isAnalysesFolder && (
@@ -334,7 +334,7 @@ const createRenderItem = (
             )}
             {showRenameDelete && (
               <button
-                className="px-1 py-1 rounded text-red-500 hover:text-red-600 hover:bg-red-50 transition-all duration-150"
+                className="px-1 py-1 bg-red-500 text-white hover:bg-red-600 rounded duration-150 transition-colors"
                 onClick={handleDeleteClick}
                 onMouseDown={(e) => e.preventDefault()}
                 onFocus={(e) => e.stopPropagation()}
