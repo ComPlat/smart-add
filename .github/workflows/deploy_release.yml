@@ -1,0 +1,98 @@
+name: Build & Deploy (release, pnpm)
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: "deploy-release"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Enable corepack & install pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        run: pnpm build
+
+      - name: Prepare artifact
+        run: |
+          mkdir -p artifact/standalone
+          cp -r .next/standalone ./artifact/
+          cp -r .next/static ./artifact/standalone/.next/static
+          [ -d public ] && cp -r public ./artifact/standalone/public || true
+
+          tar -czf app-artifact.tgz -C artifact/standalone .
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: standalone-out-release
+          path: app-artifact.tgz
+          if-no-files-found: error
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production-release
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: standalone-out-release
+          path: standalone-out
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY_RELEASE }}
+
+      - name: Verify host fingerprint
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_HOST_FINGERPRINT: ${{ secrets.SSH_HOST_FINGERPRINT }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          PORT=${SSH_PORT:-22}
+          ssh-keyscan -p "$PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          ssh-keygen -l -f ~/.ssh/known_hosts | grep -qF "$SSH_HOST_FINGERPRINT" \
+            || { echo "Host fingerprint mismatch — aborting"; exit 1; }
+
+      - name: Push artifact to remote
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER_RELEASE }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+        run: |
+          PORT=${SSH_PORT:-22}
+          SSH_OPTS="-p $PORT -o StrictHostKeyChecking=yes"
+
+          rsync -az --delete \
+            -e "ssh $SSH_OPTS" \
+            standalone-out/ "$SSH_USER@$SSH_HOST:."
