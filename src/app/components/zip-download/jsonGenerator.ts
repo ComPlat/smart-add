@@ -150,6 +150,7 @@ export const generateExportJson = async (
 
     // Get molecule molfile to copy to sample
     const moleculeMolfile = moleculeFolder?.metadata?.molfile || null
+    const moleculeCanoSmiles = moleculeFolder?.metadata?.cano_smiles || null
 
     // Format temperature fields for export (append ..Infinity to single numbers)
     const formattedMetadata = { ...folder.metadata }
@@ -175,9 +176,13 @@ export const generateExportJson = async (
           created_at: currentDate,
           updated_at: currentDate,
           molecule_id: linkedMoleculeId,
-          molecule_name_id: null, // Always null for export - prevents referencing non-existent MoleculeName UUIDs
+          molecule_name_id: linkedMoleculeId
+            ? Object.entries(uidToMoleculeName).find(
+                ([, mn]) => mn.molecule_id === linkedMoleculeId,
+              )?.[0] ?? null
+            : null,
           molfile: moleculeMolfile,
-          decoupled: moleculeMolfile ? false : true,
+          decoupled: moleculeMolfile || moleculeCanoSmiles ? false : true,
           name: moleculeMolfile
             ? null
             : formattedMetadata.name || folder.name || 'decoupled sample',

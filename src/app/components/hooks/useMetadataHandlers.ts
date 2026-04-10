@@ -95,7 +95,10 @@ export const useMetadataHandlers = ({
 
           // Only update tree/state for the currently selected item
           if (fullPath === item.fullPath) {
-            if (key === 'name') {
+            if (
+              key === 'name' &&
+              (item as ExtendedFolder).dtype !== 'molecule'
+            ) {
               renameFolder(item as ExtendedFolder, tree, newValue as string)
             }
 

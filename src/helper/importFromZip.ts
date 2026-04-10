@@ -676,7 +676,7 @@ export const importFromJsonOrZip = async (file: File) => {
       }
     } else if (container.container_type === CONTAINER_TYPE_ANALYSES) {
       dtype = 'analyses'
-      folderName = ANALYSES_FOLDER_NAME
+      folderName = container.name || ANALYSES_FOLDER_NAME
       // Use template for field definitions, then merge container metadata
       metadata = {
         ...containerTemplate,
@@ -804,7 +804,6 @@ export const importFromJsonOrZip = async (file: File) => {
       if (sample?.molfile || sample?.molecule_id) {
         // Create molecule folder
         const moleculeUid = v4()
-        const moleculeFolderPath = `${folderPath}/${DEFAULT_MOLECULE_NAME}`
 
         // Start with template to ensure all fields exist
         let moleculeMetadata: Record<string, unknown> = {
@@ -829,12 +828,31 @@ export const importFromJsonOrZip = async (file: File) => {
           }
         }
 
+        // Derive molecule folder name from MoleculeName, metadata, or default
+        let moleculeName = DEFAULT_MOLECULE_NAME
+        if (exportData.MoleculeName && sample.molecule_id) {
+          const moleculeNameEntry = Object.values(exportData.MoleculeName).find(
+            (mn) => mn.molecule_id === sample.molecule_id,
+          )
+          if (moleculeNameEntry?.name) {
+            moleculeName = moleculeNameEntry.name
+          }
+        }
+        if (
+          moleculeName === DEFAULT_MOLECULE_NAME &&
+          moleculeMetadata.iupac_name
+        ) {
+          moleculeName = String(moleculeMetadata.iupac_name)
+        }
+
+        const moleculeFolderPath = `${folderPath}/${moleculeName}`
+
         await filesDB.folders.add({
           dtype: 'molecule',
           fullPath: moleculeFolderPath,
           isFolder: true,
           metadata: moleculeMetadata as Metadata,
-          name: DEFAULT_MOLECULE_NAME,
+          name: moleculeName,
           parentUid: containerUid,
           reactionSchemeType: 'none',
           treeId: TARGET_TREE_ROOT,
@@ -842,12 +860,7 @@ export const importFromJsonOrZip = async (file: File) => {
         })
 
         // Add molecule to tree
-        addFolderToTree(
-          tree,
-          moleculeFolderPath,
-          DEFAULT_MOLECULE_NAME,
-          moleculeUid,
-        )
+        addFolderToTree(tree, moleculeFolderPath, moleculeName, moleculeUid)
 
         sampleUidToMoleculeUid[containerUid] = moleculeUid
       }

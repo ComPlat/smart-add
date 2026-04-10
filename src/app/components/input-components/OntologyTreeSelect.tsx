@@ -8,11 +8,7 @@ interface OntologyItem {
   is_enabled?: boolean
   selectable?: boolean
   id?: number
-  children: OntologyItem[]
-}
-
-interface OntologyData {
-  ols_terms: OntologyItem[]
+  children?: OntologyItem[]
 }
 
 interface TreeSelectFieldProps {
@@ -24,67 +20,109 @@ interface TreeSelectFieldProps {
   name?: string
 }
 
-// Cache for ontology data
-const ontologyCache = new Map<string, any[]>()
+const RECENTLY_SELECTED_MAX = 10
+const RECENT_PREFIX = '__recent__'
+const ONTOLOGY_LABELS: Record<string, string> = {
+  Kind: 'Type (Chemicals Method Ontology - CHMO)',
+  Rxno: 'Type (Name Reaction Ontology - RXNO)',
+}
 
-// Transform ontology data (simplified)
-const transformOntologyData = (data: OntologyItem[]): any[] => {
+// Raw JSON cache — fetched once per type, never invalidated
+const rawDataCache = new Map<string, OntologyItem[]>()
+
+const getRecentlySelected = (ontologyType: string): OntologyItem[] => {
+  try {
+    const stored = localStorage.getItem(`ontology_recent_${ontologyType}`)
+    return stored ? JSON.parse(stored) : []
+  } catch {
+    return []
+  }
+}
+
+const addRecentlySelected = (ontologyType: string, item: OntologyItem) => {
+  const current = getRecentlySelected(ontologyType)
+  if (current.find((i) => i.value === item.value)) return
+  const updated = [item, ...current].slice(0, RECENTLY_SELECTED_MAX)
+  try {
+    localStorage.setItem(
+      `ontology_recent_${ontologyType}`,
+      JSON.stringify(updated),
+    )
+  } catch {}
+}
+
+const transformOntologyData = (
+  data: OntologyItem[],
+  ontologyType: string,
+): any[] => {
   const usedKeys = new Set<string>()
 
-  const transform = (items: OntologyItem[]): any[] => {
-    return items
-      .filter((item) => item.selectable !== false)
+  const transform = (items: OntologyItem[]): any[] =>
+    items
       .map((item) => {
-        // Create unique key for duplicates
+        if (item.selectable === false) {
+          if (item.title !== '-- Recently selected --') return null
+          const recent = getRecentlySelected(ontologyType)
+          if (recent.length === 0) return null
+          return {
+            title: item.title,
+            value: item.value,
+            key: '__recently_selected__',
+            children: recent.map((r) => ({
+              title: r.title,
+              value: `${RECENT_PREFIX}${r.value}`,
+              key: `${RECENT_PREFIX}${r.value}`,
+            })),
+          }
+        }
+
         let uniqueKey = item.value
         let counter = 1
-        while (usedKeys.has(uniqueKey)) {
-          uniqueKey = `${item.value}__${counter}`
-          counter++
-        }
+        while (usedKeys.has(uniqueKey))
+          uniqueKey = `${item.value}__${counter++}`
         usedKeys.add(uniqueKey)
 
         return {
           title: item.title,
           value: item.value,
           key: uniqueKey,
-          children:
-            item.children?.length > 0 ? transform(item.children) : undefined,
+          children: item.children?.length
+            ? transform(item.children)
+            : undefined,
           disabled: item.is_enabled === false,
         }
       })
-  }
+      .filter(Boolean)
 
   return transform(data)
 }
 
-// Load ontology data
 const loadOntologyData = async (
   ontologyType: 'reaction' | 'analysis',
 ): Promise<any[]> => {
-  if (ontologyCache.has(ontologyType)) {
-    return ontologyCache.get(ontologyType)!
+  if (!rawDataCache.has(ontologyType)) {
+    const fileName = ontologyType === 'reaction' ? 'rxno.json' : 'chmo.json'
+    const response = await fetch(`/data/ontologies/${fileName}`)
+    if (!response.ok) throw new Error(`Failed to load ${fileName}`)
+    const { ols_terms } = await response.json()
+    rawDataCache.set(ontologyType, ols_terms)
   }
-
-  const fileName = ontologyType === 'reaction' ? 'rxno.json' : 'chmo.json'
-  const response = await fetch(`/data/ontologies/${fileName}`)
-
-  if (!response.ok) {
-    throw new Error(`Failed to load ${fileName}`)
-  }
-
-  const data: OntologyData = await response.json()
-  const transformedData = transformOntologyData(data.ols_terms)
-  ontologyCache.set(ontologyType, transformedData)
-  return transformedData
+  return transformOntologyData(rawDataCache.get(ontologyType)!, ontologyType)
 }
 
-// Simple filter function
-const filterTreeNode = (input: string, child: any): boolean => {
-  const searchText =
-    child.title?.toLowerCase() || child.value?.toLowerCase() || ''
-  return searchText.includes(input?.toLowerCase() || '')
+const findInTree = (nodes: any[], value: string): any => {
+  for (const node of nodes) {
+    if (node.value === value) return node
+    if (node.children) {
+      const found = findInTree(node.children, value)
+      if (found) return found
+    }
+  }
+  return null
 }
+
+const filterTreeNode = (input: string, child: any): boolean =>
+  (child.title?.toLowerCase() ?? '').includes(input?.toLowerCase() ?? '')
 
 const OntologyTreeSelect: React.FC<TreeSelectFieldProps> = ({
   value,
@@ -100,38 +138,44 @@ const OntologyTreeSelect: React.FC<TreeSelectFieldProps> = ({
 
   useEffect(() => {
     let mounted = true
-
-    const loadData = async () => {
-      setLoading(true)
-      setError(null)
-
-      try {
-        const data = await loadOntologyData(ontologyType)
-        if (mounted) {
-          setTreeData(data)
-        }
-      } catch (err) {
-        if (mounted) {
+    setLoading(true)
+    setError(null)
+    loadOntologyData(ontologyType)
+      .then((data) => {
+        if (mounted) setTreeData(data)
+      })
+      .catch((err) => {
+        if (mounted)
           setError(
             err instanceof Error ? err.message : 'Failed to load ontology data',
           )
-        }
-      } finally {
-        if (mounted) {
-          setLoading(false)
-        }
-      }
-    }
-
-    loadData()
+      })
+      .finally(() => {
+        if (mounted) setLoading(false)
+      })
     return () => {
       mounted = false
     }
   }, [ontologyType])
 
   const handleChange = (selectedValue: string) => {
-    if (onChange && !readonly) {
-      onChange(selectedValue || '')
+    if (readonly) return
+    const cleanValue = selectedValue?.startsWith(RECENT_PREFIX)
+      ? selectedValue.slice(RECENT_PREFIX.length)
+      : selectedValue
+    if (!cleanValue || cleanValue === 'recently selected') return
+
+    onChange?.(cleanValue)
+
+    const fromRecent = getRecentlySelected(ontologyType).find(
+      (r) => r.value === cleanValue,
+    )
+    const title = fromRecent?.title ?? findInTree(treeData, cleanValue)?.title
+    if (title) {
+      addRecentlySelected(ontologyType, { title, value: cleanValue })
+      setTreeData(
+        transformOntologyData(rawDataCache.get(ontologyType)!, ontologyType),
+      )
     }
   }
 
@@ -152,17 +196,11 @@ const OntologyTreeSelect: React.FC<TreeSelectFieldProps> = ({
     )
   }
 
-  const onthologyLabel = name
-    ? formatLabel(name) === 'Kind'
-      ? 'Type (Chemicals Method Ontology - CHMO)'
-      : formatLabel(name) === 'Rxno'
-      ? 'Type (Name Reaction Ontology - RXNO)'
-      : undefined
-    : undefined
+  const ontologyLabel = name ? ONTOLOGY_LABELS[formatLabel(name)] : undefined
 
   return (
     <label className="flex flex-col text-sm">
-      {onthologyLabel && <p className="font-bold mb-2">{onthologyLabel}</p>}
+      {ontologyLabel && <p className="font-bold mb-2">{ontologyLabel}</p>}
       <TreeSelect
         style={{ width: '100%' }}
         value={value || undefined}

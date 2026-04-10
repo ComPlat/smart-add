@@ -65,6 +65,10 @@ const InspectorSidebar = ({
       if (items.length > 0) {
         setItem(items[0])
         setIsOpen(true)
+      } else {
+        // Item was deleted — clear inspector
+        setItem(null)
+        setFocusedItem(undefined)
       }
     } else {
       setItem(null)
@@ -171,6 +175,11 @@ const InspectorSidebar = ({
                     .forEach(([key, value]) =>
                       flattenedEntries.push([key, value]),
                     )
+
+                  // Inject folder name for molecules
+                  if ((item as ExtendedFolder).dtype === 'molecule') {
+                    flattenedEntries.push(['name', item.name])
+                  }
 
                   // Add extended_metadata fields if they exist
                   if (

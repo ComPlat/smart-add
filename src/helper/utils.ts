@@ -182,7 +182,6 @@ const hiddenKeys = Object.freeze([
   'molfile_version',
   'is_partial',
   'deleted_at',
-  'iupac_name',
   'molecule_svg_file',
   'mol3k',
   'mol2k',
@@ -196,10 +195,10 @@ const hiddenKeys = Object.freeze([
 // Add any schema type and keys you want to hide for that schema
 const schemaSpecificHiddenKeys: Record<string, readonly string[]> =
   Object.freeze({
-    sample: ['molfile', 'inventory_sample'], // Hide molfile for samples
+    sample: ['molfile', 'inventory_sample', 'iupac_name'], // Hide molfile and iupac_name for samples
     root: ['molfile'], // Hide molfile for root containers (imported samples with container_type: 'root')
-    molecule: ['melting_point', 'boiling_point', 'name'], // Hide these molecule fields (in addition to global hiddenKeys)
-    reaction: [], // Show all reaction-specific keys
+    molecule: ['melting_point', 'boiling_point', 'name'], // Hide these molecule fields (name is injected from folder.name instead)
+    reaction: ['iupac_name'], // Hide iupac_name for reactions
     analyses: ['description', 'container_type'], // Show all analysis-specific keys
     analysis: [], // Show all analysis-specific keys
     dataset: [], // Show all dataset-specific keys

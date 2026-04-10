@@ -3,9 +3,7 @@ import { FileNode } from '@/helper/types'
 import { useOnClickOutside } from '@/hooks/useOnClickOutside'
 import { FC, useRef, useState } from 'react'
 import { FaDeleteLeft } from 'react-icons/fa6'
-
-import deleteFile from '../deleteFile'
-import deleteFolder from '../deleteFolder'
+import DeleteConfirm from '../../shared/DeleteConfirm'
 
 interface DeleteProps {
   className?: string
@@ -21,24 +19,9 @@ const DeleteContextMenuItem: FC<DeleteProps> = ({
   tree,
 }) => {
   const popupRef = useRef<HTMLDivElement>(null)
-
   const [showConfirmation, setShowConfirmation] = useState(false)
 
   useOnClickOutside(popupRef, () => setShowConfirmation(false))
-
-  const handleDelete = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!item.isFolder) deleteFile(item as ExtendedFile)
-    else deleteFolder(item as ExtendedFolder, tree)
-
-    close()
-  }
-
-  const handleCancel = (e: { stopPropagation: () => void }) => {
-    e.stopPropagation()
-    setShowConfirmation(false)
-  }
 
   return (
     <li
@@ -54,29 +37,12 @@ const DeleteContextMenuItem: FC<DeleteProps> = ({
           className="absolute left-full top-[-5px] z-10 ml-2 origin-left-center animate-emerge-from-lamp rounded-lg border border-gray-300 bg-white p-1 shadow-lg"
           ref={popupRef}
         >
-          <div className="flex flex-col space-y-1">
-            <span className="w-auto min-w-[150px] max-w-[300px] truncate whitespace-nowrap rounded-sm p-1 text-center shadow">
-              Delete{' '}
-              <span className="underline" title={item.name}>
-                {item.name}
-              </span>
-              ?
-            </span>
-            <div className="flex justify-end space-x-2">
-              <button
-                className="flex-1 rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-700"
-                onClick={handleDelete}
-              >
-                Confirm
-              </button>
-              <button
-                className="flex-1 rounded bg-red-500 px-3 py-1 text-white hover:bg-red-700"
-                onClick={handleCancel}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
+          <DeleteConfirm
+            item={item}
+            tree={tree}
+            onDone={close}
+            onCancel={() => setShowConfirmation(false)}
+          />
         </div>
       )}
     </li>

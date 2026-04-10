@@ -1,13 +1,18 @@
-import { ReactElement, ReactNode } from 'react'
-import { TreeItem, TreeItemRenderContext } from 'react-complex-tree'
-import { FaPlus } from 'react-icons/fa6'
+import { Dispatch, ReactElement, ReactNode, SetStateAction } from 'react'
+import {
+  TreeItem,
+  TreeItemIndex,
+  TreeItemRenderContext,
+} from 'react-complex-tree'
+import { FaPen, FaPlus, FaTrashCan } from 'react-icons/fa6'
 
 import { FileNode } from '@/helper/types'
 import { ICONS } from './fileIcons'
-import { createSample } from '../structure-btns/templates'
+import { createSample, createAnalysis } from '../structure-btns/templates'
 import { getUniqueFolderName } from '../structure-btns/folderUtils'
 import MoleculeTooltip from './MoleculeTooltip'
 import ReactionTooltip from './ReactionTooltip'
+import { dragNotifications } from '@/utils/dragNotifications'
 
 interface RenderItemParams {
   children: ReactNode
@@ -37,7 +42,14 @@ const Icon = (
     : ICONS.folderPlus
 }
 
-const createRenderItem = (tree: Record<string, FileNode>) =>
+const createRenderItem = (
+  tree: Record<string, FileNode>,
+  setExpandedItems?: Dispatch<SetStateAction<TreeItemIndex[]>>,
+  actions?: {
+    onRenameClick?: (fullPath: string, x: number, y: number) => void
+    onDeleteClick?: (fullPath: string, x: number, y: number) => void
+  },
+) =>
   function RenderItem({
     children,
     context,
@@ -83,6 +95,56 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
     // Check if this is a reaction folder
     const isReactionFolder = fileNode?.isFolder && fileNode.dtype === 'reaction'
     const isSample = fileNode?.isFolder && fileNode.dtype === 'sample'
+    const isAnalysesFolder = fileNode?.isFolder && fileNode.dtype === 'analyses'
+    const isStructureFolder =
+      fileNode?.isFolder &&
+      (fileNode.metadata as any)?.container_type === 'structure'
+    const isMoleculeFolder = fileNode?.isFolder && fileNode.dtype === 'molecule'
+
+    // Show rename/delete buttons for actionable nodes (not root, not analyses, not structure, not molecule)
+    const showRenameDelete =
+      !shouldHideTitle &&
+      !!fileNode &&
+      !!actions &&
+      !isAnalysesFolder &&
+      !isStructureFolder &&
+      !isMoleculeFolder
+
+    const handleRenameClick = (e: React.MouseEvent) => {
+      e.stopPropagation()
+      actions?.onRenameClick?.(String(item.index), e.pageX, e.pageY)
+    }
+
+    const handleDeleteClick = (e: React.MouseEvent) => {
+      e.stopPropagation()
+      actions?.onDeleteClick?.(String(item.index), e.pageX, e.pageY)
+    }
+
+    const handleAddAnalysisToAnalyses = async (e: React.MouseEvent) => {
+      e.stopPropagation()
+      if (fileNode) {
+        const analysisName = getUniqueFolderName(
+          'analysis',
+          tree,
+          'analysis',
+          false,
+          fileNode.index,
+        )
+        await createAnalysis(
+          'analysis',
+          fileNode.index,
+          tree,
+          fileNode.uid || '',
+        )
+        setExpandedItems?.((prev) =>
+          prev.includes(fileNode.index) ? prev : [...prev, fileNode.index],
+        )
+        dragNotifications.showSuccess(
+          `"${analysisName}" added to ${parentNode?.data || fileNode.data}`,
+          0,
+        )
+      }
+    }
 
     const handleAddSampleToReaction = async (e: React.MouseEvent) => {
       e.stopPropagation()
@@ -103,6 +165,13 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
           fileNode.uid || undefined,
           'product',
         )
+        setExpandedItems?.((prev) =>
+          prev.includes(fileNode.index) ? prev : [...prev, fileNode.index],
+        )
+        dragNotifications.showSuccess(
+          `"${uniqueSampleName}" added to ${fileNode.data}`,
+          0,
+        )
       }
     }
 
@@ -116,18 +185,13 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
           {...context.itemContainerWithoutChildrenProps}
           {...context.interactiveElementProps}
           data-mykey={item.index}
-          className={`flex items-center justify-between px-2 text-sm
-          ${
-            context.isSelected
-              ? 'my-1 rounded-md bg-kit-primary-mid font-bold'
-              : ''
-          }
+          className={`flex items-center justify-between px-2 text-sm h-7
+          ${context.isSelected ? 'rounded-md bg-kit-primary-mid font-bold' : ''}
           ${
             isDraggingOver ? 'rounded-md bg-blue-200' : ''
           } text-sm text-gray-800 duration-75 hover:text-kit-primary-full`}
           style={{
             marginLeft: `${depth * 25}px`,
-            marginBottom: '2px',
           }}
           type="button"
         >
@@ -229,18 +293,58 @@ const createRenderItem = (tree: Record<string, FileNode>) =>
                 </>
               )}
             </span>
+            {showRenameDelete && (
+              <button
+                className="px-1 py-1 ml-1 bg-amber-500 text-white hover:bg-amber-600 rounded duration-150 transition-colors shrink-0"
+                onClick={handleRenameClick}
+                onMouseDown={(e) => e.preventDefault()}
+                onFocus={(e) => e.stopPropagation()}
+                title="Rename"
+                type="button"
+              >
+                <FaPen className="w-2.5 h-2.5" />
+              </button>
+            )}
           </div>
 
-          {isReactionFolder && (
-            <button
-              className="px-1 py-1 mt-1 mb-1 bg-kit-primary-full text-white hover:bg-kit-primary-full/90 rounded duration-150 transition-colors text-xs font-medium"
-              onClick={handleAddSampleToReaction}
-              title="Add sample to reaction"
-              type="button"
-            >
-              <FaPlus className="w-3 h-3" />
-            </button>
-          )}
+          <div className="flex items-center gap-0.5 ml-auto shrink-0">
+            {isReactionFolder && (
+              <button
+                className="px-1 py-1 bg-kit-primary-full text-white hover:bg-kit-primary-full/90 rounded duration-150 transition-colors text-xs font-medium"
+                onClick={handleAddSampleToReaction}
+                onMouseDown={(e) => e.preventDefault()}
+                onFocus={(e) => e.stopPropagation()}
+                title="Add sample to reaction"
+                type="button"
+              >
+                <FaPlus className="w-2.5 h-2.5" />
+              </button>
+            )}
+            {isAnalysesFolder && (
+              <button
+                className="px-1 py-1 bg-emerald-600 text-white hover:bg-emerald-700 rounded duration-150 transition-colors text-xs font-medium"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={handleAddAnalysisToAnalyses}
+                onFocus={(e) => e.stopPropagation()}
+                title="Add analysis"
+                type="button"
+              >
+                <FaPlus className="w-2.5 h-2.5" />
+              </button>
+            )}
+            {showRenameDelete && (
+              <button
+                className="px-1 py-1 bg-red-500 text-white hover:bg-red-600 rounded duration-150 transition-colors"
+                onClick={handleDeleteClick}
+                onMouseDown={(e) => e.preventDefault()}
+                onFocus={(e) => e.stopPropagation()}
+                title="Delete"
+                type="button"
+              >
+                <FaTrashCan className="w-2.5 h-2.5" />
+              </button>
+            )}
+          </div>
         </button>
         {children}
       </li>

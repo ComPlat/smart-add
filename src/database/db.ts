@@ -71,6 +71,7 @@ export type ExtendedFolder = {
   metadata?: Metadata
   name: string
   parentUid: string
+  position?: number
   reactionSchemeType: ReactionSchemeType
   treeId: string
   uid: string
@@ -86,6 +87,11 @@ export class FilesDBCreator extends Dexie {
       files: '++id, fullPath, name, uid, extension, parentUid, treeId',
       folders:
         '++id, fullPath, name, uid, parentUid, treeId, dtype, reactionSchemeType',
+    })
+    this.version(2).stores({
+      files: '++id, fullPath, name, uid, extension, parentUid, treeId',
+      folders:
+        '++id, fullPath, name, uid, parentUid, treeId, dtype, reactionSchemeType, position',
     })
   }
 }
