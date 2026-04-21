@@ -1,0 +1,23 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "4000:3000"
+    volumes:
+      # Mount source code for hot reload
+      - .:/app
+      # Prevent host node_modules from overwriting container's
+      - node_modules:/app/node_modules
+      # Persist .next cache between restarts
+      - next_cache:/app/.next
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true   # needed on some Linux/WSL setups for HMR
+    stdin_open: true
+    tty: true
+
+volumes:
+  node_modules:
+  next_cache:

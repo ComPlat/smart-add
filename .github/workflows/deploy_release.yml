@@ -1,11 +1,12 @@
-name: Build & Deploy (standalone, pnpm)
+name: Build & Deploy (release, pnpm)
 
 on:
   push:
-    branches: [edge]
+    tags:
+      - 'v*'
 
 concurrency:
-  group: "deploy-production"
+  group: "deploy-release"
   cancel-in-progress: true
 
 jobs:
@@ -48,29 +49,27 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v7
         with:
-          name: standalone-out
-          path: |
-            app-artifact.tgz
-          retention-days: 1
+          name: standalone-out-release
+          path: app-artifact.tgz
           if-no-files-found: error
 
   deploy:
     name: Deploy
     needs: build
     runs-on: ubuntu-latest
-    environment: production
+    environment: production-release
 
     steps:
       - name: Download build artifact
         uses: actions/download-artifact@v7
         with:
-          name: standalone-out
+          name: standalone-out-release
           path: standalone-out
 
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY_RELEASE }}
 
       - name: Verify host fingerprint
         env:
@@ -85,18 +84,15 @@ jobs:
           ssh-keygen -l -f ~/.ssh/known_hosts | grep -qF "$SSH_HOST_FINGERPRINT" \
             || { echo "Host fingerprint mismatch — aborting"; exit 1; }
 
-      - name: Push artifact on remote
+      - name: Push artifact to remote
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_USER: ${{ secrets.SSH_USER_RELEASE }}
           SSH_PORT: ${{ secrets.SSH_PORT }}
         run: |
           PORT=${SSH_PORT:-22}
           SSH_OPTS="-p $PORT -o StrictHostKeyChecking=yes"
 
-          rsync -az --delete  \
+          rsync -az --delete \
             -e "ssh $SSH_OPTS" \
             standalone-out/ "$SSH_USER@$SSH_HOST:."
-
-
-
