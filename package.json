@@ -53,7 +53,7 @@
     "dexie": "4.0.11",
     "dexie-react-hooks": "1.1.7",
     "eslint": "9.33.0",
-    "eslint-config-next": "15.4.6",
+    "eslint-config-next": "15.4.10",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-perfectionist": "1.5.1",
     "eslint-plugin-prettier": "5.5.4",

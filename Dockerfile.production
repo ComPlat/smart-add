@@ -1,0 +1,36 @@
+# Stage 1: Install dependencies
+# Stage 2: Build
+FROM node:24-alpine AS builder
+
+WORKDIR /app
+RUN apk add --no-cache libc6-compat
+
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+ADD https://github.com/ComPlat/smart-add.git#edge /app
+#COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+#COPY . .
+
+RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm build
+
+# Stage 3: Production runner
+FROM node:24-alpine AS runner
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN mkdir /app
+WORKDIR /app
+# Copy only what standalone needs
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+
+EXPOSE 3000
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "server.js"]
